@@ -1,0 +1,40 @@
+entered method / no capture:
+  remember level in local
+  level++
+  normal
+
+entered method / capture:
+  remember level in local
+  level++
+  dispatcher
+    dummy args
+    enter interrupted method (direct call)                 | avoids restore of complete stack
+    jump after normal method call (to "leave method" code) |
+    PROBLEM: stack mismatch: special restore code or restore frame before method call
+
+interrupt:
+  capture frame
+  set level to have being captured
+  set capture
+
+interrupt end:
+  reset capture
+  set level to have not being captured
+  restore frame
+
+left method / no capture:
+  level--,
+  set level to have not being captured
+  restore frame
+
+left method / capture:
+  level--
+  if level not captured
+    capture frame
+    set level to have being captured
+  return
+
+catch block:
+  reset context to remembered level
+  restore frame
+  normal

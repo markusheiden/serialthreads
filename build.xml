@@ -1,0 +1,66 @@
+<project name="SerialThread" default="dist" basedir=".">
+  <property name="version" value="0.0.1"/>
+
+  <property name="src" value="${basedir}/src/main/java"/>
+  <property name="resources" value="${basedir}/src/main/resources"/>
+  <property name="lib" value="${basedir}/lib"/>
+
+  <property name="target" value="${basedir}/target"/>
+  <property name="classes" value="${target}/classes"/>
+
+  <property name="project.jar" value="${target}/serialthreads.jar"/>
+  <property name="project-src.zip" value="${target}/serialthreads-src.zip"/>
+
+  <path id="classpath">
+    <pathelement location="${classes}"/>
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init">
+    <tstamp>
+      <format property="TODAY" pattern="dd.MM.yyyy" locale="de"/>
+    </tstamp>
+    <mkdir dir="${target}"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${target}"/>
+  </target>
+
+  <target name="copyResources">
+    <copy todir="${target}/classes">
+      <fileset dir="${resources}"/>
+    </copy>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${src}" classpathref="classpath" destdir="${target}/classes" debug="true"/>
+  </target>
+
+  <target name="jar" depends="compile, copyResources">
+    <jar basedir="${classes}" destfile="${project.jar}" update="false">
+      <zipfileset src="${lib}/asm-all-3.2.jar"/>
+      <manifest>
+        <attribute name="Implementation-Title" value="SerialThreads"/>
+        <attribute name="Implementation-Version" value="${version} ${TODAY}"/>
+        <attribute name="Premain-Class" value="org.serialthreads.agent.Agent"/>
+        <attribute name="Agent-Class" value="org.serialthreads.agent.Agent"/>
+        <attribute name="Can-Redefine-Classes" value="true"/>
+        <attribute name="Can-Retransform-Classes" value="false"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="src">
+    <zip destfile="${project-src.zip}" update="false">
+      <fileset dir="${src}"/>
+      <fileset dir="${resources}"/>
+    </zip>
+  </target>
+
+  <target name="all" depends="jar, src"/>
+  <target name="dist" depends="clean, all"/>
+</project>
