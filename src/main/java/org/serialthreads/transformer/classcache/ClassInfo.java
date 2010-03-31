@@ -24,6 +24,7 @@ public class ClassInfo
   private static final Type TYPE_INTERRUPT = Type.getType(Interrupt.class);
 
   private final boolean isInterface;
+  private final Type type;
   private final String className;
   private final String superClassName;
   private final Set<String> superClasses;
@@ -40,6 +41,7 @@ public class ClassInfo
   public ClassInfo(boolean isInterface, String className, String superClassName, Map<String, MethodInfo> methods)
   {
     this.isInterface = isInterface;
+    this.type = Type.getObjectType(className);
     this.className = className;
     this.superClassName = superClassName;
     this.superClasses = new TreeSet<String>();
@@ -64,6 +66,14 @@ public class ClassInfo
   public boolean isInterface()
   {
     return isInterface;
+  }
+
+  /**
+   * Get ASM type representation fpr this class.
+   */
+  public Type getType()
+  {
+    return type;
   }
 
   /**
