@@ -58,21 +58,39 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     assert superClassName != null : "Precondition: superClassName != null";
 
     Type classType = Type.getObjectType(className);
-    Type superClassType = Type.getObjectType(superClassName);
     if (classType.getSort() == Type.ARRAY)
     {
-      if (superClassType.getSort() == Type.ARRAY)
-      {
-        // TODO 2010-03-13 mh: add support for primitive arrays
-        return true; // getClassInfo(classType.getElementType().getInternalName()).hasSuperClass(superClassType.getElementType().getInternalName());
-      }
-      else
-      {
-        return superClassType.equals(Type.getType(Object.class));
-      }
+      return hasSuperClassArray(className, superClassName);
     }
 
-    return getClassInfo(classType.getInternalName()).hasSuperClass(superClassType.getInternalName());
+    return getClassInfo(className).hasSuperClass(superClassName);
+  }
+
+  private boolean hasSuperClassArray(String className, String superClassName)
+  {
+    Type classType = Type.getObjectType(className);
+    Type superClassType = Type.getObjectType(superClassName);
+
+    if (superClassType.getSort() != Type.ARRAY)
+    {
+      // only possible non array super class is Object
+      return superClassType.equals(Type.getType(Object.class));
+    }
+
+    if (classType.getDimensions() != superClassType.getDimensions())
+    {
+      // arrays dimension mismatch
+      return false;
+    }
+
+    if (classType.getElementType().getSort() != Type.OBJECT)
+    {
+      // primitive arrays -> no inheritance
+      return classType.getElementType().equals(superClassType.getElementType());
+    }
+
+    // non primitive arrays with same dimension -> check inheritance relationship of element types
+    return hasSuperClass(classType.getElementType().getInternalName(), superClassType.getElementType().getInternalName());
   }
 
   @Override
