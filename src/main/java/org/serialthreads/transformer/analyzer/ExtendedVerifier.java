@@ -2,6 +2,7 @@ package org.serialthreads.transformer.analyzer;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.objectweb.asm.tree.analysis.Value;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
@@ -16,7 +17,7 @@ import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocals
 /**
  * Verifier which can merge extended values.
  */
-public class ExtendedVerifier extends FixedVerifier
+public class ExtendedVerifier extends SimpleVerifier
 {
   /**
    * The class that is verified.
