@@ -202,7 +202,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    *
    * @param clazz class to transform
    * @param method method to transform
-   * @param methodCalls interrutable method calls
+   * @param methodCalls interruptible method calls
    */
   private void addThreadAndFrame(ClassNode clazz, MethodNode method, Set<MethodInsnNode> methodCalls)
   {
@@ -300,6 +300,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     // call interrupted method
     if (isSelfCall(methodCall, frameBefore))
     {
+      // self call: owner == this
       restore.add(new VarInsnNode(ALOAD, 0));
     }
     else if (isNotStatic(clonedCall))

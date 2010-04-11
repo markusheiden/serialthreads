@@ -592,7 +592,7 @@ public abstract class AbstractTransformer implements ITransformer
   }
 
   /**
-   * Insert frame capturing code after return from a method call.
+   * Insert frame capturing code after returning from a method call.
    *
    * @param clazz class containing method
    * @param method method containing the call
