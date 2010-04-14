@@ -278,69 +278,9 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   @Override
   protected InsnList createRestoreCodeForMethod(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
   {
-    if (log.isDebugEnabled())
-    {
-      log.debug("      Creating restore code for method call to " + methodName(methodCall));
-    }
-
-    MethodInsnNode clonedCall = copyMethodCall(methodCall);
-
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localReturnValue = method.maxLocals + 3;
-
-    // label "normal" points the code directly after the method call
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
-    LabelNode restoreFrame = new LabelNode();
-
-    InsnList restore = new InsnList();
-
-    // call interrupted method
-    if (isSelfCall(methodCall, frameBefore))
-    {
-      // self call: owner == this
-      restore.add(new VarInsnNode(ALOAD, 0));
-    }
-    else if (isNotStatic(clonedCall))
-    {
-      // get owner
-      restore.add(new VarInsnNode(ALOAD, localFrame));
-      restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
-      restore.add(new TypeInsnNode(CHECKCAST, clonedCall.owner));
-    }
-
-    // jump to cloned method call with thread and frame as arguments
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new VarInsnNode(ALOAD, localFrame));
-    restore.add(clonedCall);
-
-    // if not serializing "GOTO" normal, but restore the frame first
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-    restore.add(new JumpInsnNode(IFEQ, restoreFrame));
-
-    // early return, the frame already has been captured
-    restore.add(dummyReturnStatement(method));
-
-    // restore frame to be able to resume normal execution of method
-    restore.add(restoreFrame);
-
-    // restore stack "under" the returned value, if any
-    // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
-    final boolean needToSaveReturnValue = isNotVoid(clonedCall) && frameAfter.getStackSize() > 1;
-    if (needToSaveReturnValue)
-    {
-      restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
-    }
-    restore.add(popFromFrame(method, clonedCall, frameAfter, localFrame));
-    if (needToSaveReturnValue)
-    {
-      restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
-    }
-    restore.add(new JumpInsnNode(GOTO, normal));
-
-    return restore;
+    // not needed, because we do not need to decent from root to the leaf anymore.
+    // instead we jump mit a method handle directly to the leaf.
+    return null;
   }
 
   /**
