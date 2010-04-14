@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -110,6 +111,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     MethodNode copy = copyMethod(clazz, method);
 
     // add thread and previousFrame arguments to original method
+    // TODO 2010-04-10 mh: move this up? need run() ever to be copied???
     if (!isRun(clazz, method, classInfoCache))
     {
       method.desc = changeDesc(method.desc);
@@ -177,6 +179,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   private MethodNode copyMethod(ClassNode clazz, MethodNode method)
   {
     MethodNode copy = MethodNodeCopier.copy(method);
+    copy.access = copy.access & 0xFFF8 | ACC_PRIVATE;
     copy.name = changeCopyName(method.name, method.desc);
     copy.desc = changeCopyDesc(method.desc);
 
@@ -198,7 +201,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    *
    * @param clazz class to transform
    * @param method method to transform
-   * @param methodCalls interrutable method calls
+   * @param methodCalls interruptible method calls
    */
   private void addThreadAndFrame(ClassNode clazz, MethodNode method, Set<MethodInsnNode> methodCalls)
   {
@@ -296,6 +299,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     // call interrupted method
     if (isSelfCall(methodCall, frameBefore))
     {
+      // self call: owner == this
       restore.add(new VarInsnNode(ALOAD, 0));
     }
     else if (isNotStatic(clonedCall))
@@ -373,7 +377,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   private String changeCopyDesc(String desc)
   {
-    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
+    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")V";
   }
 
   /**
