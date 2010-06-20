@@ -167,7 +167,7 @@ public class MethodCode
   }
 
   /**
-   * Check if the method is IRunnable.run().
+   * Check if the method is IRunnable.run() or an implementation of it.
    *
    * @param clazz owner of method
    * @param method method
