@@ -62,6 +62,24 @@ public class Strategies
   };
 
   /**
+   * Strategy for frequent interrupts which bloats the code more than FREQUENT but is slightly faster.
+   */
+  public static IStrategy SINGLE_FRAME_EXECUTION = new IStrategy()
+  {
+    @Override
+    public ITransformer getTransformer(IClassInfoCache classInfoCache)
+    {
+      return new SingleFrameExecutionTransformer(classInfoCache);
+    }
+
+    @Override
+    public String toString()
+    {
+      return "Transformation strategy " + SingleFrameExecutionTransformer.STRATEGY;
+    }
+  };
+
+  /**
    * Strategy for infrequent interrupts.
    */
   public static IStrategy DEFAULT = FREQUENT3;
