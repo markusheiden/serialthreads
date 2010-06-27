@@ -93,11 +93,13 @@ public class TestInterruptible implements IRunnable
   {
     i++;
     SerialThreadManager.interrupt();
+    i+=3;
+    SerialThreadManager.interrupt();
     return i;
   }
 
   //
-  // Check results of execution
+  // Check results of execution ("self test")
   //
 
   private void checkResult()
@@ -106,12 +108,12 @@ public class TestInterruptible implements IRunnable
     assertEquals((char) 2, c); // 1++
     assertEquals((byte) 4, b); // 3++
     assertEquals((short) 6, s); // 5++
-    assertEquals(8, i); // 7++
+    assertEquals(8, i); // 7++ + 3
     assertEquals(12L, j); // 11++
 
     assertEquals(14.0F, f, 0.1); // 13++
     assertEquals(18.0D, d, 0.1); // 17++
 
-    assertEquals(50L, test); // 11++ + 17++ + 19++
+    assertEquals(53L, test); // 11++ + 3 + 17++ + 19++
   }
 }
