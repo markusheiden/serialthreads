@@ -434,7 +434,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
-    // TODO 2009-12-01 mh: fix / reenable dynamic frame resize
+    // TODO 2009-12-01 mh: fix / re-enable dynamic frame resize
     // getFrame.add(new VarInsnNode(ALOAD, localFrame));
     // getFrame.add(IntValueCode.push(255));
     // getFrame.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, FRAME_IMPL_NAME, "resize", "(I)V"));
