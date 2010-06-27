@@ -26,7 +26,7 @@ public class Debugger extends TraceMethodVisitor
   public static String debug(ClassNode clazz)
   {
     StringBuilder result = new StringBuilder(65536);
-    result.append("Class " + clazz.name);
+    result.append("Class " + clazz.name + "\n");
     result.append(debug(clazz, (String) null));
     return result.toString();
   }
