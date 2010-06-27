@@ -23,9 +23,10 @@ public class LocalVariablesShifter
    */
   public static void shift(int point, int shift, MethodNode method)
   {
-    for (Iterator<Object> iter = method.instructions.iterator(); iter.hasNext();)
+    // adopt instructions
+    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext();)
     {
-      Object instruction = iter.next();
+      AbstractInsnNode instruction = iter.next();
       if (instruction instanceof VarInsnNode)
       {
         VarInsnNode varInstruction = (VarInsnNode) instruction;
@@ -36,12 +37,16 @@ public class LocalVariablesShifter
         IincInsnNode incInstruction = (IincInsnNode) instruction;
         incInstruction.var = remap(point, shift, incInstruction.var);
       }
-      else if (instruction instanceof LocalVariableNode)
-      {
-        LocalVariableNode localNode = (LocalVariableNode) instruction;
-        localNode.index = remap(point, shift, localNode.index);
-      }
     }
+
+    // adopt local variable debug info
+    for (Iterator<LocalVariableNode> iter = method.localVariables.iterator(); iter.hasNext();)
+    {
+      LocalVariableNode local = iter.next();
+      local.index = remap(point, shift, local.index);
+    }
+
+    // fix max locals
     method.maxLocals += shift;
   }
 
