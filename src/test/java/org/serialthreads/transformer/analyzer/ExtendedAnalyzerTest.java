@@ -15,7 +15,7 @@ public class ExtendedAnalyzerTest
   @Test
   public void testNewFrame_ii()
   {
-    ExtendedAnalyzer analyzer = new ExtendedAnalyzer();
+    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
 
     ExtendedFrame frame = analyzer.newFrame(2, 2);
     frame.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
@@ -43,7 +43,7 @@ public class ExtendedAnalyzerTest
   @Test
   public void testNewFrame_frame()
   {
-    ExtendedAnalyzer analyzer = new ExtendedAnalyzer();
+    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
 
     ExtendedFrame src = new ExtendedFrame(2, 2);
     ExtendedFrame frame = analyzer.newFrame(src);

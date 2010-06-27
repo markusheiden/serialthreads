@@ -15,19 +15,6 @@ import java.util.List;
 public class ExtendedAnalyzer extends Analyzer
 {
   /**
-   * Constructor.
-   *
-   * TODO 2010-01-20 mh: use other constructor?
-   *
-   * @deprecated for tests only!
-   */
-  @Deprecated
-  protected ExtendedAnalyzer()
-  {
-    super(new ExtendedVerifier());
-  }
-
-  /**
    * Constructs a new {@link ExtendedAnalyzer} to anaylze a specific class. This
    * class will not be loaded into the JVM since it may be incorrect.
    *

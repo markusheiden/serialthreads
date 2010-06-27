@@ -2,6 +2,7 @@ package org.serialthreads.transformer.analyzer;
 
 import org.junit.Test;
 import org.objectweb.asm.Type;
+import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -19,7 +20,8 @@ public class ExtendedVerifierTest
   @Test
   public void testMerge() throws Exception
   {
-    ExtendedVerifier verifier = new ExtendedVerifier();
+    ExtendedVerifier verifier = new ExtendedVerifier(
+      new ClassInfoCacheASM(getClass().getClassLoader()), null, null, null, false);
 
     ExtendedValue local1Int = valueInLocal(Type.INT_TYPE, 1);
     ExtendedValue local12Int = valueInLocal(Type.INT_TYPE, 1).addLocal(2);

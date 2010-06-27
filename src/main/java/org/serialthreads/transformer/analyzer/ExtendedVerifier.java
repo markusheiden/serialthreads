@@ -45,19 +45,6 @@ public class ExtendedVerifier extends SimpleVerifier
   private final IClassInfoCache _classInfoCache;
 
   /**
-   * Constructor.
-   *
-   * TODO 2010-01-20 mh: use other constructor?
-   *
-   * @deprecated for tests only!
-   */
-  @Deprecated
-  protected ExtendedVerifier()
-  {
-    this(null, null, null, null, false);
-  }
-
-  /**
    * Constructs a new {@link ExtendedVerifier} to verify a specific class. This
    * class will not be loaded into the JVM since it may be incorrect.
    *
