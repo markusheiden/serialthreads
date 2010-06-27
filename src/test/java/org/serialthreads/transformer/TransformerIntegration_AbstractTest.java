@@ -3,15 +3,15 @@ package org.serialthreads.transformer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.serialthreads.Interruptible;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
 
-import java.lang.reflect.Field;
-
-import static org.junit.Assert.assertEquals;
+import java.io.PrintWriter;
 
 /**
  * Integration test for transformer.
@@ -33,7 +33,14 @@ public abstract class TransformerIntegration_AbstractTest
   @Test
   public void testTransform() throws Exception
   {
-    Class<?> clazz = new TransformingClassLoader(strategy).loadClass(TransformerIntegration_AbstractTest.class.getPackage().getName() + ".TestInterruptible");
+    Class<?> clazz = new TransformingClassLoader(strategy)
+    {
+      @Override
+      protected ClassVisitor createVisitor(ClassWriter writer)
+      {
+        return new TraceClassVisitor(writer, new PrintWriter(System.out));
+      }
+    }.loadClass(TransformerIntegration_AbstractTest.class.getPackage().getName() + ".TestInterruptible");
     clazz.getMethod("runTransformed").invoke(clazz.newInstance());
   }
 
