@@ -2,6 +2,7 @@ package org.serialthreads.transformer;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
@@ -22,9 +23,9 @@ public class LocalVariablesShifter
    */
   public static void shift(int point, int shift, MethodNode method)
   {
-    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext();)
+    for (Iterator<Object> iter = method.instructions.iterator(); iter.hasNext();)
     {
-      AbstractInsnNode instruction = iter.next();
+      Object instruction = iter.next();
       if (instruction instanceof VarInsnNode)
       {
         VarInsnNode varInstruction = (VarInsnNode) instruction;
@@ -35,7 +36,13 @@ public class LocalVariablesShifter
         IincInsnNode incInstruction = (IincInsnNode) instruction;
         incInstruction.var = remap(point, shift, incInstruction.var);
       }
+      else if (instruction instanceof LocalVariableNode)
+      {
+        LocalVariableNode localNode = (LocalVariableNode) instruction;
+        localNode.index = remap(point, shift, localNode.index);
+      }
     }
+    method.maxLocals += shift;
   }
 
   /**
