@@ -1,6 +1,6 @@
 package org.serialthreads.transformer;
 
-import org.junit.*;
+import org.junit.Test;
 import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
@@ -9,7 +9,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
  */
 public class FrequentInterruptsTransformer3_IntegrationTest
 {
-  @org.junit.Test
+  @Test
   public void testDefault() throws Exception
   {
     ClassLoader cl = new TransformingClassLoader(new IStrategy()
