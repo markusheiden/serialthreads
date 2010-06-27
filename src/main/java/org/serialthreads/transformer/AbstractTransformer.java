@@ -47,6 +47,7 @@ import java.util.Map.Entry;
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
+import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 import static org.serialthreads.transformer.code.MethodCode.isInterrupt;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
@@ -246,8 +247,6 @@ public abstract class AbstractTransformer implements ITransformer
    */
   protected Frame[] analyze(ClassNode clazz, MethodNode method) throws AnalyzerException
   {
-//    return new ExtendedAnalyzer().analyze(clazz.name, method);
-
     Type classType = Type.getObjectType(clazz.name);
     Type superClassType = Type.getObjectType(clazz.superName);
     List<Type> interfaceTypes = new ArrayList<Type>(clazz.interfaces.size());
@@ -490,8 +489,10 @@ public abstract class AbstractTransformer implements ITransformer
       log.debug("      Creating restore code for interrupt");
     }
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int local = firstLocal(method);
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
+    final int localFrame = local++;
 
     InsnList restore = new InsnList();
 
@@ -567,9 +568,10 @@ public abstract class AbstractTransformer implements ITransformer
       log.debug("      Creating capture code for interrupt");
     }
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localPreviousFrame = method.maxLocals + 2;
+    int local = firstLocal(method);
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
+    final int localFrame = local++;
 
     InsnList capture = new InsnList();
 

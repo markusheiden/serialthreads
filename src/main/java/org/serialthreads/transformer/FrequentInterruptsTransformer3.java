@@ -112,6 +112,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   {
     // create copy of method with shortened arguments
     MethodNode copy = copyMethod(clazz, method);
+    copy.desc = changeCopyDesc(method.desc);
 
     // add thread and previousFrame arguments to original method
     if (!isRun(clazz, method, classInfoCache))
@@ -132,6 +133,9 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private List<MethodNode> transformRun(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
+//    log.error("before: " + Debugger.debug(clazz.name, method));
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+//    log.error("after: " + Debugger.debug(clazz.name, method));
     Frame[] frames = analyze(clazz, method);
 
     replaceReturns(clazz, method);
@@ -153,6 +157,9 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private List<MethodNode> transformMethod(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
+//    log.error("before: " + Debugger.debug(clazz.name, method));
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+//    log.error("after: " + Debugger.debug(clazz.name, method));
     Frame[] frames = analyze(clazz, method);
 
     // create copy of method with shortened signature
@@ -161,6 +168,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     List<InsnList> restoreCodes = insertCaptureCode(clazz, copy, frames, copyMethodCalls, true);
     createRestoreHandlerCopy(clazz, copy, restoreCodes);
     addThreadAndFrame(clazz, copy, copyMethodCalls.keySet());
+    copy.desc = changeCopyDesc(method.desc);
     fixMaxs(copy);
 
     insertCaptureCode(clazz, method, frames, methodCalls, false);
@@ -182,7 +190,6 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   {
     MethodNode copy = MethodNodeCopier.copy(method);
     copy.name = changeCopyName(method.name, method.desc);
-    copy.desc = changeCopyDesc(method.desc);
 
     //noinspection unchecked
     clazz.methods.add(copy);
@@ -208,8 +215,10 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   {
     InsnList instructions = method.instructions;
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     for (MethodInsnNode methodCall : methodCalls)
     {
@@ -230,7 +239,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   protected void fixMaxs(MethodNode method)
   {
-    method.maxLocals += 4;
+    method.maxLocals += 2;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
   }
@@ -247,9 +256,10 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       log.debug("      Creating capture code for method call to " + methodName(methodCall));
     }
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localPreviousFrame = method.maxLocals + 2;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     LabelNode normal = new LabelNode();
 
@@ -286,9 +296,11 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localReturnValue = method.maxLocals + 3;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
+    final int localReturnValue = method.maxLocals + 1;
 
     // label "normal" points the code directly after the method call
     LabelNode normal = new LabelNode();
@@ -410,26 +422,15 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     }
 
     int local = firstLocal(method);
-
-    final int paramThread = local++;
-    final int paramPreviousFrame = local++;
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localPreviousFrame = method.maxLocals + 2;
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     // frame = previousFrame.next
     InsnList getFrame = new InsnList();
-    getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
-
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
-
-    // thread = currentThread
-    // TODO 2009-11-11 mh: rename others locals instead of copy these?
-    getFrame.add(new VarInsnNode(ALOAD, paramThread));
-    getFrame.add(new VarInsnNode(ASTORE, localThread));
 
     // TODO 2009-12-01 mh: fix / reenable dynamic frame resize
     // getFrame.add(new VarInsnNode(ALOAD, localFrame));
@@ -455,11 +456,14 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       log.debug("    Creating restore handler for copied method");
     }
 
-    int local = isNotStatic(method) ? 1 : 0;
-    final int paramThread = local++;
-    final int paramPreviousFrame = local++;
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int param = isNotStatic(method) ? 1 : 0;
+    final int paramThread = param++;
+    final int paramPreviousFrame = param++;
+
+    int local = firstLocal(method);
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
+    final int localFrame = local++;
 
     InsnList restore = new InsnList();
 
@@ -500,8 +504,10 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       log.debug("    Creating restore handler for run");
     }
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     // dummy startup restore code to avoid to check thread.serializing.
     // empty frames are expected to have method = -1.
