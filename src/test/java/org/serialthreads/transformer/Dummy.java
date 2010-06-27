@@ -1,13 +1,15 @@
 package org.serialthreads.transformer;
 
 import org.serialthreads.Interruptible;
+import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
 
 /**
- * Dummy target for transformer.
+ * Dummy target for transformers.
  */
-public class Dummy implements Runnable
+public class Dummy implements IRunnable
 {
+  @Override
   @Interruptible
   public void run()
   {
