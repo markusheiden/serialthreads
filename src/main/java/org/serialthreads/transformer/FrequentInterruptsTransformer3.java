@@ -302,7 +302,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     final int localThread = local++; // param thread
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
-    final int localReturnValue = method.maxLocals + 1;
+    final int localReturnValue = method.maxLocals;
 
     // label "normal" points the code directly after the method call
     LabelNode normal = new LabelNode();
