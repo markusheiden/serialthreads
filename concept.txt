@@ -1,3 +1,43 @@
+SFE:
+----
+
+run:
+- normal start vs.
+- method handle call of last interrupt
+- returned: new call, if no capture
+- capture code
+- replace returns with exception
+
+abstract:
+- signature + thread & (previous) frame
+
+abstract copy:
+- signature + thread & (previous) frame, no return value
+
+concrete:
+- signature + thread & (previous) frame
+- init code, calculate current frame
+- no restore code
+- interrupt, capture top most frame
+- capture code
+
+concrete copy:
+- signature == thread & (previous) frame, no return value
+- init code, calculate current frame
+- restore code only for interrupt
+- interrupt, capture top most frame
+- capture code: end of capture (because directly called by run())
+- capture return value into frame at original exit points
+
+-------------------------------------------------------------------------------
+
+Ideas:
+------
+
+@RestorePoint?
+
+-------------------------------------------------------------------------------
+
 entered method / no capture:
   remember level in local
   level++
