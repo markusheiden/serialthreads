@@ -133,9 +133,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private List<MethodNode> transformRun(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
-//    log.error("before: " + Debugger.debug(clazz.name, method));
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
-//    log.error("after: " + Debugger.debug(clazz.name, method));
     Frame[] frames = analyze(clazz, method);
 
     replaceReturns(clazz, method);
@@ -157,9 +155,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private List<MethodNode> transformMethod(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
-//    log.error("before: " + Debugger.debug(clazz.name, method));
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
-//    log.error("after: " + Debugger.debug(clazz.name, method));
     Frame[] frames = analyze(clazz, method);
 
     // create copy of method with shortened signature
