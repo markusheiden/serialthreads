@@ -93,7 +93,9 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   }
 
   /**
-   * Transform abstract method (includes interface methods).
+   * Transform abstract methods (includes interface methods).
+   * Changes the signature of the abstract method and creates a copy of the abstract method too,
+   * because it is needed as an interface / superclass for the copied concrete methods.
    *
    * @param clazz class to alter
    * @param method method to transform
@@ -101,10 +103,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   private List<MethodNode> transformAbstract(ClassNode clazz, MethodNode method)
   {
-    // create copy of method with shortened arguments
+    // create a copy of the method with no arguments: ...(Thread, Frame)V
     MethodNode copy = copyMethod(clazz, method);
 
-    // add thread and previousFrame arguments to original method
+    // add thread and previousFrame arguments to the original method: ...(..., Thread, Frame)...
     // TODO 2010-04-10 mh: move this up? need run() ever to be copied???
     if (!isRun(clazz, method, classInfoCache))
     {
@@ -127,6 +129,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     Frame[] frames = analyze(clazz, method);
 
     replaceReturns(clazz, method);
+    // TODO 2010-06-26 mh: interrupt restore codes only??? "self" calls?
     List<InsnList> restoreCodes = insertCaptureCode(clazz, method, frames, methodCalls, true);
     createRestoreHandlerRun(clazz, method, restoreCodes);
     addThreadAndFrame(clazz, method, methodCalls.keySet());
@@ -147,13 +150,15 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   {
     Frame[] frames = analyze(clazz, method);
 
-    // create copy of method with shortened signature
+    // create copy of method with no arguments: ...(Thread, Frame)V
     MethodNode copy = copyMethod(clazz, method);
     Map<MethodInsnNode, Integer> copyMethodCalls = interruptibleMethodCalls(copy.instructions);
+    // TODO 2010-06-26 mh: interrupt restore codes only
     List<InsnList> restoreCodes = insertCaptureCode(clazz, copy, frames, copyMethodCalls, true);
     createRestoreHandlerCopy(clazz, copy, restoreCodes);
     addThreadAndFrame(clazz, copy, copyMethodCalls.keySet());
     fixMaxs(copy);
+    // TODO 2010-06-26 mh: replace returns, capture return values
 
     insertCaptureCode(clazz, method, frames, methodCalls, false);
     createRestoreHandlerMethod(clazz, method);
@@ -273,26 +278,13 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   protected InsnList createRestoreCodeForMethod(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
   {
     // not needed, because we do not need to decent from root to the leaf anymore.
-    // instead we jump mit a method handle directly to the leaf.
+    // instead we jump with a method handle directly to the leaf.
     return null;
   }
 
   /**
-   * Copies method call and changes the signature.
-   *
-   * @param methodCall method call
-   */
-  private MethodInsnNode copyMethodCall(MethodInsnNode methodCall)
-  {
-    MethodInsnNode result = (MethodInsnNode) methodCall.clone(null);
-    result.name = changeCopyName(methodCall.name, methodCall.desc);
-    result.desc = changeCopyDesc(methodCall.desc);
-
-    return result;
-  }
-
-  /**
    * Change the name of a copied method.
+   * Computes an unique name based on the name and the descriptor.
    *
    * @param name name of method
    * @param desc parameters
@@ -304,7 +296,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   }
 
   /**
-   * Change parameters of a copied method.
+   * Change the parameters of a copied method to (Thread, Frame)V.
    *
    * @param desc parameters
    * @return changed parameters
@@ -316,6 +308,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
 
   /**
    * Change parameters of a method.
+   * Inserts thread and frame as additional parameters at the end.
    *
    * @param desc parameters
    * @return changed parameters
@@ -352,6 +345,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
 
     // frame = previousFrame.next
     InsnList getFrame = new InsnList();
+    // TODO 2009-10-22 mh: rename locals to avoid this copy?
     getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
     getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
@@ -366,7 +360,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
 
     // TODO 2009-12-01 mh: fix / reenable dynamic frame resize
     // getFrame.add(new VarInsnNode(ALOAD, localFrame));
-    // getFrame.add(IntValueCode.push(255));
+    // getFrame.add(IntValueCode.push(maxFrameSize));
     // getFrame.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, FRAME_IMPL_NAME, "resize", "(I)V"));
 
     method.instructions.insertBefore(method.instructions.getFirst(), getFrame);
