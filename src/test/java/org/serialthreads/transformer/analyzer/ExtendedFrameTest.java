@@ -101,7 +101,7 @@ public class ExtendedFrameTest
 
   private void testExecute_const(AbstractInsnNode instruction, Type type, Object constant) throws Exception
   {
-    Interpreter interpreter = new ExtendedVerifier(null, null, null, null, false);
+    Interpreter interpreter = new ExtendedVerifier(null);
 
     ExtendedFrame frame = new ExtendedFrame(0, 1);
     frame.execute(instruction, interpreter);
@@ -123,7 +123,7 @@ public class ExtendedFrameTest
 
   private void testExecute_store(AbstractInsnNode instruction, Type type) throws Exception
   {
-    Interpreter interpreter = new ExtendedVerifier(null, null, null, null, false);
+    Interpreter interpreter = new ExtendedVerifier(null);
 
     ExtendedFrame frame = new ExtendedFrame(4, 4);
     // value which will be changed

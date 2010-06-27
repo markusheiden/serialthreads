@@ -42,7 +42,18 @@ public class ExtendedVerifier extends SimpleVerifier
   /**
    * Class info cache to look up references.
    */
-  private final IClassInfoCache _classInfoCache;
+  private final IClassInfoCache classInfoCache;
+
+  /**
+   * Constructs a new {@link ExtendedVerifier}.
+   *
+   * @param classInfoCache class info cache.
+   */
+  public ExtendedVerifier(IClassInfoCache classInfoCache)
+  {
+    this(classInfoCache, null, null, null, false);
+  }
+
 
   /**
    * Constructs a new {@link ExtendedVerifier} to verify a specific class. This
@@ -67,7 +78,7 @@ public class ExtendedVerifier extends SimpleVerifier
     this.currentSuperClass = currentSuperClass;
     this.currentClassInterfaces = currentClassInterfaces;
     this.isInterface = isInterface;
-    _classInfoCache = classInfoCache;
+    this.classInfoCache = classInfoCache;
   }
 
   public BasicValue merge(Value v, Value w)
@@ -113,7 +124,7 @@ public class ExtendedVerifier extends SimpleVerifier
     {
       return isInterface;
     }
-    return _classInfoCache.isInterface(t.getInternalName());
+    return classInfoCache.isInterface(t.getInternalName());
   }
 
   @Override
@@ -124,7 +135,7 @@ public class ExtendedVerifier extends SimpleVerifier
       return currentSuperClass;
     }
 
-    return _classInfoCache.getSuperClass(t.getInternalName());
+    return classInfoCache.getSuperClass(t.getInternalName());
   }
 
   protected boolean isAssignableFrom(final Type t, final Type u)
@@ -163,7 +174,7 @@ public class ExtendedVerifier extends SimpleVerifier
       }
       return false;
     }
-    return _classInfoCache.hasSuperClass(u.getInternalName(), t.getInternalName());
+    return classInfoCache.hasSuperClass(u.getInternalName(), t.getInternalName());
   }
 
   @Override

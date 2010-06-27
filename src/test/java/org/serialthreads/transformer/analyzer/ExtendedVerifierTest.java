@@ -20,14 +20,13 @@ public class ExtendedVerifierTest
   @Test
   public void testMerge() throws Exception
   {
-    ExtendedVerifier verifier = new ExtendedVerifier(
-      new ClassInfoCacheASM(getClass().getClassLoader()), null, null, null, false);
+    ExtendedVerifier verifier = new ExtendedVerifier(new ClassInfoCacheASM(getClass().getClassLoader()));
 
     ExtendedValue local1Int = valueInLocal(Type.INT_TYPE, 1);
     ExtendedValue local12Int = valueInLocal(Type.INT_TYPE, 1).addLocal(2);
     ExtendedValue const1Int = constantValue(Type.INT_TYPE, 1);
 
-    // test handling of unitialized value
+    // test handling of uninitialized value
     assertEquals(UNINITIALIZED_VALUE, verifier.merge(UNINITIALIZED_VALUE, UNINITIALIZED_VALUE));
     assertEquals(UNINITIALIZED_VALUE, verifier.merge(UNINITIALIZED_VALUE, valueInLocal(Type.INT_TYPE, 1)));
     assertEquals(UNINITIALIZED_VALUE, verifier.merge(local1Int, UNINITIALIZED_VALUE));
