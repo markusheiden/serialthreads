@@ -27,7 +27,7 @@ public class Debugger extends TraceMethodVisitor
   {
     StringBuilder result = new StringBuilder(65536);
     result.append("Class " + clazz.name);
-    result.append(debug(clazz, null));
+    result.append(debug(clazz, (String) null));
     return result.toString();
   }
 
@@ -38,12 +38,16 @@ public class Debugger extends TraceMethodVisitor
     {
       if (methodToDebug == null || method.name.startsWith(methodToDebug))
       {
-        result.append("Method " + MethodCode.methodName(clazz, method));
         result.append(debug(clazz.name, method));
       }
     }
 
     return result.toString();
+  }
+
+  public static String debug(ClassNode clazz, MethodNode method)
+  {
+    return debug(clazz.name, method);
   }
 
   public static String debug(String owner, MethodNode method)
@@ -62,12 +66,13 @@ public class Debugger extends TraceMethodVisitor
     Debugger debugger = new Debugger(frames);
     method.accept(debugger);
 
-    StringWriter output = new StringWriter(4096);
-    PrintWriter writer = new PrintWriter(output);
+    StringWriter result = new StringWriter(4096);
+    result.append("Method " + MethodCode.methodName(owner, method.name, method.desc) + "\n");
+    PrintWriter writer = new PrintWriter(result);
     debugger.print(writer);
     writer.flush();
 
-    return output.toString();
+    return result.toString();
   }
 
   public Debugger(Frame[] frames)
