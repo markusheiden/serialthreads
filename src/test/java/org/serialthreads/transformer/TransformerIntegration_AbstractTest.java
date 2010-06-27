@@ -16,8 +16,10 @@ import static org.junit.Assert.assertEquals;
 /**
  * Integration test for transformer.
  */
-public class TransformerIntegrationTest
+public abstract class TransformerIntegration_AbstractTest
 {
+  protected IStrategy strategy;
+
   @Before
   @After
   public void setUp()
@@ -29,12 +31,12 @@ public class TransformerIntegrationTest
    * Check that transformation does not alter behaviour.
    */
   @Test
-  public void transform() throws Exception
+  public void testTransform() throws Exception
   {
-    TransformingClassLoader cl = new TransformingClassLoader(Strategies.FREQUENT);
+    TransformingClassLoader cl = new TransformingClassLoader(strategy);
 
     Class<? extends IRunnable> clazz = (Class<? extends IRunnable>)
-      cl.loadClass(getClass().getName() + "$TestInterruptible");
+      cl.loadClass(TestInterruptible.class.getName());
     IRunnable test = clazz.newInstance();
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
     SerialThreadManager.registerManager(manager);
@@ -44,16 +46,16 @@ public class TransformerIntegrationTest
   }
 
   /**
-   * Check if the test assumptions are correct by excuting without a transformer.
+   * Check if the test assumptions are correct by executing without a transformer.
    */
   @Test
-  public void noTransform() throws Exception
+  public void testNoTransform() throws Exception
   {
     // disable debug mode to not throw an exception in SerialThreadManager.interrupt()
     SerialThreadManager.DEBUG = false;
 
     Class<? extends IRunnable> clazz = (Class<? extends IRunnable>)
-      getClass().getClassLoader().loadClass(getClass().getName() + "$TestInterruptible");
+      getClass().getClassLoader().loadClass(TestInterruptible.class.getName());
     IRunnable test = clazz.newInstance();
     test.run();
 

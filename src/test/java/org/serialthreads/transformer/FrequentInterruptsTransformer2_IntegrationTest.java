@@ -5,21 +5,21 @@ import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**
- * Integration-test for FrequentInterruptsTransformer3.
+ * Integration-test for FrequentInterruptsTransformer2.
  */
-public class FrequentInterruptsTransformer2_IntegrationTest
+public class FrequentInterruptsTransformer2_IntegrationTest extends TransformerIntegration_AbstractTest
 {
-  @Test
-  public void testDefault() throws Exception
+  @Override
+  public void setUp()
   {
-    ClassLoader cl = new TransformingClassLoader(new IStrategy()
+    strategy = new IStrategy()
     {
       @Override
       public ITransformer getTransformer(IClassInfoCache classInfoCache)
       {
         return new FrequentInterruptsTransformer2(classInfoCache);
       }
-    });
-    cl.loadClass("org.serialthreads.transformer.Dummy");
+    };
+    super.setUp();
   }
 }

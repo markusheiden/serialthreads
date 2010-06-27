@@ -7,19 +7,19 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 /**
  * Integration-test for FrequentInterruptsTransformer3.
  */
-public class FrequentInterruptsTransformer3_IntegrationTest
+public class FrequentInterruptsTransformer3_IntegrationTest extends TransformerIntegration_AbstractTest
 {
-  @Test
-  public void testDefault() throws Exception
+  @Override
+  public void setUp()
   {
-    ClassLoader cl = new TransformingClassLoader(new IStrategy()
+    strategy = new IStrategy()
     {
       @Override
       public ITransformer getTransformer(IClassInfoCache classInfoCache)
       {
         return new FrequentInterruptsTransformer3(classInfoCache);
       }
-    });
-    cl.loadClass("org.serialthreads.transformer.Dummy");
+    };
+    super.setUp();
   }
 }
