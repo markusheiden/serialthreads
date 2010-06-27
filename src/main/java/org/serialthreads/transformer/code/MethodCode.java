@@ -183,15 +183,26 @@ public class MethodCode
   }
 
   /**
+   * The first parameter of a method.
+   * For static methods the first parameter is in local 0.
+   * For non-static methods local 0 contains "this" and the first parameter is in local 1.
+   *
+   * @param method method
+   */
+  public static int firstParam(MethodNode method)
+  {
+    return isNotStatic(method) ? 1 : 0;
+  }
+
+  /**
    * The first local of a method that is no parameter.
    *
    * @param method method
    */
   public static int firstLocal(MethodNode method)
   {
-    Type[] types = Type.getArgumentTypes(method.desc);
-    int local = isNotStatic(method) ? 1 : 0;
-    for (Type type : types)
+    int local = firstParam(method);
+    for (Type type : Type.getArgumentTypes(method.desc))
     {
       local += type.getSize();
     }

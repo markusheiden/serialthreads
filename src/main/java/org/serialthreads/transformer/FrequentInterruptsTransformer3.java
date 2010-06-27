@@ -33,6 +33,7 @@ import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
+import static org.serialthreads.transformer.code.MethodCode.firstParam;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isInterrupt;
@@ -114,6 +115,11 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     MethodNode copy = copyMethod(clazz, method);
     copy.desc = changeCopyDesc(method.desc);
 
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Copied abstract method " + methodName(clazz, copy));
+    }
+
     // add thread and previousFrame arguments to original method
     if (!isRun(clazz, method, classInfoCache))
     {
@@ -167,6 +173,11 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     copy.desc = changeCopyDesc(method.desc);
     fixMaxs(copy);
 
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Copied concrete method " + methodName(clazz, copy));
+    }
+
     insertCaptureCode(clazz, method, frames, methodCalls, false);
     createRestoreHandlerMethod(clazz, method);
     addThreadAndFrame(clazz, method, methodCalls.keySet());
@@ -177,7 +188,8 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   }
 
   /**
-   * Copies a method, changes its signature and adds it to the class.
+   * Copies a method and adds it to the class.
+   * Its arguments will be shortened by the caller later on.
    *
    * @param clazz class to add copied method to
    * @param method method to copy
@@ -189,12 +201,6 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
     //noinspection unchecked
     clazz.methods.add(copy);
-
-    if (log.isDebugEnabled())
-    {
-      String kind = isAbstract(method) ? "abstract" : "concrete";
-      log.debug("      Copied " + kind + " method " + methodName(clazz, copy));
-    }
 
     return copy;
   }
@@ -235,7 +241,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   protected void fixMaxs(MethodNode method)
   {
-    method.maxLocals += 2;
+    method.maxLocals += 1;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
   }
@@ -452,7 +458,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       log.debug("    Creating restore handler for copied method");
     }
 
-    int param = isNotStatic(method) ? 1 : 0;
+    int param = firstParam(method);
     final int paramThread = param++;
     final int paramPreviousFrame = param++;
 
@@ -471,7 +477,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     restore.add(new VarInsnNode(ASTORE, localFrame));
 
     // thread = currentThread;
-    // TODO 2009-10-22 mh: rename locals to avoid this copy?
+    // TODO 2009-10-22 mh: how to avoid this copy???
     restore.add(new VarInsnNode(ALOAD, paramThread));
     restore.add(new VarInsnNode(ASTORE, localThread));
 
@@ -520,6 +526,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
     restoreCodes.add(0, startRestoreCode);
 
+    // restore code dispatcher
     InsnList restore = new InsnList();
 
     // thread = this.$$thread$$;
