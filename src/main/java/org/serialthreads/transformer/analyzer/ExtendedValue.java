@@ -214,6 +214,11 @@ public class ExtendedValue extends BasicValue
     return new ExtendedValue(getType(), constant, modifiedLocals);
   }
 
+  /**
+   * equals() replacement which additionally checks, that the extended attributes are equal too.
+   *
+   * @param value value to compare against
+   */
   public boolean equalsValue(ExtendedValue value)
   {
     assert value != null : "Precondition: value != null";
@@ -221,7 +226,12 @@ public class ExtendedValue extends BasicValue
     return equals(value) && equalsConstant(value) && equalsLocals(value);
   }
 
-  public boolean equalsConstant(ExtendedValue value)
+  /**
+   * Check that the constant value is the same, if any.
+   *
+   * @param value value to compare against
+   */
+  private boolean equalsConstant(ExtendedValue value)
   {
     assert value != null : "Precondition: value != null";
 
@@ -229,7 +239,12 @@ public class ExtendedValue extends BasicValue
       constant != null && constant.equals(value.constant);
   }
 
-  public boolean equalsLocals(ExtendedValue value)
+  /**
+   * Check that the locals are identical.
+   *
+   * @param value value to compare against
+   */
+  private boolean equalsLocals(ExtendedValue value)
   {
     assert value != null : "Precondition: value != null";
 

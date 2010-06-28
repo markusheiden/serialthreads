@@ -54,7 +54,6 @@ public class ExtendedVerifier extends SimpleVerifier
     this(classInfoCache, null, null, null, false);
   }
 
-
   /**
    * Constructs a new {@link ExtendedVerifier} to verify a specific class. This
    * class will not be loaded into the JVM since it may be incorrect.
@@ -81,6 +80,7 @@ public class ExtendedVerifier extends SimpleVerifier
     this.classInfoCache = classInfoCache;
   }
 
+  @Override
   public BasicValue merge(Value v, Value w)
   {
     assert v != null : "Precondition: v != null";
@@ -118,6 +118,7 @@ public class ExtendedVerifier extends SimpleVerifier
     return result;
   }
 
+  @Override
   protected boolean isInterface(final Type t)
   {
     if (currentClass != null && t.equals(currentClass))
@@ -138,6 +139,8 @@ public class ExtendedVerifier extends SimpleVerifier
     return classInfoCache.getSuperClass(t.getInternalName());
   }
 
+  @Override
+  @SuppressWarnings("unchecked")
   protected boolean isAssignableFrom(final Type t, final Type u)
   {
     if (t.equals(u))
@@ -146,14 +149,7 @@ public class ExtendedVerifier extends SimpleVerifier
     }
     if (currentClass != null && t.equals(currentClass))
     {
-      if (getSuperClass(u) == null)
-      {
-        return false;
-      }
-      else
-      {
-        return isAssignableFrom(t, getSuperClass(u));
-      }
+      return getSuperClass(u) != null && isAssignableFrom(t, getSuperClass(u));
     }
     if (currentClass != null && u.equals(currentClass))
     {
@@ -163,9 +159,8 @@ public class ExtendedVerifier extends SimpleVerifier
       }
       if (currentClassInterfaces != null)
       {
-        for (int i = 0; i < currentClassInterfaces.size(); ++i)
+        for (Type v : (List<Type>) currentClassInterfaces)
         {
-          Type v = (Type) currentClassInterfaces.get(i);
           if (isAssignableFrom(t, v))
           {
             return true;

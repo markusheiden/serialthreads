@@ -15,8 +15,8 @@ import java.util.List;
 public class ExtendedAnalyzer extends Analyzer
 {
   /**
-   * Constructs a new {@link ExtendedAnalyzer} to anaylze a specific class. This
-   * class will not be loaded into the JVM since it may be incorrect.
+   * Constructs a new {@link ExtendedAnalyzer} to analyze a specific class.
+   * This class will not be loaded into the JVM since it may be incorrect.
    *
    * @param classInfoCache class info cache
    * @param currentClass the class that is analyzed.

@@ -150,7 +150,7 @@ public class ExtendedFrame extends Frame
   /**
    * {@inheritDoc}
    *
-   * Always uses extented values.
+   * Always uses extended values.
    */
   @Override
   public void setLocal(int i, Value value) throws IndexOutOfBoundsException
