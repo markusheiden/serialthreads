@@ -18,8 +18,6 @@ public class StackFrame
   public final StackFrame previous;
   public StackFrame next;
 
-  public IFrameExecutor executor;
-
   // Method owner and index of restore code
   public Object owner;
   public int method;
@@ -157,8 +155,6 @@ public class StackFrame
     this.previous = previous;
     this.next = null;
 
-    executor = null;
-
     owner = null;
     // has to be -1 for dummy startup restore!
     method = -1;
@@ -213,8 +209,6 @@ public class StackFrame
    */
   public final void reset()
   {
-    executor = null;
-
     owner = null;
     method = -1;
 
