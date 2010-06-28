@@ -16,7 +16,7 @@ public class MethodInfo
   private final Set<String> annotations;
 
   /**
-   * Cosntructor.
+   * Constructor.
    *
    * @param name name of method
    * @param desc method descriptor
