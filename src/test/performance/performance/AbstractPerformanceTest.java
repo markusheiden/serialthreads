@@ -1,4 +1,4 @@
-package org.serialthreads.performance;
+package performance;
 
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;

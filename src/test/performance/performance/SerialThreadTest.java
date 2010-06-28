@@ -1,4 +1,4 @@
-package org.serialthreads.performance;
+package performance;
 
 import org.junit.Before;
 import org.serialthreads.Interruptible;
