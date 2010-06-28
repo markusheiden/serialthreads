@@ -7,6 +7,7 @@ import java.util.Arrays;
 /**
  * Used to store the content of a stack frame.
  */
+@SuppressWarnings("unused")
 public class StackFrame
 {
   private final Logger logger = Logger.getLogger(getClass());
@@ -144,6 +145,7 @@ public class StackFrame
    * Constructor.
    *
    * @param previous previous stack frame for a linked list
+   * @param size maximum size of the frame
    */
   public StackFrame(StackFrame previous, int size)
   {
