@@ -18,20 +18,22 @@ import java.io.PrintWriter;
  */
 public class InvokeDynamicTest
 {
+  static {
+    Linkage.registerBootstrapMethod("bootstrap");
+  }
+
   public static void main(String[] args)
   {
     try
     {
       ClassReader r = new ClassReader(InvokeDynamicTest.class.getResourceAsStream(InvokeDynamicTest.class.getSimpleName() + ".class"));
       r.accept(new ASMifierClassVisitor(new PrintWriter(System.out)), 0);
+      new InvokeDynamicTest().run();
     }
     catch (IOException e)
     {
       e.printStackTrace();
     }
-
-    Linkage.registerBootstrapMethod("bootstrap");
-    new InvokeDynamicTest().run();
   }
 
   public void run()
@@ -39,13 +41,14 @@ public class InvokeDynamicTest
     try
     {
       MethodHandle handle1 = MethodHandles.lookup().findVirtual(Callee.class, "run1", MethodType.methodType(void.class, String.class));
-      handle1.invokeGeneric(new Callee("callee1"), "?");
-//      handle1.<void>invoke(new Callee("callee1"), "?");
+//      handle1.invokeGeneric(new Callee("callee1"), "?");
+      handle1.<void>invoke(new Callee("callee1"), "?");
       MethodHandle handle2 = MethodHandles.lookup().bind(new Callee("callee2"), "run1", MethodType.methodType(void.class, String.class));
-      handle2.invokeGeneric("!");
+//      handle2.invokeGeneric("!");
       handle2.<void>invoke("!!");
+//      handle2.<void>invokeExact("!!");
 
-      InvokeDynamic.<void>run1("...");
+//      InvokeDynamic.<void>run1("...");
     }
     catch (Throwable throwable)
     {
