@@ -188,6 +188,7 @@ public abstract class AbstractTransformer implements ITransformer
    *
    * @param clazz class to transform
    * @param method method node to transform
+   * @return transformed methods
    */
   protected List<MethodNode> transformMethod(ClassNode clazz, MethodNode method)
   {
@@ -234,6 +235,7 @@ public abstract class AbstractTransformer implements ITransformer
    *
    * @param clazz class to transform
    * @param method method node to transform
+   * @return transformed methods
    */
   protected abstract List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
 
