@@ -3,7 +3,10 @@ package org.serialthreads.transformer.classcache;
 import org.junit.Test;
 import org.objectweb.asm.Type;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -45,7 +48,7 @@ public class MethodInfoTest
   @Test(expected = UnsupportedOperationException.class)
   public void testGetAnnotations_immutable()
   {
-    MethodInfo info = new MethodInfo("name", "desc", Collections.singleton(Type.INT_TYPE.getDescriptor()));
+    MethodInfo info = new MethodInfo("name", "desc", new HashSet<String>(Collections.singleton(Type.INT_TYPE.getDescriptor())));
 
     info.getAnnotations().add("something");
   }
