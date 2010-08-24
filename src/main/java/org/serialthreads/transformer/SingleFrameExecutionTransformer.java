@@ -63,13 +63,16 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
   {
-    if (isInterface(clazz) && isRun(clazz, method, classInfoCache))
+    boolean isAbstract = isAbstract(method);
+    boolean isRun = isRun(clazz, method, classInfoCache);
+
+    if ((isInterface(clazz) || isAbstract) && isRun)
     {
       // do not transform IRunnable.run() itself
       return Collections.emptyList();
     }
 
-    if (isAbstract(method))
+    if (isAbstract)
     {
       // change signature of abstract methods
       return transformAbstract(clazz, method);
@@ -82,7 +85,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
       return Collections.emptyList();
     }
 
-    if (isRun(clazz, method, classInfoCache))
+    if (isRun)
     {
       // take special care of run method
       return transformRun(clazz, method, methodCalls);
@@ -103,21 +106,17 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   private List<MethodNode> transformAbstract(ClassNode clazz, MethodNode method)
   {
-    // create a copy of the method with no arguments: ...(Thread, Frame)V
+    // create a copy of the method with fixed arguments: ...(Thread, Frame)V
     MethodNode copy = copyMethod(clazz, method);
 
     // add thread and previousFrame arguments to the original method: ...(..., Thread, Frame)...
-    // TODO 2010-04-10 mh: move this up? need run() ever to be copied???
-    if (!isRun(clazz, method, classInfoCache))
-    {
-      method.desc = changeDesc(method.desc);
-    }
+    method.desc = changeDesc(method.desc);
 
-    return Arrays.asList(copy);
+    return Arrays.asList(method, copy);
   }
 
   /**
-   * Transform IRunnable.run() method.
+   * Transform implementations of the IRunnable.run() method.
    *
    * @param clazz class to alter
    * @param method run method to transform
@@ -150,7 +149,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   {
     Frame[] frames = analyze(clazz, method);
 
-    // create copy of method with no arguments: ...(Thread, Frame)V
+    // create copy of method with fixed arguments: ...(Thread, Frame)V
     MethodNode copy = copyMethod(clazz, method);
     Map<MethodInsnNode, Integer> copyMethodCalls = interruptibleMethodCalls(copy.instructions);
     // TODO 2010-06-26 mh: interrupt restore codes only
