@@ -73,7 +73,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
   {
-    if (isInterface(clazz) && isRun(clazz, method, classInfoCache))
+    if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache))
     {
       // do not transform IRunnable.run() itself
       return Collections.emptyList();
@@ -121,10 +121,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     }
 
     // add thread and previousFrame arguments to original method
-    if (!isRun(clazz, method, classInfoCache))
-    {
-      method.desc = changeDesc(method.desc);
-    }
+    method.desc = changeDesc(method.desc);
 
     return Arrays.asList(copy);
   }
