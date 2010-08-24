@@ -12,7 +12,7 @@ abstract:
 - signature + thread & (previous) frame
 
 abstract copy:
-- signature + thread & (previous) frame, no return value
+- signature + thread & (previous) frame, no return value, private
 
 concrete:
 - signature + thread & (previous) frame
