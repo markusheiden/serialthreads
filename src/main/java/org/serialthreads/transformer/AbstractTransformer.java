@@ -877,8 +877,8 @@ public abstract class AbstractTransformer implements ITransformer
             {
               log.debug("        Detected codes with the same value: " + extendedValue.getLowestLocal() + "/" + local);
             }
-            copyLocals.add(code(extendedValue.getType()).load(extendedValue.getLowestLocal()));
-            copyLocals.add(code(extendedValue.getType()).store(local));
+            copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
+            copyLocals.add(code(extendedValue).store(local));
           }
           else
           {
