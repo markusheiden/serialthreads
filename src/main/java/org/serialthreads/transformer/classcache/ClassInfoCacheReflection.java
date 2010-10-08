@@ -113,7 +113,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
       String superClassName = null;
       if (clazz.getSuperclass() != null)
       {
-        clazz.getSuperclass().getName().replace('.', '/');
+        superClassName = clazz.getSuperclass().getName().replace('.', '/');
       }
       Map<String, MethodInfo> methodInfos = new HashMap<String, MethodInfo>();
       Method[] methods = clazz.getDeclaredMethods();

@@ -2,13 +2,14 @@ package org.serialthreads.context;
 
 import org.apache.log4j.Logger;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Used to store the content of a stack frame.
  */
 @SuppressWarnings("unused")
-public class StackFrame
+public class StackFrame implements Serializable
 {
   private final Logger logger = Logger.getLogger(getClass());
 

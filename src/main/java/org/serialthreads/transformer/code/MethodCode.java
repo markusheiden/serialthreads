@@ -238,8 +238,8 @@ public class MethodCode
   public static boolean isCompatible(MethodNode method, Frame frame)
   {
     Type[] arguments = Type.getArgumentTypes(method.desc);
-    int a = 0;
-    for (int l = isNotStatic(method) ? 1 : 0; l < frame.getLocals() && a < arguments.length; a++)
+    // Condition "l < frame.getLocals()" holds  always, because each argument is stored in a local
+    for (int l = isNotStatic(method) ? 1 : 0, a = 0; a < arguments.length; a++)
     {
       BasicValue local = (BasicValue) frame.getLocal(l);
       if (BasicValue.UNINITIALIZED_VALUE.equals(local))
@@ -254,13 +254,6 @@ public class MethodCode
       }
 
       l += argument.getSize();
-    }
-
-    if (a != arguments.length)
-    {
-      // there had to be always at least as many locals as arguments,
-      // because the arguments are always put into locals before a method is entered
-      throw new IllegalArgumentException("Less locals than arguments");
     }
 
     // scanned all arguments and they passed the test

@@ -3,7 +3,7 @@ package org.serialthreads.transformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**
- * Available tranformation strategies.
+ * Available transformation strategies.
  */
 public class Strategies
 {
@@ -28,7 +28,7 @@ public class Strategies
   /**
    * Strategy for frequent interrupts which bloats the code more than FREQUENT but is slightly faster.
    */
-  public static IStrategy FREQUENT2 = new IStrategy()
+  public static final IStrategy FREQUENT2 = new IStrategy()
   {
     @Override
     public ITransformer getTransformer(IClassInfoCache classInfoCache)
@@ -46,7 +46,7 @@ public class Strategies
   /**
    * Strategy for frequent interrupts which bloats the code more than FREQUENT but is slightly faster.
    */
-  public static IStrategy FREQUENT3 = new IStrategy()
+  public static final IStrategy FREQUENT3 = new IStrategy()
   {
     @Override
     public ITransformer getTransformer(IClassInfoCache classInfoCache)
@@ -64,7 +64,7 @@ public class Strategies
   /**
    * Strategy for frequent interrupts which bloats the code more than FREQUENT but is slightly faster.
    */
-  public static IStrategy SINGLE_FRAME_EXECUTION = new IStrategy()
+  public static final IStrategy SINGLE_FRAME_EXECUTION = new IStrategy()
   {
     @Override
     public ITransformer getTransformer(IClassInfoCache classInfoCache)
@@ -82,5 +82,5 @@ public class Strategies
   /**
    * Strategy for infrequent interrupts.
    */
-  public static IStrategy DEFAULT = FREQUENT3;
+  public static final IStrategy DEFAULT = FREQUENT3;
 }
