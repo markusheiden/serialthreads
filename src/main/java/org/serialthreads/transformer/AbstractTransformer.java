@@ -65,6 +65,8 @@ public abstract class AbstractTransformer implements ITransformer
 
   protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
   protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
+  protected static final String CLASS_NAME = Type.getType(Class.class).getInternalName();
+  protected static final String CLASS_DESC = Type.getType(Class.class).getDescriptor();
   protected static final String STRING_DESC = Type.getType(String.class).getDescriptor();
   protected static final String NPE_NAME = Type.getType(NullPointerException.class).getInternalName();
   protected static final String MANAGER_NAME = Type.getType(SerialThreadManager.class).getInternalName();
@@ -346,7 +348,8 @@ public abstract class AbstractTransformer implements ITransformer
       instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
       instructions.add(new InsnNode(DUP));
       instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC));
+      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC));
+      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC));
       // TODO 2009-12-01 mh: configurable default size
       instructions.add(IntValueCode.push(defaultFrameSize));
       instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V"));
