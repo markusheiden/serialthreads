@@ -3,8 +3,6 @@ package org.serialthreads.transformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.ASMifierClassVisitor;
 
-import java.dyn.CallSite;
-import java.dyn.Linkage;
 import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
 import java.dyn.MethodType;
