@@ -4,8 +4,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.ASMifierClassVisitor;
 
 import java.dyn.CallSite;
-import java.dyn.InvokeDynamic;
-import java.dyn.JavaMethodHandle;
 import java.dyn.Linkage;
 import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
@@ -18,11 +16,12 @@ import java.io.PrintWriter;
  */
 public class InvokeDynamicTest
 {
+/*
   static
   {
     Linkage.registerBootstrapMethod("bootstrap");
   }
-
+*/
   public static void main(String[] args)
   {
     try
@@ -42,21 +41,18 @@ public class InvokeDynamicTest
     try
     {
       MethodHandle handle1 = MethodHandles.lookup().findVirtual(Callee.class, "run1", MethodType.methodType(void.class, String.class));
-//      handle1.invokeGeneric(new Callee("callee1"), "?");
-      handle1.<void>invoke(new Callee("callee1"), "?");
+      handle1.invokeGeneric(new Callee("callee1"), "?");
+      handle1.invokeExact(new Callee("callee1"), "?");
       MethodHandle handle2 = MethodHandles.lookup().bind(new Callee("callee2"), "run1", MethodType.methodType(void.class, String.class));
-//      handle2.invokeGeneric("!");
-      handle2.<void>invoke("!!");
-//      handle2.<void>invokeExact("!!");
-
-//      InvokeDynamic.<void>run1("...");
+      handle2.invokeGeneric("!");
+      handle2.invokeExact("!!");
     }
     catch (Throwable throwable)
     {
       throwable.printStackTrace();
     }
   }
-
+/*
   public static CallSite bootstrap(Class<?> clazz, String name, MethodType methodType)
   {
     System.out.println("bootstrap: " + clazz.getName() + " / " + name + " / " + methodType.toString());
@@ -68,7 +64,7 @@ public class InvokeDynamicTest
     result.setTarget(target);
     return result;
   }
-
+*/
   public static class Callee
   {
     private final String name;
