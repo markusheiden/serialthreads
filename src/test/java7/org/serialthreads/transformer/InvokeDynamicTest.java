@@ -3,6 +3,8 @@ package org.serialthreads.transformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.ASMifierClassVisitor;
 
+import java.dyn.CallSite;
+import java.dyn.ConstantCallSite;
 import java.dyn.MethodHandle;
 import java.dyn.MethodHandles;
 import java.dyn.MethodType;
@@ -38,9 +40,10 @@ public class InvokeDynamicTest
   {
     try
     {
-      MethodHandle handle1 = MethodHandles.lookup().findVirtual(Callee.class, "run1", MethodType.methodType(void.class, String.class));
-      handle1.invokeGeneric(new Callee("callee1"), "?");
-      handle1.invokeExact(new Callee("callee1"), "?");
+      MethodHandle handle1a = MethodHandles.lookup().findVirtual(Callee.class, "run1", MethodType.methodType(void.class, String.class));
+      handle1a.invokeExact(new Callee("callee1a"), "?");
+      MethodHandle handle1b = handle1a.bindTo(new Callee("callee1b"));
+      handle1b.invokeExact("?");
       MethodHandle handle2 = MethodHandles.lookup().bind(new Callee("callee2"), "run1", MethodType.methodType(void.class, String.class));
       handle2.invokeGeneric("!");
       handle2.invokeExact("!!");
@@ -50,19 +53,24 @@ public class InvokeDynamicTest
       throwable.printStackTrace();
     }
   }
-/*
-  public static CallSite bootstrap(Class<?> clazz, String name, MethodType methodType)
+
+  public static void run2()
   {
-    System.out.println("bootstrap: " + clazz.getName() + " / " + name + " / " + methodType.toString());
-    System.out.flush();
-    CallSite result = new CallSite(clazz, name, methodType);
-    MethodHandle target = MethodHandles.lookup().findVirtual(Callee.class, "run2", MethodType.methodType(void.class, String.class, String.class));
-    target = MethodHandles.insertArguments(target, 0, new Callee("dummy"));
-    target = MethodHandles.insertArguments(target, 1, "X");
-    result.setTarget(target);
-    return result;
+    try
+    {
+      MethodHandle target = MethodHandles.lookup().findVirtual(Callee.class, "run2", MethodType.methodType(void.class, String.class, String.class));
+      target = MethodHandles.insertArguments(target, 0, new Callee("dummy"));
+      target = MethodHandles.insertArguments(target, 1, "X");
+      CallSite site = new ConstantCallSite(target);
+
+      site.dynamicInvoker().invokeExact("Q");
+    }
+    catch (Throwable throwable)
+    {
+      throwable.printStackTrace();
+    }
   }
-*/
+
   public static class Callee
   {
     private final String name;
