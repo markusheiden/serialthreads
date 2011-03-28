@@ -23,7 +23,7 @@ public class TransformingVisitor extends ClassNode
    */
   public TransformingVisitor(ClassVisitor cv, ITransformer transformer)
   {
-    this.cv = cv;
+    this.cv = log.isDebugEnabled()? new CheckClassAdapter(cv) : cv;
     this.transformer = transformer;
   }
 
@@ -34,13 +34,6 @@ public class TransformingVisitor extends ClassNode
     // transform class
     transformer.transform(this);
 
-    if (log.isDebugEnabled())
-    {
-      accept(new CheckClassAdapter(cv));
-    }
-    else
-    {
-      accept(cv);
-    }
+    accept(cv);
   }
 }
