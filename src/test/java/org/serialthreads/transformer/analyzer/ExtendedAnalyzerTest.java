@@ -18,11 +18,13 @@ public class ExtendedAnalyzerTest
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
 
     ExtendedFrame frame = analyzer.newFrame(2, 2);
+
     frame.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
     frame.setLocal(1, BasicValue.INT_VALUE);
-    assertEquals(2, frame.getLocals());
     assertEquals(BasicValue.UNINITIALIZED_VALUE, frame.getLocal(0));
     assertEquals(ExtendedValue.valueInLocal(Type.INT_TYPE, 1), frame.getLocal(1));
+    assertEquals(2, frame.getLocals());
+
     frame.push(BasicValue.LONG_VALUE);
     frame.push(BasicValue.DOUBLE_VALUE);
     assertEquals(ExtendedValue.value(Type.LONG_TYPE), frame.getStack(0));
@@ -46,14 +48,17 @@ public class ExtendedAnalyzerTest
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
 
     ExtendedFrame src = new ExtendedFrame(2, 2);
+    src.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
+    src.setLocal(1, BasicValue.INT_VALUE);
+    src.push(BasicValue.LONG_VALUE);
+    src.push(BasicValue.DOUBLE_VALUE);
+
     ExtendedFrame frame = analyzer.newFrame(src);
-    frame.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
-    frame.setLocal(1, BasicValue.INT_VALUE);
-    assertEquals(2, frame.getLocals());
+
     assertEquals(BasicValue.UNINITIALIZED_VALUE, frame.getLocal(0));
     assertEquals(ExtendedValue.valueInLocal(Type.INT_TYPE, 1), frame.getLocal(1));
-    frame.push(BasicValue.LONG_VALUE);
-    frame.push(BasicValue.DOUBLE_VALUE);
+    assertEquals(2, frame.getLocals());
+
     assertEquals(ExtendedValue.value(Type.LONG_TYPE), frame.getStack(0));
     assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
