@@ -102,7 +102,7 @@ public abstract class AbstractPerformanceTest
 
     long duration = endTime - startTime;
     long countsPerSecond = counters[0].getCount() * 1000 / duration;
-    System.out.println("Perfomance: " + countsPerSecond + " counts/s for " + COUNT + " threads");
+    System.out.println("Performance: " + countsPerSecond + " counts/s for " + COUNT + " threads");
   }
 
   /**
