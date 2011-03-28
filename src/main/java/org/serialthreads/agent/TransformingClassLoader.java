@@ -138,8 +138,7 @@ public class TransformingClassLoader extends ClassLoader
     try
     {
       byte[] buffer = new byte[16384];
-      int bytesRead = -1;
-      while ((bytesRead = in.read(buffer)) != -1)
+      for (int bytesRead; (bytesRead = in.read(buffer)) != -1;)
       {
         out.write(buffer, 0, bytesRead);
       }
