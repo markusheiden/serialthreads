@@ -5,7 +5,7 @@ package org.serialthreads.context;
  */
 public class ArrayResizer
 {
-  public static final Object[] resize(Object[] old, Object object)
+  public static Object[] resize(Object[] old, Object object)
   {
     final int oldLength = old.length;
     Object[] result = new Object[oldLength << 1];
@@ -14,7 +14,7 @@ public class ArrayResizer
     return result;
   }
 
-  public static final boolean[] resize(boolean[] old, boolean value)
+  public static boolean[] resize(boolean[] old, boolean value)
   {
     final int oldLength = old.length;
     boolean[] result = new boolean[oldLength << 1];
@@ -23,7 +23,7 @@ public class ArrayResizer
     return result;
   }
 
-  public static final int[] resize(int[] old, int value)
+  public static int[] resize(int[] old, int value)
   {
     final int oldLength = old.length;
     int[] result = new int[oldLength << 1];
@@ -32,7 +32,7 @@ public class ArrayResizer
     return result;
   }
 
-  public static final long[] resize(long[] old, long value)
+  public static long[] resize(long[] old, long value)
   {
     final int oldLength = old.length;
     long[] result = new long[oldLength << 1];
@@ -41,7 +41,7 @@ public class ArrayResizer
     return result;
   }
 
-  public static final float[] resize(float[] old, float value)
+  public static float[] resize(float[] old, float value)
   {
     final int oldLength = old.length;
     float[] result = new float[oldLength << 1];
@@ -50,7 +50,7 @@ public class ArrayResizer
     return result;
   }
 
-  public static final double[] resize(double[] old, double value)
+  public static double[] resize(double[] old, double value)
   {
     final int oldLength = old.length;
     double[] result = new double[oldLength << 1];
