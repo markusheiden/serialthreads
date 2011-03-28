@@ -7,6 +7,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Shifts the local variables of a method.
@@ -40,11 +41,9 @@ public class LocalVariablesShifter
     }
 
     // adopt local variable debug info
-    for (Iterator<LocalVariableNode> iter = method.localVariables.iterator(); iter.hasNext();)
-    {
-      LocalVariableNode local = iter.next();
-      local.index = remap(point, shift, local.index);
-    }
+      for (LocalVariableNode local : (List<LocalVariableNode>) method.localVariables) {
+          local.index = remap(point, shift, local.index);
+      }
 
     // fix max locals
     method.maxLocals += shift;
@@ -53,6 +52,8 @@ public class LocalVariablesShifter
   /**
    * Remap a local.
    *
+   * @param point number of first local to alter
+   * @param shift increment for locals >= point
    * @param local local to remap
    * @return remapped local
    */

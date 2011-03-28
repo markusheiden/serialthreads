@@ -22,7 +22,7 @@ public class ClassInfoVisitor extends EmptyVisitor
 
   private String methodName;
   private String methodDesc;
-  private Set<String> methodAnnotations = new HashSet<String>();
+  private final Set<String> methodAnnotations = new HashSet<String>();
 
   private final Map<String, MethodInfo> methods;
 

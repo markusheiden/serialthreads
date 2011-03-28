@@ -21,12 +21,12 @@ import java.util.List;
 public class Debugger extends TraceMethodVisitor
 {
   private int instruction;
-  private Frame[] frames;
+  private final Frame[] frames;
 
   public static String debug(ClassNode clazz)
   {
     StringBuilder result = new StringBuilder(65536);
-    result.append("Class " + clazz.name + "\n");
+    result.append("Class ").append(clazz.name).append("\n");
     result.append(debug(clazz, (String) null));
     return result.toString();
   }
@@ -67,7 +67,7 @@ public class Debugger extends TraceMethodVisitor
     method.accept(debugger);
 
     StringWriter result = new StringWriter(4096);
-    result.append("Method " + MethodCode.methodName(owner, method.name, method.desc) + "\n");
+    result.append("Method ").append(MethodCode.methodName(owner, method.name, method.desc)).append("\n");
     PrintWriter writer = new PrintWriter(result);
     debugger.print(writer);
     writer.flush();
