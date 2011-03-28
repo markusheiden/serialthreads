@@ -120,11 +120,15 @@ public interface IValueCode
 
   /**
    * Is this type compatible with another type?
+   *
+   * @param type type
    */
   public boolean isCompatibleWith(Type type);
 
   /**
    * Is this code responsible for handling the given type?
+   *
+   * @param type type
    */
   public boolean isResponsibleFor(Type type);
 }

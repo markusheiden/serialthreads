@@ -9,6 +9,8 @@ public interface ITransformer
 {
   /**
    * Execute byte code transformation on a class.
+   *
+   * @param clazz class to be transformed
    */
   public void transform(ClassNode clazz);
 }

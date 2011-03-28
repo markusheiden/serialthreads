@@ -11,6 +11,8 @@ public final class ChainedRunnable
 
   /**
    * Create linked chain array.
+   *
+   * @param runnables Runnables
    */
   public static ChainedRunnable[] chain(IRunnable... runnables)
   {
