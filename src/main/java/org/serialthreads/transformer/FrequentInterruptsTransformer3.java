@@ -17,13 +17,14 @@ import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.GETFIELD;
@@ -425,16 +426,23 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
+    LabelNode normal = new LabelNode();
+
     // frame = previousFrame.next
     InsnList getFrame = new InsnList();
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    getFrame.add(new VarInsnNode(ASTORE, localFrame));
+    getFrame.add(new InsnNode(DUP));
+    getFrame.add(new JumpInsnNode(IFNONNULL, normal));
 
-    // TODO 2009-12-01 mh: fix / re-enable dynamic frame resize
-    // getFrame.add(new VarInsnNode(ALOAD, localFrame));
-    // getFrame.add(IntValueCode.push(255));
-    // getFrame.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, FRAME_IMPL_NAME, "resize", "(I)V"));
+    getFrame.add(new InsnNode(POP));
+    // frame = thread.addFrame(previousFrame);
+    getFrame.add(new VarInsnNode(ALOAD, localThread));
+    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+    getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC));
+
+    getFrame.add(normal);
+    getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     method.instructions.insertBefore(method.instructions.getFirst(), getFrame);
   }

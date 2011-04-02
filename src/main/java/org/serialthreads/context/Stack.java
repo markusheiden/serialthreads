@@ -13,9 +13,9 @@ public class Stack extends SerialThread implements Serializable
   protected static final int MAX_LEVELS = 256;
 
   /**
-   * The currently active frame.
+   * Default frame size.
    */
-  public StackFrame frame;
+  private final int frameSize;
 
   /**
    * Frame for the first method.
@@ -23,27 +23,34 @@ public class Stack extends SerialThread implements Serializable
   public final StackFrame first;
 
   /**
+   * The currently active frame.
+   */
+  public StackFrame frame;
+
+  /**
    * Constructor.
    *
    * @param name name of the thread
-   * @param size size of frames
+   * @param frameSize size of frames
    */
-  public Stack(String name, int size)
+  public Stack(String name, int frameSize)
   {
     super(name);
 
-    first = new StackFrame(null, size);
-    fillStack(first, size);
+    this.frameSize = frameSize;
+    first = new StackFrame(null, frameSize);
     frame = first;
   }
 
-  private void fillStack(StackFrame last, int size)
+  /**
+   * Increase the stack by one frame.
+   *
+   * @param lastFrame last frame of the stack
+   * @return Added frame
+   */
+  public StackFrame addFrame(StackFrame lastFrame)
   {
-    StackFrame previous = last;
-    for (int i = 0; i < MAX_LEVELS; i++)
-    {
-      previous = new StackFrame(previous, size);
-    }
+    return new StackFrame(lastFrame, frameSize);
   }
 
   /**
