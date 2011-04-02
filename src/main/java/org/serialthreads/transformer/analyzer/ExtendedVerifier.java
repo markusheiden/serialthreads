@@ -32,7 +32,7 @@ public class ExtendedVerifier extends SimpleVerifier
   /**
    * The interfaces implemented by the class that is verified.
    */
-  private final List currentClassInterfaces;
+  private final List<Type> currentClassInterfaces;
 
   /**
    * If the class that is verified is an interface.
@@ -43,16 +43,6 @@ public class ExtendedVerifier extends SimpleVerifier
    * Class info cache to look up references.
    */
   private final IClassInfoCache classInfoCache;
-
-  /**
-   * Constructs a new {@link ExtendedVerifier}.
-   *
-   * @param classInfoCache class info cache.
-   */
-  public ExtendedVerifier(IClassInfoCache classInfoCache)
-  {
-    this(classInfoCache, null, null, null, false);
-  }
 
   /**
    * Constructs a new {@link ExtendedVerifier} to verify a specific class. This
@@ -68,7 +58,7 @@ public class ExtendedVerifier extends SimpleVerifier
     IClassInfoCache classInfoCache,
     Type currentClass,
     Type currentSuperClass,
-    List currentClassInterfaces,
+    List<Type> currentClassInterfaces,
     boolean isInterface)
   {
     super(currentClass, currentSuperClass, currentClassInterfaces, isInterface);
@@ -121,7 +111,7 @@ public class ExtendedVerifier extends SimpleVerifier
   @Override
   protected boolean isInterface(final Type t)
   {
-    if (currentClass != null && t.equals(currentClass))
+    if (t.equals(currentClass))
     {
       return isInterface;
     }
@@ -131,7 +121,7 @@ public class ExtendedVerifier extends SimpleVerifier
   @Override
   protected Type getSuperClass(Type t)
   {
-    if (currentClass != null && t.equals(currentClass))
+    if (t.equals(currentClass))
     {
       return currentSuperClass;
     }
@@ -147,11 +137,11 @@ public class ExtendedVerifier extends SimpleVerifier
     {
       return true;
     }
-    if (currentClass != null && t.equals(currentClass))
+    if (t.equals(currentClass))
     {
       return getSuperClass(u) != null && isAssignableFrom(t, getSuperClass(u));
     }
-    if (currentClass != null && u.equals(currentClass))
+    if (u.equals(currentClass))
     {
       if (isAssignableFrom(t, currentSuperClass))
       {
@@ -159,7 +149,7 @@ public class ExtendedVerifier extends SimpleVerifier
       }
       if (currentClassInterfaces != null)
       {
-        for (Type v : (List<Type>) currentClassInterfaces)
+        for (Type v : currentClassInterfaces)
         {
           if (isAssignableFrom(t, v))
           {

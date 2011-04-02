@@ -20,7 +20,8 @@ public class ExtendedVerifierTest
   @Test
   public void testMerge() throws Exception
   {
-    ExtendedVerifier verifier = new ExtendedVerifier(new ClassInfoCacheASM(getClass().getClassLoader()));
+    ExtendedVerifier verifier = new ExtendedVerifier(
+      new ClassInfoCacheASM(getClass().getClassLoader()), null, null, null, false);
 
     ExtendedValue local1Int = valueInLocal(Type.INT_TYPE, 1);
     ExtendedValue local12Int = valueInLocal(Type.INT_TYPE, 1).addLocal(2);

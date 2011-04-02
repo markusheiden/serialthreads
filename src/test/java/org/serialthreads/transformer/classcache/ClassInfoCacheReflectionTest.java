@@ -12,8 +12,7 @@ public class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest
   {
     // TODO 2010-01-20 mh: add tests with other start method
 
-    ClassInfoCacheReflection cache = new ClassInfoCacheReflection();
-    cache.setClassLoader(ClassInfoCacheReflectionTest.class.getClassLoader());
-    testIsInterruptible(cache);
+    cache = new ClassInfoCacheReflection();
+    ((ClassInfoCacheReflection) cache).setClassLoader(getClass().getClassLoader());
   }
 }

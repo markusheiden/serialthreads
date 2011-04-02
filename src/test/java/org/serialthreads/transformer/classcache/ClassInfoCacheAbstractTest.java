@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.junit.Test;
 import org.objectweb.asm.Type;
 
 import java.util.Map;
@@ -12,7 +13,10 @@ import static org.junit.Assert.assertFalse;
  */
 public abstract class ClassInfoCacheAbstractTest
 {
-  protected void testIsInterruptible(IClassInfoCache cache)
+  protected IClassInfoCache cache;
+
+  @Test
+  public void testIsInterruptible()
   {
     String mapName = Type.getType(Map.class).getInternalName();
     String sortedMapName = Type.getType(SortedMap.class).getInternalName();

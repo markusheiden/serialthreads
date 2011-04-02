@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -7,10 +8,9 @@ import org.junit.Test;
  */
 public class ClassInfoCacheASMTest extends ClassInfoCacheAbstractTest
 {
-  @Test
-  public void testIsInterruptible()
+  @Before
+  public void setUp()
   {
-    ClassInfoCacheASM cache = new ClassInfoCacheASM(ClassInfoCacheASMTest.class.getClassLoader());
-    testIsInterruptible(cache);
+    cache = new ClassInfoCacheASM(ClassInfoCacheASMTest.class.getClassLoader());
   }
 }
