@@ -23,6 +23,8 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 /**
  * Byte code enhancement agent.
  * Does the same as {@link TransformingClassLoader}.
+ *
+ * TODO mh: Do not throw exception in case of transforming problems, because otherwise the vm disables the transformer
  */
 public class Agent implements ClassFileTransformer
 {
