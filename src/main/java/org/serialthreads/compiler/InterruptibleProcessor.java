@@ -1,28 +1,33 @@
 package org.serialthreads.compiler;
 
+import org.apache.log4j.Logger;
+import org.serialthreads.Interruptible;
+
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic.Kind;
 import java.util.Set;
 
 /**
- * Checks {@link org.serialthreads.Interruptible} annotation.
+ * Checks {@link org.serialthreads.Interruptible} annotations.
  */
 @SupportedAnnotationTypes("org.serialthreads.Interruptible")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class InterruptibleProcessor extends AbstractProcessor
 {
   @Override
-  public boolean process(Set<? extends TypeElement> typeElements, RoundEnvironment roundEnvironment)
+  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
   {
-    if (typeElements != null)
+    for (TypeElement annotation : annotations)
     {
-      for (TypeElement typeElement : typeElements)
+      for (Element element : roundEnv.getElementsAnnotatedWith(annotation))
       {
-        System.out.println(typeElement.getClass().getName());
+        processingEnv.getMessager().printMessage(Kind.WARNING, element.getSimpleName() + " is interruptible", element);
       }
     }
 
