@@ -30,16 +30,13 @@ public class InterruptibleProcessor extends AbstractProcessor
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
   {
-    for (TypeElement annotation : annotations)
+    for (Element element : roundEnv.getElementsAnnotatedWith(Interruptible.class))
     {
-      for (Element element : roundEnv.getElementsAnnotatedWith(annotation))
+      // It had to be a method, because the targets of @Interruptible can only be methods,
+      // but to be sure we are checking per instanceof here.
+      if (element instanceof ExecutableElement)
       {
-        // It had to be a method, because the targets of @Interruptible can only be methods,
-        // but to be sure we are checking per instanceof here.
-        if (element instanceof ExecutableElement)
-        {
-          check((ExecutableElement) element);
-        }
+        check((ExecutableElement) element);
       }
     }
 
@@ -47,7 +44,7 @@ public class InterruptibleProcessor extends AbstractProcessor
   }
 
   /**
-   * Check if interruptible method overrides an interruptible method, if it overrides something.
+   * Check that an interruptible method overrides another interruptible method, if it overrides anything.
    *
    * @param overrider Method to check, whether it overrides something
    */
