@@ -1,10 +1,8 @@
 package org.serialthreads.compiler;
 
-import org.apache.log4j.Logger;
 import org.serialthreads.Interruptible;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -12,7 +10,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -58,26 +55,41 @@ public class InterruptibleProcessor extends AbstractProcessor
     processingEnv.getMessager().printMessage(Kind.WARNING,
       type.getQualifiedName() + "#" + overrider.getSimpleName() + " is interruptible", overrider);
 
-    List<? extends TypeMirror> superTypes = types.directSupertypes(type.asType());
-    for (TypeMirror superType : superTypes)
+    for (TypeMirror superType : types.directSupertypes(type.asType()))
     {
-      TypeElement superElement = (TypeElement) types.asElement(superType);
-      for (Element overridden : elements.getAllMembers(superElement))
+      TypeElement overriddenType = (TypeElement) types.asElement(superType);
+      for (Element overridden : elements.getAllMembers(overriddenType))
       {
-        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, type))
+        if (overridden instanceof ExecutableElement)
         {
-          try
-          {
-            processingEnv.getMessager().printMessage(Kind.WARNING,
-              type.getQualifiedName() + "#" + overrider.getSimpleName() + " overrides " +
-              superElement.getQualifiedName() + "#" +  overridden.getSimpleName(),
-              overrider);
-          }
-          catch (Exception e)
-          {
-            processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage(), overrider);
-          }
+          check(type, overrider, overriddenType, (ExecutableElement) overridden);
         }
+      }
+    }
+  }
+
+  /**
+   * Check that an interruptible method overrides another interruptible method, if it overrides anything.
+   *
+   * @param overriderType Class of overriding method
+   * @param overrider Overriding method
+   * @param overriddenType Class of potentially overridden method
+   * @param overridden Potentially overridden method
+   */
+  private void check(TypeElement overriderType, ExecutableElement overrider, TypeElement overriddenType, ExecutableElement overridden)
+  {
+    if (processingEnv.getElementUtils().overrides(overrider, overridden, overriderType))
+    {
+      try
+      {
+        processingEnv.getMessager().printMessage(Kind.WARNING,
+          overriderType.getQualifiedName() + "#" + overrider.getSimpleName() + " overrides " +
+          overriddenType.getQualifiedName() + "#" +  overridden.getSimpleName(),
+          overrider);
+      }
+      catch (Exception e)
+      {
+        processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage(), overrider);
       }
     }
   }
