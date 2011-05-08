@@ -59,23 +59,21 @@ public class InterruptibleProcessor extends AbstractProcessor
     TypeElement type = (TypeElement) overrider.getEnclosingElement();
 
     processingEnv.getMessager().printMessage(Kind.WARNING,
-      type.getQualifiedName() + ":" + overrider.getSimpleName() + " is interruptible", overrider);
+      type.getQualifiedName() + "#" + overrider.getSimpleName() + " is interruptible", overrider);
 
     List<? extends TypeMirror> superTypes = types.directSupertypes(type.asType());
     for (TypeMirror superType : superTypes)
     {
       TypeElement superElement = (TypeElement) types.asElement(superType);
-      List<? extends Element> members = elements.getAllMembers(superElement);
-      for (Element overridden : members)
+      for (Element overridden : elements.getAllMembers(superElement))
       {
         if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, type))
         {
           try
           {
             processingEnv.getMessager().printMessage(Kind.WARNING,
-              type.getQualifiedName() + ":" + overrider.getSimpleName() + "/" +
-              superElement.getQualifiedName() + ":" +  overridden.getSimpleName() +
-              " -> " + elements.overrides(overrider, (ExecutableElement) overridden, type),
+              type.getQualifiedName() + "#" + overrider.getSimpleName() + " overrides " +
+              superElement.getQualifiedName() + "#" +  overridden.getSimpleName(),
               overrider);
           }
           catch (Exception e)
