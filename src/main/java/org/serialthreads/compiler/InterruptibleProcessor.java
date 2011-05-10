@@ -90,12 +90,18 @@ public class InterruptibleProcessor extends AbstractProcessor
           {
             boolean overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
 
-            if (interruptible != overriddenInterruptible)
+            if (interruptible && !overriddenInterruptible)
             {
               processingEnv.getMessager().printMessage(Kind.WARNING,
-                type.getQualifiedName() + "#" + overrider.getSimpleName() + " overrides " +
-                overriddenType.getQualifiedName() + "#" +  overridden.getSimpleName() + ", " +
-                "but their interruptible status does not match",
+                "Method " + overrider + " may not be interruptible, because the overridden method " +
+                overriddenType.getQualifiedName() + "#" +  overridden + " is not interruptible",
+                overrider);
+            }
+            else if (!interruptible && overriddenInterruptible)
+            {
+              processingEnv.getMessager().printMessage(Kind.WARNING,
+                "Method " + overrider + " should be interruptible, because the overridden method " +
+                overriddenType.getQualifiedName() + "#" +  overridden + " is interruptible",
                 overrider);
             }
             break;
