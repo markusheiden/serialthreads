@@ -12,6 +12,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementScanner6;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
@@ -19,72 +20,57 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Checks {@link org.serialthreads.Interruptible} annotations.
+ * Checks correct usage of {@link org.serialthreads.Interruptible} annotations.
  */
-@SupportedAnnotationTypes("*")
+@SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class InterruptibleProcessor extends AbstractProcessor
 {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
   {
+    Scanner scanner = new Scanner();
     for (Element root : roundEnv.getRootElements())
     {
-      if (root instanceof TypeElement)
-      {
-        check((TypeElement) root);
-      }
-      else
-      {
-        processingEnv.getMessager().printMessage(Kind.WARNING, root.getSimpleName()  + " is not a type", root);
-      }
+      root.accept(scanner, null);
     }
 
+    // Most annotations are not ours, so we do not claim them
     return false;
   }
 
   /**
-   * Check a type that its interruptible methods override interruptible methods, if they overrides anything.
-   *
-   * @param type Type to check
+   * Inner visitor class for scanning types.
    */
-  private void check(TypeElement type)
+  private class Scanner extends ElementScanner6<Void, Void>
   {
-    for (Element enclosed : type.getEnclosedElements())
+    @Override
+    public Void visitExecutable(ExecutableElement executableElement, Void dummy)
     {
-      if (enclosed instanceof TypeElement)
-      {
-        check((TypeElement) enclosed);
-      }
-      else if (enclosed instanceof ExecutableElement)
-      {
-        check(type, (ExecutableElement) enclosed);
-      }
-      else if (!(enclosed instanceof VariableElement))
-      {
-        processingEnv.getMessager().printMessage(Kind.WARNING, enclosed.getSimpleName()  + " is neither a method nor a field", enclosed);
-      }
+      check(executableElement);
+      return null;
     }
   }
 
   /**
    * Check that an interruptible method overrides another interruptible method, if it overrides anything.
    *
-   * @param type Class containing the method
    * @param overrider Method to check, whether it overrides something
    */
-  private void check(TypeElement type, ExecutableElement overrider)
+  private void check(ExecutableElement overrider)
   {
     Types types = processingEnv.getTypeUtils();
     Elements elements = processingEnv.getElementUtils();
 
     boolean interruptible = overrider.getAnnotation(Interruptible.class) != null;
-    for (TypeMirror superType : types.directSupertypes(type.asType()))
+
+    TypeElement overriderType = (TypeElement) overrider.getEnclosingElement();
+    for (TypeMirror superType : types.directSupertypes(overriderType.asType()))
     {
       TypeElement overriddenType = (TypeElement) types.asElement(superType);
       for (Element overridden : elements.getAllMembers(overriddenType))
       {
-        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, type))
+        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, overriderType))
         {
           boolean overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
 
