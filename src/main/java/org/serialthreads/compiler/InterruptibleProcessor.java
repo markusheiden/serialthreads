@@ -84,28 +84,25 @@ public class InterruptibleProcessor extends AbstractProcessor
       TypeElement overriddenType = (TypeElement) types.asElement(superType);
       for (Element overridden : elements.getAllMembers(overriddenType))
       {
-        if (overridden instanceof ExecutableElement)
+        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, type))
         {
-          if (elements.overrides(overrider, (ExecutableElement) overridden, type))
-          {
-            boolean overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
+          boolean overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
 
-            if (interruptible && !overriddenInterruptible)
-            {
-              processingEnv.getMessager().printMessage(Kind.WARNING,
-                "Method " + overrider + " may not be interruptible, because the overridden method " +
-                overriddenType.getQualifiedName() + "#" +  overridden + " is not interruptible",
-                overrider);
-            }
-            else if (!interruptible && overriddenInterruptible)
-            {
-              processingEnv.getMessager().printMessage(Kind.WARNING,
-                "Method " + overrider + " should be interruptible, because the overridden method " +
-                overriddenType.getQualifiedName() + "#" +  overridden + " is interruptible",
-                overrider);
-            }
-            break;
+          if (interruptible && !overriddenInterruptible)
+          {
+            processingEnv.getMessager().printMessage(Kind.WARNING,
+              "Method " + overrider + " may not be interruptible, because the overridden method in " +
+              overriddenType.getQualifiedName() + " is not interruptible",
+              overrider);
           }
+          else if (!interruptible && overriddenInterruptible)
+          {
+            processingEnv.getMessager().printMessage(Kind.WARNING,
+              "Method " + overrider + " should be interruptible, because the overridden method in " +
+              overriddenType.getQualifiedName() + " is interruptible",
+              overrider);
+          }
+          break;
         }
       }
     }
