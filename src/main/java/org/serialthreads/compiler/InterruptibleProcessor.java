@@ -45,10 +45,10 @@ public class InterruptibleProcessor extends AbstractProcessor
   private class Scanner extends ElementScanner6<Void, Void>
   {
     @Override
-    public Void visitExecutable(ExecutableElement executableElement, Void dummy)
+    public Void visitExecutable(ExecutableElement element, Void dummy)
     {
-      check(executableElement);
-      return null;
+      check(element);
+      return super.visitExecutable(element, dummy);
     }
   }
 
@@ -76,14 +76,14 @@ public class InterruptibleProcessor extends AbstractProcessor
 
           if (interruptible && !overriddenInterruptible)
           {
-            processingEnv.getMessager().printMessage(Kind.WARNING,
+            processingEnv.getMessager().printMessage(Kind.ERROR,
               "Method " + overrider + " may not be interruptible, because the overridden method in " +
               overriddenType.getQualifiedName() + " is not interruptible",
               overrider);
           }
           else if (!interruptible && overriddenInterruptible)
           {
-            processingEnv.getMessager().printMessage(Kind.WARNING,
+            processingEnv.getMessager().printMessage(Kind.ERROR,
               "Method " + overrider + " should be interruptible, because the overridden method in " +
               overriddenType.getQualifiedName() + " is interruptible",
               overrider);
