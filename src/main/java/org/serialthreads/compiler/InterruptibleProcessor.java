@@ -76,14 +76,14 @@ public class InterruptibleProcessor extends AbstractProcessor
 
           if (interruptible && !overriddenInterruptible)
           {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            processingEnv.getMessager().printMessage(Kind.WARNING,
               "Method " + overrider + " may not be interruptible, because the overridden method in " +
               overriddenType.getQualifiedName() + " is not interruptible",
               overrider);
           }
           else if (!interruptible && overriddenInterruptible)
           {
-            processingEnv.getMessager().printMessage(Kind.ERROR,
+            processingEnv.getMessager().printMessage(Kind.WARNING,
               "Method " + overrider + " should be interruptible, because the overridden method in " +
               overriddenType.getQualifiedName() + " is interruptible",
               overrider);
