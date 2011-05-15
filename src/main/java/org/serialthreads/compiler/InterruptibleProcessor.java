@@ -47,7 +47,14 @@ public class InterruptibleProcessor extends AbstractProcessor
     @Override
     public Void visitExecutable(ExecutableElement element, Void dummy)
     {
-      check(element);
+      try
+      {
+        check(element);
+      }
+      catch (RuntimeException e)
+      {
+        processingEnv.getMessager().printMessage(Kind.WARNING, e.getMessage());
+      }
       return super.visitExecutable(element, dummy);
     }
   }
@@ -76,14 +83,14 @@ public class InterruptibleProcessor extends AbstractProcessor
 
           if (interruptible && !overriddenInterruptible)
           {
-            processingEnv.getMessager().printMessage(Kind.WARNING,
+            processingEnv.getMessager().printMessage(Kind.NOTE,
               "Method " + overrider + " may not be interruptible, because the overridden method in " +
               overriddenType.getQualifiedName() + " is not interruptible",
               overrider);
           }
           else if (!interruptible && overriddenInterruptible)
           {
-            processingEnv.getMessager().printMessage(Kind.WARNING,
+            processingEnv.getMessager().printMessage(Kind.NOTE,
               "Method " + overrider + " should be interruptible, because the overridden method in " +
               overriddenType.getQualifiedName() + " is interruptible",
               overrider);
