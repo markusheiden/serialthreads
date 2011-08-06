@@ -3,7 +3,6 @@ package org.serialthreads.transformer.analyzer;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
-import org.objectweb.asm.tree.analysis.Value;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.HashSet;
@@ -71,7 +70,7 @@ public class ExtendedVerifier extends SimpleVerifier
   }
 
   @Override
-  public BasicValue merge(Value v, Value w)
+  public BasicValue merge(BasicValue v, BasicValue w)
   {
     assert v != null : "Precondition: v != null";
     assert w != null : "Precondition: w != null";
@@ -99,7 +98,7 @@ public class ExtendedVerifier extends SimpleVerifier
       Set<Integer> mergedLocals = new HashSet<Integer>(ev.getLocals());
       mergedLocals.retainAll(ew.getLocals());
 
-      return isConstant ?
+      return isConstant?
         constantInLocals(result.getType(), ev.getConstant(), mergedLocals) :
         valueInLocals(result.getType(), mergedLocals);
     }
