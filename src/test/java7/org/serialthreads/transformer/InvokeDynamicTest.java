@@ -3,25 +3,25 @@ package org.serialthreads.transformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.ASMifierClassVisitor;
 
-import java.dyn.CallSite;
-import java.dyn.ConstantCallSite;
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.invoke.CallSite;
+import java.lang.invoke.ConstantCallSite;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 /**
  * Test of invoke dynamic.
  */
 public class InvokeDynamicTest
 {
-/*
-  static
-  {
-    Linkage.registerBootstrapMethod("bootstrap");
-  }
-*/
+  /*
+    static
+    {
+      Linkage.registerBootstrapMethod("bootstrap");
+    }
+  */
   public static void main(String[] args)
   {
     try
@@ -45,8 +45,9 @@ public class InvokeDynamicTest
       MethodHandle handle1b = handle1a.bindTo(new Callee("callee1b"));
       handle1b.invokeExact("?");
       MethodHandle handle2 = MethodHandles.lookup().bind(new Callee("callee2"), "run1", MethodType.methodType(void.class, String.class));
-      handle2.invokeGeneric("!");
+      handle2.invoke("!");
       handle2.invokeExact("!!");
+      handle2.invokeWithArguments("!!!");
     }
     catch (Throwable throwable)
     {
