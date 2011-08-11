@@ -1,7 +1,5 @@
 package org.serialthreads.transformer;
 
-import org.junit.Test;
-import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**

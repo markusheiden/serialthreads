@@ -1,7 +1,7 @@
 package org.serialthreads.transformer.analyzer;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.analysis.BasicValue;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.analysis.BasicValue;
 
 import java.util.Collections;
 import java.util.HashSet;

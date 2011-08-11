@@ -1,8 +1,8 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.junit.Test;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.analysis.Value;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.analysis.Value;
 
 import java.util.Arrays;
 import java.util.HashSet;

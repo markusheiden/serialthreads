@@ -1,10 +1,8 @@
 package org.serialthreads.transformer.classcache;
 
 import org.junit.Test;
-import org.objectweb.asm.Type;
+import org.ow2.asm.Type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 

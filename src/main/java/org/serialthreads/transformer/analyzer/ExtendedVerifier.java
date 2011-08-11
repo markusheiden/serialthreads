@@ -1,15 +1,15 @@
 package org.serialthreads.transformer.analyzer;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.SimpleVerifier;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.SimpleVerifier;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
+import static org.ow2.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.constantInLocals;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocals;
 

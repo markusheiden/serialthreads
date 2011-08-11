@@ -1,6 +1,6 @@
 package org.serialthreads.transformer;
 
-import org.objectweb.asm.tree.ClassNode;
+import org.ow2.asm.tree.ClassNode;
 
 /**
  * Byte code transformer.

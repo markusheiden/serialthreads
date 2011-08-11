@@ -1,26 +1,26 @@
 package org.serialthreads.transformer;
 
 import org.apache.log4j.Logger;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TableSwitchInsnNode;
-import org.objectweb.asm.tree.TryCatchBlockNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.FieldNode;
+import org.ow2.asm.tree.InsnList;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.JumpInsnNode;
+import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.LdcInsnNode;
+import org.ow2.asm.tree.MethodInsnNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.TableSwitchInsnNode;
+import org.ow2.asm.tree.TryCatchBlockNode;
+import org.ow2.asm.tree.TypeInsnNode;
+import org.ow2.asm.tree.VarInsnNode;
+import org.ow2.asm.tree.analysis.AnalyzerException;
+import org.ow2.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.Frame;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.ITransformedRunnable;
 import org.serialthreads.context.SerialThread;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.ow2.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
@@ -247,7 +247,7 @@ public abstract class AbstractTransformer implements ITransformer
    * @param clazz owner of method
    * @param method method
    * @return frames
-   * @throws AnalyzerException
+   * @exception AnalyzerException
    */
   protected Frame[] analyze(ClassNode clazz, MethodNode method) throws AnalyzerException
   {
@@ -410,7 +410,7 @@ public abstract class AbstractTransformer implements ITransformer
 
   /**
    * Extract return instructions.
-   *
+   * <p/>
    * TODO 2009-11-20 mh: extract
    *
    * @param instructions instructions
@@ -418,7 +418,7 @@ public abstract class AbstractTransformer implements ITransformer
   protected List<AbstractInsnNode> returnInstructions(InsnList instructions)
   {
     List<AbstractInsnNode> result = new ArrayList<AbstractInsnNode>();
-    for (Iterator<AbstractInsnNode> iter = instructions.iterator(); iter.hasNext();)
+    for (Iterator<AbstractInsnNode> iter = instructions.iterator(); iter.hasNext(); )
     {
       AbstractInsnNode instruction = iter.next();
       if (instruction.getOpcode() == Opcodes.RETURN)
@@ -474,7 +474,7 @@ public abstract class AbstractTransformer implements ITransformer
    */
   protected InsnList createRestoreCode(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
   {
-    return isInterrupt(methodCall, classInfoCache) ?
+    return isInterrupt(methodCall, classInfoCache)?
       createRestoreCodeForInterrupt(method, methodCall, frameAfter) :
       createRestoreCodeForMethod(method, frameBefore, methodCall, frameAfter);
   }
@@ -641,7 +641,7 @@ public abstract class AbstractTransformer implements ITransformer
     // save stack
     // the topmost element is a dummy return value, if the called method returns one
     int[] stackIndexes = stackIndexes(frame);
-    for (int stack = isCallNotVoid ? frame.getStackSize() - 2 : frame.getStackSize() - 1; stack >= 0; stack--)
+    for (int stack = isCallNotVoid? frame.getStackSize() - 2 : frame.getStackSize() - 1; stack >= 0; stack--)
     {
       ExtendedValue value = (ExtendedValue) frame.getStack(stack);
       if (value.isConstant() || value.isHoldInLocal())
@@ -661,7 +661,7 @@ public abstract class AbstractTransformer implements ITransformer
       List<Integer> pushLocals = new ArrayList<Integer>(frame.getLocals());
 
       // do not store local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic ? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
+      for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
       {
         BasicValue value = (BasicValue) frame.getLocal(local);
         if (code.isResponsibleFor(value.getType()))
@@ -867,7 +867,7 @@ public abstract class AbstractTransformer implements ITransformer
       InsnList copyLocals = new InsnList();
 
       // do not restore local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic ? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
+      for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
       {
         BasicValue value = (BasicValue) frame.getLocal(local);
         if (code.isResponsibleFor(value.getType()))
@@ -925,7 +925,7 @@ public abstract class AbstractTransformer implements ITransformer
     // restore stack
     // the topmost element is a dummy return value, if the called method is not a void method
     int[] stackIndexes = stackIndexes(frame);
-    for (int stack = 0, end = isCallNotVoid ? frame.getStackSize() - 1 : frame.getStackSize(); stack < end; stack++)
+    for (int stack = 0, end = isCallNotVoid? frame.getStackSize() - 1 : frame.getStackSize(); stack < end; stack++)
     {
       ExtendedValue value = (ExtendedValue) frame.getStack(stack);
       if (value.isConstant())
@@ -1158,12 +1158,12 @@ public abstract class AbstractTransformer implements ITransformer
     for (int i = 0; i < frame.getLocals(); i++)
     {
       BasicValue local = (BasicValue) frame.getLocal(i);
-      log.debug("        Local " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local));
+      log.debug("        Local " + i + ": " + (local.isReference()? local.getType().getDescriptor() : local));
     }
     for (int i = 0; i < frame.getStackSize(); i++)
     {
       BasicValue stack = (BasicValue) frame.getStack(i);
-      log.debug("        Stack " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack));
+      log.debug("        Stack " + i + ": " + (stack.isReference()? stack.getType().getDescriptor() : stack));
     }
   }
 }

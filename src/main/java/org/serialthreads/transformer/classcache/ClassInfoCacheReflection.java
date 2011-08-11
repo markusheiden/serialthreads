@@ -1,7 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.Type;
 import org.serialthreads.transformer.NotTransformableException;
 
 import java.io.IOException;

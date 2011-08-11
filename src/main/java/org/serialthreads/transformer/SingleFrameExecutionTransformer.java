@@ -1,16 +1,16 @@
 package org.serialthreads.transformer;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.FieldInsnNode;
+import org.ow2.asm.tree.InsnList;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.JumpInsnNode;
+import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.MethodInsnNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.VarInsnNode;
+import org.ow2.asm.tree.analysis.AnalyzerException;
+import org.ow2.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.ow2.asm.Opcodes.ACC_PRIVATE;
+import static org.ow2.asm.Opcodes.ALOAD;
+import static org.ow2.asm.Opcodes.ASTORE;
+import static org.ow2.asm.Opcodes.GETFIELD;
+import static org.ow2.asm.Opcodes.ICONST_0;
+import static org.ow2.asm.Opcodes.IFEQ;
+import static org.ow2.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
@@ -186,7 +186,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
 
     if (log.isDebugEnabled())
     {
-      String kind = isAbstract(method) ? "abstract" : "concrete";
+      String kind = isAbstract(method)? "abstract" : "concrete";
       log.debug("      Copied " + kind + " method " + methodName(clazz, copy));
     }
 
@@ -381,7 +381,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
       log.debug("    Creating restore handler for copied method");
     }
 
-    int local = isNotStatic(method) ? 1 : 0;
+    int local = isNotStatic(method)? 1 : 0;
     final int paramThread = local++;
     final int paramPreviousFrame = local++;
     final int localThread = method.maxLocals;

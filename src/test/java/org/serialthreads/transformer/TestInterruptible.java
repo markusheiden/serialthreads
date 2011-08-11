@@ -5,8 +5,6 @@ import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
 
-import java.lang.reflect.Field;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -93,7 +91,7 @@ public class TestInterruptible implements IRunnable
   {
     i++;
     SerialThreadManager.interrupt();
-    i+=3;
+    i += 3;
     SerialThreadManager.interrupt();
     return i;
   }

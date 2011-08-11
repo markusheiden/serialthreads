@@ -1,10 +1,10 @@
 package org.serialthreads.transformer;
 
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.IincInsnNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.IincInsnNode;
+import org.ow2.asm.tree.LocalVariableNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.VarInsnNode;
 
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +25,7 @@ public class LocalVariablesShifter
   public static void shift(int point, int shift, MethodNode method)
   {
     // adopt instructions
-    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext();)
+    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext(); )
     {
       AbstractInsnNode instruction = iter.next();
       if (instruction instanceof VarInsnNode)
@@ -41,9 +41,10 @@ public class LocalVariablesShifter
     }
 
     // adopt local variable debug info
-      for (LocalVariableNode local : (List<LocalVariableNode>) method.localVariables) {
-          local.index = remap(point, shift, local.index);
-      }
+    for (LocalVariableNode local : (List<LocalVariableNode>) method.localVariables)
+    {
+      local.index = remap(point, shift, local.index);
+    }
 
     // fix max locals
     method.maxLocals += shift;
@@ -59,6 +60,6 @@ public class LocalVariablesShifter
    */
   protected static int remap(int point, int shift, int local)
   {
-    return local < point ? local : local + shift;
+    return local < point? local : local + shift;
   }
 }

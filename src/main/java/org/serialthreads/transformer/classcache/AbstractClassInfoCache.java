@@ -1,11 +1,11 @@
 package org.serialthreads.transformer.classcache;
 
 import org.apache.log4j.Logger;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.MethodInsnNode;
+import org.ow2.asm.tree.MethodNode;
 import org.serialthreads.transformer.NotTransformableException;
 
 import java.io.IOException;
@@ -15,9 +15,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.objectweb.asm.ClassReader.SKIP_CODE;
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import static org.ow2.asm.ClassReader.SKIP_CODE;
+import static org.ow2.asm.ClassReader.SKIP_DEBUG;
+import static org.ow2.asm.ClassReader.SKIP_FRAMES;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -49,7 +49,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     assert className != null : "Precondition: className != null";
 
     String superClassName = getClassInfo(className).getSuperClassName();
-    return superClassName == null ? null : Type.getObjectType(superClassName);
+    return superClassName == null? null : Type.getObjectType(superClassName);
   }
 
   public boolean hasSuperClass(String className, String superClassName)
@@ -111,7 +111,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     boolean result = classInfo.isExecutor(name + desc);
     if (logger.isDebugEnabled())
     {
-      logger.debug(methodName(owner, name, desc) + " is " + (result ? "an" : "no") + " executor");
+      logger.debug(methodName(owner, name, desc) + " is " + (result? "an" : "no") + " executor");
     }
 
     return result;
@@ -139,7 +139,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     boolean result = classInfo.isInterruptible(name + desc);
     if (logger.isDebugEnabled())
     {
-      logger.debug(methodName(owner, name, desc) + " is" + (result ? " " : " not ") + "interruptible");
+      logger.debug(methodName(owner, name, desc) + " is" + (result? " " : " not ") + "interruptible");
     }
 
     return result;
@@ -162,7 +162,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     boolean result = classInfo.isInterrupt(name + desc);
     if (logger.isDebugEnabled())
     {
-      logger.debug(methodName(owner, name, desc) + " is " + (result ? "an" : "no") + " interrupt");
+      logger.debug(methodName(owner, name, desc) + " is " + (result? "an" : "no") + " interrupt");
     }
 
     return result;

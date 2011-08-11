@@ -1,9 +1,9 @@
 package org.serialthreads.transformer.classcache;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.EmptyVisitor;
+import org.ow2.asm.AnnotationVisitor;
+import org.ow2.asm.MethodVisitor;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.commons.EmptyVisitor;
 
 import java.util.HashSet;
 import java.util.Map;

@@ -1,10 +1,10 @@
 package org.serialthreads.agent;
 
 import org.apache.log4j.Logger;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.util.TraceClassVisitor;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.ClassVisitor;
+import org.ow2.asm.ClassWriter;
+import org.ow2.asm.util.TraceClassVisitor;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -18,10 +18,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+import static org.ow2.asm.ClassReader.SKIP_DEBUG;
+import static org.ow2.asm.ClassReader.SKIP_FRAMES;
+import static org.ow2.asm.ClassWriter.COMPUTE_FRAMES;
+import static org.ow2.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * ClassLoader which applies a transformer to the loaded classes.
@@ -63,7 +63,7 @@ public class TransformingClassLoader extends ClassLoader
 
   /**
    * {@inheritDoc}
-   *
+   * <p/>
    * Tries to transform class first, if possible.
    */
   protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
@@ -120,7 +120,7 @@ public class TransformingClassLoader extends ClassLoader
    *
    * @param name name of class
    * @return byte code or null, if class file does not exist
-   * @throws IOException in case of IO exception while reading the class file
+   * @exception IOException in case of IO exception while reading the class file
    */
   private byte[] loadByteCode(String name) throws IOException
   {
@@ -138,7 +138,7 @@ public class TransformingClassLoader extends ClassLoader
     try
     {
       byte[] buffer = new byte[16384];
-      for (int bytesRead; (bytesRead = in.read(buffer)) != -1;)
+      for (int bytesRead; (bytesRead = in.read(buffer)) != -1; )
       {
         out.write(buffer, 0, bytesRead);
       }

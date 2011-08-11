@@ -1,13 +1,13 @@
 package org.serialthreads.transformer;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.Analyzer;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.SimpleVerifier;
-import org.objectweb.asm.util.TraceMethodVisitor;
+import org.ow2.asm.Label;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.analysis.Analyzer;
+import org.ow2.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.Frame;
+import org.ow2.asm.tree.analysis.SimpleVerifier;
+import org.ow2.asm.util.TraceMethodVisitor;
 import org.serialthreads.transformer.code.MethodCode;
 
 import java.io.PrintWriter;
@@ -107,13 +107,13 @@ public class Debugger extends TraceMethodVisitor
         BasicValue local = (BasicValue) frame.getLocal(i);
         if (local != BasicValue.UNINITIALIZED_VALUE)
         {
-          frameText.add(tab3 + "Local: " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local) + "\n");
+          frameText.add(tab3 + "Local: " + i + ": " + (local.isReference()? local.getType().getDescriptor() : local) + "\n");
         }
       }
       for (int i = 0; i < frame.getStackSize(); i++)
       {
         BasicValue stack = (BasicValue) frame.getStack(i);
-        frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack) + "\n");
+        frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference()? stack.getType().getDescriptor() : stack) + "\n");
       }
 
       text.addAll(lastSize, frameText);

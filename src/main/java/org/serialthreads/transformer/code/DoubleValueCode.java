@@ -1,17 +1,17 @@
 package org.serialthreads.transformer.code;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.LdcInsnNode;
 
-import static org.objectweb.asm.Opcodes.DALOAD;
-import static org.objectweb.asm.Opcodes.DASTORE;
-import static org.objectweb.asm.Opcodes.DCONST_0;
-import static org.objectweb.asm.Opcodes.DCONST_1;
-import static org.objectweb.asm.Opcodes.DLOAD;
-import static org.objectweb.asm.Opcodes.DRETURN;
-import static org.objectweb.asm.Opcodes.DSTORE;
+import static org.ow2.asm.Opcodes.DALOAD;
+import static org.ow2.asm.Opcodes.DASTORE;
+import static org.ow2.asm.Opcodes.DCONST_0;
+import static org.ow2.asm.Opcodes.DCONST_1;
+import static org.ow2.asm.Opcodes.DLOAD;
+import static org.ow2.asm.Opcodes.DRETURN;
+import static org.ow2.asm.Opcodes.DSTORE;
 
 /**
  * Code for double values.

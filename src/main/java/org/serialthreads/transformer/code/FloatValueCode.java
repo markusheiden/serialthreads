@@ -1,17 +1,17 @@
 package org.serialthreads.transformer.code;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.LdcInsnNode;
 
-import static org.objectweb.asm.Opcodes.FALOAD;
-import static org.objectweb.asm.Opcodes.FASTORE;
-import static org.objectweb.asm.Opcodes.FCONST_0;
-import static org.objectweb.asm.Opcodes.FCONST_1;
-import static org.objectweb.asm.Opcodes.FLOAD;
-import static org.objectweb.asm.Opcodes.FRETURN;
-import static org.objectweb.asm.Opcodes.FSTORE;
+import static org.ow2.asm.Opcodes.FALOAD;
+import static org.ow2.asm.Opcodes.FASTORE;
+import static org.ow2.asm.Opcodes.FCONST_0;
+import static org.ow2.asm.Opcodes.FCONST_1;
+import static org.ow2.asm.Opcodes.FLOAD;
+import static org.ow2.asm.Opcodes.FRETURN;
+import static org.ow2.asm.Opcodes.FSTORE;
 
 /**
  * Code for float values.

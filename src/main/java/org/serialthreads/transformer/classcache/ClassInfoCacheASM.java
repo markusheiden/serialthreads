@@ -1,6 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
-import org.objectweb.asm.ClassReader;
+import org.ow2.asm.ClassReader;
 
 import java.io.IOException;
 import java.io.InputStream;

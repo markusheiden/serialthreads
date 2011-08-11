@@ -1,9 +1,9 @@
 package org.serialthreads.agent;
 
 import org.apache.log4j.Logger;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.ClassVisitor;
+import org.ow2.asm.ClassWriter;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -17,13 +17,13 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
-import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+import static org.ow2.asm.ClassWriter.COMPUTE_FRAMES;
+import static org.ow2.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * Byte code enhancement agent.
  * Does the same as {@link TransformingClassLoader}.
- *
+ * <p/>
  * TODO mh: Do not throw exception in case of transforming problems, because otherwise the vm disables the transformer
  */
 public class Agent implements ClassFileTransformer
@@ -56,7 +56,7 @@ public class Agent implements ClassFileTransformer
     boolean failure = true;
     try
     {
-      _logger.info("Transforming class " + className + (classBeingRedefined != null ? " (redefining)" : " (initial)"));
+      _logger.info("Transforming class " + className + (classBeingRedefined != null? " (redefining)" : " (initial)"));
       _classInfoCache.start(loader, className, classfileBuffer);
 
       ClassReader reader = new ClassReader(classfileBuffer);
@@ -66,7 +66,7 @@ public class Agent implements ClassFileTransformer
       byte[] result = writer.toByteArray();
       failure = false;
 
-      _logger.info("Successfully transformed class " + className + (classBeingRedefined != null ? " (redefining)" : " (initial)"));
+      _logger.info("Successfully transformed class " + className + (classBeingRedefined != null? " (redefining)" : " (initial)"));
       _classInfoCache.stop(className);
 
       return result;

@@ -1,11 +1,12 @@
 package org.serialthreads.transformer;
 
-import org.objectweb.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.BasicValue;
 
 /**
  * Used to calculate maxs sizes.
  */
-public class Maxs {
+public class Maxs
+{
   public int maxStackObjects;
   public int maxStackInts;
   public int maxStackLongs;
@@ -22,18 +23,30 @@ public class Maxs {
    *
    * @param value type of the stack element
    */
-  public void addStack(BasicValue value) {
-    if (value.isReference()) {
+  public void addStack(BasicValue value)
+  {
+    if (value.isReference())
+    {
       maxStackObjects++;
-    } else if (BasicValue.INT_VALUE.equals(value)) {
+    }
+    else if (BasicValue.INT_VALUE.equals(value))
+    {
       maxStackInts++;
-    } else if (BasicValue.LONG_VALUE.equals(value)) {
+    }
+    else if (BasicValue.LONG_VALUE.equals(value))
+    {
       maxStackLongs++;
-    } else if (BasicValue.FLOAT_VALUE.equals(value)) {
+    }
+    else if (BasicValue.FLOAT_VALUE.equals(value))
+    {
       maxStackFloats++;
-    } else if (BasicValue.DOUBLE_VALUE.equals(value)) {
+    }
+    else if (BasicValue.DOUBLE_VALUE.equals(value))
+    {
       maxStackDoubles++;
-    } else {
+    }
+    else
+    {
       throw new NotTransformableException("Unknown type " + value + " in stack detected");
     }
   }
@@ -43,18 +56,30 @@ public class Maxs {
    *
    * @param value type of the local variable
    */
-  public void addLocal(BasicValue value) {
-    if (value.isReference()) {
+  public void addLocal(BasicValue value)
+  {
+    if (value.isReference())
+    {
       maxLocalObjects++;
-    } else if (BasicValue.INT_VALUE.equals(value)) {
+    }
+    else if (BasicValue.INT_VALUE.equals(value))
+    {
       maxLocalInts++;
-    } else if (BasicValue.LONG_VALUE.equals(value)) {
+    }
+    else if (BasicValue.LONG_VALUE.equals(value))
+    {
       maxLocalLongs++;
-    } else if (BasicValue.FLOAT_VALUE.equals(value)) {
+    }
+    else if (BasicValue.FLOAT_VALUE.equals(value))
+    {
       maxLocalFloats++;
-    } else if (BasicValue.DOUBLE_VALUE.equals(value)) {
+    }
+    else if (BasicValue.DOUBLE_VALUE.equals(value))
+    {
       maxLocalDoubles++;
-    } else {
+    }
+    else
+    {
       throw new NotTransformableException("Unknown type " + value + " in local variable detected");
     }
   }
@@ -64,7 +89,8 @@ public class Maxs {
    *
    * @param add maxs to consolidate from
    */
-  public void consolidate(Maxs add) {
+  public void consolidate(Maxs add)
+  {
     maxStackObjects = Math.max(maxStackObjects, add.maxStackObjects);
     maxStackInts = Math.max(maxStackInts, add.maxStackInts);
     maxStackLongs = Math.max(maxStackLongs, add.maxStackLongs);

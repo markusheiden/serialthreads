@@ -1,7 +1,7 @@
 package org.serialthreads.transformer;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.util.ASMifierClassVisitor;
+import org.ow2.asm.ClassReader;
+import org.ow2.asm.util.ASMifierClassVisitor;
 
 import java.io.IOException;
 import java.io.PrintWriter;

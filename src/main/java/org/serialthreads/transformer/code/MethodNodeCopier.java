@@ -1,8 +1,8 @@
 package org.serialthreads.transformer.code;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.ow2.asm.Label;
+import org.ow2.asm.tree.LabelNode;
+import org.ow2.asm.tree.MethodNode;
 
 import java.util.HashMap;
 import java.util.Map;

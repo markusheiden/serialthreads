@@ -1,6 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
-import org.objectweb.asm.Type;
+import org.ow2.asm.Type;
 
 import java.util.Collections;
 import java.util.HashSet;

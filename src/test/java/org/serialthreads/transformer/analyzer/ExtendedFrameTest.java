@@ -1,18 +1,18 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.junit.Test;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.IincInsnNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Interpreter;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.IincInsnNode;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.IntInsnNode;
+import org.ow2.asm.tree.LdcInsnNode;
+import org.ow2.asm.tree.VarInsnNode;
+import org.ow2.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.Interpreter;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqualsValue;
 

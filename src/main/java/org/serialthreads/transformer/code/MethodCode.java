@@ -1,15 +1,15 @@
 package org.serialthreads.transformer.code;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.Value;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.ClassNode;
+import org.ow2.asm.tree.InsnList;
+import org.ow2.asm.tree.InsnNode;
+import org.ow2.asm.tree.MethodInsnNode;
+import org.ow2.asm.tree.MethodNode;
+import org.ow2.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.Frame;
+import org.ow2.asm.tree.analysis.Value;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
@@ -191,7 +191,7 @@ public class MethodCode
    */
   public static int firstParam(MethodNode method)
   {
-    return isNotStatic(method) ? 1 : 0;
+    return isNotStatic(method)? 1 : 0;
   }
 
   /**
@@ -239,7 +239,7 @@ public class MethodCode
   {
     Type[] arguments = Type.getArgumentTypes(method.desc);
     // Condition "l < frame.getLocals()" holds  always, because each argument is stored in a local
-    for (int l = isNotStatic(method) ? 1 : 0, a = 0; a < arguments.length; a++)
+    for (int l = isNotStatic(method)? 1 : 0, a = 0; a < arguments.length; a++)
     {
       BasicValue local = (BasicValue) frame.getLocal(l);
       if (BasicValue.UNINITIALIZED_VALUE.equals(local))

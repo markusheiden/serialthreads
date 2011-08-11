@@ -1,8 +1,8 @@
 package org.serialthreads.transformer.analyzer;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.analysis.Analyzer;
-import org.objectweb.asm.tree.analysis.Frame;
+import org.ow2.asm.Type;
+import org.ow2.asm.tree.analysis.Analyzer;
+import org.ow2.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;

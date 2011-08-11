@@ -1,16 +1,16 @@
 package org.serialthreads.transformer.analyzer;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.IincInsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.Interpreter;
-import org.objectweb.asm.tree.analysis.Value;
+import org.ow2.asm.Opcodes;
+import org.ow2.asm.tree.AbstractInsnNode;
+import org.ow2.asm.tree.IincInsnNode;
+import org.ow2.asm.tree.IntInsnNode;
+import org.ow2.asm.tree.LdcInsnNode;
+import org.ow2.asm.tree.VarInsnNode;
+import org.ow2.asm.tree.analysis.AnalyzerException;
+import org.ow2.asm.tree.analysis.BasicValue;
+import org.ow2.asm.tree.analysis.Frame;
+import org.ow2.asm.tree.analysis.Interpreter;
+import org.ow2.asm.tree.analysis.Value;
 
 import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
@@ -149,7 +149,7 @@ public class ExtendedFrame extends Frame
 
   /**
    * {@inheritDoc}
-   *
+   * <p/>
    * Always uses extended values.
    */
   @Override
@@ -174,7 +174,7 @@ public class ExtendedFrame extends Frame
 
   /**
    * {@inheritDoc}
-   *
+   * <p/>
    * Always uses extended values.
    */
   @Override
