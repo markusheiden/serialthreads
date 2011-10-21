@@ -1,13 +1,14 @@
 package org.serialthreads.transformer;
 
-import org.ow2.asm.Label;
-import org.ow2.asm.tree.ClassNode;
-import org.ow2.asm.tree.MethodNode;
-import org.ow2.asm.tree.analysis.Analyzer;
-import org.ow2.asm.tree.analysis.BasicValue;
-import org.ow2.asm.tree.analysis.Frame;
-import org.ow2.asm.tree.analysis.SimpleVerifier;
-import org.ow2.asm.util.TraceMethodVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
+import org.objectweb.asm.tree.analysis.SimpleVerifier;
+import org.objectweb.asm.util.Textifier;
+import org.objectweb.asm.util.TraceMethodVisitor;
 import org.serialthreads.transformer.code.MethodCode;
 
 import java.io.PrintWriter;
@@ -18,11 +19,8 @@ import java.util.List;
 /**
  * Class to aid debugging of a method's byte code.
  */
-public class Debugger extends TraceMethodVisitor
+public class Debugger
 {
-  private int instruction;
-  private final Frame[] frames;
-
   public static String debug(ClassNode clazz)
   {
     StringBuilder result = new StringBuilder(65536);
@@ -63,227 +61,216 @@ public class Debugger extends TraceMethodVisitor
     }
     Frame[] frames = analyzer.getFrames();
 
-    Debugger debugger = new Debugger(frames);
-    method.accept(debugger);
+    DebugPrinter printer = new DebugPrinter(frames);
+    method.accept(new TraceMethodVisitor(printer));
 
     StringWriter result = new StringWriter(4096);
     result.append("Method ").append(MethodCode.methodName(owner, method.name, method.desc)).append("\n");
     PrintWriter writer = new PrintWriter(result);
-    debugger.print(writer);
+    printer.print(writer);
     writer.flush();
 
     return result.toString();
   }
 
-  public Debugger(Frame[] frames)
+  private static class DebugPrinter extends Textifier
   {
-    this.instruction = 0;
-    this.frames = frames;
-  }
+    private int instruction;
+    private final Frame[] frames;
 
-  private void addByteCodeIndexWithoutFrame(int lastSize)
-  {
-    String index = "000" + Integer.toString(instruction);
-    index = index.substring(index.length() - 4, index.length());
 
-    for (int i = lastSize; i < text.size(); i++)
+    public DebugPrinter(Frame[] frames)
     {
-      String line = (String) text.get(i);
-      text.set(i, index.toUpperCase() + line);
+      this.instruction = 0;
+      this.frames = frames;
     }
 
-    instruction++;
-
-  }
-
-  private void addByteCodeIndex(int lastSize)
-  {
-    Frame frame = frames[instruction];
-    if (frame != null)
+    private void addByteCodeIndexWithoutFrame(int lastSize)
     {
-      List<String> frameText = new ArrayList<String>();
-      for (int i = 0; i < frame.getLocals(); i++)
+      String index = "000" + Integer.toString(instruction);
+      index = index.substring(index.length() - 4, index.length());
+
+      for (int i = lastSize; i < text.size(); i++)
       {
-        BasicValue local = (BasicValue) frame.getLocal(i);
-        if (local != BasicValue.UNINITIALIZED_VALUE)
+        String line = (String) text.get(i);
+        text.set(i, index.toUpperCase() + line);
+      }
+
+      instruction++;
+
+    }
+
+    private void addByteCodeIndex(int lastSize)
+    {
+      Frame frame = frames[instruction];
+      if (frame != null)
+      {
+        List<String> frameText = new ArrayList<String>();
+        for (int i = 0; i < frame.getLocals(); i++)
         {
-          frameText.add(tab3 + "Local: " + i + ": " + (local.isReference()? local.getType().getDescriptor() : local) + "\n");
+          BasicValue local = (BasicValue) frame.getLocal(i);
+          if (local != BasicValue.UNINITIALIZED_VALUE)
+          {
+            frameText.add(tab3 + "Local: " + i + ": " + (local.isReference()? local.getType().getDescriptor() : local) + "\n");
+          }
         }
-      }
-      for (int i = 0; i < frame.getStackSize(); i++)
-      {
-        BasicValue stack = (BasicValue) frame.getStack(i);
-        frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference()? stack.getType().getDescriptor() : stack) + "\n");
+        for (int i = 0; i < frame.getStackSize(); i++)
+        {
+          BasicValue stack = (BasicValue) frame.getStack(i);
+          frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference()? stack.getType().getDescriptor() : stack) + "\n");
+        }
+
+        text.addAll(lastSize, frameText);
       }
 
-      text.addAll(lastSize, frameText);
+      addByteCodeIndexWithoutFrame(lastSize);
     }
 
-    addByteCodeIndexWithoutFrame(lastSize);
-  }
-
-  private void addNoByteCodeIndex(int lastSize)
-  {
-    for (int i = lastSize; i < text.size(); i++)
+    private void addNoByteCodeIndex(int lastSize)
     {
-      String line = (String) text.get(i);
-      text.set(i, "----" + line);
+      for (int i = lastSize; i < text.size(); i++)
+      {
+        String line = (String) text.get(i);
+        text.set(i, "----" + line);
+      }
     }
-  }
 
-  //
-  // instructions
-  //
+    //
+    // instructions
+    //
 
-  @Override
-  public void visitInsn(int opcode)
-  {
-    int lastSize = text.size();
-    super.visitInsn(opcode);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitInsn(int opcode)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitIntInsn(int opcode, int operand)
-  {
-    int lastSize = text.size();
-    super.visitIntInsn(opcode, operand);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitIntInsn(int opcode, int operand)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitVarInsn(int opcode, int var)
-  {
-    int lastSize = text.size();
-    super.visitVarInsn(opcode, var);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitVarInsn(int opcode, int var)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitTypeInsn(int opcode, String type)
-  {
-    int lastSize = text.size();
-    super.visitTypeInsn(opcode, type);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitTypeInsn(int opcode, String type)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitFieldInsn(int opcode, String owner, String name, String desc)
-  {
-    int lastSize = text.size();
-    super.visitFieldInsn(opcode, owner, name, desc);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitFieldInsn(int opcode, String owner, String name, String desc)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitMethodInsn(int opcode, String owner, String name, String desc)
-  {
-    int lastSize = text.size();
-    super.visitMethodInsn(opcode, owner, name, desc);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitMethodInsn(int opcode, String owner, String name, String desc)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitJumpInsn(int opcode, Label label)
-  {
-    int lastSize = text.size();
-    super.visitJumpInsn(opcode, label);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitJumpInsn(int opcode, Label label)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitLdcInsn(Object cst)
-  {
-    int lastSize = text.size();
-    super.visitLdcInsn(cst);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitLdcInsn(Object cst)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitIincInsn(int var, int increment)
-  {
-    int lastSize = text.size();
-    super.visitIincInsn(var, increment);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitIincInsn(int var, int increment)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels)
-  {
-    int lastSize = text.size();
-    super.visitTableSwitchInsn(min, max, dflt, labels);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels)
-  {
-    int lastSize = text.size();
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitMultiANewArrayInsn(String desc, int dims)
-  {
-    int lastSize = text.size();
-    super.visitMultiANewArrayInsn(desc, dims);
-    addByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitMultiANewArrayInsn(String desc, int dims)
+    {
+      int lastSize = text.size();
+      addByteCodeIndex(lastSize);
+    }
 
-  //
-  // no instructions, but which asm counts as instructions
-  //
+    //
+    // no instructions, but which asm counts as instructions
+    //
 
-  @Override
-  public void visitLabel(Label label)
-  {
-    int lastSize = text.size();
-    super.visitLabel(label);
-    addByteCodeIndexWithoutFrame(lastSize);
-  }
+    @Override
+    public void visitLabel(Label label)
+    {
+      int lastSize = text.size();
+      addByteCodeIndexWithoutFrame(lastSize);
+    }
 
-  @Override
-  public void visitLineNumber(int line, Label start)
-  {
-    int lastSize = text.size();
-    super.visitLineNumber(line, start);
-    addByteCodeIndexWithoutFrame(lastSize);
-  }
+    @Override
+    public void visitLineNumber(int line, Label start)
+    {
+      int lastSize = text.size();
+      addByteCodeIndexWithoutFrame(lastSize);
+    }
 
-  @Override
-  public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack)
-  {
-    int lastSize = text.size();
-    super.visitFrame(type, nLocal, local, nStack, stack);
-    addByteCodeIndexWithoutFrame(lastSize);
-  }
+    @Override
+    public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack)
+    {
+      int lastSize = text.size();
+      addByteCodeIndexWithoutFrame(lastSize);
+    }
 
-  //
-  //
-  //
+    //
+    //
+    //
 
-  @Override
-  public void visitTryCatchBlock(Label start, Label end, Label handler, String type)
-  {
-    int lastSize = text.size();
-    super.visitTryCatchBlock(start, end, handler, type);
-    addNoByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitTryCatchBlock(Label start, Label end, Label handler, String type)
+    {
+      int lastSize = text.size();
+      addNoByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index)
-  {
-    int lastSize = text.size();
-    super.visitLocalVariable(name, desc, signature, start, end, index);
-    addNoByteCodeIndex(lastSize);
-  }
+    @Override
+    public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index)
+    {
+      int lastSize = text.size();
+      addNoByteCodeIndex(lastSize);
+    }
 
-  @Override
-  public void visitMaxs(int maxStack, int maxLocals)
-  {
-    int lastSize = text.size();
-    super.visitMaxs(maxStack, maxLocals);
-    addNoByteCodeIndex(lastSize);
+    @Override
+    public void visitMaxs(int maxStack, int maxLocals)
+    {
+      int lastSize = text.size();
+      addNoByteCodeIndex(lastSize);
+    }
   }
 }
