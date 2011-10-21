@@ -174,7 +174,6 @@ public abstract class AbstractTransformer implements ITransformer
       try
       {
         analyze(clazz, method);
-        log.debug("Byte code:\n" + Debugger.debug(clazz.name, method));
       }
       catch (Exception e)
       {
