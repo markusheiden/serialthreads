@@ -14,10 +14,12 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/asm-debug-all-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/asm-debug-all-4.0_RC2.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/lib/asm-all-4.0_RC2-src.zip!/" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">

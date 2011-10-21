@@ -1,33 +1,28 @@
 package org.serialthreads.transformer.classcache;
 
-import org.ow2.asm.AnnotationVisitor;
-import org.ow2.asm.MethodVisitor;
-import org.ow2.asm.Opcodes;
-import org.ow2.asm.commons.EmptyVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
  * Visitor which checks all methods for the presence of the @Interruptible annotation.
  */
-public class ClassInfoVisitor extends EmptyVisitor
+public class ClassInfoVisitor extends ClassVisitor
 {
   private boolean isInterface;
   private String className;
   private String superClassName;
   private String[] interfaceNames;
 
-  private String methodName;
-  private String methodDesc;
-  private final Set<String> methodAnnotations = new HashSet<String>();
-
   private final Map<String, MethodInfo> methods;
 
   public ClassInfoVisitor()
   {
+    super(Opcodes.ASM4);
+
     this.methods = new TreeMap<String, MethodInfo>();
   }
 
@@ -42,37 +37,10 @@ public class ClassInfoVisitor extends EmptyVisitor
     interfaceNames = interfaces;
   }
 
+  @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)
   {
-    methodName = name;
-    methodDesc = desc;
-    return this;
-  }
-
-  public AnnotationVisitor visitAnnotation(String desc, boolean visible)
-  {
-    methodAnnotations.add(desc);
-    return null;
-  }
-
-  public void visitEnd()
-  {
-    // distinguish between method related visitEnd() and class related visitEnd()
-    if (methodName != null)
-    {
-      // method related visitEnd()
-      MethodInfo method = new MethodInfo(methodName, methodDesc, methodAnnotations);
-      methods.put(method.getID(), method);
-
-      methodName = null;
-      methodDesc = null;
-      methodAnnotations.clear();
-    }
-  }
-
-  public Map<String, MethodInfo> getMethods()
-  {
-    return methods;
+    return new MethodInfoVisitor(name, desc, methods);
   }
 
   public boolean isInterface()
@@ -93,5 +61,10 @@ public class ClassInfoVisitor extends EmptyVisitor
   public String[] getInterfaceNames()
   {
     return interfaceNames;
+  }
+
+  public Map<String, MethodInfo> getMethods()
+  {
+    return methods;
   }
 }

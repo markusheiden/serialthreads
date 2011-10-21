@@ -1,7 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
 import org.apache.log4j.Logger;
-import org.ow2.asm.Type;
+import org.objectweb.asm.Type;
 import org.serialthreads.Executor;
 import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;

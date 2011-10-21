@@ -1,12 +1,12 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.junit.Test;
-import org.ow2.asm.Type;
+import org.objectweb.asm.Type;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.ow2.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
+import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;

@@ -1,7 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
 import org.junit.Test;
-import org.ow2.asm.Type;
+import org.objectweb.asm.Type;
 
 import java.util.Map;
 import java.util.SortedMap;

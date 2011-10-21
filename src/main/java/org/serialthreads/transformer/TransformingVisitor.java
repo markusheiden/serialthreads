@@ -1,9 +1,9 @@
 package org.serialthreads.transformer;
 
 import org.apache.log4j.Logger;
-import org.ow2.asm.ClassVisitor;
-import org.ow2.asm.tree.ClassNode;
-import org.ow2.asm.util.CheckClassAdapter;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 /**
  * Visitor executing byte code enhancement of a class.

@@ -1,9 +1,9 @@
 package org.serialthreads.transformer.code;
 
-import org.ow2.asm.Type;
-import org.ow2.asm.tree.AbstractInsnNode;
-import org.ow2.asm.tree.InsnList;
-import org.ow2.asm.tree.VarInsnNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Value specific code generation.

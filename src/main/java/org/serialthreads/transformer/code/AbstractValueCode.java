@@ -1,18 +1,18 @@
 package org.serialthreads.transformer.code;
 
-import org.ow2.asm.Type;
-import org.ow2.asm.tree.FieldInsnNode;
-import org.ow2.asm.tree.InsnList;
-import org.ow2.asm.tree.InsnNode;
-import org.ow2.asm.tree.VarInsnNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.serialthreads.context.StackFrame;
 
-import static org.ow2.asm.Opcodes.ALOAD;
-import static org.ow2.asm.Opcodes.GETFIELD;
-import static org.ow2.asm.Opcodes.POP;
-import static org.ow2.asm.Opcodes.POP2;
-import static org.ow2.asm.Opcodes.PUTFIELD;
-import static org.ow2.asm.Opcodes.SWAP;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.POP;
+import static org.objectweb.asm.Opcodes.POP2;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.SWAP;
 
 /**
  * Value specific code generation.

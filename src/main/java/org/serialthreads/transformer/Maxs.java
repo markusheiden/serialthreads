@@ -1,6 +1,6 @@
 package org.serialthreads.transformer;
 
-import org.ow2.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.BasicValue;
 
 /**
  * Used to calculate maxs sizes.

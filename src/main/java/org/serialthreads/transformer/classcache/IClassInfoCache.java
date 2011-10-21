@@ -1,9 +1,9 @@
 package org.serialthreads.transformer.classcache;
 
-import org.ow2.asm.Type;
-import org.ow2.asm.tree.ClassNode;
-import org.ow2.asm.tree.MethodInsnNode;
-import org.ow2.asm.tree.MethodNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 
 /**
  * Interface for class info cache.

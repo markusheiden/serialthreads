@@ -1,10 +1,10 @@
 package org.serialthreads.transformer;
 
-import org.ow2.asm.tree.AbstractInsnNode;
-import org.ow2.asm.tree.IincInsnNode;
-import org.ow2.asm.tree.LocalVariableNode;
-import org.ow2.asm.tree.MethodNode;
-import org.ow2.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.Iterator;
 import java.util.List;

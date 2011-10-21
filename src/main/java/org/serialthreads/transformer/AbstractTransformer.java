@@ -1,26 +1,26 @@
 package org.serialthreads.transformer;
 
 import org.apache.log4j.Logger;
-import org.ow2.asm.Opcodes;
-import org.ow2.asm.Type;
-import org.ow2.asm.tree.AbstractInsnNode;
-import org.ow2.asm.tree.ClassNode;
-import org.ow2.asm.tree.FieldInsnNode;
-import org.ow2.asm.tree.FieldNode;
-import org.ow2.asm.tree.InsnList;
-import org.ow2.asm.tree.InsnNode;
-import org.ow2.asm.tree.JumpInsnNode;
-import org.ow2.asm.tree.LabelNode;
-import org.ow2.asm.tree.LdcInsnNode;
-import org.ow2.asm.tree.MethodInsnNode;
-import org.ow2.asm.tree.MethodNode;
-import org.ow2.asm.tree.TableSwitchInsnNode;
-import org.ow2.asm.tree.TryCatchBlockNode;
-import org.ow2.asm.tree.TypeInsnNode;
-import org.ow2.asm.tree.VarInsnNode;
-import org.ow2.asm.tree.analysis.AnalyzerException;
-import org.ow2.asm.tree.analysis.BasicValue;
-import org.ow2.asm.tree.analysis.Frame;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.ITransformedRunnable;
 import org.serialthreads.context.SerialThread;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.ow2.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
@@ -179,7 +179,7 @@ public abstract class AbstractTransformer implements ITransformer
       {
         // disassemble erroneous method
         log.debug("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage());
-        log.debug("Byte code:\n" + Debugger.debug(clazz.name, method));
+//        log.debug("Byte code:\n" + Debugger.debug(clazz.name, method));
         throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
       }
     }

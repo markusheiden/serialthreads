@@ -1,24 +1,24 @@
 package org.serialthreads.transformer.code;
 
-import org.ow2.asm.Type;
-import org.ow2.asm.tree.AbstractInsnNode;
-import org.ow2.asm.tree.FieldInsnNode;
-import org.ow2.asm.tree.InsnList;
-import org.ow2.asm.tree.InsnNode;
-import org.ow2.asm.tree.LdcInsnNode;
-import org.ow2.asm.tree.TypeInsnNode;
-import org.ow2.asm.tree.VarInsnNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
-import static org.ow2.asm.Opcodes.AALOAD;
-import static org.ow2.asm.Opcodes.AASTORE;
-import static org.ow2.asm.Opcodes.ACONST_NULL;
-import static org.ow2.asm.Opcodes.ALOAD;
-import static org.ow2.asm.Opcodes.ARETURN;
-import static org.ow2.asm.Opcodes.ASTORE;
-import static org.ow2.asm.Opcodes.CHECKCAST;
-import static org.ow2.asm.Opcodes.DUP;
-import static org.ow2.asm.Opcodes.PUTFIELD;
-import static org.ow2.asm.Opcodes.SWAP;
+import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.AASTORE;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.SWAP;
 
 /**
  * Code for object values.

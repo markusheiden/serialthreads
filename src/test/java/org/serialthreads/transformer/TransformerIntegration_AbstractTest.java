@@ -3,9 +3,9 @@ package org.serialthreads.transformer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ow2.asm.ClassVisitor;
-import org.ow2.asm.ClassWriter;
-import org.ow2.asm.util.TraceClassVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.context.SerialThreadManager;
 

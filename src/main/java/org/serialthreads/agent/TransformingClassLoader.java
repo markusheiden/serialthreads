@@ -1,10 +1,10 @@
 package org.serialthreads.agent;
 
 import org.apache.log4j.Logger;
-import org.ow2.asm.ClassReader;
-import org.ow2.asm.ClassVisitor;
-import org.ow2.asm.ClassWriter;
-import org.ow2.asm.util.TraceClassVisitor;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -18,10 +18,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static org.ow2.asm.ClassReader.SKIP_DEBUG;
-import static org.ow2.asm.ClassReader.SKIP_FRAMES;
-import static org.ow2.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.ow2.asm.ClassWriter.COMPUTE_MAXS;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * ClassLoader which applies a transformer to the loaded classes.

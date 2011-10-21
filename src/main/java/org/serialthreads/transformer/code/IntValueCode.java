@@ -1,25 +1,25 @@
 package org.serialthreads.transformer.code;
 
-import org.ow2.asm.Type;
-import org.ow2.asm.tree.AbstractInsnNode;
-import org.ow2.asm.tree.InsnNode;
-import org.ow2.asm.tree.IntInsnNode;
-import org.ow2.asm.tree.LdcInsnNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 
-import static org.ow2.asm.Opcodes.BIPUSH;
-import static org.ow2.asm.Opcodes.IALOAD;
-import static org.ow2.asm.Opcodes.IASTORE;
-import static org.ow2.asm.Opcodes.ICONST_0;
-import static org.ow2.asm.Opcodes.ICONST_1;
-import static org.ow2.asm.Opcodes.ICONST_2;
-import static org.ow2.asm.Opcodes.ICONST_3;
-import static org.ow2.asm.Opcodes.ICONST_4;
-import static org.ow2.asm.Opcodes.ICONST_5;
-import static org.ow2.asm.Opcodes.ICONST_M1;
-import static org.ow2.asm.Opcodes.ILOAD;
-import static org.ow2.asm.Opcodes.IRETURN;
-import static org.ow2.asm.Opcodes.ISTORE;
-import static org.ow2.asm.Opcodes.SIPUSH;
+import static org.objectweb.asm.Opcodes.BIPUSH;
+import static org.objectweb.asm.Opcodes.IALOAD;
+import static org.objectweb.asm.Opcodes.IASTORE;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ICONST_2;
+import static org.objectweb.asm.Opcodes.ICONST_3;
+import static org.objectweb.asm.Opcodes.ICONST_4;
+import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.SIPUSH;
 
 /**
  * Code for int values (and boolean, byte, char and short).

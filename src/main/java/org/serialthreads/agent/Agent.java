@@ -1,9 +1,9 @@
 package org.serialthreads.agent;
 
 import org.apache.log4j.Logger;
-import org.ow2.asm.ClassReader;
-import org.ow2.asm.ClassVisitor;
-import org.ow2.asm.ClassWriter;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -17,8 +17,8 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
-import static org.ow2.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.ow2.asm.ClassWriter.COMPUTE_MAXS;
+import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * Byte code enhancement agent.
