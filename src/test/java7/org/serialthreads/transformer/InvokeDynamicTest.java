@@ -1,8 +1,12 @@
 package org.serialthreads.transformer;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.util.ASMifier;
+import org.objectweb.asm.util.Printer;
+import org.objectweb.asm.util.TraceClassVisitor;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
 import java.lang.invoke.MethodHandle;
@@ -25,7 +29,8 @@ public class InvokeDynamicTest
     try
     {
       ClassReader r = new ClassReader(InvokeDynamicTest.class.getResourceAsStream(InvokeDynamicTest.class.getSimpleName() + ".class"));
-//      r.accept(new ASMifierClassVisitor(new PrintWriter(System.out)), 0);
+      Printer printer = new ASMifier();
+      r.accept(new TraceClassVisitor(null, printer, new PrintWriter(System.out)), 0);
       new InvokeDynamicTest().run();
     }
     catch (IOException e)
