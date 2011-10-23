@@ -21,7 +21,7 @@ import java.util.Set;
  * Checks correct usage of {@link org.serialthreads.Interruptible} annotations.
  */
 @SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class InterruptibleProcessor extends AbstractProcessor
 {
   @Override
@@ -83,14 +83,14 @@ public class InterruptibleProcessor extends AbstractProcessor
           {
             processingEnv.getMessager().printMessage(Kind.NOTE,
               "Method " + overrider + " may not be interruptible, because the overridden method in " +
-              overriddenType.getQualifiedName() + " is not interruptible",
+                overriddenType.getQualifiedName() + " is not interruptible",
               overrider);
           }
           else if (!interruptible && overriddenInterruptible)
           {
             processingEnv.getMessager().printMessage(Kind.NOTE,
               "Method " + overrider + " should be interruptible, because the overridden method in " +
-              overriddenType.getQualifiedName() + " is interruptible",
+                overriddenType.getQualifiedName() + " is interruptible",
               overrider);
           }
           break;
