@@ -46,7 +46,7 @@ public class InvokeDynamicTest
       MethodHandle handle1a = MethodHandles.lookup().findVirtual(Callee.class, "run1", MethodType.methodType(void.class, String.class));
       handle1a.invokeExact(new Callee("callee1a"), "?");
       MethodHandle handle1b = handle1a.bindTo(new Callee("callee1b"));
-      handle1b.invokeExact("?");
+      handle1b.invokeExact("??");
       MethodHandle handle2 = MethodHandles.lookup().bind(new Callee("callee2"), "run1", MethodType.methodType(void.class, String.class));
       handle2.invoke("!");
       handle2.invokeExact("!!");
