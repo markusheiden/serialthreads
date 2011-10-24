@@ -1,7 +1,5 @@
 package org.serialthreads.transformer;
 
-import org.serialthreads.transformer.classcache.IClassInfoCache;
-
 /**
  * Integration-test for FrequentInterruptsTransformer.
  */
@@ -10,14 +8,7 @@ public class FrequentInterruptsTransformer_IntegrationTest extends TransformerIn
   @Override
   public void setUp()
   {
-    strategy = new IStrategy()
-    {
-      @Override
-      public ITransformer getTransformer(IClassInfoCache classInfoCache)
-      {
-        return new FrequentInterruptsTransformer(classInfoCache);
-      }
-    };
+    strategy = Strategies.FREQUENT;
     super.setUp();
   }
 }

@@ -1,7 +1,5 @@
 package org.serialthreads.transformer;
 
-import org.serialthreads.transformer.classcache.IClassInfoCache;
-
 /**
  * Integration-test for SingleFrameExecutionTransformer.
  */
@@ -10,14 +8,7 @@ public class SingleFrameExecutionTransformer_IntegrationTest extends Transformer
   @Override
   public void setUp()
   {
-    strategy = new IStrategy()
-    {
-      @Override
-      public ITransformer getTransformer(IClassInfoCache classInfoCache)
-      {
-        return new SingleFrameExecutionTransformer(classInfoCache);
-      }
-    };
+    strategy = Strategies.SINGLE_FRAME_EXECUTION;
     super.setUp();
   }
 }
