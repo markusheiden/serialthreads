@@ -3,6 +3,7 @@ package org.serialthreads.transformer;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
@@ -10,7 +11,6 @@ import org.serialthreads.transformer.code.MethodCode;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.List;
 
 /**
  * Class to aid debugging of a method's byte code.
@@ -28,7 +28,7 @@ public class Debugger
   public static String debug(ClassNode clazz, String methodToDebug)
   {
     StringBuilder result = new StringBuilder(65536);
-    for (MethodNode method : (List<MethodNode>) clazz.methods)
+    for (MethodNode method : clazz.methods)
     {
       if (methodToDebug == null || method.name.startsWith(methodToDebug))
       {
@@ -46,7 +46,7 @@ public class Debugger
 
   public static String debug(String owner, MethodNode method)
   {
-    Analyzer analyzer = new Analyzer(new SimpleVerifier());
+    Analyzer<BasicValue> analyzer = new Analyzer<>(new SimpleVerifier());
     try
     {
       analyzer.analyze(owner, method);

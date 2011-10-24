@@ -83,13 +83,7 @@ public class Agent implements ClassFileTransformer
       failure = false;
       throw e;
     }
-    catch (RuntimeException e)
-    {
-      _logger.error("Failed to transform " + className, e);
-      failure = false;
-      throw e;
-    }
-    catch (Error e)
+    catch (RuntimeException | Error e)
     {
       _logger.error("Failed to transform " + className, e);
       failure = false;

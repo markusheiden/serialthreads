@@ -42,7 +42,7 @@ class DebugPrinter extends Textifier
     Frame frame = frames[instruction];
     if (frame != null)
     {
-      List<String> frameText = new ArrayList<String>();
+      List<String> frameText = new ArrayList<>();
       for (int i = 0; i < frame.getLocals(); i++)
       {
         BasicValue local = (BasicValue) frame.getLocal(i);

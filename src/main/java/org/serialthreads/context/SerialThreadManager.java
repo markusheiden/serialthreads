@@ -10,8 +10,7 @@ public abstract class SerialThreadManager
 {
   public static boolean DEBUG = true;
 
-  private static final ThreadLocal<SerialThreadManager> threadManagers =
-    new ThreadLocal<SerialThreadManager>();
+  private static final ThreadLocal<SerialThreadManager> threadManagers = new ThreadLocal<>();
 
   protected SerialThread currentThread;
 

@@ -7,7 +7,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Shifts the local variables of a method.
@@ -41,7 +40,7 @@ public class LocalVariablesShifter
     }
 
     // adopt local variable debug info
-    for (LocalVariableNode local : (List<LocalVariableNode>) method.localVariables)
+    for (LocalVariableNode local : method.localVariables)
     {
       local.index = remap(point, shift, local.index);
     }
