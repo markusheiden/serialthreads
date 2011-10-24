@@ -10,7 +10,6 @@ import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Interpreter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -106,7 +105,7 @@ public class ExtendedFrameTest
 
   private void testExecute_const(AbstractInsnNode instruction, Type type, Object constant) throws Exception
   {
-    Interpreter interpreter = new ExtendedVerifier(null, null, null, null, false);
+    ExtendedVerifier interpreter = new ExtendedVerifier(null, null, null, null, false);
 
     ExtendedFrame frame = new ExtendedFrame(0, 1);
     frame.execute(instruction, interpreter);
@@ -128,7 +127,7 @@ public class ExtendedFrameTest
 
   private void testExecute_store(AbstractInsnNode instruction, Type type) throws Exception
   {
-    Interpreter interpreter = new ExtendedVerifier(null, null, null, null, false);
+    ExtendedVerifier interpreter = new ExtendedVerifier(null, null, null, null, false);
 
     ExtendedFrame frame = new ExtendedFrame(4, 4);
     // value which will be changed

@@ -46,7 +46,7 @@ public class MethodInfoTest
   @Test(expected = UnsupportedOperationException.class)
   public void testGetAnnotations_immutable()
   {
-    MethodInfo info = new MethodInfo("name", "desc", new HashSet<String>(Collections.singleton(Type.INT_TYPE.getDescriptor())));
+    MethodInfo info = new MethodInfo("name", "desc", new HashSet<>(Collections.singleton(Type.INT_TYPE.getDescriptor())));
 
     info.getAnnotations().add("something");
   }

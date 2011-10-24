@@ -30,7 +30,7 @@ public class ExtendedValueTest
   @Test
   public void testValueInLocal()
   {
-    Set<Integer> locals1 = new HashSet<Integer>(Arrays.asList(1));
+    Set<Integer> locals1 = new HashSet<>(Arrays.asList(1));
 
     ExtendedValue value = ExtendedValue.valueInLocal(Type.INT_TYPE, 1);
     assertEquals(Type.INT_TYPE, value.getType());
@@ -43,7 +43,7 @@ public class ExtendedValueTest
   @Test
   public void testValueInLocals()
   {
-    Set<Integer> locals12 = new HashSet<Integer>(Arrays.asList(1, 2));
+    Set<Integer> locals12 = new HashSet<>(Arrays.asList(1, 2));
 
     ExtendedValue value = ExtendedValue.valueInLocal(Type.INT_TYPE, 1).addLocal(2);
     assertEquals(Type.INT_TYPE, value.getType());
@@ -66,7 +66,7 @@ public class ExtendedValueTest
   @Test
   public void testConstantInLocals()
   {
-    Set<Integer> locals12 = new HashSet<Integer>(Arrays.asList(1, 2));
+    Set<Integer> locals12 = new HashSet<>(Arrays.asList(1, 2));
 
     ExtendedValue value = ExtendedValue.constantInLocals(Type.INT_TYPE, 1, locals12);
     assertEquals(Type.INT_TYPE, value.getType());
