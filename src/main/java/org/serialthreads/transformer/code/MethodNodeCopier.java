@@ -20,7 +20,7 @@ public class MethodNodeCopier
    */
   public static MethodNode copyEmpty(MethodNode method)
   {
-    String[] exceptions = (String[]) method.exceptions.toArray(new String[method.exceptions.size()]);
+    String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);
     return new MethodNode(method.access, method.name, method.desc, method.signature, exceptions);
   }
 
@@ -33,14 +33,14 @@ public class MethodNodeCopier
    */
   public static MethodNode copy(MethodNode method)
   {
-    String[] exceptions = (String[]) method.exceptions.toArray(new String[method.exceptions.size()]);
+    String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);
     MethodNode result = new MethodNode(method.access, method.name, method.desc, method.signature, exceptions)
     {
       /**
        * Label remapping.
        * Old label -> new label.
        */
-      private final Map<Label, Label> labels = new HashMap<Label, Label>();
+      private final Map<Label, Label> labels = new HashMap<>();
 
       @Override
       protected LabelNode getLabelNode(Label label)
