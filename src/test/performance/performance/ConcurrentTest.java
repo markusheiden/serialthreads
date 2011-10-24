@@ -23,9 +23,9 @@ public class ConcurrentTest extends AbstractPerformanceTest
 
   protected void doStop()
   {
-    for (int i = 0; i < threads.length; i++)
+    for (Thread thread : threads)
     {
-      LockSupport.unpark(threads[i]);
+      LockSupport.unpark(thread);
     }
   }
 

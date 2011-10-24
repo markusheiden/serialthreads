@@ -75,9 +75,9 @@ public abstract class AbstractPerformanceTest
     {
       Thread.yield();
       ready = true;
-      for (int i = 0; i < counters.length; i++)
+      for (ICounter counter : counters)
       {
-        ready &= counters[i].isReady();
+        ready &= counter.isReady();
       }
     } while (!ready);
   }
@@ -123,9 +123,9 @@ public abstract class AbstractPerformanceTest
    */
   protected void doJoinThreads() throws Exception
   {
-    for (int i = 0; i < threads.length; i++)
+    for (Thread thread : threads)
     {
-      threads[i].join();
+      thread.join();
     }
   }
 }

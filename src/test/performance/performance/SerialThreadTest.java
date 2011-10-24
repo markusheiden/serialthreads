@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
  */
 public class SerialThreadTest extends AbstractPerformanceTest
 {
-  private Class counterClass;
+  private Class<? extends ICounter> counterClass;
   private Field run;
 
   private Thread managerThread;
@@ -25,8 +25,8 @@ public class SerialThreadTest extends AbstractPerformanceTest
   @Before
   public void setUp() throws Exception
   {
-    ClassLoader cl = new TransformingClassLoader(Strategies.FREQUENT, getClass().getPackage().getName());
-    counterClass = cl.loadClass(SerialCounter.class.getName());
+    ClassLoader cl = new TransformingClassLoader(Strategies.DEFAULT, getClass().getPackage().getName());
+    counterClass = (Class<? extends ICounter>) cl.loadClass(SerialCounter.class.getName());
     Constructor<? extends ICounter> constructor = counterClass.getConstructor(int.class);
     run = counterClass.getSuperclass().getDeclaredField("run");
     run.setAccessible(true);

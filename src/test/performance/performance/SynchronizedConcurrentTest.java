@@ -7,53 +7,72 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test to analyze performance of threading with synchronization.
  */
-public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
-  private static final Object lock = new Object();
+public class SynchronizedConcurrentTest extends AbstractPerformanceTest
+{
   private static AtomicInteger barrierCount;
 
   @Before
-  public void setUp() {
+  public void setUp()
+  {
     barrierCount = new AtomicInteger(COUNT);
-    for (int i = 0; i < counters.length; i++) {
+    for (int i = 0; i < counters.length; i++)
+    {
       counters[i] = new SynchronizedConcurrentCounter(i);
     }
   }
 
-  protected void doStop() {
-    for (int i = 0; i < threads.length; i++) {
-      threads[i].interrupt();
+  protected void doStop()
+  {
+    for (Thread thread : threads)
+    {
+      thread.interrupt();
     }
   }
 
-  private static class SynchronizedConcurrentCounter extends Counter {
+  private static class SynchronizedConcurrentCounter extends Counter
+  {
     private int next;
 
-    public SynchronizedConcurrentCounter(int number) {
+    public SynchronizedConcurrentCounter(int number)
+    {
       super(number);
       next = COUNT;
     }
 
-    public void run() {
-      try {
+    public void run()
+    {
+      try
+      {
         waitForStart();
-        do {
+        do
+        {
           count++;
           tick(count);
-        } while(true);
-      } catch (InterruptedException e) {
+        } while (true);
+      }
+      catch (InterruptedException e)
+      {
         // ignore
-      } catch (Exception e) {
+      }
+      catch (Exception e)
+      {
         e.printStackTrace();
       }
     }
 
-    protected final void tick(long count) throws Exception {
-      if (barrierCount.incrementAndGet() < next) {
-        synchronized (lock) {
+    protected final void tick(long count) throws Exception
+    {
+      if (barrierCount.incrementAndGet() < next)
+      {
+        synchronized (lock)
+        {
           lock.wait();
         }
-      } else {
-        synchronized (lock) {
+      }
+      else
+      {
+        synchronized (lock)
+        {
           lock.notifyAll();
         }
       }
