@@ -109,10 +109,9 @@ public abstract class AbstractTransformer implements ITransformer
     }
 
     // separate constructors and methods
-    List<MethodNode> constructors = new ArrayList<MethodNode>(clazz.methods.size());
-    List<MethodNode> methods = new ArrayList<MethodNode>(clazz.methods.size());
-    //noinspection unchecked
-    for (MethodNode method : (List<MethodNode>) clazz.methods)
+    List<MethodNode> constructors = new ArrayList<>(clazz.methods.size());
+    List<MethodNode> methods = new ArrayList<>(clazz.methods.size());
+    for (MethodNode method : clazz.methods)
     {
       if (method.name.equals("<init>"))
       {
@@ -124,7 +123,7 @@ public abstract class AbstractTransformer implements ITransformer
       }
     }
 
-    List<MethodNode> allTransformedMethods = new ArrayList<MethodNode>(methods.size() * 2);
+    List<MethodNode> allTransformedMethods = new ArrayList<>(methods.size() * 2);
     for (MethodNode method : methods)
     {
       List<MethodNode> transformedMethods = transformMethod(clazz, method);
@@ -253,8 +252,8 @@ public abstract class AbstractTransformer implements ITransformer
   {
     Type classType = Type.getObjectType(clazz.name);
     Type superClassType = Type.getObjectType(clazz.superName);
-    List<Type> interfaceTypes = new ArrayList<Type>(clazz.interfaces.size());
-    for (String interfaceName : (List<String>) clazz.interfaces)
+    List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
+    for (String interfaceName : clazz.interfaces)
     {
       interfaceTypes.add(Type.getObjectType(interfaceName));
     }
@@ -300,11 +299,9 @@ public abstract class AbstractTransformer implements ITransformer
       throw new NotTransformableException("Custom classes may not not implement ITransformedRunnable. Implement IRunnable instead.");
     }
 
-    //noinspection unchecked
     clazz.interfaces.add(ITRANSFORMED_RUNNABLE_NAME);
 
     // add $$thread$$ field
-    //noinspection unchecked
     clazz.fields.add(new FieldNode(ACC_PRIVATE + ACC_FINAL + ACC_SYNTHETIC, THREAD, THREAD_IMPL_DESC, null, null));
 
     // init $$thread$$ fields in constructors
@@ -391,7 +388,7 @@ public abstract class AbstractTransformer implements ITransformer
    */
   protected Map<MethodInsnNode, Integer> interruptibleMethodCalls(InsnList instructions)
   {
-    Map<MethodInsnNode, Integer> result = new LinkedHashMap<MethodInsnNode, Integer>();
+    Map<MethodInsnNode, Integer> result = new LinkedHashMap<>();
     for (int i = 0; i < instructions.size(); i++)
     {
       AbstractInsnNode instruction = instructions.get(i);
@@ -417,7 +414,7 @@ public abstract class AbstractTransformer implements ITransformer
    */
   protected List<AbstractInsnNode> returnInstructions(InsnList instructions)
   {
-    List<AbstractInsnNode> result = new ArrayList<AbstractInsnNode>();
+    List<AbstractInsnNode> result = new ArrayList<>();
     for (Iterator<AbstractInsnNode> iter = instructions.iterator(); iter.hasNext(); )
     {
       AbstractInsnNode instruction = iter.next();
@@ -448,7 +445,7 @@ public abstract class AbstractTransformer implements ITransformer
   {
     boolean moreThanOne = methodCalls.size() > 1;
 
-    List<InsnList> restoreCodes = new ArrayList<InsnList>(methodCalls.size());
+    List<InsnList> restoreCodes = new ArrayList<>(methodCalls.size());
     int methodCallIndex = 0;
     for (Entry<MethodInsnNode, Integer> entry : methodCalls.entrySet())
     {
@@ -658,7 +655,7 @@ public abstract class AbstractTransformer implements ITransformer
     // save locals separated by type
     for (IValueCode code : ValueCodeFactory.CODES)
     {
-      List<Integer> pushLocals = new ArrayList<Integer>(frame.getLocals());
+      List<Integer> pushLocals = new ArrayList<>(frame.getLocals());
 
       // do not store local 0 for non static methods, because it always contains "this"
       for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
@@ -863,7 +860,7 @@ public abstract class AbstractTransformer implements ITransformer
     // restore locals by type
     for (IValueCode code : ValueCodeFactory.CODES)
     {
-      List<Integer> popLocals = new ArrayList<Integer>();
+      List<Integer> popLocals = new ArrayList<>();
       InsnList copyLocals = new InsnList();
 
       // do not restore local 0 for non static methods, because it always contains "this"
