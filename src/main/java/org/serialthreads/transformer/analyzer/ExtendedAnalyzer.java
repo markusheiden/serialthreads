@@ -2,6 +2,7 @@ package org.serialthreads.transformer.analyzer;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
@@ -12,7 +13,7 @@ import java.util.List;
  * Supports detection of "this" and method parameters in the locals and on the stack.
  * Always uses a verifier as interpreter.
  */
-public class ExtendedAnalyzer extends Analyzer
+public class ExtendedAnalyzer extends Analyzer<BasicValue>
 {
   /**
    * Constructs a new {@link ExtendedAnalyzer} to analyze a specific class.
@@ -28,7 +29,7 @@ public class ExtendedAnalyzer extends Analyzer
     IClassInfoCache classInfoCache,
     Type currentClass,
     Type currentSuperClass,
-    List currentClassInterfaces,
+    List<Type> currentClassInterfaces,
     boolean isInterface)
   {
     super(new ExtendedVerifier(classInfoCache, currentClass, currentSuperClass, currentClassInterfaces, isInterface));
@@ -41,7 +42,7 @@ public class ExtendedAnalyzer extends Analyzer
   }
 
   @Override
-  protected ExtendedFrame newFrame(Frame src)
+  protected ExtendedFrame newFrame(Frame<? extends BasicValue> src)
   {
     return new ExtendedFrame(src);
   }

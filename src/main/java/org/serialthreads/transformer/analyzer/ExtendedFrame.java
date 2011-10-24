@@ -20,7 +20,7 @@ import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;
  * Frame for extended analyzer.
  * Supports detection of stack elements that have the same value as a local.
  */
-public class ExtendedFrame extends Frame
+public class ExtendedFrame extends Frame<BasicValue>
 {
   /**
    * Constructs a new frame with the given size.
@@ -38,68 +38,68 @@ public class ExtendedFrame extends Frame
    *
    * @param src a frame.
    */
-  public ExtendedFrame(Frame src)
+  public ExtendedFrame(Frame<? extends BasicValue> src)
   {
     super(src);
   }
 
   @Override
-  public void execute(AbstractInsnNode insn, Interpreter interpreter) throws AnalyzerException
+  public void execute(AbstractInsnNode insn, Interpreter<BasicValue> interpreter) throws AnalyzerException
   {
     // remove references to local, if required
     switch (insn.getOpcode())
     {
       case Opcodes.ACONST_NULL:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), null));
+        push(constantValue(interpreter.newOperation(insn).getType(), null));
         break;
       case Opcodes.ICONST_M1:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), -1));
+        push(constantValue(interpreter.newOperation(insn).getType(), -1));
         break;
       case Opcodes.ICONST_0:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 0));
+        push(constantValue(interpreter.newOperation(insn).getType(), 0));
         break;
       case Opcodes.ICONST_1:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 1));
+        push(constantValue(interpreter.newOperation(insn).getType(), 1));
         break;
       case Opcodes.ICONST_2:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 2));
+        push(constantValue(interpreter.newOperation(insn).getType(), 2));
         break;
       case Opcodes.ICONST_3:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 3));
+        push(constantValue(interpreter.newOperation(insn).getType(), 3));
         break;
       case Opcodes.ICONST_4:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 4));
+        push(constantValue(interpreter.newOperation(insn).getType(), 4));
         break;
       case Opcodes.ICONST_5:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 5));
+        push(constantValue(interpreter.newOperation(insn).getType(), 5));
         break;
       case Opcodes.LCONST_0:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 0L));
+        push(constantValue(interpreter.newOperation(insn).getType(), 0L));
         break;
       case Opcodes.LCONST_1:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 1L));
+        push(constantValue(interpreter.newOperation(insn).getType(), 1L));
         break;
       case Opcodes.FCONST_0:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 0F));
+        push(constantValue(interpreter.newOperation(insn).getType(), 0F));
         break;
       case Opcodes.FCONST_1:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 1F));
+        push(constantValue(interpreter.newOperation(insn).getType(), 1F));
         break;
       case Opcodes.FCONST_2:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 2F));
+        push(constantValue(interpreter.newOperation(insn).getType(), 2F));
         break;
       case Opcodes.DCONST_0:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 0D));
+        push(constantValue(interpreter.newOperation(insn).getType(), 0D));
         return;
       case Opcodes.DCONST_1:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), 1D));
+        push(constantValue(interpreter.newOperation(insn).getType(), 1D));
         return;
       case Opcodes.BIPUSH:
       case Opcodes.SIPUSH:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), ((IntInsnNode) insn).operand));
+        push(constantValue(interpreter.newOperation(insn).getType(), ((IntInsnNode) insn).operand));
         return;
       case Opcodes.LDC:
-        push(constantValue(((BasicValue) interpreter.newOperation(insn)).getType(), ((LdcInsnNode) insn).cst));
+        push(constantValue(interpreter.newOperation(insn).getType(), ((LdcInsnNode) insn).cst));
         return;
       case Opcodes.ISTORE:
       case Opcodes.LSTORE:
@@ -130,7 +130,7 @@ public class ExtendedFrame extends Frame
   {
     assert modifiedLocal >= 0 && modifiedLocal < getLocals() : "Precondition: modifiedLocal >= 0 && modifiedLocal < getLocals()";
 
-    Frame copy = new Frame(this);
+    ExtendedFrame copy = new ExtendedFrame(this);
     for (int i = 0; i < copy.getLocals(); i++)
     {
       Value local = copy.getLocal(i);
@@ -153,7 +153,7 @@ public class ExtendedFrame extends Frame
    * Always uses extended values.
    */
   @Override
-  public void setLocal(int i, Value value) throws IndexOutOfBoundsException
+  public void setLocal(int i, BasicValue value) throws IndexOutOfBoundsException
   {
     if (value.equals(BasicValue.UNINITIALIZED_VALUE))
     {
@@ -168,7 +168,7 @@ public class ExtendedFrame extends Frame
     else
     {
       // annotate the value, that it belongs to the local -> new annotated value
-      super.setLocal(i, valueInLocal(((BasicValue) value).getType(), i));
+      super.setLocal(i, valueInLocal(value.getType(), i));
     }
   }
 
@@ -178,7 +178,7 @@ public class ExtendedFrame extends Frame
    * Always uses extended values.
    */
   @Override
-  public void push(Value value) throws IndexOutOfBoundsException
+  public void push(BasicValue value) throws IndexOutOfBoundsException
   {
     if (value.equals(BasicValue.UNINITIALIZED_VALUE))
     {
@@ -193,7 +193,7 @@ public class ExtendedFrame extends Frame
     else
     {
       // convert the value to an extended value -> new value
-      super.push(value(((BasicValue) value).getType()));
+      super.push(value(value.getType()));
     }
   }
 }

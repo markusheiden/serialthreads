@@ -75,7 +75,7 @@ public class ExtendedVerifier extends SimpleVerifier
     assert v != null : "Precondition: v != null";
     assert w != null : "Precondition: w != null";
 
-    BasicValue result = (BasicValue) super.merge(v, w);
+    BasicValue result = super.merge(v, w);
     if (result.equals(UNINITIALIZED_VALUE))
     {
       // return uninitialized value
@@ -95,7 +95,7 @@ public class ExtendedVerifier extends SimpleVerifier
       boolean isConstant = ev.isConstant() && ew.isConstant() &&
         (ev.getConstant() == ew.getConstant() || ev.getConstant() != null && ev.getConstant().equals(ew.getConstant()));
 
-      Set<Integer> mergedLocals = new HashSet<Integer>(ev.getLocals());
+      Set<Integer> mergedLocals = new HashSet<>(ev.getLocals());
       mergedLocals.retainAll(ew.getLocals());
 
       return isConstant?

@@ -118,7 +118,7 @@ public class ExtendedValue extends BasicValue
     assert locals != null : "Precondition: locals != null";
 
     this.constant = constant;
-    this.locals = Collections.unmodifiableSortedSet(new TreeSet<Integer>(locals));
+    this.locals = Collections.unmodifiableSortedSet(new TreeSet<>(locals));
   }
 
   /**
@@ -190,7 +190,7 @@ public class ExtendedValue extends BasicValue
       return this;
     }
 
-    Set<Integer> modifiedLocals = new HashSet<Integer>(locals);
+    Set<Integer> modifiedLocals = new HashSet<>(locals);
     modifiedLocals.add(local);
     return new ExtendedValue(getType(), constant, modifiedLocals);
   }
@@ -209,7 +209,7 @@ public class ExtendedValue extends BasicValue
       return this;
     }
 
-    Set<Integer> modifiedLocals = new HashSet<Integer>(locals);
+    Set<Integer> modifiedLocals = new HashSet<>(locals);
     modifiedLocals.remove(modifiedLocal);
     return new ExtendedValue(getType(), constant, modifiedLocals);
   }
