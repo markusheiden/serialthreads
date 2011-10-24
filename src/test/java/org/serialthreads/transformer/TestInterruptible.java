@@ -2,8 +2,11 @@ package org.serialthreads.transformer;
 
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
+import org.serialthreads.context.ITransformedRunnable;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
+import org.serialthreads.context.Stack;
+import org.serialthreads.context.StackFrame;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,6 +33,15 @@ public class TestInterruptible implements IRunnable
   {
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(this);
     SerialThreadManager.registerManager(manager);
+
+    // TODO 2011-10-24 mh: This is just a workaround for transformers that don't support auto resize of stack
+    Stack stack = (Stack) ((ITransformedRunnable) this).getThread();
+    StackFrame first = stack.first;
+    stack.addFrame(stack.frame);
+    stack.addFrame(stack.frame);
+    stack.addFrame(stack.frame);
+    stack.frame = first;
+
     manager.execute();
   }
 
