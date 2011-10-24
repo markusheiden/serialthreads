@@ -34,7 +34,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
    */
   public AbstractClassInfoCache()
   {
-    this.classes = new TreeMap<String, ClassInfo>();
+    this.classes = new TreeMap<>();
   }
 
   public boolean isInterface(String className)
@@ -205,7 +205,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     String className = null;
     try
     {
-      Deque<String> toProcess = new LinkedList<String>();
+      Deque<String> toProcess = new LinkedList<>();
       ClassInfo result = scan(owner, toProcess);
 
       while (!toProcess.isEmpty())

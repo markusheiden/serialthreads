@@ -15,7 +15,7 @@ public class MethodInfoVisitor extends MethodVisitor
 {
   private String methodName;
   private String methodDesc;
-  private final Set<String> methodAnnotations = new HashSet<String>();
+  private final Set<String> methodAnnotations = new HashSet<>();
 
   private final Map<String, MethodInfo> methods;
 

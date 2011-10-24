@@ -23,7 +23,7 @@ public class ClassInfoVisitor extends ClassVisitor
   {
     super(Opcodes.ASM4);
 
-    this.methods = new TreeMap<String, MethodInfo>();
+    this.methods = new TreeMap<>();
   }
 
   @Override

@@ -21,8 +21,8 @@ import java.util.Set;
 public class ClassInfoCacheReflection extends AbstractClassInfoCache
 {
   private ClassLoader _classLoader;
-  private final Map<String, ClassLoader> _classLoaders = new HashMap<String, ClassLoader>();
-  private final Map<String, ClassInfoVisitor> _classes = new HashMap<String, ClassInfoVisitor>();
+  private final Map<String, ClassLoader> _classLoaders = new HashMap<>();
+  private final Map<String, ClassInfoVisitor> _classes = new HashMap<>();
 
   /**
    * Start processing for a given class.
@@ -115,13 +115,13 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
       {
         superClassName = clazz.getSuperclass().getName().replace('.', '/');
       }
-      Map<String, MethodInfo> methodInfos = new HashMap<String, MethodInfo>();
+      Map<String, MethodInfo> methodInfos = new HashMap<>();
       Method[] methods = clazz.getDeclaredMethods();
       for (Method method : methods)
       {
         String name = method.getName();
         String desc = Type.getMethodDescriptor(method);
-        Set<String> annotations = new HashSet<String>();
+        Set<String> annotations = new HashSet<>();
         for (Annotation annotation : method.getAnnotations())
         {
           annotations.add(Type.getDescriptor(annotation.getClass()));
@@ -136,7 +136,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
       {
         String name = "<init>";
         String desc = Type.getConstructorDescriptor(constructor);
-        Set<String> annotations = new HashSet<String>();
+        Set<String> annotations = new HashSet<>();
 
         MethodInfo info = new MethodInfo(name, desc, annotations);
         methodInfos.put(info.getID(), info);
@@ -144,7 +144,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
 
       String name = "<clinit>";
       String desc = "()V";
-      Set<String> annotations = new HashSet<String>();
+      Set<String> annotations = new HashSet<>();
 
       MethodInfo info = new MethodInfo(name, desc, annotations);
       methodInfos.put(info.getID(), info);

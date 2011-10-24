@@ -30,7 +30,7 @@ public class MethodInfo
 
     this.name = name;
     this.desc = desc;
-    this.annotations = Collections.unmodifiableSet(new HashSet<String>(annotations));
+    this.annotations = Collections.unmodifiableSet(new HashSet<>(annotations));
   }
 
   /**

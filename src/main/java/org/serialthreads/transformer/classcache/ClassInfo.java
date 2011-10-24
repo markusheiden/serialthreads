@@ -44,8 +44,8 @@ public class ClassInfo
     this.type = Type.getObjectType(className);
     this.className = className;
     this.superClassName = superClassName;
-    this.superClasses = new TreeSet<String>();
-    this.methods = new TreeMap<String, MethodInfo>(methods);
+    this.superClasses = new TreeSet<>();
+    this.methods = new TreeMap<>(methods);
 
     superClasses.add(className);
 
