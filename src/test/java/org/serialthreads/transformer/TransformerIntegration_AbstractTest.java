@@ -38,7 +38,7 @@ public abstract class TransformerIntegration_AbstractTest
       {
         return new TraceClassVisitor(writer, new PrintWriter(System.out));
       }
-    }.loadClass(TransformerIntegration_AbstractTest.class.getPackage().getName() + ".TestInterruptible");
+    }.loadClass(TestInterruptible.class.getName());
     clazz.getMethod("runTransformed").invoke(clazz.newInstance());
   }
 
@@ -51,7 +51,7 @@ public abstract class TransformerIntegration_AbstractTest
     // disable debug mode to not throw an exception in SerialThreadManager.interrupt()
     SerialThreadManager.DEBUG = false;
 
-    Class<?> clazz = getClass().getClassLoader().loadClass(TransformerIntegration_AbstractTest.class.getPackage().getName() + ".TestInterruptible");
+    Class<?> clazz = getClass().getClassLoader().loadClass(TestInterruptible.class.getName());
     clazz.getMethod("run").invoke(clazz.newInstance());
   }
 }
