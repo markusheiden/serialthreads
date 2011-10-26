@@ -1,7 +1,7 @@
 package org.serialthreads.transformer;
 
 /**
- * Integration-test for SingleFrameExecutionTransformer.
+ * Integration-test for {@link SingleFrameExecutionTransformer}.
  */
 public class SingleFrameExecutionTransformer_IntegrationTest extends TransformerIntegration_AbstractTest
 {

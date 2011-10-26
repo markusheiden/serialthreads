@@ -1,7 +1,7 @@
 package org.serialthreads.transformer;
 
 /**
- * Integration-test for FrequentInterruptsTransformer.
+ * Integration-test for {@link FrequentInterruptsTransformer}.
  */
 public class FrequentInterruptsTransformer_IntegrationTest extends TransformerIntegration_AbstractTest
 {
