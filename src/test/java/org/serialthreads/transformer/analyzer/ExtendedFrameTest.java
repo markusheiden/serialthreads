@@ -93,6 +93,7 @@ public class ExtendedFrameTest
     testExecute_const(new InsnNode(Opcodes.LCONST_1), Type.LONG_TYPE, 1L);
     testExecute_const(new InsnNode(Opcodes.FCONST_0), Type.FLOAT_TYPE, 0F);
     testExecute_const(new InsnNode(Opcodes.FCONST_1), Type.FLOAT_TYPE, 1F);
+    testExecute_const(new InsnNode(Opcodes.FCONST_2), Type.FLOAT_TYPE, 2F);
     testExecute_const(new InsnNode(Opcodes.DCONST_0), Type.DOUBLE_TYPE, 0D);
     testExecute_const(new InsnNode(Opcodes.DCONST_1), Type.DOUBLE_TYPE, 1D);
 
