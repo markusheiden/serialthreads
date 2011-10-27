@@ -124,7 +124,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     // add thread and previousFrame arguments to the original method
     method.desc = changeDesc(method.desc);
 
-    return Arrays.asList(copy);
+    return Arrays.asList(method, copy);
   }
 
   /**
