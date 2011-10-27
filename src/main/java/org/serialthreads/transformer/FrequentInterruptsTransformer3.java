@@ -115,7 +115,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private List<MethodNode> transformAbstract(ClassNode clazz, MethodNode method)
   {
-    // create copy of method with shortened arguments
+    // create a copy of the method with shortened arguments
     MethodNode copy = copyMethod(clazz, method);
     copy.desc = changeCopyDesc(method.desc);
 
@@ -124,7 +124,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       log.debug("      Copied abstract method " + methodName(clazz, copy));
     }
 
-    // add thread and previousFrame arguments to original method
+    // add thread and previousFrame arguments to the original method
     method.desc = changeDesc(method.desc);
 
     return Arrays.asList(copy);
@@ -375,6 +375,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
   /**
    * Change the name of a copied method.
+   * Computes an unique name based on the name and the descriptor.
    *
    * @param name name of method
    * @param desc parameters
@@ -386,7 +387,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   }
 
   /**
-   * Change parameters of a copied method.
+   * Change the parameters of a copied method to (Thread, Frame).
    *
    * @param desc parameters
    * @return changed parameters
@@ -398,6 +399,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
   /**
    * Change parameters of a method.
+   * Inserts thread and frame as additional parameters at the end.
    *
    * @param desc parameters
    * @return changed parameters
