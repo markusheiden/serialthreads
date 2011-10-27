@@ -1,5 +1,6 @@
 package org.serialthreads.transformer;
 
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -8,9 +9,11 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
+import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
@@ -20,22 +23,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IFNONNULL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
+import static org.serialthreads.transformer.code.MethodCode.firstParam;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isInterrupt;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
  * Transformer implementing serial threads by executing single frames.
@@ -51,7 +62,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   public SingleFrameExecutionTransformer(IClassInfoCache classInfoCache)
   {
-    super(classInfoCache, 256);
+    super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
   }
 
   @Override
@@ -63,16 +74,13 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
   {
-    boolean isAbstract = isAbstract(method);
-    boolean isRun = isRun(clazz, method, classInfoCache);
-
-    if ((isInterface(clazz) || isAbstract) && isRun)
+    if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache))
     {
       // do not transform IRunnable.run() itself
       return Collections.emptyList();
     }
 
-    if (isAbstract)
+    if (isAbstract(method))
     {
       // change signature of abstract methods
       return transformAbstract(clazz, method);
@@ -85,7 +93,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
       return Collections.emptyList();
     }
 
-    if (isRun)
+    if (isRun(clazz, method, classInfoCache))
     {
       // take special care of run method
       return transformRun(clazz, method, methodCalls);
@@ -96,9 +104,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   }
 
   /**
-   * Transform abstract methods (includes interface methods).
-   * Changes the signature of the abstract method and creates a copy of the abstract method too,
-   * because it is needed as an interface / superclass for the copied concrete methods.
+   * Transform abstract method (includes interface methods).
    *
    * @param clazz class to alter
    * @param method method to transform
@@ -106,17 +112,23 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   private List<MethodNode> transformAbstract(ClassNode clazz, MethodNode method)
   {
-    // create a copy of the method with fixed arguments: ...(Thread, Frame)V
+    // create a copy of the method with shortened arguments
     MethodNode copy = copyMethod(clazz, method);
+    copy.desc = changeCopyDesc(method.desc);
 
-    // add thread and previousFrame arguments to the original method: ...(..., Thread, Frame)...
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Copied abstract method " + methodName(clazz, copy));
+    }
+
+    // add thread and previousFrame arguments to the original method
     method.desc = changeDesc(method.desc);
 
-    return Arrays.asList(method, copy);
+    return Arrays.asList(copy);
   }
 
   /**
-   * Transform implementations of the IRunnable.run() method.
+   * Transform IRunnable.run() method.
    *
    * @param clazz class to alter
    * @param method run method to transform
@@ -125,10 +137,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   private List<MethodNode> transformRun(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
     Frame[] frames = analyze(clazz, method);
 
     replaceReturns(clazz, method);
-    // TODO 2010-06-26 mh: interrupt restore codes only??? "self" calls?
     List<InsnList> restoreCodes = insertCaptureCode(clazz, method, frames, methodCalls, true);
     createRestoreHandlerRun(clazz, method, restoreCodes);
     addThreadAndFrame(clazz, method, methodCalls.keySet());
@@ -147,17 +159,22 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   private List<MethodNode> transformMethod(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
     Frame[] frames = analyze(clazz, method);
 
-    // create copy of method with fixed arguments: ...(Thread, Frame)V
+    // create copy of method with shortened signature
     MethodNode copy = copyMethod(clazz, method);
     Map<MethodInsnNode, Integer> copyMethodCalls = interruptibleMethodCalls(copy.instructions);
-    // TODO 2010-06-26 mh: interrupt restore codes only
     List<InsnList> restoreCodes = insertCaptureCode(clazz, copy, frames, copyMethodCalls, true);
     createRestoreHandlerCopy(clazz, copy, restoreCodes);
     addThreadAndFrame(clazz, copy, copyMethodCalls.keySet());
+    copy.desc = changeCopyDesc(method.desc);
     fixMaxs(copy);
-    // TODO 2010-06-26 mh: replace returns, capture return values
+
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Copied concrete method " + methodName(clazz, copy));
+    }
 
     insertCaptureCode(clazz, method, frames, methodCalls, false);
     createRestoreHandlerMethod(clazz, method);
@@ -169,7 +186,8 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   }
 
   /**
-   * Copies a method, changes its signature and adds it to the class.
+   * Copies a method and adds it to the class.
+   * Its arguments will be shortened by the caller later on.
    *
    * @param clazz class to add copied method to
    * @param method method to copy
@@ -177,18 +195,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   private MethodNode copyMethod(ClassNode clazz, MethodNode method)
   {
     MethodNode copy = MethodNodeCopier.copy(method);
-    copy.access = copy.access & 0xFFF8 | ACC_PRIVATE;
     copy.name = changeCopyName(method.name, method.desc);
-    copy.desc = changeCopyDesc(method.desc);
 
     //noinspection unchecked
     clazz.methods.add(copy);
-
-    if (log.isDebugEnabled())
-    {
-      String kind = isAbstract(method)? "abstract" : "concrete";
-      log.debug("      Copied " + kind + " method " + methodName(clazz, copy));
-    }
 
     return copy;
   }
@@ -205,8 +215,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   {
     InsnList instructions = method.instructions;
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     for (MethodInsnNode methodCall : methodCalls)
     {
@@ -227,7 +239,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
    */
   protected void fixMaxs(MethodNode method)
   {
-    method.maxLocals += 4;
+    method.maxLocals += 1;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
   }
@@ -244,9 +256,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
       log.debug("      Creating capture code for method call to " + methodName(methodCall));
     }
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localPreviousFrame = method.maxLocals + 2;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     LabelNode normal = new LabelNode();
 
@@ -259,7 +272,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
 
     // capture frame and return early
     capture.add(pushToFrame(method, methodCall, frameAfter, localFrame));
-    capture.add(pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, frameBefore), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
     capture.add(dummyReturnStatement(method));
 
     // normal execution
@@ -276,9 +289,85 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   @Override
   protected InsnList createRestoreCodeForMethod(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
   {
-    // not needed, because we do not need to decent from root to the leaf anymore.
-    // instead we jump with a method handle directly to the leaf.
-    return null;
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Creating restore code for method call to " + methodName(methodCall));
+    }
+
+    MethodInsnNode clonedCall = copyMethodCall(methodCall);
+
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
+    final int localReturnValue = method.maxLocals;
+
+    // label "normal" points the code directly after the method call
+    LabelNode normal = new LabelNode();
+    method.instructions.insert(methodCall, normal);
+    LabelNode restoreFrame = new LabelNode();
+
+    InsnList restore = new InsnList();
+
+    // call interrupted method
+    if (isSelfCall(methodCall, frameBefore))
+    {
+      // self call: owner == this
+      restore.add(new VarInsnNode(ALOAD, 0));
+    }
+    else if (isNotStatic(clonedCall))
+    {
+      // get owner
+      restore.add(new VarInsnNode(ALOAD, localFrame));
+      restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+      restore.add(new TypeInsnNode(CHECKCAST, clonedCall.owner));
+    }
+
+    // jump to cloned method call with thread and frame as arguments
+    restore.add(new VarInsnNode(ALOAD, localThread));
+    restore.add(new VarInsnNode(ALOAD, localFrame));
+    restore.add(clonedCall);
+
+    // if not serializing "GOTO" normal, but restore the frame first
+    restore.add(new VarInsnNode(ALOAD, localThread));
+    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restore.add(new JumpInsnNode(IFEQ, restoreFrame));
+
+    // early return, the frame already has been captured
+    restore.add(dummyReturnStatement(method));
+
+    // restore frame to be able to resume normal execution of method
+    restore.add(restoreFrame);
+
+    // restore stack "under" the returned value, if any
+    // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
+    final boolean needToSaveReturnValue = isNotVoid(clonedCall) && frameAfter.getStackSize() > 1;
+    if (needToSaveReturnValue)
+    {
+      restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
+    }
+    restore.add(popFromFrame(method, clonedCall, frameAfter, localFrame));
+    if (needToSaveReturnValue)
+    {
+      restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
+    }
+    restore.add(new JumpInsnNode(GOTO, normal));
+
+    return restore;
+  }
+
+  /**
+   * Copies method call and changes the signature.
+   *
+   * @param methodCall method call
+   */
+  private MethodInsnNode copyMethodCall(MethodInsnNode methodCall)
+  {
+    MethodInsnNode result = (MethodInsnNode) methodCall.clone(null);
+    result.name = changeCopyName(methodCall.name, methodCall.desc);
+    result.desc = changeCopyDesc(methodCall.desc);
+
+    return result;
   }
 
   /**
@@ -295,14 +384,14 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
   }
 
   /**
-   * Change the parameters of a copied method to (Thread, Frame)V.
+   * Change the parameters of a copied method to (Thread, Frame).
    *
    * @param desc parameters
    * @return changed parameters
    */
   private String changeCopyDesc(String desc)
   {
-    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")V";
+    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
   }
 
   /**
@@ -335,32 +424,27 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     }
 
     int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
-    final int paramThread = local++;
-    final int paramPreviousFrame = local++;
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
-    final int localPreviousFrame = method.maxLocals + 2;
+    LabelNode normal = new LabelNode();
 
     // frame = previousFrame.next
     InsnList getFrame = new InsnList();
-    // TODO 2009-10-22 mh: rename locals to avoid this copy?
-    getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
-
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    getFrame.add(new InsnNode(DUP));
+    getFrame.add(new JumpInsnNode(IFNONNULL, normal));
+
+    getFrame.add(new InsnNode(POP));
+    // frame = thread.addFrame(previousFrame);
+    getFrame.add(new VarInsnNode(ALOAD, localThread));
+    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+    getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC));
+
+    getFrame.add(normal);
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
-
-    // thread = currentThread
-    // TODO 2009-11-11 mh: rename others locals instead of copy these?
-    getFrame.add(new VarInsnNode(ALOAD, paramThread));
-    getFrame.add(new VarInsnNode(ASTORE, localThread));
-
-    // TODO 2009-12-01 mh: fix / reenable dynamic frame resize
-    // getFrame.add(new VarInsnNode(ALOAD, localFrame));
-    // getFrame.add(IntValueCode.push(maxFrameSize));
-    // getFrame.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, FRAME_IMPL_NAME, "resize", "(I)V"));
 
     method.instructions.insertBefore(method.instructions.getFirst(), getFrame);
   }
@@ -381,11 +465,14 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
       log.debug("    Creating restore handler for copied method");
     }
 
-    int local = isNotStatic(method)? 1 : 0;
-    final int paramThread = local++;
-    final int paramPreviousFrame = local++;
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int param = firstParam(method);
+    final int paramThread = param++;
+    final int paramPreviousFrame = param++;
+
+    int local = firstLocal(method);
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
+    final int localFrame = local++;
 
     InsnList restore = new InsnList();
 
@@ -397,7 +484,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     restore.add(new VarInsnNode(ASTORE, localFrame));
 
     // thread = currentThread;
-    // TODO 2009-10-22 mh: rename locals to avoid this copy?
+    // TODO 2009-10-22 mh: how to avoid this copy???
     restore.add(new VarInsnNode(ALOAD, paramThread));
     restore.add(new VarInsnNode(ASTORE, localThread));
 
@@ -426,8 +513,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
       log.debug("    Creating restore handler for run");
     }
 
-    final int localThread = method.maxLocals;
-    final int localFrame = method.maxLocals + 1;
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
 
     // dummy startup restore code to avoid to check thread.serializing.
     // empty frames are expected to have method = -1.
@@ -444,6 +533,7 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
     restoreCodes.add(0, startRestoreCode);
 
+    // restore code dispatcher
     InsnList restore = new InsnList();
 
     // thread = this.$$thread$$;
@@ -453,10 +543,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer
 
     // frame = thread.first;
     restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
     restore.add(new VarInsnNode(ASTORE, localFrame));
 
-    // no previous frame needed in run
+    // no previous frame needed in run, because there may not be a previous frame
 
     // restore code dispatcher
     InsnList getMethod = new InsnList();
