@@ -1,6 +1,7 @@
 package org.serialthreads.transformer;
 
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -231,6 +232,36 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localFrame));
         methodCall.desc = changeDesc(methodCall.desc);
       }
+    }
+  }
+
+  /**
+   * Replace returns with void returns.
+   * The return value will be captured in the previous frame.
+   *
+   * @param clazz class to transform
+   * @param method method to transform
+   */
+  private void voidReturns(ClassNode clazz, MethodNode method)
+  {
+    Type returnType = Type.getReturnType(method.desc);
+    if (returnType.getSort() == Type.VOID)
+    {
+      // Method already has return type void
+      return;
+    }
+
+    InsnList instructions = method.instructions;
+
+    int local = firstLocal(method);
+    final int localThread = local++; // param thread
+    final int localPreviousFrame = local++; // param previousFrame
+    final int localFrame = local++;
+
+    for (AbstractInsnNode returnInstruction : returnInstructions(method.instructions))
+    {
+      instructions.insert(returnInstruction, code(returnType).pushReturnValue(localPreviousFrame));
+      instructions.remove(returnInstruction);
     }
   }
 
