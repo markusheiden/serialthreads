@@ -25,11 +25,11 @@ public class StackFrame implements Serializable
   public int method;
 
   // Return value of the method
-  public Object objectReturn;
-  public int intReturn;
-  public long longReturn;
-  public float floatReturn;
-  public double doubleReturn;
+  public Object returnObject;
+  public int returnInt;
+  public long returnLong;
+  public float returnFloat;
+  public double returnDouble;
 
   // size of frame
   private int size;

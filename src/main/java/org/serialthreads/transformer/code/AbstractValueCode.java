@@ -12,6 +12,7 @@ import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.POP2;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.SWAP;
 
 /**
@@ -22,6 +23,7 @@ public abstract class AbstractValueCode implements IValueCode
   protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
 
   protected final Type type;
+  protected final Type baseType;
   protected final String methodName;
   protected final int load;
   protected final int store;
@@ -33,6 +35,7 @@ public abstract class AbstractValueCode implements IValueCode
   public AbstractValueCode(Type type, String methodName, int load, int store, int aload, int astore, int pushNull, int returnValue)
   {
     this.type = type;
+    this.baseType = type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY? Type.getType(Object.class) : type;
     this.methodName = methodName;
     this.load = load;
     this.store = store;
@@ -74,6 +77,17 @@ public abstract class AbstractValueCode implements IValueCode
   }
 
   @Override
+  public InsnList pushReturnValue(int localFrame)
+  {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new InsnNode(SWAP));
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new InsnNode(RETURN));
+    return instructions;
+  }
+
+  @Override
   public InsnList popLocalVariableFast(int local, int index, int localFrame)
   {
     assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
@@ -98,6 +112,16 @@ public abstract class AbstractValueCode implements IValueCode
     instructions.add(cast());
     instructions.add(afterPop(local));
     instructions.add(new VarInsnNode(store, local));
+    return instructions;
+  }
+
+  @Override
+  public InsnList popReturnValue(int localFrame)
+  {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(cast());
     return instructions;
   }
 

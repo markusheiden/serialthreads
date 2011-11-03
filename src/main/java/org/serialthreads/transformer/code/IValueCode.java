@@ -37,6 +37,13 @@ public interface IValueCode
   public InsnList pushLocalVariable(int local, int index);
 
   /**
+   * Generate code to capture the current stack as a return value to a frame.
+   *
+   * @param localFrame frame to push to
+   */
+  public InsnList pushReturnValue(int localFrame);
+
+  /**
    * Generate code to restore a local variable from a frame.
    * The frame is expected to be already on the top of the stack.
    *
@@ -54,6 +61,13 @@ public interface IValueCode
    * @param index index of local among locals of the same type
    */
   public InsnList popLocalVariable(int local, int index);
+
+  /**
+   * Generate code to restore the return value from a frame.
+   *
+   * @param localFrame frame to pop from
+   */
+  public InsnList popReturnValue(int localFrame);
 
   /**
    * Generate code to get the array for stack elements of the frame.
