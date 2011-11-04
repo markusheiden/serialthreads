@@ -36,7 +36,7 @@ import static org.objectweb.asm.Opcodes.IFNONNULL;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 import static org.serialthreads.transformer.code.MethodCode.firstParam;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
@@ -55,6 +55,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
  * The thread and frame will be added to the signature of all interruptible methods.
  * This transformation needs no static thread holder, SimpleSerialThreadManager2 can be used.
  */
+@SuppressWarnings({"UnusedAssignment", "UnusedParameters", "UnusedDeclaration"})
 public class FrequentInterruptsTransformer3 extends AbstractTransformer
 {
   public static final String STRATEGY = "FREQUENT3";
@@ -168,6 +169,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
     // create copy of method with shortened signature
     MethodNode copy = copyMethod(clazz, method);
+    voidReturns(clazz, copy);
     Map<MethodInsnNode, Integer> copyMethodCalls = interruptibleMethodCalls(copy.instructions);
     List<InsnList> restoreCodes = insertCaptureCode(clazz, copy, frames, copyMethodCalls, true);
     createRestoreHandlerCopy(clazz, copy, restoreCodes);
@@ -180,6 +182,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       log.debug("      Copied concrete method " + methodName(clazz, copy));
     }
 
+    voidReturns(clazz, method);
     insertCaptureCode(clazz, method, frames, methodCalls, false);
     createRestoreHandlerMethod(clazz, method);
     addThreadAndFrame(clazz, method, methodCalls.keySet());
@@ -201,7 +204,6 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     MethodNode copy = MethodNodeCopier.copy(method);
     copy.name = changeCopyName(method.name, method.desc);
 
-    //noinspection unchecked
     clazz.methods.add(copy);
 
     return copy;
@@ -283,6 +285,15 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   //
 
   @Override
+  protected InsnList dummyReturn(MethodNode method)
+  {
+    // Always use void returns, because all methods have been change to use void returns
+    InsnList result = new InsnList();
+    result.add(new InsnNode(RETURN));
+    return result;
+  }
+
+  @Override
   protected void createCaptureCodeForMethod(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
   {
     if (log.isDebugEnabled())
@@ -307,13 +318,25 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     // capture frame and return early
     capture.add(pushToFrame(method, methodCall, frameAfter, localFrame));
     capture.add(pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
-    capture.add(dummyReturnStatement(method));
+    capture.add(new InsnNode(RETURN));
 
     // normal execution
     capture.add(normal);
+    // restore return value of call, if any
+    if (isNotVoid(methodCall))
+    {
+      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+    }
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
+  }
+
+  @Override
+  protected InsnList popReturnValue(MethodInsnNode methodCall)
+  {
+    // There is no return value, because all method have been change to void returns
+    return new InsnList();
   }
 
   //
@@ -368,22 +391,16 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     restore.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // early return, the frame already has been captured
-    restore.add(dummyReturnStatement(method));
+    restore.add(new InsnNode(RETURN));
 
     // restore frame to be able to resume normal execution of method
     restore.add(restoreFrame);
 
     // restore stack "under" the returned value, if any
-    // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
-    final boolean needToSaveReturnValue = isNotVoid(clonedCall) && frameAfter.getStackSize() > 1;
-    if (needToSaveReturnValue)
+    restore.add(popFromFrame(method, methodCall, frameAfter, localFrame));
+    if (isNotVoid(methodCall))
     {
-      restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
-    }
-    restore.add(popFromFrame(method, clonedCall, frameAfter, localFrame));
-    if (needToSaveReturnValue)
-    {
-      restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
+      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
     }
     restore.add(new JumpInsnNode(GOTO, normal));
 
@@ -425,7 +442,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private String changeCopyDesc(String desc)
   {
-    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
+    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.VOID_TYPE;
   }
 
   /**
@@ -437,7 +454,8 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private String changeDesc(String desc)
   {
-    return desc.replace(")", THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")");
+    int index = desc.indexOf(")");
+    return desc.substring(0, index) + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.VOID_TYPE;
   }
 
   //
@@ -510,7 +528,9 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
     InsnList restore = new InsnList();
 
-    // previousFrame needs not to be stored in local, because the owner has already been stored in the previous frame
+    // TODO 2011-10-04 mh: Avoid this copy, it is needed just for capturing the return value. Fix order of copies?
+    restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+    restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
     // frame = previousFrame.next
     restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));

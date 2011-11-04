@@ -1,7 +1,6 @@
 package org.serialthreads.transformer;
 
 import org.apache.log4j.Logger;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -59,6 +58,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 /**
  * Base implementation of a transformer.
  */
+@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
 public abstract class AbstractTransformer implements ITransformer
 {
   protected final Logger log = Logger.getLogger(getClass());
@@ -418,7 +418,8 @@ public abstract class AbstractTransformer implements ITransformer
     for (Iterator<AbstractInsnNode> iter = instructions.iterator(); iter.hasNext(); )
     {
       AbstractInsnNode instruction = iter.next();
-      if (instruction.getOpcode() == Opcodes.RETURN)
+      int opcode = instruction.getOpcode();
+      if (opcode >= IRETURN && opcode <= RETURN)
       {
         result.add(instruction);
       }
@@ -588,11 +589,23 @@ public abstract class AbstractTransformer implements ITransformer
     capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
 
     // return early
-    capture.add(dummyReturnStatement(method));
+    capture.add(dummyReturn(method));
 
     // replace dummy call of interrupt method by capture code
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
+  }
+
+  /**
+   * Dummy return for the given method.
+   *
+   * @param method method containing the call
+   */
+  protected InsnList dummyReturn(MethodNode method)
+  {
+    InsnList result = new InsnList();
+    result.add(dummyReturnStatement(method));
+    return result;
   }
 
   /**
@@ -624,7 +637,7 @@ public abstract class AbstractTransformer implements ITransformer
    */
   protected InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, Frame frame, int localFrame)
   {
-    InsnList result = new InsnList();
+    InsnList push = new InsnList();
 
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
@@ -632,7 +645,7 @@ public abstract class AbstractTransformer implements ITransformer
     // get rid of dummy return value of called method first
     if (isCallNotVoid)
     {
-      result.add(code(Type.getReturnType(methodCall.desc)).pop());
+      push.add(popReturnValue(methodCall));
     }
 
     // save stack
@@ -644,11 +657,11 @@ public abstract class AbstractTransformer implements ITransformer
       if (value.isConstant() || value.isHoldInLocal())
       {
         // just pop the value from stack, because the stack value is constant or stored in a local too.
-        result.add(code(value).pop());
+        push.add(code(value).pop());
       }
       else
       {
-        result.add(code(value).pushStack(stackIndexes[stack], localFrame));
+        push.add(code(value).pushStack(stackIndexes[stack], localFrame));
       }
     }
 
@@ -678,26 +691,38 @@ public abstract class AbstractTransformer implements ITransformer
       {
         int local = iter.next();
         IValueCode localCode = code((BasicValue) frame.getLocal(local));
-        result.add(localCode.pushLocalVariableFast(local, i, localFrame));
+        push.add(localCode.pushLocalVariableFast(local, i, localFrame));
       }
 
       // for too high locals use "slow" storage in (dynamic) array
       if (iter.hasNext())
       {
-        result.add(code.getLocals(localFrame));
+        push.add(code.getLocals(localFrame));
         for (int i = 0; iter.hasNext(); i++)
         {
           int local = iter.next();
           IValueCode localCode = code((BasicValue) frame.getLocal(local));
           if (iter.hasNext())
           {
-            result.add(new InsnNode(DUP));
+            push.add(new InsnNode(DUP));
           }
-          result.add(localCode.pushLocalVariable(local, i));
+          push.add(localCode.pushLocalVariable(local, i));
         }
       }
     }
 
+    return push;
+  }
+
+  /**
+   * Pop return value from stack before saving a frame.
+   *
+   * @param methodCall method call to process
+   */
+  protected InsnList popReturnValue(MethodInsnNode methodCall)
+  {
+    InsnList result = new InsnList();
+    result.add(code(Type.getReturnType(methodCall.desc)).pop());
     return result;
   }
 
