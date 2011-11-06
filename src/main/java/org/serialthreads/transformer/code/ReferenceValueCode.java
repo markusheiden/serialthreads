@@ -35,6 +35,17 @@ public class ReferenceValueCode extends AbstractValueCode
   }
 
   @Override
+  public InsnList popReturnValue(int localFrame)
+  {
+    InsnList instructions = super.popReturnValue(localFrame);
+    // TODO 2009-10-11 mh: remove deletion of reference for performance reasons?
+    instructions.add(pushNull());
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "returnObject", type.getDescriptor()));
+
+    return instructions;
+  }
+
+  @Override
   protected InsnList cast()
   {
     InsnList instructions = new InsnList();
@@ -43,11 +54,10 @@ public class ReferenceValueCode extends AbstractValueCode
     return instructions;
   }
 
-  // TODO 2009-10-11 mh: remove deletion of reference for performance reasons?
-
   @Override
   protected InsnList clear(String name, int localFrame)
   {
+    // TODO 2009-10-11 mh: remove deletion of reference for performance reasons?
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(pushNull());
