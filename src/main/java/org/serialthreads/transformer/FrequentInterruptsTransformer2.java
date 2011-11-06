@@ -30,10 +30,14 @@ import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IFNONNULL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
@@ -405,6 +409,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
+    LabelNode normal = new LabelNode();
+
     // previousFrame = thread.frame;
     InsnList getFrame = new InsnList();
     getFrame.add(new VarInsnNode(ALOAD, localThread));
@@ -416,6 +422,16 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     // frame = previousFrame.next;
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    getFrame.add(new InsnNode(DUP));
+    getFrame.add(new JumpInsnNode(IFNONNULL, normal));
+
+    getFrame.add(new InsnNode(POP));
+    // frame = thread.addFrame(previousFrame);
+    getFrame.add(new VarInsnNode(ALOAD, localThread));
+    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+    getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC));
+
+    getFrame.add(normal);
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
