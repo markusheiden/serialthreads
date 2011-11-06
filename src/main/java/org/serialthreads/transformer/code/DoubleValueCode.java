@@ -55,6 +55,7 @@ public class DoubleValueCode extends AbstractValueCode
     instructions.add(new InsnNode(DUP_X2));
     instructions.add(new InsnNode(POP));
     instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+
     instructions.add(new InsnNode(RETURN));
     return instructions;
   }
