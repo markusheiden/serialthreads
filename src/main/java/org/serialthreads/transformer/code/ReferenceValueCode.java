@@ -38,9 +38,7 @@ public class ReferenceValueCode extends AbstractValueCode
   public InsnList popReturnValue(int localFrame)
   {
     InsnList instructions = super.popReturnValue(localFrame);
-    // TODO 2009-10-11 mh: remove deletion of reference for performance reasons?
-    instructions.add(pushNull());
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "returnObject", type.getDescriptor()));
+    instructions.add(clear("returnObject", localFrame));
 
     return instructions;
   }
