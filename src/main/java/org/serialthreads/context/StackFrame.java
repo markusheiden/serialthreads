@@ -3,6 +3,8 @@ package org.serialthreads.context;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.util.Arrays;
 
 /**
@@ -16,13 +18,17 @@ public class StackFrame implements Serializable
   public static int DEFAULT_FRAME_SIZE = 64;
   public static final int FAST_FRAME_SIZE = 8;
 
+  public static MethodType METHOD_TYPE = MethodType.methodType(void.class, Stack.class, StackFrame.class);
+
   // double linked list of stack frames
   public final StackFrame previous;
   public StackFrame next;
+  public StackFrame last;
 
   // Method owner and index of restore code
   public Object owner;
   public int method;
+  public MethodHandle methodHandle;
 
   // Return value of the method
   public Object returnObject;
@@ -161,6 +167,9 @@ public class StackFrame implements Serializable
     owner = null;
     // has to be -1 for dummy startup restore!
     method = -1;
+    methodHandle = null;
+
+    returnObject = null;
 
     this.size = size;
 
@@ -214,6 +223,9 @@ public class StackFrame implements Serializable
   {
     owner = null;
     method = -1;
+    methodHandle = null;
+
+    returnObject = null;
 
     stackObjectPtr = 0;
     // TODO 2010-03-18 mh: reset fast stack too
