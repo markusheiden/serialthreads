@@ -1,3 +1,23 @@
+SFE new:
+--------
+
+run:
+- restore code dispatcher just for run
+- not run: store last frame in local, call method handle of last frame
+- while not serializing: local last frame--, call method handle of last frame
+
+copy:
+- restore code dispatcher which just restores the frame and jumps after interrupt/method call
+- static field with same name with (unbound) method handle
+
+interrupt:
+- set last frame
+
+method:
+- same as frequent3
+
+-------------------------------------------------------------------------------
+
 SFE:
 ----
 
