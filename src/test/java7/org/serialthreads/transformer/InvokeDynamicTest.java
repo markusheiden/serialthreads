@@ -54,12 +54,14 @@ public class InvokeDynamicTest
       SubMethodHandleTestTarget.overriddenSuperHandle.invoke(new SubMethodHandleTestTarget(), new Stack("", 0), new StackFrame(null, 0));
       MethodHandleTestTarget.privateHandle.invoke(new MethodHandleTestTarget(), new Stack("", 0), new StackFrame(null, 0));
       MethodHandleTestTarget.privateStaticHandle.invoke(new Stack("", 0), new StackFrame(null, 0));
+      MethodHandleTestTarget.varargsHandle.invoke(new MethodHandleTestTarget(), "1", "2");
       System.out.println("Bound:");
       MethodHandleTestTarget.overrideHandle.bindTo(new MethodHandleTestTarget()).invoke(new Stack("", 0), new StackFrame(null, 0));
       SubMethodHandleTestTarget.overriddenHandle.bindTo(new SubMethodHandleTestTarget()).invoke(new Stack("", 0), new StackFrame(null, 0));
       SubMethodHandleTestTarget.overriddenSuperHandle.bindTo(new SubMethodHandleTestTarget()).invoke(new Stack("", 0), new StackFrame(null, 0));
       MethodHandleTestTarget.privateHandle.bindTo(new MethodHandleTestTarget()).invoke(new Stack("", 0), new StackFrame(null, 0));
       MethodHandleTestTarget.privateStaticHandle.invoke(new Stack("", 0), new StackFrame(null, 0));
+//      MethodHandleTestTarget.varargsHandle.bindTo(new MethodHandleTestTarget()).asFixedArity().invoke("1", "2");
     }
     catch (Throwable throwable)
     {
