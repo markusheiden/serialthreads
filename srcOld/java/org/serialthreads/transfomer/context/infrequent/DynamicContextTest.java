@@ -1,6 +1,5 @@
 package org.serialthreads.transfomer.context.infrequent;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**

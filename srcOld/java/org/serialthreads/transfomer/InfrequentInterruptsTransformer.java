@@ -1,18 +1,5 @@
 package org.serialthreads.transfomer;
 
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
-import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.ICONST_1;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -29,11 +16,6 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transfomer.context.infrequent.DynamicContext;
 import org.serialthreads.transformer.AbstractTransformer;
-import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
-import static org.serialthreads.transformer.code.MethodCode.isAbstract;
-import static org.serialthreads.transformer.code.MethodCode.isInterface;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import org.serialthreads.transformer.interruptable.IIsInterruptableCache;
 import org.springframework.util.Assert;
 
@@ -42,9 +24,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
+import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
+import static org.serialthreads.transformer.code.MethodCode.isAbstract;
+import static org.serialthreads.transformer.code.MethodCode.isInterface;
+import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+
 /**
  * Class adapter executing byte code enhancement of all methods.
- *
+ * <p/>
  * TODO 2008-08-29 mh: Add line numbers to generated code?
  * TODO 2008-08-29 mh: Name local variables in generated code?
  * TODO 2008-08-29 mh: Need to fix longs and doubles (size==2)?

@@ -3,6 +3,7 @@ package org.serialthreads.transfomer.context.infrequent;
 import org.apache.log4j.Logger;
 import org.serialthreads.context.IFrame;
 import org.serialthreads.context.SerialThread;
+
 import static org.serialthreads.context.ArrayResizer.resize;
 
 /**
