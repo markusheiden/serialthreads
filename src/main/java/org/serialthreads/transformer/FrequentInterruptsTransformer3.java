@@ -47,6 +47,7 @@ import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
@@ -260,7 +261,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
-    for (AbstractInsnNode returnInstruction : returnInstructions(method.instructions))
+    for (AbstractInsnNode returnInstruction : returnInstructions(method))
     {
       instructions.insert(returnInstruction, code(returnType).pushReturnValue(localPreviousFrame));
       instructions.remove(returnInstruction);

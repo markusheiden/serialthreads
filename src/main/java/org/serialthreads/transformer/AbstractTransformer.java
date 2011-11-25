@@ -53,6 +53,7 @@ import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
@@ -334,7 +335,7 @@ public abstract class AbstractTransformer implements ITransformer
 
     constructor.maxStack = Math.max(5, constructor.maxStack);
 
-    for (AbstractInsnNode returnInstruction : returnInstructions(constructor.instructions))
+    for (AbstractInsnNode returnInstruction : returnInstructions(constructor))
     {
       // constructors may not return a value
       assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
@@ -399,29 +400,6 @@ public abstract class AbstractTransformer implements ITransformer
         {
           result.put(methodCall, i);
         }
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Extract return instructions.
-   * <p/>
-   * TODO 2009-11-20 mh: extract
-   *
-   * @param instructions instructions
-   */
-  protected List<AbstractInsnNode> returnInstructions(InsnList instructions)
-  {
-    List<AbstractInsnNode> result = new ArrayList<>();
-    for (Iterator<AbstractInsnNode> iter = instructions.iterator(); iter.hasNext(); )
-    {
-      AbstractInsnNode instruction = iter.next();
-      int opcode = instruction.getOpcode();
-      if (opcode >= IRETURN && opcode <= RETURN)
-      {
-        result.add(instruction);
       }
     }
 
@@ -1076,7 +1054,7 @@ public abstract class AbstractTransformer implements ITransformer
    */
   protected void replaceReturns(ClassNode clazz, MethodNode run)
   {
-    for (AbstractInsnNode returnInstruction : returnInstructions(run.instructions))
+    for (AbstractInsnNode returnInstruction : returnInstructions(run))
     {
       InsnList instructions = new InsnList();
       // TODO 2009-11-21 mh: implement once, jump to implementation

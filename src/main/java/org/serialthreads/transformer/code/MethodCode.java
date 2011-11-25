@@ -2,6 +2,7 @@ package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -11,9 +12,15 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Value;
 import org.serialthreads.context.IRunnable;
-import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 /**
  * Method related code.
@@ -21,7 +28,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 public class MethodCode
 {
   private static final String IRUNNABLE_NAME = Type.getType(IRunnable.class).getInternalName();
-  private static final String MANAGER_NAME = Type.getType(SerialThreadManager.class).getInternalName();
 
   //
   // method call specific code
@@ -258,6 +264,31 @@ public class MethodCode
 
     // scanned all arguments and they passed the test
     return true;
+  }
+
+  //
+  // code related to the instructions of a method
+  //
+
+  /**
+   * All return instructions.
+   *
+   * @param method method
+   */
+  public static List<AbstractInsnNode> returnInstructions(MethodNode method)
+  {
+    List<AbstractInsnNode> result = new ArrayList<>();
+    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext(); )
+    {
+      AbstractInsnNode instruction = iter.next();
+      int opcode = instruction.getOpcode();
+      if (opcode >= IRETURN && opcode <= RETURN)
+      {
+        result.add(instruction);
+      }
+    }
+
+    return result;
   }
 
   //
