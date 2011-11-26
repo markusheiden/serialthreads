@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.debug;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.analysis.BasicValue;

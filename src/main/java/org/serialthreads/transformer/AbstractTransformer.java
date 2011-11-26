@@ -33,6 +33,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.code.IntValueCode;
 import org.serialthreads.transformer.code.ValueCodeFactory;
+import org.serialthreads.transformer.debug.Debugger;
 
 import java.util.ArrayList;
 import java.util.Arrays;

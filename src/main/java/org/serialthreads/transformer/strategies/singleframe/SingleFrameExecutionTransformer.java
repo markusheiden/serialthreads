@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies.singleframe;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -15,9 +15,13 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.StackFrame;
+import org.serialthreads.transformer.AbstractTransformer;
+import org.serialthreads.transformer.LocalVariablesShifter;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -51,22 +55,24 @@ import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
- * Class adapter executing byte code enhancement of all methods.
- * For efficiency all interruptible methods will be copied with a reduced signature.
- * The thread and frame will be added to the signature of all interruptible methods.
- * This transformation needs no static thread holder, SimpleSerialThreadManager2 can be used.
+ * Transformer implementing serial threads by executing single frames.
  */
 @SuppressWarnings({"UnusedAssignment", "UnusedParameters", "UnusedDeclaration"})
-public class FrequentInterruptsTransformer3 extends AbstractTransformer
+public class SingleFrameExecutionTransformer extends AbstractTransformer
 {
-  public static final String STRATEGY = "FREQUENT3";
+  public static final String STRATEGY = "SINGLE_FRAME_EXECUTION";
+
+  private static final String METHOD_HANDLE_NAME = Type.getType(MethodHandle.class).getInternalName();
+  private static final String METHOD_HANDLE_DESC = Type.getType(MethodHandle.class).getDescriptor();
+  private static final String LOOKUP_NAME = Type.getType(Lookup.class).getInternalName();
+  private static final String LOOKUP_DESC = Type.getType(Lookup.class).getDescriptor();
 
   /**
    * Constructor.
    *
    * @param classInfoCache class cache to use
    */
-  public FrequentInterruptsTransformer3(IClassInfoCache classInfoCache)
+  public SingleFrameExecutionTransformer(IClassInfoCache classInfoCache)
   {
     super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
   }
@@ -165,6 +171,8 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    */
   private List<MethodNode> transformMethod(ClassNode clazz, MethodNode method, Map<MethodInsnNode, Integer> methodCalls) throws AnalyzerException
   {
+//    clazz.fields.add(new FieldNode(ASM4, ACC_PRIVATE, changeCopyName(method.name, method.desc), METHOD_HANDLE_DESC, METHOD_HANDLE_NAME, null));
+
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     Frame[] frames = analyze(clazz, method);
 

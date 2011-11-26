@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies.frequent;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -15,8 +15,9 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.StackFrame;
+import org.serialthreads.transformer.AbstractTransformer;
+import org.serialthreads.transformer.LocalVariablesShifter;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,9 +40,9 @@ import static org.objectweb.asm.Opcodes.IFNONNULL;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
-import static org.serialthreads.transformer.code.MethodCode.firstParam;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
@@ -53,20 +54,19 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
  * Class adapter executing byte code enhancement of all methods.
- * For efficiency all interruptible methods will be copied with a reduced signature.
  * The signature of all interruptible methods will not be changed.
  * This transformation needs a static thread holder, so SimpleSerialThreadManager has to be used.
  */
-public class FrequentInterruptsTransformer2 extends AbstractTransformer
+public class FrequentInterruptsTransformer extends AbstractTransformer
 {
-  public static final String STRATEGY = "FREQUENT2";
+  public static final String STRATEGY = "FREQUENT";
 
   /**
    * Constructor.
    *
    * @param classInfoCache class cache to use
    */
-  public FrequentInterruptsTransformer2(IClassInfoCache classInfoCache)
+  public FrequentInterruptsTransformer(IClassInfoCache classInfoCache)
   {
     super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
   }
@@ -82,8 +82,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
   {
     if (isAbstract(method))
     {
-      // change signature of abstract methods
-      return transformAbstract(clazz, method);
+      // abstract methods need no transformation
+      return Collections.emptyList();
     }
 
     Map<MethodInsnNode, Integer> methodCalls = interruptibleMethodCalls(method.instructions);
@@ -101,27 +101,6 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
 
     // "standard" transformation of interruptible methods
     return transformMethod(clazz, method, methodCalls);
-  }
-
-  /**
-   * Transform abstract method (includes interface methods).
-   *
-   * @param clazz class to alter
-   * @param method method to transform
-   * @return transformed methods
-   */
-  private List<MethodNode> transformAbstract(ClassNode clazz, MethodNode method)
-  {
-    // create copy of method with shortened arguments
-    MethodNode copy = copyMethod(clazz, method);
-    copy.desc = changeCopyDesc(method.desc);
-
-    if (log.isDebugEnabled())
-    {
-      log.debug("      Copied abstract method " + methodName(clazz, copy));
-    }
-
-    return Arrays.asList(copy);
   }
 
   /**
@@ -158,41 +137,11 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     Frame[] frames = analyze(clazz, method);
 
-    // create copy of method with shortened signature
-    MethodNode copy = copyMethod(clazz, method);
-    Map<MethodInsnNode, Integer> copyMethodCalls = interruptibleMethodCalls(copy.instructions);
-    List<InsnList> restoreCodes = insertCaptureCode(clazz, copy, frames, copyMethodCalls, true);
-    createRestoreHandlerCopy(clazz, copy, restoreCodes);
-    copy.desc = changeCopyDesc(method.desc);
-    fixMaxs(copy);
-
-    if (log.isDebugEnabled())
-    {
-      log.debug("      Copied concrete method " + methodName(clazz, copy));
-    }
-
-    insertCaptureCode(clazz, method, frames, methodCalls, false);
-    createRestoreHandlerMethod(clazz, method);
+    List<InsnList> restoreCodes = insertCaptureCode(clazz, method, frames, methodCalls, false);
+    createRestoreHandlerMethod(clazz, method, restoreCodes);
     fixMaxs(method);
 
-    return Arrays.asList(method, copy);
-  }
-
-  /**
-   * Copies a method, changes its signature and adds it to the class.
-   *
-   * @param clazz class to add copied method to
-   * @param method method to copy
-   */
-  private MethodNode copyMethod(ClassNode clazz, MethodNode method)
-  {
-    MethodNode copy = MethodNodeCopier.copy(method);
-    copy.name = changeCopyName(method.name, method.desc);
-
-    //noinspection unchecked
-    clazz.methods.add(copy);
-
-    return copy;
+    return Arrays.asList(method);
   }
 
   /**
@@ -239,8 +188,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     }
 
     int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
     final int localFrame = local++;
 
     LabelNode normal = new LabelNode();
@@ -285,8 +234,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
 
     int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
     final int localFrame = local++;
     final int localReturnValue = method.maxLocals;
 
@@ -310,9 +259,9 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
       restore.add(new TypeInsnNode(CHECKCAST, clonedCall.owner));
     }
 
-    // jump to cloned method call with thread and frame as arguments
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new VarInsnNode(ALOAD, localFrame));
+    // push arguments on stack and jump to method call
+    // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
+    restore.add(dummyArguments(methodCall));
     restore.add(clonedCall);
 
     // if not serializing "GOTO" normal, but restore the frame first
@@ -351,65 +300,38 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
   }
 
   /**
-   * Copies method call and changes the signature.
+   * Copies method call.
    *
    * @param methodCall method call
    */
   private MethodInsnNode copyMethodCall(MethodInsnNode methodCall)
   {
-    MethodInsnNode result = (MethodInsnNode) methodCall.clone(null);
-    result.name = changeCopyName(methodCall.name, methodCall.desc);
-    result.desc = changeCopyDesc(methodCall.desc);
-
-    return result;
+    return (MethodInsnNode) methodCall.clone(null);
   }
-
-  /**
-   * Change the name of a copied method.
-   *
-   * @param name name of method
-   * @param desc parameters
-   * @return changed name
-   */
-  private String changeCopyName(String name, String desc)
-  {
-    return name + "$$" + desc.replaceAll("[()\\[/;]", "_") + "$$";
-  }
-
-  /**
-   * Change parameters of a copied method.
-   *
-   * @param desc parameters
-   * @return changed parameters
-   */
-  private String changeCopyDesc(String desc)
-  {
-    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
-  }
-
-  //
-  // Restore handlers at start of method
-  //
 
   /**
    * Insert frame restoring code at the begin of an interruptible method.
    *
    * @param clazz class to alter
    * @param method method to alter
+   * @param restoreCodes restore codes for all method calls in the method
    */
-  protected void createRestoreHandlerMethod(ClassNode clazz, MethodNode method)
+  protected void createRestoreHandlerMethod(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes)
   {
+    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+
     if (log.isDebugEnabled())
     {
       log.debug("    Creating restore handler for method");
     }
 
     int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
     final int localFrame = local++;
 
     LabelNode normal = new LabelNode();
+    LabelNode getThread = new LabelNode();
 
     // previousFrame = thread.frame;
     InsnList getFrame = new InsnList();
@@ -440,58 +362,22 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     restore.add(new VarInsnNode(ALOAD, localFrame));
     restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
 
-    // insert generated byte code
-    insertMethodGetThreadStartCode(clazz, method, localThread, getFrame, restore);
-  }
+    // if not serializing "GOTO" normal
+    restore.add(new VarInsnNode(ALOAD, localThread));
+    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restore.add(new JumpInsnNode(IFEQ, getThread));
 
-  /**
-   * Insert frame restoring code at the begin of a copied method.
-   *
-   * @param clazz class to alter
-   * @param method method to alter
-   * @param restoreCodes restore codes for all method calls in the method
-   */
-  protected void createRestoreHandlerCopy(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes)
-  {
-    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
-
-    if (log.isDebugEnabled())
-    {
-      log.debug("    Creating restore handler for copied method");
-    }
-
-    int param = firstParam(method);
-    final int paramThread = param++;
-    final int paramPreviousFrame = param++;
-
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
-
-    InsnList restore = new InsnList();
-
-    // previousFrame
-    restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
-
-    // frame = previousFrame.next
-    restore.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    restore.add(new VarInsnNode(ASTORE, localFrame));
-
-    // thread = currentThread;
-    // TODO 2009-10-22 mh: rename locals to avoid this copy?
-    restore.add(new VarInsnNode(ALOAD, paramThread));
-    restore.add(new VarInsnNode(ASTORE, localThread));
-
-    // restore code dispatcher
+    // else restore code dispatcher
     InsnList getMethod = new InsnList();
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
     restore.add(restoreCodeDispatcher(getMethod, restoreCodes, 0));
 
-    method.instructions.insertBefore(method.instructions.getFirst(), restore);
+    // insert label for normal body of method
+    restore.add(getThread);
+
+    // insert generated byte code
+    insertMethodGetThreadStartCode(clazz, method, localThread, getFrame, restore);
   }
 
   /**
@@ -511,8 +397,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     }
 
     int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
     final int localFrame = local++;
 
     // dummy startup restore code to avoid to check thread.serializing.
@@ -527,13 +413,6 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
       startRestoreCode.add(new InsnNode(ICONST_0));
       startRestoreCode.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
     }
-
-    // TODO 2009-11-26 mh: remove me?
-    // thread.frame = frame;
-    startRestoreCode.add(new VarInsnNode(ALOAD, localThread));
-    startRestoreCode.add(new VarInsnNode(ALOAD, localFrame));
-    startRestoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
-
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
     restoreCodes.add(0, startRestoreCode);
 
@@ -548,6 +427,12 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     restore.add(new VarInsnNode(ALOAD, localThread));
     restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
     restore.add(new VarInsnNode(ASTORE, localFrame));
+
+    // TODO 2009-11-26 mh: remove me?
+    // thread.frame = frame;
+    restore.add(new VarInsnNode(ALOAD, localThread));
+    restore.add(new VarInsnNode(ALOAD, localFrame));
+    restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
 
     // no previous frame needed in run, because there may not be a previous frame
 
