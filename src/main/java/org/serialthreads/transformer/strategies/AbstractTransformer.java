@@ -18,10 +18,8 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.ITransformedRunnable;
 import org.serialthreads.context.SerialThread;
-import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
-import org.serialthreads.context.ThreadFinishedException;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
@@ -36,7 +34,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
@@ -55,7 +52,6 @@ import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 /**
  * Base implementation of a transformer.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
 public abstract class AbstractTransformer implements ITransformer
 {
   protected final Logger log = Logger.getLogger(getClass());
@@ -65,14 +61,10 @@ public abstract class AbstractTransformer implements ITransformer
   protected static final String CLASS_NAME = Type.getType(Class.class).getInternalName();
   protected static final String CLASS_DESC = Type.getType(Class.class).getDescriptor();
   protected static final String STRING_DESC = Type.getType(String.class).getDescriptor();
-  protected static final String NPE_NAME = Type.getType(NullPointerException.class).getInternalName();
-  protected static final String MANAGER_NAME = Type.getType(SerialThreadManager.class).getInternalName();
   protected static final String IRUNNABLE_NAME = Type.getType(IRunnable.class).getInternalName();
   protected static final String ITRANSFORMED_RUNNABLE_NAME = Type.getType(ITransformedRunnable.class).getInternalName();
-  protected static final String THREAD_NAME = Type.getType(SerialThread.class).getInternalName();
   protected static final String THREAD_DESC = Type.getType(SerialThread.class).getDescriptor();
   protected static final String THREAD = "$$thread$$";
-  protected static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
 
   protected final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
   protected final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
@@ -169,7 +161,7 @@ public abstract class AbstractTransformer implements ITransformer
     {
       try
       {
-        analyze(clazz, method);
+        ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
       }
       catch (Exception e)
       {
@@ -236,28 +228,6 @@ public abstract class AbstractTransformer implements ITransformer
    * @return transformed methods
    */
   protected abstract List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
-
-  /**
-   * Analyze a method to compute frames.
-   *
-   * @param clazz owner of method
-   * @param method method
-   * @return frames
-   * @exception AnalyzerException
-   */
-  protected Frame[] analyze(ClassNode clazz, MethodNode method) throws AnalyzerException
-  {
-    Type classType = Type.getObjectType(clazz.name);
-    Type superClassType = Type.getObjectType(clazz.superName);
-    List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
-    for (String interfaceName : clazz.interfaces)
-    {
-      interfaceTypes.add(Type.getObjectType(interfaceName));
-    }
-    boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
-
-    return new ExtendedAnalyzer(classInfoCache, classType, superClassType, interfaceTypes, isInterface).analyze(clazz.name, method);
-  }
 
   /**
    * Execute some final modifications after transformation.
@@ -393,6 +363,7 @@ public abstract class AbstractTransformer implements ITransformer
    *
    * @param frame frame
    */
+  @SuppressWarnings({"UnusedDeclaration"})
   protected void logDebug(Frame frame)
   {
     for (int i = 0; i < frame.getLocals(); i++)

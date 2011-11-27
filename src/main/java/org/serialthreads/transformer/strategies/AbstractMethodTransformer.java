@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.ATHROW;
@@ -114,16 +113,7 @@ public abstract class AbstractMethodTransformer
    */
   protected Frame[] analyze() throws AnalyzerException
   {
-    Type classType = Type.getObjectType(clazz.name);
-    Type superClassType = Type.getObjectType(clazz.superName);
-    List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
-    for (String interfaceName : clazz.interfaces)
-    {
-      interfaceTypes.add(Type.getObjectType(interfaceName));
-    }
-    boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
-
-    return new ExtendedAnalyzer(classInfoCache, classType, superClassType, interfaceTypes, isInterface).analyze(clazz.name, method);
+    return ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
   }
 
   /**

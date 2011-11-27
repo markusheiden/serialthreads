@@ -1,11 +1,15 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,6 +19,29 @@ import java.util.List;
  */
 public class ExtendedAnalyzer extends Analyzer<BasicValue>
 {
+  /**
+   * Analyze a method to compute its frames.
+   *
+   * @param clazz owner of method
+   * @param method method
+   * @param classInfoCache class info cache
+   * @return frames
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   */
+  public static Frame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) throws AnalyzerException
+  {
+    Type classType = Type.getObjectType(clazz.name);
+    Type superClassType = Type.getObjectType(clazz.superName);
+    List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
+    for (String interfaceName : clazz.interfaces)
+    {
+      interfaceTypes.add(Type.getObjectType(interfaceName));
+    }
+    boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
+
+    return new ExtendedAnalyzer(classInfoCache, classType, superClassType, interfaceTypes, isInterface).analyze(clazz.name, method);
+  }
+
   /**
    * Constructs a new {@link ExtendedAnalyzer} to analyze a specific class.
    * This class will not be loaded into the JVM since it may be incorrect.
