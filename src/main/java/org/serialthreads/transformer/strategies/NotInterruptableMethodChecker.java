@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Frame;
+import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import static org.serialthreads.transformer.code.MethodCode.isRun;

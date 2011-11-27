@@ -5,7 +5,7 @@ import org.serialthreads.Interruptible;
 import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
-import org.serialthreads.transformer.strategies.Strategies;
+import org.serialthreads.transformer.Strategies;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

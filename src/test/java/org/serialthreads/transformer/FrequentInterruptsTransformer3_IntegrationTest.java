@@ -1,7 +1,5 @@
 package org.serialthreads.transformer;
 
-import org.serialthreads.transformer.strategies.Strategies;
-
 /**
  * Integration-test for {@link org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3}.
  */

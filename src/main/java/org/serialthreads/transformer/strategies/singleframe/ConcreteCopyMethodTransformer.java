@@ -8,8 +8,8 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.transformer.MethodNeedsNoTransformationException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.util.List;
 import java.util.Map;
@@ -45,7 +45,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
    *
    * @return Transformed method
    * @exception org.objectweb.asm.tree.analysis.AnalyzerException In case of incorrect byte code of the original method
-   * @exception org.serialthreads.transformer.MethodNeedsNoTransformationException In case the method needs no byte code transformation
+   * @exception org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException In case the method needs no byte code transformation
    */
   public MethodNode transform() throws AnalyzerException, MethodNeedsNoTransformationException
   {

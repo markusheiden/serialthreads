@@ -15,8 +15,8 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transfomer.context.infrequent.DynamicContext;
-import org.serialthreads.transformer.AbstractTransformer;
 import org.serialthreads.transformer.interruptable.IIsInterruptableCache;
+import org.serialthreads.transformer.strategies.AbstractTransformer;
 import org.springframework.util.Assert;
 
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 /**
  * Exception signalling that a method needs no transformation

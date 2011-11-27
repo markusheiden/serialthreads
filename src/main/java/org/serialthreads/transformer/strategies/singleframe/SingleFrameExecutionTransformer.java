@@ -5,10 +5,10 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.context.StackFrame;
-import org.serialthreads.transformer.AbstractTransformer;
-import org.serialthreads.transformer.LocalVariablesShifter;
-import org.serialthreads.transformer.MethodNeedsNoTransformationException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.strategies.AbstractTransformer;
+import org.serialthreads.transformer.strategies.LocalVariablesShifter;
+import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;

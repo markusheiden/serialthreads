@@ -8,7 +8,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.context.SerialThreadManager;
-import org.serialthreads.transformer.strategies.IStrategy;
 
 import java.io.PrintWriter;
 

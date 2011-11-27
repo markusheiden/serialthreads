@@ -5,9 +5,9 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.context.StackFrame;
-import org.serialthreads.transformer.AbstractTransformer;
-import org.serialthreads.transformer.MethodNeedsNoTransformationException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.strategies.AbstractTransformer;
+import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.util.Arrays;
 import java.util.Collections;

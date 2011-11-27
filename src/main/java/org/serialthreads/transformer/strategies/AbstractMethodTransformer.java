@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 import org.apache.log4j.Logger;
 import org.objectweb.asm.Type;

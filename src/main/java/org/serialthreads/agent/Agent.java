@@ -4,12 +4,12 @@ import org.apache.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
+import org.serialthreads.transformer.Strategies;
 import org.serialthreads.transformer.classcache.ClassInfoCacheReflection;
-import org.serialthreads.transformer.strategies.IStrategy;
-import org.serialthreads.transformer.strategies.Strategies;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;

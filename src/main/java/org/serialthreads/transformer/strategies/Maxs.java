@@ -1,6 +1,7 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.serialthreads.transformer.NotTransformableException;
 
 /**
  * Used to calculate maxs sizes.

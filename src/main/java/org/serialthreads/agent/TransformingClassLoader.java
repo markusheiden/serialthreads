@@ -5,11 +5,11 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
+import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
-import org.serialthreads.transformer.strategies.IStrategy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

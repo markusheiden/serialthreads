@@ -13,7 +13,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.transformer.AbstractMethodTransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
@@ -39,7 +38,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
  * Base class for method transformers of {@link SingleFrameExecutionTransformer}.
  */
 @SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
-abstract class MethodTransformer extends AbstractMethodTransformer
+abstract class MethodTransformer extends org.serialthreads.transformer.strategies.AbstractMethodTransformer
 {
   /**
    * Constructor.

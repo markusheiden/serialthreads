@@ -1,6 +1,5 @@
-package org.serialthreads.transformer.strategies;
+package org.serialthreads.transformer;
 
-import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**

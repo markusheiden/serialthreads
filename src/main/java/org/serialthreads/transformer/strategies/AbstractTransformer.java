@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 import org.apache.log4j.Logger;
 import org.objectweb.asm.Type;
@@ -22,6 +22,9 @@ import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.context.ThreadFinishedException;
+import org.serialthreads.transformer.ITransformer;
+import org.serialthreads.transformer.LoadUntransformedException;
+import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IntValueCode;

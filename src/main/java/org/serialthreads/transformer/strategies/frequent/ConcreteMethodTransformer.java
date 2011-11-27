@@ -11,9 +11,9 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.transformer.LocalVariablesShifter;
-import org.serialthreads.transformer.MethodNeedsNoTransformationException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.strategies.LocalVariablesShifter;
+import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.util.List;
 
