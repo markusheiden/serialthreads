@@ -69,6 +69,7 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
       }
 
       // "standard" transformation of interruptible methods
+      // TODO 2011-11-27 mh: Move shift into method transformer
       LocalVariablesShifter.shift(firstLocal(method), 3, method);
       return Arrays.asList(
         new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
