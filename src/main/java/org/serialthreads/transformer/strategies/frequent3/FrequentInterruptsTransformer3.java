@@ -9,7 +9,8 @@ import org.serialthreads.transformer.LocalVariablesShifter;
 import org.serialthreads.transformer.MethodNeedsNoTransformationException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
@@ -47,20 +48,18 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
   @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
   {
-    List<MethodNode> result = new ArrayList<>(2);
-
     if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache))
     {
       // do not transform IRunnable.run() itself
-      return result;
+      return Collections.emptyList();
     }
 
     if (isAbstract(method))
     {
       // change signature of abstract methods
-      result.add(new AbstractCopyMethodTransformer(clazz, method, classInfoCache).transform());
-      result.add(new AbstractMethodTransformer(clazz, method, classInfoCache).transform());
-      return result;
+      return Arrays.asList(
+        new AbstractCopyMethodTransformer(clazz, method, classInfoCache).transform(),
+        new AbstractMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     try
@@ -68,20 +67,20 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
       if (isRun(clazz, method, classInfoCache))
       {
         // take special care of run method
-        result.add(new RunMethodTransformer(clazz, method, classInfoCache).transform());
-        return result;
+        return Arrays.asList(
+          new RunMethodTransformer(clazz, method, classInfoCache).transform());
       }
 
       // "standard" transformation of interruptible methods
       LocalVariablesShifter.shift(firstLocal(method), 3, method);
-      result.add(new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform());
-      result.add(new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
-      return result;
+      return Arrays.asList(
+        new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
+        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
     }
     catch (MethodNeedsNoTransformationException e)
     {
       // no interruptible calls -> nothing to do
-      return result;
+      return Collections.emptyList();
     }
   }
 }
