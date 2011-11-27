@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;

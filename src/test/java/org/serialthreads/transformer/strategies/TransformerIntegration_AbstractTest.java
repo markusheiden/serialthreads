@@ -1,4 +1,4 @@
-package org.serialthreads.transformer;
+package org.serialthreads.transformer.strategies;
 
 import org.junit.After;
 import org.junit.Before;
@@ -8,6 +8,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.context.SerialThreadManager;
+import org.serialthreads.transformer.IStrategy;
 
 import java.io.PrintWriter;
 
