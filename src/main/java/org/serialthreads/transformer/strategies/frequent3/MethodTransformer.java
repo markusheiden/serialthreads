@@ -164,7 +164,7 @@ abstract class MethodTransformer extends org.serialthreads.transformer.strategie
   //
 
   @Override
-  protected InsnList dummyReturn(MethodNode method)
+  protected InsnList dummyReturn()
   {
     // Always use void returns, because all methods have been change to use void returns
     InsnList result = new InsnList();

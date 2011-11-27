@@ -368,7 +368,7 @@ public abstract class AbstractMethodTransformer
     capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
 
     // return early
-    capture.add(dummyReturn(method));
+    capture.add(dummyReturn());
 
     // replace dummy call of interrupt method by capture code
     method.instructions.insert(methodCall, capture);
@@ -377,10 +377,8 @@ public abstract class AbstractMethodTransformer
 
   /**
    * Dummy return for the given method.
-   *
-   * @param method method containing the call
    */
-  protected InsnList dummyReturn(MethodNode method)
+  protected InsnList dummyReturn()
   {
     InsnList result = new InsnList();
     result.add(dummyReturnStatement(method));
