@@ -18,6 +18,7 @@ public class MethodNodeCopier
    * @param method method
    * @return copied method
    */
+  @SuppressWarnings({"UnusedDeclaration"})
   public static MethodNode copyEmpty(MethodNode method)
   {
     String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);

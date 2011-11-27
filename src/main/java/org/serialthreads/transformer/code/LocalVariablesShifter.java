@@ -1,4 +1,4 @@
-package org.serialthreads.transformer.strategies;
+package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.IincInsnNode;
