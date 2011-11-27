@@ -159,6 +159,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer
       instructions.remove(returnInstruction);
     }
   }
+
   //
   // Capture code inserted after method calls
   //
