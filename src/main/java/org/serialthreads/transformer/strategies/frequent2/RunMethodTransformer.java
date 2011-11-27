@@ -54,7 +54,7 @@ class RunMethodTransformer extends MethodTransformer
     replaceReturns(clazz, method);
     List<InsnList> restoreCodes = insertCaptureCode(frames, interruptibleMethodCalls(), true);
     createRestoreHandlerRun(restoreCodes);
-    fixMaxs(method);
+    fixMaxs();
 
     return method;
   }

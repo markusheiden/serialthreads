@@ -55,7 +55,7 @@ class ConcreteMethodTransformer extends MethodTransformer
 
     insertCaptureCode(frames, interruptibleMethodCalls(), false);
     createRestoreHandlerMethod();
-    fixMaxs(method);
+    fixMaxs();
 
     return method;
   }

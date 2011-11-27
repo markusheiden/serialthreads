@@ -56,7 +56,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
     List<InsnList> restoreCodes = insertCaptureCode(frames, copyMethodCalls, true);
     createRestoreHandlerCopy(restoreCodes);
     method.desc = changeCopyDesc(method.desc);
-    fixMaxs(method);
+    fixMaxs();
 
     if (log.isDebugEnabled())
     {

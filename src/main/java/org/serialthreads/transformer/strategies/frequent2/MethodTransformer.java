@@ -232,10 +232,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer
   /**
    * Fix maxs of method.
    * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
-   *
-   * @param method method to alter
    */
-  protected void fixMaxs(MethodNode method)
+  protected void fixMaxs()
   {
     method.maxLocals += 1;
     // TODO 2009-10-11 mh: recalculate minimum maxs
