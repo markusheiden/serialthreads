@@ -1,0 +1,742 @@
+package org.serialthreads.transformer;
+
+import org.apache.log4j.Logger;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
+import org.serialthreads.context.Stack;
+import org.serialthreads.context.StackFrame;
+import org.serialthreads.context.ThreadFinishedException;
+import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
+import org.serialthreads.transformer.analyzer.ExtendedValue;
+import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.IValueCode;
+import org.serialthreads.transformer.code.ValueCodeFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ATHROW;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.serialthreads.transformer.code.IntValueCode.push;
+import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
+import static org.serialthreads.transformer.code.MethodCode.firstLocal;
+import static org.serialthreads.transformer.code.MethodCode.isInterrupt;
+import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
+import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
+import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+
+/**
+ * Base class for all method transformers.
+ */
+@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+public abstract class AbstractMethodTransformer
+{
+  protected final Logger log = Logger.getLogger(getClass());
+
+  protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
+  protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
+  protected static final String STRING_DESC = Type.getType(String.class).getDescriptor();
+  protected static final String THREAD = "$$thread$$";
+  protected static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
+
+  protected final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
+  protected final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
+  protected final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
+  protected final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
+
+  protected final ClassNode clazz;
+  protected final MethodNode method;
+  protected final IClassInfoCache classInfoCache;
+
+  /**
+   * Constructor.
+   *
+   * @param clazz class to transform
+   * @param method method to transform
+   * @param classInfoCache class cache to use
+   */
+  protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
+  {
+    this.clazz = clazz;
+    this.method = method;
+    this.classInfoCache = classInfoCache;
+  }
+
+  /**
+   * Analyze a method to compute frames.
+   *
+   * @return frames
+   * @exception AnalyzerException
+   */
+  protected Frame[] analyze() throws AnalyzerException
+  {
+    Type classType = Type.getObjectType(clazz.name);
+    Type superClassType = Type.getObjectType(clazz.superName);
+    List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
+    for (String interfaceName : clazz.interfaces)
+    {
+      interfaceTypes.add(Type.getObjectType(interfaceName));
+    }
+    boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
+
+    return new ExtendedAnalyzer(classInfoCache, classType, superClassType, interfaceTypes, isInterface).analyze(clazz.name, method);
+  }
+
+  /**
+   * Extract all interruptible method calls.
+   *
+   * @return map with method call -> Index of method call in instructions
+   * @exception MethodNeedsNoTransformationException if there are no interruptible method calls in the method
+   */
+  protected Map<MethodInsnNode, Integer> interruptibleMethodCalls() throws MethodNeedsNoTransformationException
+  {
+    Map<MethodInsnNode, Integer> result = new LinkedHashMap<>();
+    for (int i = 0; i < method.instructions.size(); i++)
+    {
+      AbstractInsnNode instruction = method.instructions.get(i);
+      if (instruction instanceof MethodInsnNode)
+      {
+        MethodInsnNode methodCall = (MethodInsnNode) instruction;
+        if (isInterruptible(methodCall))
+        {
+          result.put(methodCall, i);
+        }
+      }
+    }
+
+    if (result.isEmpty())
+    {
+      throw new MethodNeedsNoTransformationException();
+    }
+
+    return result;
+  }
+
+  /**
+   * Check if method call is interruptible.
+   *
+   * @param methodCall method call
+   */
+  protected boolean isInterruptible(MethodInsnNode methodCall)
+  {
+    return isInterrupt(methodCall, classInfoCache) || classInfoCache.isInterruptible(methodCall);
+  }
+
+  /**
+   * Create restore code dispatcher.
+   *
+   * @param getMethod instruction to get method index onto the top of the stack
+   * @param restoreCodes restore codes
+   * @param startIndex first method index, should be -1 for run(), 0 otherwise
+   * @return generated restore code
+   */
+  protected InsnList restoreCodeDispatcher(InsnList getMethod, List<InsnList> restoreCodes, int startIndex)
+  {
+    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+
+    if (restoreCodes.size() == 1)
+    {
+      // just one method call -> nothing to dispatch -> execute directly
+      return restoreCodes.get(0);
+    }
+
+    InsnList result = new InsnList();
+
+    // Label to the specific restore code for every method call
+    LabelNode[] labels = new LabelNode[restoreCodes.size()];
+    for (int i = 0; i < labels.length; i++)
+    {
+      labels[i] = new LabelNode();
+    }
+    LabelNode defaultLabel = new LabelNode();
+
+    // switch(currentFrame.method) // branch to specific restore code
+    result.add(getMethod);
+    result.add(new TableSwitchInsnNode(startIndex, startIndex + restoreCodes.size() - 1, defaultLabel, labels));
+
+    // default case -> may not happen -> throw IllegalThreadStateException
+    result.add(defaultLabel);
+    result.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
+    result.add(new InsnNode(DUP));
+    result.add(new LdcInsnNode("Invalid method pointer"));
+    result.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V"));
+    result.add(new InsnNode(ATHROW));
+
+    // reverse iteration to put first restore code at the end
+    for (int i = labels.length - 1; i >= 0; i--)
+    {
+      result.add(labels[i]);
+      result.add(restoreCodes.get(i));
+    }
+
+    return result;
+  }
+
+  //
+  // capture code insertion
+  //
+
+  /**
+   * Inserts capture code after method calls.
+   *
+   * @param frames frames
+   * @param methodCalls method calls inside method
+   * @param suppressOwner suppress capturing of owner?
+   * @return generated restore codes for method calls
+   */
+  protected List<InsnList> insertCaptureCode(Frame[] frames, Map<MethodInsnNode, Integer> methodCalls, boolean suppressOwner)
+  {
+    boolean moreThanOne = methodCalls.size() > 1;
+
+    List<InsnList> restoreCodes = new ArrayList<>(methodCalls.size());
+    int methodCallIndex = 0;
+    for (Entry<MethodInsnNode, Integer> entry : methodCalls.entrySet())
+    {
+      Frame frameBefore = frames[entry.getValue()];
+      MethodInsnNode methodCall = entry.getKey();
+      Frame frameAfter = frames[entry.getValue() + 1];
+
+      restoreCodes.add(createRestoreCode(frameBefore, methodCall, frameAfter));
+      createCaptureCode(frameBefore, methodCall, frameAfter, methodCallIndex++, moreThanOne, suppressOwner);
+    }
+
+    return restoreCodes;
+  }
+
+  /**
+   * Create method specific frame restore code.
+   *
+   * @param frameBefore frame before method call
+   * @param methodCall method call to generate restore code for
+   * @param frameAfter frame after method call
+   * @return restore code
+   */
+  protected InsnList createRestoreCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
+  {
+    return isInterrupt(methodCall, classInfoCache)?
+      createRestoreCodeForInterrupt(methodCall, frameAfter) :
+      createRestoreCodeForMethod(frameBefore, methodCall, frameAfter);
+  }
+
+  /**
+   * Create restore code for ending an interrupt.
+   *
+   * @param methodCall method call to generate capturing code for
+   * @param frame frame after method call
+   * @return restore code
+   */
+  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, Frame frame)
+  {
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Creating restore code for interrupt");
+    }
+
+    int local = firstLocal(method);
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
+    final int localFrame = local++;
+
+    InsnList restore = new InsnList();
+
+    LabelNode normal = new LabelNode();
+    method.instructions.insert(methodCall, normal);
+
+    // stop deserializing
+    restore.add(new VarInsnNode(ALOAD, localThread));
+    restore.add(new InsnNode(ICONST_0));
+    restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+
+    // restore frame
+    // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
+    restore.add(popFromFrame(methodCall, frame, localFrame));
+
+    // resume
+    restore.add(new JumpInsnNode(GOTO, normal));
+
+    return restore;
+  }
+
+  /**
+   * Create method specific frame restore code.
+   *
+   * @param frameBefore frame before method call
+   * @param methodCall method call to generate restore code for
+   * @param frameAfter frame after method call
+   * @return restore code
+   */
+  protected abstract InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter);
+
+  /**
+   * Insert frame capturing code after a given method call.
+   *
+   * @param frameBefore frame before method call
+   * @param methodCall method call to generate capturing code for
+   * @param frameAfter frame after method call
+   * @param position position of method call in method
+   * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
+   * @param suppressOwner suppress capturing of owner?
+   */
+  protected void createCaptureCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
+  {
+    if (isInterrupt(methodCall, classInfoCache))
+    {
+      createCaptureCodeForInterrupt(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
+    }
+    else
+    {
+      createCaptureCodeForMethod(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
+    }
+  }
+
+  /**
+   * Insert frame capturing code when starting an interrupt.
+   *
+   * @param frameBefore frame before method call
+   * @param methodCall method call to generate capturing code for
+   * @param frameAfter frame after method call
+   * @param position position of method call in method
+   * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
+   * @param suppressOwner suppress capturing of owner?
+   */
+  protected void createCaptureCodeForInterrupt(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
+  {
+    if (log.isDebugEnabled())
+    {
+      log.debug("      Creating capture code for interrupt");
+    }
+
+    int local = firstLocal(method);
+    final int localThread = local++;
+    final int localPreviousFrame = local++;
+    final int localFrame = local++;
+
+    InsnList capture = new InsnList();
+
+    // capture frame
+    // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
+    capture.add(pushToFrame(methodCall, frameAfter, localFrame));
+    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, frameBefore), localPreviousFrame, localFrame));
+
+    // "start" serializing
+    capture.add(new VarInsnNode(ALOAD, localThread));
+    capture.add(new InsnNode(ICONST_1));
+    capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+
+    // return early
+    capture.add(dummyReturn(method));
+
+    // replace dummy call of interrupt method by capture code
+    method.instructions.insert(methodCall, capture);
+    method.instructions.remove(methodCall);
+  }
+
+  /**
+   * Dummy return for the given method.
+   *
+   * @param method method containing the call
+   */
+  protected InsnList dummyReturn(MethodNode method)
+  {
+    InsnList result = new InsnList();
+    result.add(dummyReturnStatement(method));
+    return result;
+  }
+
+  /**
+   * Insert frame capturing code after returning from a method call.
+   *
+   * @param frameBefore frame before method call
+   * @param methodCall method call to generate capturing code for
+   * @param frameAfter frame after method call
+   * @param position position of method call in method
+   * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
+   * @param suppressOwner suppress capturing of owner?
+   */
+  protected abstract void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner);
+
+  /**
+   * Replace all return instructions by ThreadFinishedException.
+   * Needed for transformation of IRunnable.run().
+   *
+   * @param clazz clazz to alter
+   * @param run run method to alter
+   */
+  protected void replaceReturns(ClassNode clazz, MethodNode run)
+  {
+    for (AbstractInsnNode returnInstruction : returnInstructions(run))
+    {
+      InsnList instructions = new InsnList();
+      // TODO 2009-11-21 mh: implement once, jump to implementation
+      instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
+      instructions.add(new InsnNode(DUP));
+      // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
+      instructions.add(new VarInsnNode(ALOAD, 0));
+      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC));
+      instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V"));
+      instructions.add(new InsnNode(ATHROW));
+
+      run.instructions.insertBefore(returnInstruction, instructions);
+      run.instructions.remove(returnInstruction);
+    }
+  }
+
+  //
+  // frame related code
+  //
+
+  /**
+   * Save current frame after returning from a method call.
+   *
+   * @param methodCall method call to process
+   * @param frame frame after method call
+   * @param localFrame number of local containing the frame
+   * @return generated capture code
+   */
+  protected InsnList pushToFrame(MethodInsnNode methodCall, Frame frame, int localFrame)
+  {
+    InsnList push = new InsnList();
+
+    final boolean isMethodNotStatic = isNotStatic(method);
+    final boolean isCallNotVoid = isNotVoid(methodCall);
+
+    // get rid of dummy return value of called method first
+    if (isCallNotVoid)
+    {
+      push.add(popReturnValue(methodCall));
+    }
+
+    // save stack
+    // the topmost element is a dummy return value, if the called method returns one
+    int[] stackIndexes = stackIndexes(frame);
+    for (int stack = isCallNotVoid? frame.getStackSize() - 2 : frame.getStackSize() - 1; stack >= 0; stack--)
+    {
+      ExtendedValue value = (ExtendedValue) frame.getStack(stack);
+      if (value.isConstant() || value.isHoldInLocal())
+      {
+        // just pop the value from stack, because the stack value is constant or stored in a local too.
+        push.add(code(value).pop());
+      }
+      else
+      {
+        push.add(code(value).pushStack(stackIndexes[stack], localFrame));
+      }
+    }
+
+    // save locals separated by type
+    for (IValueCode code : ValueCodeFactory.CODES)
+    {
+      List<Integer> pushLocals = new ArrayList<>(frame.getLocals());
+
+      // do not store local 0 for non static methods, because it always contains "this"
+      for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
+      {
+        BasicValue value = (BasicValue) frame.getLocal(local);
+        if (code.isResponsibleFor(value.getType()))
+        {
+          ExtendedValue extendedValue = (ExtendedValue) value;
+          if (!extendedValue.isHoldInLowerLocal(local))
+          {
+            pushLocals.add(local);
+          }
+        }
+      }
+
+      Iterator<Integer> iter = pushLocals.iterator();
+
+      // for first locals use fast stack
+      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++)
+      {
+        int local = iter.next();
+        IValueCode localCode = code((BasicValue) frame.getLocal(local));
+        push.add(localCode.pushLocalVariableFast(local, i, localFrame));
+      }
+
+      // for too high locals use "slow" storage in (dynamic) array
+      if (iter.hasNext())
+      {
+        push.add(code.getLocals(localFrame));
+        for (int i = 0; iter.hasNext(); i++)
+        {
+          int local = iter.next();
+          IValueCode localCode = code((BasicValue) frame.getLocal(local));
+          if (iter.hasNext())
+          {
+            push.add(new InsnNode(DUP));
+          }
+          push.add(localCode.pushLocalVariable(local, i));
+        }
+      }
+    }
+
+    return push;
+  }
+
+  /**
+   * Pop return value from stack before saving a frame.
+   *
+   * @param methodCall method call to process
+   */
+  protected InsnList popReturnValue(MethodInsnNode methodCall)
+  {
+    InsnList result = new InsnList();
+    result.add(code(Type.getReturnType(methodCall.desc)).pop());
+    return result;
+  }
+
+  /**
+   * Push method and owner onto frame.
+   *
+   * @param position position of method call
+   * @param containsMoreThanOneMethodCall contains the method more than one method call?
+   * @param suppressOwner suppress saving the owner?
+   * @param localPreviousFrame number of local containing the previous frame or -1 for retrieving it via current frame
+   * @param localFrame number of local containing the current frame
+   * @return generated capture code
+   */
+  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, int localPreviousFrame, int localFrame)
+  {
+    InsnList result = new InsnList();
+
+    // save method index of this method
+    if (containsMoreThanOneMethodCall)
+    {
+      // frame.method = position;
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(push(position));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
+    }
+
+    // save owner of method call one level above
+    if (isNotStatic(method) && !suppressOwner)
+    {
+      // previousFrame.owner = this;
+      if (localPreviousFrame < 0)
+      {
+        result.add(new VarInsnNode(ALOAD, localFrame));
+        result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "previous", FRAME_IMPL_DESC));
+      }
+      else
+      {
+        result.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      }
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+    }
+
+    return result;
+  }
+
+  /**
+   * Push method and owner onto frame with a given method.
+   *
+   * @param position position of method call
+   * @param containsMoreThanOneMethodCall contains the method more than one method call?
+   * @param methodName name of method to store owner and method
+   * @param localThread number of local containing the thread
+   * @return generated capture code
+   */
+  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, String methodName, int localThread)
+  {
+    InsnList result = new InsnList();
+
+    final boolean isMethodNotStatic = isNotStatic(method);
+
+    // save method index of this method and owner of method call one level above
+    boolean pushOwner = isMethodNotStatic && !isRun(clazz, method, classInfoCache);
+    boolean pushMethod = containsMoreThanOneMethodCall;
+    if (pushOwner && pushMethod)
+    {
+      // save owner of this method for calling method and index of interrupted method
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(push(position));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V"));
+    }
+    else if (pushOwner)
+    {
+      // save owner of this method for calling method
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V"));
+    }
+    else if (pushMethod)
+    {
+      // save index of interrupted method
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(push(position));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V"));
+    }
+
+    return result;
+  }
+
+  /**
+   * Restore current frame before resuming the method call
+   *
+   * @param methodCall method call to process
+   * @param frame frame after method call
+   * @param localFrame number of local containing the frame
+   * @return generated restore code
+   */
+  protected InsnList popFromFrame(MethodInsnNode methodCall, Frame frame, int localFrame)
+  {
+    InsnList result = new InsnList();
+
+    final boolean isMethodNotStatic = isNotStatic(method);
+    final boolean isCallNotVoid = isNotVoid(methodCall);
+
+    // restore locals by type
+    for (IValueCode code : ValueCodeFactory.CODES)
+    {
+      List<Integer> popLocals = new ArrayList<>();
+      InsnList copyLocals = new InsnList();
+
+      // do not restore local 0 for non static methods, because it always contains "this"
+      for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
+      {
+        BasicValue value = (BasicValue) frame.getLocal(local);
+        if (code.isResponsibleFor(value.getType()))
+        {
+          ExtendedValue extendedValue = (ExtendedValue) value;
+          if (extendedValue.isHoldInLowerLocal(local))
+          {
+            // the value of the local is hold in a lower local too -> copy
+            if (log.isDebugEnabled())
+            {
+              log.debug("        Detected codes with the same value: " + extendedValue.getLowestLocal() + "/" + local);
+            }
+            copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
+            copyLocals.add(code(extendedValue).store(local));
+          }
+          else
+          {
+            // normal case -> pop local from frame
+            popLocals.add(local);
+          }
+        }
+      }
+
+      // first restore not duplicated locals, if any
+      Iterator<Integer> iter = popLocals.iterator();
+
+      // for first locals use fast stack
+      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++)
+      {
+        int local = iter.next();
+        IValueCode localCode = code((BasicValue) frame.getLocal(local));
+        result.add(localCode.popLocalVariableFast(local, i, localFrame));
+      }
+
+      // for too high locals use "slow" storage in (dynamic) array
+      if (iter.hasNext())
+      {
+        result.add(code.getLocals(localFrame));
+        for (int i = 0; iter.hasNext(); i++)
+        {
+          int local = iter.next();
+          IValueCode localCode = code((BasicValue) frame.getLocal(local));
+          if (iter.hasNext())
+          {
+            result.add(new InsnNode(DUP));
+          }
+          result.add(localCode.popLocalVariable(local, i));
+        }
+      }
+
+      // then restore duplicated locals
+      result.add(copyLocals);
+    }
+
+    // restore stack
+    // the topmost element is a dummy return value, if the called method is not a void method
+    int[] stackIndexes = stackIndexes(frame);
+    for (int stack = 0, end = isCallNotVoid? frame.getStackSize() - 1 : frame.getStackSize(); stack < end; stack++)
+    {
+      ExtendedValue value = (ExtendedValue) frame.getStack(stack);
+      if (value.isConstant())
+      {
+        // the stack value is constant -> push constant
+        if (log.isDebugEnabled())
+        {
+          log.debug("        Detected constant value on stack: " + value.toString() + " / value " + value.getConstant());
+        }
+        result.add(code(value).push(value.getConstant()));
+      }
+      else if (value.isHoldInLocal())
+      {
+        // the stack value was already stored in local variable -> load local
+        if (log.isDebugEnabled())
+        {
+          log.debug("        Detected value of local on stack: " + value.toString() + " / local " + value.getLowestLocal());
+        }
+        result.add(code(value).load(value.getLowestLocal()));
+      }
+      else
+      {
+        // normal case -> pop stack from frame
+        result.add(code(value).popStack(stackIndexes[stack], localFrame));
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Compute index of all stack elements in typed stack arrays.
+   *
+   * @param frame Frame
+   * @return array stack element -> stack element index
+   */
+  private int[] stackIndexes(Frame frame)
+  {
+    int[] result = new int[frame.getStackSize()];
+    Arrays.fill(result, -1);
+    for (IValueCode code : ValueCodeFactory.CODES)
+    {
+      for (int stack = 0, end = frame.getStackSize(), i = 0; stack < end; stack++)
+      {
+        BasicValue value = (BasicValue) frame.getStack(stack);
+        if (code.isResponsibleFor(value.getType()))
+        {
+          result[stack] = i++;
+        }
+      }
+    }
+
+    return result;
+  }
+}
