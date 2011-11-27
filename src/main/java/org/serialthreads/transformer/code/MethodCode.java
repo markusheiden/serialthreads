@@ -107,7 +107,7 @@ public class MethodCode
   }
 
   /**
-   * Create dummy arguments for call to the givem method for restoring code.
+   * Create dummy arguments for call to the given method for restoring code.
    * Creates appropriate argument values for a method call with 0 or null values.
    *
    * @param method method node to create arguments for
