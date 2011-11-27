@@ -8,11 +8,8 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -35,8 +32,20 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 
@@ -359,70 +368,6 @@ public abstract class AbstractTransformer implements ITransformer
     instructions.add(new InsnNode(ARETURN));
 
     clazz.methods.add(getThread);
-  }
-
-  /**
-   * Create "get thread" code including exception handling.
-   * Inserts generated code directly into method.
-   * Required stack size: 3.
-   *
-   * @param clazz class to transform
-   * @param method method to transform
-   * @param localThread number of local containing the thread
-   * @param tryCode restore code which can cause a NullPointerException during access of this.$$thread$$
-   * @param restoreCode remaining restore code, executed directly after tryCode
-   */
-  protected void insertMethodGetThreadStartCode(ClassNode clazz, MethodNode method, int localThread, InsnList tryCode, InsnList restoreCode)
-  {
-    final boolean isMethodNotStatic = isNotStatic(method);
-
-    InsnList instructions = new InsnList();
-
-    // store thread always in a new local variable
-    if (isMethodNotStatic)
-    {
-      instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
-    }
-    else
-    {
-      instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC));
-      instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
-    }
-    LabelNode retry = new LabelNode();
-    instructions.add(retry);
-    // store frame always in a new local variable
-    instructions.add(new VarInsnNode(ASTORE, localThread));
-
-    LabelNode beginTry = new LabelNode();
-    instructions.add(beginTry);
-    instructions.add(tryCode);
-    LabelNode endTry = new LabelNode();
-    instructions.add(endTry);
-    instructions.add(restoreCode);
-
-    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-
-    if (isMethodNotStatic)
-    {
-      InsnList handler = new InsnList();
-
-      // try / catch (NullPointerException) for thread access
-      LabelNode catchNPE = new LabelNode();
-      handler.add(catchNPE);
-      // Pop NPE from stack
-      handler.add(new InsnNode(POP));
-      handler.add(new VarInsnNode(ALOAD, 0));
-      handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC));
-      handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
-      handler.add(new InsnNode(DUP_X1));
-      handler.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
-      handler.add(new JumpInsnNode(GOTO, retry));
-      //noinspection unchecked
-      method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
-
-      method.instructions.add(handler);
-    }
   }
 
   //
