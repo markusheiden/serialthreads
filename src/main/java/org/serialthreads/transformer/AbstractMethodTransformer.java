@@ -402,13 +402,10 @@ public abstract class AbstractMethodTransformer
   /**
    * Replace all return instructions by ThreadFinishedException.
    * Needed for transformation of IRunnable.run().
-   *
-   * @param clazz clazz to alter
-   * @param run run method to alter
    */
-  protected void replaceReturns(ClassNode clazz, MethodNode run)
+  protected void replaceReturns()
   {
-    for (AbstractInsnNode returnInstruction : returnInstructions(run))
+    for (AbstractInsnNode returnInstruction : returnInstructions(method))
     {
       InsnList instructions = new InsnList();
       // TODO 2009-11-21 mh: implement once, jump to implementation
@@ -420,8 +417,8 @@ public abstract class AbstractMethodTransformer
       instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V"));
       instructions.add(new InsnNode(ATHROW));
 
-      run.instructions.insertBefore(returnInstruction, instructions);
-      run.instructions.remove(returnInstruction);
+      method.instructions.insertBefore(returnInstruction, instructions);
+      method.instructions.remove(returnInstruction);
     }
   }
 

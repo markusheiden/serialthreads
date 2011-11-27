@@ -51,7 +51,7 @@ class RunMethodTransformer extends MethodTransformer
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     Frame[] frames = analyze();
 
-    replaceReturns(clazz, method);
+    replaceReturns();
     List<InsnList> restoreCodes = insertCaptureCode(frames, interruptibleMethodCalls(), true);
     createRestoreHandlerRun(restoreCodes);
     fixMaxs();
