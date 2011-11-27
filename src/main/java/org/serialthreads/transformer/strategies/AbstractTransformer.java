@@ -200,6 +200,7 @@ public abstract class AbstractTransformer implements ITransformer
       {
         log.debug("    Not interruptible -> abort transformation of method");
       }
+
       return Collections.emptyList();
     }
 
@@ -218,7 +219,6 @@ public abstract class AbstractTransformer implements ITransformer
       throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
     }
   }
-
 
   /**
    * Execute byte code transformation on interruptible method.
