@@ -24,6 +24,12 @@ class AbstractCopyMethodTransformer extends MethodTransformer
     super(clazz, copyMethod(clazz, method), classInfoCache);
   }
 
+  /**
+   * Transform method.
+   *
+   * @return Transformed method
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   */
   public MethodNode transform() throws AnalyzerException
   {
     // create copy of method with shortened arguments

@@ -22,6 +22,12 @@ class AbstractMethodTransformer extends MethodTransformer
     super(clazz, method, classInfoCache);
   }
 
+  /**
+   * Transform method.
+   *
+   * @return Transformed method
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   */
   public MethodNode transform() throws AnalyzerException
   {
     // add thread and previousFrame arguments to the original method

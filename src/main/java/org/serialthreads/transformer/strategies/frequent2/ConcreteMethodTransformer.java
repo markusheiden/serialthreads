@@ -42,6 +42,13 @@ class ConcreteMethodTransformer extends MethodTransformer
     super(clazz, method, classInfoCache);
   }
 
+  /**
+   * Transform method.
+   *
+   * @return Transformed method
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   * @exception MethodNeedsNoTransformationException In case the method needs no byte code transformation
+   */
   public MethodNode transform() throws AnalyzerException, MethodNeedsNoTransformationException
   {
     Frame[] frames = analyze();

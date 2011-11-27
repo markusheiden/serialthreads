@@ -43,6 +43,13 @@ class ConcreteMethodTransformer extends MethodTransformer
     super(clazz, method, classInfoCache);
   }
 
+  /**
+   * Transform method.
+   *
+   * @return Transformed method
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   * @exception MethodNeedsNoTransformationException In case the method needs no byte code transformation
+   */
   public MethodNode transform() throws AnalyzerException, MethodNeedsNoTransformationException
   {
     Frame[] frames = analyze();
@@ -50,7 +57,7 @@ class ConcreteMethodTransformer extends MethodTransformer
     voidReturns();
     Map<MethodInsnNode, Integer> methodCalls = interruptibleMethodCalls();
     insertCaptureCode(frames, methodCalls, false);
-    createRestoreHandlerMethod(clazz, method);
+    createRestoreHandlerMethod();
     addThreadAndFrame(methodCalls.keySet());
     method.desc = changeDesc(method.desc);
     fixMaxs();
@@ -60,11 +67,8 @@ class ConcreteMethodTransformer extends MethodTransformer
 
   /**
    * Insert frame restoring code at the begin of an interruptible method.
-   *
-   * @param clazz class to alter
-   * @param method method to alter
    */
-  protected void createRestoreHandlerMethod(ClassNode clazz, MethodNode method)
+  private void createRestoreHandlerMethod()
   {
     if (log.isDebugEnabled())
     {
