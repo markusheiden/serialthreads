@@ -32,7 +32,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 /**
  * Base class for method transformers of {@link org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3}.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 abstract class MethodTransformer extends AbstractMethodTransformer
 {
   /**

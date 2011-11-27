@@ -26,7 +26,7 @@ import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 /**
  * Method transformer for run methods.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 class RunMethodTransformer extends MethodTransformer
 {
   /**
@@ -45,8 +45,8 @@ class RunMethodTransformer extends MethodTransformer
    * Transform method.
    *
    * @return Transformed method
-   * @exception org.objectweb.asm.tree.analysis.AnalyzerException In case of incorrect byte code of the original method
-   * @exception org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException In case the method needs no byte code transformation
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   * @exception MethodNeedsNoTransformationException In case the method needs no byte code transformation
    */
   public MethodNode transform() throws AnalyzerException, MethodNeedsNoTransformationException
   {

@@ -24,7 +24,6 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
  * The thread and frame will be added to the signature of all interruptible methods.
  * This transformation needs no static thread holder, SimpleSerialThreadManager2 can be used.
  */
-@SuppressWarnings({"UnusedAssignment", "UnusedParameters", "UnusedDeclaration"})
 public class FrequentInterruptsTransformer3 extends AbstractTransformer
 {
   public static final String STRATEGY = "FREQUENT3";

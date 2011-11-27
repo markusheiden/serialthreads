@@ -28,7 +28,7 @@ import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 /**
  * Method transformer for concrete methods.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment"})
 class ConcreteMethodTransformer extends MethodTransformer
 {
   /**

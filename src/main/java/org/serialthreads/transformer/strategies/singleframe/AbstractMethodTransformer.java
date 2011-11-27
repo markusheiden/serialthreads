@@ -26,7 +26,7 @@ class AbstractMethodTransformer extends MethodTransformer
    * Transform method.
    *
    * @return Transformed method
-   * @exception org.objectweb.asm.tree.analysis.AnalyzerException In case of incorrect byte code of the original method
+   * @exception AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException
   {

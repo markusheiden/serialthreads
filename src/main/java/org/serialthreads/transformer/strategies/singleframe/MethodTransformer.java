@@ -37,7 +37,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 /**
  * Base class for method transformers of {@link SingleFrameExecutionTransformer}.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 abstract class MethodTransformer extends org.serialthreads.transformer.strategies.AbstractMethodTransformer
 {
   /**

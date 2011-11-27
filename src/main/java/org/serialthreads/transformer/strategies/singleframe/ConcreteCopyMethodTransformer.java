@@ -24,7 +24,7 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 /**
  * Method transformer for copies of concrete methods.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment"})
 class ConcreteCopyMethodTransformer extends MethodTransformer
 {
   /**
@@ -44,8 +44,8 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
    * Transform method.
    *
    * @return Transformed method
-   * @exception org.objectweb.asm.tree.analysis.AnalyzerException In case of incorrect byte code of the original method
-   * @exception org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException In case the method needs no byte code transformation
+   * @exception AnalyzerException In case of incorrect byte code of the original method
+   * @exception MethodNeedsNoTransformationException In case the method needs no byte code transformation
    */
   public MethodNode transform() throws AnalyzerException, MethodNeedsNoTransformationException
   {

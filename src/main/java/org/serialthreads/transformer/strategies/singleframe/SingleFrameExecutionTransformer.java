@@ -1,6 +1,5 @@
 package org.serialthreads.transformer.strategies.singleframe;
 
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -10,8 +9,6 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import org.serialthreads.transformer.strategies.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,15 +21,14 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
 /**
  * Transformer implementing serial threads by executing single frames.
  */
-@SuppressWarnings({"UnusedAssignment", "UnusedParameters", "UnusedDeclaration"})
 public class SingleFrameExecutionTransformer extends AbstractTransformer
 {
   public static final String STRATEGY = "SINGLE_FRAME_EXECUTION";
 
-  private static final String METHOD_HANDLE_NAME = Type.getType(MethodHandle.class).getInternalName();
-  private static final String METHOD_HANDLE_DESC = Type.getType(MethodHandle.class).getDescriptor();
-  private static final String LOOKUP_NAME = Type.getType(Lookup.class).getInternalName();
-  private static final String LOOKUP_DESC = Type.getType(Lookup.class).getDescriptor();
+//  private static final String METHOD_HANDLE_NAME = Type.getType(MethodHandle.class).getInternalName();
+//  private static final String METHOD_HANDLE_DESC = Type.getType(MethodHandle.class).getDescriptor();
+//  private static final String LOOKUP_NAME = Type.getType(Lookup.class).getInternalName();
+//  private static final String LOOKUP_DESC = Type.getType(Lookup.class).getDescriptor();
 
 //    clazz.fields.add(new FieldNode(ASM4, ACC_PRIVATE, changeCopyName(method.name, method.desc), METHOD_HANDLE_DESC, METHOD_HANDLE_NAME, null));
 

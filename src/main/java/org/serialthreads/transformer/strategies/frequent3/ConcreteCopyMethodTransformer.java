@@ -24,7 +24,7 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 /**
  * Method transformer for copies of concrete methods.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment"})
 class ConcreteCopyMethodTransformer extends MethodTransformer
 {
   /**

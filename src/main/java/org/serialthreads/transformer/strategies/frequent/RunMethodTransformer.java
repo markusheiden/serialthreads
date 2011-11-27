@@ -24,7 +24,7 @@ import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 /**
  * Method transformer for run methods.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 class RunMethodTransformer extends MethodTransformer
 {
   /**
