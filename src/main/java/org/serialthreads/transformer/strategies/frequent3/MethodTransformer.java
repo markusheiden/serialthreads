@@ -25,7 +25,6 @@ import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
-import static org.serialthreads.transformer.code.MethodCode.isInterrupt;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -123,7 +122,7 @@ abstract class MethodTransformer extends org.serialthreads.transformer.strategie
 
     for (MethodInsnNode methodCall : methodCalls)
     {
-      if (!isRun(methodCall, classInfoCache) && !isInterrupt(methodCall, classInfoCache))
+      if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall))
       {
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localThread));
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localFrame));

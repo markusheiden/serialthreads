@@ -46,6 +46,7 @@ import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.objectweb.asm.Opcodes.RETURN;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 
@@ -120,7 +121,7 @@ public abstract class AbstractTransformer implements ITransformer
       if (transformedMethods.isEmpty())
       {
         // method not transformed? -> check that it contains no calls of interruptible methods
-        new NotInterruptableMethodChecker(clazz, method, classInfoCache).check();
+        check(clazz, method);
       }
 
       if (log.isDebugEnabled())
@@ -145,6 +146,43 @@ public abstract class AbstractTransformer implements ITransformer
     if (log.isDebugEnabled())
     {
       log.debug("Finished transforming of class " + clazz.name);
+    }
+  }
+
+  /**
+   * Checks not interruptible method to contain no calls of interruptible methods.
+   *
+   * @param clazz Clazz to check
+   * @param method Method to check
+   */
+  public void check(ClassNode clazz, MethodNode method)
+  {
+    AbstractInsnNode[] instructions = method.instructions.toArray();
+    for (AbstractInsnNode instruction : instructions)
+    {
+      if (instruction.getType() == AbstractInsnNode.METHOD_INSN)
+      {
+        MethodInsnNode methodCall = (MethodInsnNode) instruction;
+
+        if (!classInfoCache.isInterruptible(methodCall))
+        {
+          // nothing to check on not interruptible methods
+          continue;
+        }
+
+        if (!classInfoCache.isExecutor(clazz, method))
+        {
+          throw new NotTransformableException(
+            "Not interruptible method " + org.serialthreads.transformer.code.MethodCode.methodName(clazz, method) +
+              " calls interruptible method " + org.serialthreads.transformer.code.MethodCode.methodName(methodCall));
+        }
+        else if (!isRun(methodCall, classInfoCache))
+        {
+          throw new NotTransformableException(
+            "Executor " + org.serialthreads.transformer.code.MethodCode.methodName(clazz, method) +
+              " may only call run, but called " + org.serialthreads.transformer.code.MethodCode.methodName(methodCall));
+        }
+      }
     }
   }
 

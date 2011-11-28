@@ -42,6 +42,7 @@ public interface IClassInfoCache
 
   /**
    * Check if method is interruptible.
+   * This includes interrupt methods.
    *
    * @param owner owner of method
    * @param method method
@@ -50,6 +51,7 @@ public interface IClassInfoCache
 
   /**
    * Check if the called method is interruptible.
+   * This includes interrupt methods.
    *
    * @param method method call
    */
@@ -57,6 +59,7 @@ public interface IClassInfoCache
 
   /**
    * Check if method is interruptible.
+   * This includes interrupt methods.
    *
    * @param owner owner of method
    * @param name name of method

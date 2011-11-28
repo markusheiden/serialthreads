@@ -57,7 +57,6 @@ import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
-import static org.serialthreads.transformer.code.MethodCode.isInterrupt;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -131,7 +130,7 @@ public abstract class AbstractMethodTransformer
       if (instruction instanceof MethodInsnNode)
       {
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
-        if (isInterruptible(methodCall))
+        if (classInfoCache.isInterruptible(methodCall))
         {
           result.put(methodCall, i);
         }
@@ -144,16 +143,6 @@ public abstract class AbstractMethodTransformer
     }
 
     return result;
-  }
-
-  /**
-   * Check if method call is interruptible.
-   *
-   * @param methodCall method call
-   */
-  protected boolean isInterruptible(MethodInsnNode methodCall)
-  {
-    return isInterrupt(methodCall, classInfoCache) || classInfoCache.isInterruptible(methodCall);
   }
 
   /**
@@ -247,7 +236,7 @@ public abstract class AbstractMethodTransformer
    */
   protected InsnList createRestoreCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
   {
-    return isInterrupt(methodCall, classInfoCache)?
+    return classInfoCache.isInterrupt(methodCall)?
       createRestoreCodeForInterrupt(methodCall, frameAfter) :
       createRestoreCodeForMethod(frameBefore, methodCall, frameAfter);
   }
@@ -313,7 +302,7 @@ public abstract class AbstractMethodTransformer
    */
   protected void createCaptureCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
   {
-    if (isInterrupt(methodCall, classInfoCache))
+    if (classInfoCache.isInterrupt(methodCall))
     {
       createCaptureCodeForInterrupt(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
     }

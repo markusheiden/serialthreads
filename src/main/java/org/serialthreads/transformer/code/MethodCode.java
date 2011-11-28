@@ -95,18 +95,6 @@ public class MethodCode
   }
 
   /**
-   * Check if the called method is an interrupt.
-   *
-   * @param methodCall method call
-   * @param classInfoCache classInfoCache
-   */
-  public static boolean isInterrupt(MethodInsnNode methodCall, IClassInfoCache classInfoCache)
-  {
-    // TODO 2010-03-15 mh: make sure that interrupt method has descriptor ()V!
-    return classInfoCache.isInterrupt(methodCall);
-  }
-
-  /**
    * Create dummy arguments for call to the given method for restoring code.
    * Creates appropriate argument values for a method call with 0 or null values.
    *

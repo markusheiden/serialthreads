@@ -136,7 +136,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
     }
 
     ClassInfo classInfo = getClassInfo(owner);
-    boolean result = classInfo.isInterruptible(name + desc);
+    boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
     if (logger.isDebugEnabled())
     {
       logger.debug(methodName(owner, name, desc) + " is" + (result? " " : " not ") + "interruptible");
