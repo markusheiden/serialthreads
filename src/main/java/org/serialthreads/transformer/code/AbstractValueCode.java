@@ -20,18 +20,69 @@ import static org.objectweb.asm.Opcodes.SWAP;
  */
 public abstract class AbstractValueCode implements IValueCode
 {
+  /**
+   * Internal name of frame class.
+   */
   protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
 
+  /**
+   * Type representing the the value class.
+   */
   protected final Type type;
+
+  /**
+   * Base type of the value class.
+   * For all objects and arrays the base class is Object.
+   */
   protected final Type baseType;
+
+  /**
+   * Base name of value specific load/store methods at stack.
+   */
   protected final String methodName;
+
+  /**
+   * Value specific load instruction.
+   */
   protected final int load;
+
+  /**
+   * Value specific store instruction.
+   */
   protected final int store;
+
+  /**
+   * Value specific array load instruction.
+   */
   protected final int aload;
+
+  /**
+   * Value specific array store instruction.
+   */
   protected final int astore;
+
+  /**
+   * Value specific instruction to push a zero/null onto the stack.
+   */
   protected final int pushNull;
+
+  /**
+   * Value specific return instruction.
+   */
   protected final int returnValue;
 
+  /**
+   * Constructor.
+   *
+   * @param type Type representing the the value class
+   * @param methodName Base name of value specific load/store methods at stack
+   * @param load Value specific load instruction
+   * @param store Value specific store instruction
+   * @param aload Value specific array load instruction
+   * @param astore Value specific array store instruction
+   * @param pushNull Value specific instruction to push a zero/null onto the stack
+   * @param returnValue Value specific return instruction
+   */
   public AbstractValueCode(Type type, String methodName, int load, int store, int aload, int astore, int pushNull, int returnValue)
   {
     this.type = type;
@@ -183,24 +234,47 @@ public abstract class AbstractValueCode implements IValueCode
     return instructions;
   }
 
+  /**
+   * Generate code to cast the topmost element on the stack to this type.
+   *
+   * @return Instructions
+   */
   protected InsnList cast()
   {
     // overwrite, if needed
     return new InsnList();
   }
 
+  /**
+   * Generate code to clear a saved value from the stack frame to avoid memory leaks.
+   *
+   * @param name Name of stack frame field to clear
+   * @param localFrame Local containing the frame
+   * @return Instructions
+   */
   protected InsnList clear(String name, int localFrame)
   {
     // overwrite, if needed
     return new InsnList();
   }
 
+  /**
+   * Add code directly before restoring a local or a stack element from a frame.
+   *
+   * @return Instructions
+   */
   protected InsnList beforePop()
   {
     // overwrite, if needed
     return new InsnList();
   }
 
+  /**
+   * Add code directly after restoring a local or a stack element from a frame.
+   *
+   * @param i Index
+   * @return Instructions
+   */
   protected InsnList afterPop(int i)
   {
     // overwrite, if needed

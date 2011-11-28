@@ -87,7 +87,7 @@ public interface IValueCode
   public InsnList pushStack(int index, int localFrame);
 
   /**
-   * Generate code to restore the a stack element from a frame.
+   * Generate code to restore a stack element from a frame.
    * The frame is expected to be already on the top of the stack.
    *
    * @param index index of stack element among stack elements of the same type
