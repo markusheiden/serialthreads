@@ -9,6 +9,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.MethodNodeCopier;
 import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.util.List;
@@ -37,7 +38,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
   protected ConcreteCopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
   {
     // create copy of method with shortened signature
-    super(clazz, copyMethod(clazz, method), classInfoCache);
+    super(clazz, MethodNodeCopier.copy(method), classInfoCache);
   }
 
   /**
@@ -56,8 +57,11 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
     List<InsnList> restoreCodes = insertCaptureCode(frames, copyMethodCalls, true);
     createRestoreHandlerCopy(restoreCodes);
     addThreadAndFrame(copyMethodCalls.keySet());
-    method.desc = changeCopyDesc(method.desc);
     fixMaxs();
+
+    method.name = changeCopyName(method.name, method.desc);
+    method.desc = changeCopyDesc(method.desc);
+    clazz.methods.add(method);
 
     if (log.isDebugEnabled())
     {
