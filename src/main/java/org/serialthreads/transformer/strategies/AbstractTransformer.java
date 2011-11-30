@@ -155,7 +155,7 @@ public abstract class AbstractTransformer implements ITransformer
    * @param clazz Clazz to check
    * @param method Method to check
    */
-  public void check(ClassNode clazz, MethodNode method)
+  private void check(ClassNode clazz, MethodNode method)
   {
     AbstractInsnNode[] instructions = method.instructions.toArray();
     for (AbstractInsnNode instruction : instructions)
@@ -266,6 +266,28 @@ public abstract class AbstractTransformer implements ITransformer
    * @return transformed methods
    */
   protected abstract List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
+
+  /**
+   * Are there no interruptible method calls.
+   *
+   * @param method method node to transform
+   */
+  protected boolean hasNoInterruptibleMethodCalls(MethodNode method)
+  {
+    for (int i = 0; i < method.instructions.size(); i++)
+    {
+      AbstractInsnNode instruction = method.instructions.get(i);
+      if (instruction instanceof MethodInsnNode)
+      {
+        if (classInfoCache.isInterruptible((MethodInsnNode) instruction))
+        {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
 
   /**
    * Execute some final modifications after transformation.

@@ -119,9 +119,8 @@ public abstract class AbstractMethodTransformer
    * Extract all interruptible method calls.
    *
    * @return map with method call -> Index of method call in instructions
-   * @exception MethodNeedsNoTransformationException if there are no interruptible method calls in the method
    */
-  protected Map<MethodInsnNode, Integer> interruptibleMethodCalls() throws MethodNeedsNoTransformationException
+  protected Map<MethodInsnNode, Integer> interruptibleMethodCalls()
   {
     Map<MethodInsnNode, Integer> result = new LinkedHashMap<>();
     for (int i = 0; i < method.instructions.size(); i++)
@@ -135,11 +134,6 @@ public abstract class AbstractMethodTransformer
           result.put(methodCall, i);
         }
       }
-    }
-
-    if (result.isEmpty())
-    {
-      throw new MethodNeedsNoTransformationException();
     }
 
     return result;

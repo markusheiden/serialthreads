@@ -14,6 +14,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 
 import java.util.Set;
 
@@ -36,7 +37,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
  * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
  */
 @SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
-abstract class MethodTransformer extends org.serialthreads.transformer.strategies.AbstractMethodTransformer
+abstract class MethodTransformer extends AbstractMethodTransformer
 {
   /**
    * Constructor.
