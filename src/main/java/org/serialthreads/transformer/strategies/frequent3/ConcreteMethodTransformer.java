@@ -12,6 +12,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.LocalVariablesShifter;
 
 import java.util.Map;
 
@@ -50,6 +51,7 @@ class ConcreteMethodTransformer extends MethodTransformer
    */
   public MethodNode transform() throws AnalyzerException
   {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
     Frame[] frames = analyze();
 
     voidReturns();
