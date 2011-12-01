@@ -62,7 +62,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
 
     if (hasNoInterruptibleMethodCalls(method))
     {
-      // do not transform IRunnable.run() itself
+      // no transformation needed
       return Collections.emptyList();
     }
 
