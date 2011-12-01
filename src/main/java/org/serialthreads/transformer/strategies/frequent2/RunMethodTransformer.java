@@ -7,7 +7,6 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 
@@ -47,10 +46,10 @@ class RunMethodTransformer extends MethodTransformer
   public MethodNode transform() throws AnalyzerException
   {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
-    Frame[] frames = analyze();
+    analyze();
 
     replaceReturns();
-    List<InsnList> restoreCodes = insertCaptureCode(frames, interruptibleMethodCalls(), true);
+    List<InsnList> restoreCodes = insertCaptureCode(true);
     createRestoreHandlerRun(restoreCodes);
     fixMaxs();
 

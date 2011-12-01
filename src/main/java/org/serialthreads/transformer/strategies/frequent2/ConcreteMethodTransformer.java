@@ -10,7 +10,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -49,9 +48,9 @@ class ConcreteMethodTransformer extends MethodTransformer
    */
   public MethodNode transform() throws AnalyzerException
   {
-    Frame[] frames = analyze();
+    analyze();
 
-    insertCaptureCode(frames, interruptibleMethodCalls(), false);
+    insertCaptureCode(false);
     createRestoreHandlerMethod();
     fixMaxs();
 

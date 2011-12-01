@@ -10,11 +10,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
-
-import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
@@ -52,13 +49,12 @@ class ConcreteMethodTransformer extends MethodTransformer
   public MethodNode transform() throws AnalyzerException
   {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
-    Frame[] frames = analyze();
+    analyze();
 
     voidReturns();
-    Map<MethodInsnNode, Integer> methodCalls = interruptibleMethodCalls();
-    insertCaptureCode(frames, methodCalls, false);
+    insertCaptureCode(false);
     createRestoreHandlerMethod();
-    addThreadAndFrame(methodCalls.keySet());
+    addThreadAndFrame();
     fixMaxs();
 
     method.desc = changeDesc(method.desc);

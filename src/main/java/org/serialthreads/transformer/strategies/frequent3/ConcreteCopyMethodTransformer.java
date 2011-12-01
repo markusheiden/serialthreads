@@ -3,17 +3,14 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
@@ -50,13 +47,12 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
   public MethodNode transform() throws AnalyzerException
   {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
-    Frame[] frames = analyze();
+    analyze();
 
     voidReturns();
-    Map<MethodInsnNode, Integer> copyMethodCalls = interruptibleMethodCalls();
-    List<InsnList> restoreCodes = insertCaptureCode(frames, copyMethodCalls, true);
+    List<InsnList> restoreCodes = insertCaptureCode(true);
     createRestoreHandlerCopy(restoreCodes);
-    addThreadAndFrame(copyMethodCalls.keySet());
+    addThreadAndFrame();
     fixMaxs();
 
     method.name = changeCopyName(method.name, method.desc);

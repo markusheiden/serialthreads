@@ -16,8 +16,6 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
-import java.util.Set;
-
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.GETFIELD;
@@ -108,10 +106,8 @@ abstract class MethodTransformer extends org.serialthreads.transformer.strategie
   /**
    * Additionally push thread and previous frame arguments onto the stack for all interruptible method calls.
    * Alters the method descriptor to reflect these changes.
-   *
-   * @param methodCalls interruptible method calls
    */
-  protected void addThreadAndFrame(Set<MethodInsnNode> methodCalls)
+  protected void addThreadAndFrame()
   {
     InsnList instructions = method.instructions;
 
@@ -120,7 +116,7 @@ abstract class MethodTransformer extends org.serialthreads.transformer.strategie
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
-    for (MethodInsnNode methodCall : methodCalls)
+    for (MethodInsnNode methodCall : interruptibleMethodCalls.keySet())
     {
       if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall))
       {

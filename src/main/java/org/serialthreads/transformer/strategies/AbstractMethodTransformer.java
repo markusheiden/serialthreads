@@ -86,9 +86,12 @@ public abstract class AbstractMethodTransformer
   protected final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
   protected final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
+  protected final IClassInfoCache classInfoCache;
   protected final ClassNode clazz;
   protected final MethodNode method;
-  protected final IClassInfoCache classInfoCache;
+
+  protected Frame[] frames;
+  protected Map<MethodInsnNode, Integer> interruptibleMethodCalls;
 
   /**
    * Constructor.
@@ -106,23 +109,15 @@ public abstract class AbstractMethodTransformer
 
   /**
    * Analyze a method to compute frames.
-   *
-   * @return frames
-   * @exception AnalyzerException
-   */
-  protected Frame[] analyze() throws AnalyzerException
-  {
-    return ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
-  }
-
-  /**
    * Extract all interruptible method calls.
    *
-   * @return map with method call -> Index of method call in instructions
+   * @exception AnalyzerException
    */
-  protected Map<MethodInsnNode, Integer> interruptibleMethodCalls()
+  protected void analyze() throws AnalyzerException
   {
-    Map<MethodInsnNode, Integer> result = new LinkedHashMap<>();
+    frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
+
+    interruptibleMethodCalls = new LinkedHashMap<>();
     for (int i = 0; i < method.instructions.size(); i++)
     {
       AbstractInsnNode instruction = method.instructions.get(i);
@@ -131,12 +126,10 @@ public abstract class AbstractMethodTransformer
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
         if (classInfoCache.isInterruptible(methodCall))
         {
-          result.put(methodCall, i);
+          interruptibleMethodCalls.put(methodCall, i);
         }
       }
     }
-
-    return result;
   }
 
   /**
@@ -196,18 +189,16 @@ public abstract class AbstractMethodTransformer
   /**
    * Inserts capture code after method calls.
    *
-   * @param frames frames
-   * @param methodCalls method calls inside method
    * @param suppressOwner suppress capturing of owner?
    * @return generated restore codes for method calls
    */
-  protected List<InsnList> insertCaptureCode(Frame[] frames, Map<MethodInsnNode, Integer> methodCalls, boolean suppressOwner)
+  protected List<InsnList> insertCaptureCode(boolean suppressOwner)
   {
-    boolean moreThanOne = methodCalls.size() > 1;
+    boolean moreThanOne = interruptibleMethodCalls.size() > 1;
 
-    List<InsnList> restoreCodes = new ArrayList<>(methodCalls.size());
+    List<InsnList> restoreCodes = new ArrayList<>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
-    for (Entry<MethodInsnNode, Integer> entry : methodCalls.entrySet())
+    for (Entry<MethodInsnNode, Integer> entry : interruptibleMethodCalls.entrySet())
     {
       Frame frameBefore = frames[entry.getValue()];
       MethodInsnNode methodCall = entry.getKey();
