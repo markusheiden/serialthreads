@@ -2,7 +2,6 @@ package org.serialthreads.transformer.strategies.frequent3;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**
@@ -26,9 +25,8 @@ class AbstractMethodTransformer extends MethodTransformer
    * Transform method.
    *
    * @return Transformed method
-   * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public MethodNode transform() throws AnalyzerException
+  public MethodNode transform()
   {
     // add thread and previousFrame arguments to the original method
     method.desc = changeDesc(method.desc);

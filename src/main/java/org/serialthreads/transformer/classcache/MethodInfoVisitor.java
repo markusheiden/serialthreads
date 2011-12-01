@@ -13,8 +13,8 @@ import java.util.Set;
  */
 public class MethodInfoVisitor extends MethodVisitor
 {
-  private String methodName;
-  private String methodDesc;
+  private final String methodName;
+  private final String methodDesc;
   private final Set<String> methodAnnotations = new HashSet<>();
 
   private final Map<String, MethodInfo> methods;

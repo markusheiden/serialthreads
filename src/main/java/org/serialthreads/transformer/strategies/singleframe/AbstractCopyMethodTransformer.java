@@ -2,7 +2,6 @@ package org.serialthreads.transformer.strategies.singleframe;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
@@ -29,9 +28,8 @@ class AbstractCopyMethodTransformer extends MethodTransformer
    * Transform method.
    *
    * @return Transformed method
-   * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public MethodNode transform() throws AnalyzerException
+  public MethodNode transform()
   {
     // create a copy of the method with shortened arguments
     method.name = changeCopyName(method.name, method.desc);
