@@ -8,7 +8,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
@@ -47,7 +46,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache))
     {
       // do not transform IRunnable.run() itself
-      return Collections.emptyList();
+      return null;
     }
 
     if (isAbstract(method))
@@ -61,7 +60,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
     if (hasNoInterruptibleMethodCalls(method))
     {
       // no transformation needed
-      return Collections.emptyList();
+      return null;
     }
 
     if (isRun(clazz, method, classInfoCache))

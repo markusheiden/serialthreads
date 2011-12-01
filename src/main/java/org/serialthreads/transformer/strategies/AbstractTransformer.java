@@ -30,7 +30,6 @@ import org.serialthreads.transformer.debug.Debugger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
@@ -117,17 +116,20 @@ public abstract class AbstractTransformer implements ITransformer
     for (MethodNode method : methods)
     {
       List<MethodNode> transformedMethods = transformMethod(clazz, method);
-      allTransformedMethods.addAll(transformedMethods);
-      if (transformedMethods.isEmpty())
+      if (transformedMethods == null)
       {
         // method not transformed? -> check that it contains no calls of interruptible methods
         check(clazz, method);
       }
-
-      if (log.isDebugEnabled())
+      else
       {
-        // analyze methods again to be sure that they are correct
-        reanalyzeMethods(clazz, transformedMethods);
+        allTransformedMethods.addAll(transformedMethods);
+
+        if (log.isDebugEnabled())
+        {
+          // analyze methods again to be sure that they are correct
+          reanalyzeMethods(clazz, transformedMethods);
+        }
       }
     }
 
@@ -216,7 +218,7 @@ public abstract class AbstractTransformer implements ITransformer
    *
    * @param clazz class to transform
    * @param method method node to transform
-   * @return transformed methods
+   * @return transformed methods or null, if the method needs to transformation
    */
   protected List<MethodNode> transformMethod(ClassNode clazz, MethodNode method)
   {
@@ -239,7 +241,7 @@ public abstract class AbstractTransformer implements ITransformer
         log.debug("    Not interruptible -> abort transformation of method");
       }
 
-      return Collections.emptyList();
+      return null;
     }
 
     try

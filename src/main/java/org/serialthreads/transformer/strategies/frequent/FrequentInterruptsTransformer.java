@@ -7,10 +7,8 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
-import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
@@ -52,27 +50,25 @@ public class FrequentInterruptsTransformer extends AbstractTransformer
     if (isAbstract(method))
     {
       // abstract methods need no transformation
-      return Collections.emptyList();
+      return null;
     }
 
-    try
+    if (hasNoInterruptibleMethodCalls(method))
     {
-      if (isRun(clazz, method, classInfoCache))
-      {
-        // take special care of run method
-        return Arrays.asList(
-          new RunMethodTransformer(clazz, method, classInfoCache).transform());
-      }
+      // no transformation needed
+      return null;
+    }
 
-      // "standard" transformation of interruptible methods
+    if (isRun(clazz, method, classInfoCache))
+    {
+      // take special care of run method
       return Arrays.asList(
-        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
+        new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
-    catch (MethodNeedsNoTransformationException e)
-    {
-      // no interruptible calls -> nothing to do
-      return Collections.emptyList();
-    }
+
+    // "standard" transformation of interruptible methods
+    return Arrays.asList(
+      new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
   }
 
   @Override

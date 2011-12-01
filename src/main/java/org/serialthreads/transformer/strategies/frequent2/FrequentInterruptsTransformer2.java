@@ -8,10 +8,8 @@ import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
-import org.serialthreads.transformer.strategies.MethodNeedsNoTransformationException;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
@@ -59,27 +57,25 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
         new AbstractCopyMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
-    try
+    if (hasNoInterruptibleMethodCalls(method))
     {
-      if (isRun(clazz, method, classInfoCache))
-      {
-        // take special care of run method
-        return Arrays.asList(
-          new RunMethodTransformer(clazz, method, classInfoCache).transform());
-      }
+      // no transformation needed
+      return null;
+    }
 
-      // "standard" transformation of interruptible methods
-      // TODO 2011-11-27 mh: Move shift into method transformer
-      LocalVariablesShifter.shift(firstLocal(method), 3, method);
-      return Arrays.asList(
-        new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
-        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
-    }
-    catch (MethodNeedsNoTransformationException e)
+    if (isRun(clazz, method, classInfoCache))
     {
-      // no interruptible calls -> nothing to do
-      return Collections.emptyList();
+      // take special care of run method
+      return Arrays.asList(
+        new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
+
+    // "standard" transformation of interruptible methods
+    // TODO 2011-11-27 mh: Move shift into method transformer
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+    return Arrays.asList(
+      new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
+      new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
   }
 
   @Override
