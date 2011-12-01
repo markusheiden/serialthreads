@@ -7,6 +7,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
@@ -45,6 +46,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
    */
   public MethodNode transform() throws AnalyzerException
   {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
     analyze();
 
     voidReturns();
