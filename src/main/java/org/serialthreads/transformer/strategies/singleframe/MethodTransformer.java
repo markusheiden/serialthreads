@@ -14,7 +14,6 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -50,23 +49,6 @@ abstract class MethodTransformer extends org.serialthreads.transformer.strategie
   }
 
   /**
-   * Copies a method and adds it to the class.
-   * Its arguments will be shortened by the caller later on.
-   *
-   * @param clazz class to transform
-   * @param method method to transform
-   */
-  protected static MethodNode copyMethod(ClassNode clazz, MethodNode method)
-  {
-    MethodNode copy = MethodNodeCopier.copy(method);
-    copy.name = changeCopyName(method.name, method.desc);
-
-    clazz.methods.add(copy);
-
-    return copy;
-  }
-
-  /**
    * Change the name of a copied method.
    * Computes an unique name based on the name and the descriptor.
    *
@@ -74,7 +56,7 @@ abstract class MethodTransformer extends org.serialthreads.transformer.strategie
    * @param desc parameters
    * @return changed name
    */
-  private static String changeCopyName(String name, String desc)
+  protected String changeCopyName(String name, String desc)
   {
     return name + "$$" + desc.replaceAll("[()\\[/;]", "_") + "$$";
   }
