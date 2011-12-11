@@ -6,7 +6,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
 
 import java.util.Arrays;
@@ -16,7 +15,6 @@ import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
-import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -71,8 +69,6 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer
     }
 
     // "standard" transformation of interruptible methods
-    // TODO 2011-11-27 mh: Move shift into method transformer
-    LocalVariablesShifter.shift(firstLocal(method), 3, method);
     return Arrays.asList(
       new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
       new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
