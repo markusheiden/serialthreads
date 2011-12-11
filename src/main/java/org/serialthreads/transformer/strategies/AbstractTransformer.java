@@ -270,7 +270,7 @@ public abstract class AbstractTransformer implements ITransformer
   protected abstract List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
 
   /**
-   * Are there no interruptible method calls.
+   * Are there no interruptible method calls?.
    *
    * @param method method node to transform
    */
