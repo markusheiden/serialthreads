@@ -15,6 +15,7 @@
     <pathelement location="${classes}"/>
     <fileset dir="${lib}">
       <include name="*.jar"/>
+      <exclude name="asm-all-4.0.jar"/>
     </fileset>
   </path>
 
@@ -42,7 +43,7 @@
 
   <target name="jar" depends="compile, copyResources">
     <jar basedir="${classes}" destfile="${project.jar}" update="false">
-      <zipfileset src="${lib}/asm-debug-all-4.0_RC2.jar"/>
+      <zipfileset src="${lib}/asm-debug-all-4.0.jar"/>
       <manifest>
         <attribute name="Implementation-Title" value="SerialThreads"/>
         <attribute name="Implementation-Version" value="${version} ${TODAY}"/>
