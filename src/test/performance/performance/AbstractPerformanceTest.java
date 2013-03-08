@@ -3,8 +3,8 @@ package performance;
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;
 
-import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Base performance test.

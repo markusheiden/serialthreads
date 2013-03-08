@@ -6,8 +6,8 @@ import org.objectweb.asm.Type;
 import java.util.Collections;
 import java.util.HashSet;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotSame;
 
 /**

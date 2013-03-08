@@ -2,6 +2,7 @@ package org.serialthreads.transformer.strategies;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
