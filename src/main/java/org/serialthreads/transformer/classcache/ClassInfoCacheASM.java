@@ -7,10 +7,9 @@ import java.io.InputStream;
 import java.util.Deque;
 
 /**
- * Check and caches which methods are marked as interruptible.
+ * Checks and caches which methods are marked as interruptible.
  */
-public class ClassInfoCacheASM extends AbstractClassInfoCache
-{
+public class ClassInfoCacheASM extends AbstractClassInfoCache {
   private final ClassLoader _classLoader;
 
   /**
@@ -18,8 +17,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache
    *
    * @param classLoader class loader for loading classes.
    */
-  public ClassInfoCacheASM(ClassLoader classLoader)
-  {
+  public ClassInfoCacheASM(ClassLoader classLoader) {
     assert classLoader != null : "Precondition: classLoader != null";
 
     _classLoader = classLoader;
@@ -33,10 +31,8 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache
    * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
    */
   @Override
-  protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
+    if (logger.isDebugEnabled()) {
       logger.debug("Scanning class " + className);
     }
 

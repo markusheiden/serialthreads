@@ -9,17 +9,12 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
- * Check and caches which methods are marked as interruptible.
+ * Checks and caches which methods are marked as interruptible.
  */
-public class ClassInfoCacheReflection extends AbstractClassInfoCache
-{
+public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   private ClassLoader _classLoader;
   private final Map<String, ClassLoader> _classLoaders = new HashMap<>();
   private final Map<String, ClassInfoVisitor> _classes = new HashMap<>();
@@ -31,8 +26,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
    * @param className internal name of class
    * @param byteCode byte code of class
    */
-  public void start(ClassLoader classLoader, String className, byte[] byteCode)
-  {
+  public void start(ClassLoader classLoader, String className, byte[] byteCode) {
     assert classLoader != null : "Precondition: classLoader != null";
     assert className != null : "Precondition: className != null";
     assert byteCode != null : "Precondition: byteCode != null";
@@ -47,8 +41,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
    *
    * @param className internal name of class
    */
-  public void stop(String className)
-  {
+  public void stop(String className) {
     _classLoader = null;
     _classLoaders.remove(className);
     _classes.remove(className);
@@ -59,33 +52,28 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
    *
    * @param classLoader class loader to use
    */
-  protected void setClassLoader(ClassLoader classLoader)
-  {
+  protected void setClassLoader(ClassLoader classLoader) {
     assert classLoader != null : "Precondition: classLoader != null";
 
     _classLoader = classLoader;
   }
 
   @Override
-  protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
+    if (logger.isDebugEnabled()) {
       logger.debug("Scanning class " + className);
     }
 
     // remove class info visitor, because we scan a class at max once
     ClassInfoVisitor classInfoVisitor = _classes.remove(className);
-    if (classInfoVisitor != null)
-    {
-      // scan not yet loaded class with asm to avoid class loading circles
+    if (classInfoVisitor != null) {
+      // scan not yet loaded class with asm to avoid circular class loading
       logger.debug("  Direct ASM scan of " + className);
       return scan(classInfoVisitor, toProcess);
     }
 
     InputStream classFile = _classLoader.getResourceAsStream(className + ".class");
-    if (classFile != null)
-    {
+    if (classFile != null) {
       logger.debug("  Class file based ASM scan of " + className);
       return scan(read(new ClassReader(classFile)), toProcess);
     }
@@ -103,27 +91,22 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
    * @param className name of class to scan
    * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
    */
-  private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess)
-  {
-    try
-    {
+  private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess) {
+    try {
       // scan all other classes via reflection, because not all other classes have class files
       Class<?> clazz = Class.forName(className.replace('/', '.'), false, classLoader);
 
       String superClassName = null;
-      if (clazz.getSuperclass() != null)
-      {
+      if (clazz.getSuperclass() != null) {
         superClassName = clazz.getSuperclass().getName().replace('.', '/');
       }
       Map<String, MethodInfo> methodInfos = new HashMap<>();
       Method[] methods = clazz.getDeclaredMethods();
-      for (Method method : methods)
-      {
+      for (Method method : methods) {
         String name = method.getName();
         String desc = Type.getMethodDescriptor(method);
         Set<String> annotations = new HashSet<>();
-        for (Annotation annotation : method.getAnnotations())
-        {
+        for (Annotation annotation : method.getAnnotations()) {
           annotations.add(Type.getDescriptor(annotation.getClass()));
         }
 
@@ -132,8 +115,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
       }
 
       Constructor<?>[] constructors = clazz.getDeclaredConstructors();
-      for (Constructor<?> constructor : constructors)
-      {
+      for (Constructor<?> constructor : constructors) {
         String name = "<init>";
         String desc = Type.getConstructorDescriptor(constructor);
         Set<String> annotations = new HashSet<>();
@@ -150,19 +132,15 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache
       methodInfos.put(info.getID(), info);
 
       ClassInfo classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);
-      if (clazz.getSuperclass() != null)
-      {
+      if (clazz.getSuperclass() != null) {
         toProcess.addFirst(clazz.getSuperclass().getName().replace('.', '/'));
       }
-      for (Class<?> superInterface : clazz.getInterfaces())
-      {
+      for (Class<?> superInterface : clazz.getInterfaces()) {
         toProcess.add(superInterface.getName().replace('.', '/'));
       }
 
       return classInfo;
-    }
-    catch (ClassNotFoundException e)
-    {
+    } catch (ClassNotFoundException e) {
       throw new NotTransformableException("Class not found", e);
     }
   }
