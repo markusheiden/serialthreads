@@ -1,6 +1,7 @@
 package org.serialthreads.agent;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -23,7 +24,7 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
  * TODO mh: Do not throw exception in case of transforming problems, because otherwise the vm disables the transformer
  */
 public class Agent implements ClassFileTransformer {
-  private static final Logger _logger = Logger.getLogger(Agent.class);
+  private static final Log _logger = LogFactory.getLog(Agent.class);
 
   private final ClassInfoCacheReflection _classInfoCache;
   private final ITransformer _transformer;

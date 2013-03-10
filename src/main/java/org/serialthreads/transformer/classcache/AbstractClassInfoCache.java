@@ -1,6 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -9,82 +10,66 @@ import org.objectweb.asm.tree.MethodNode;
 import org.serialthreads.transformer.NotTransformableException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
-import static org.objectweb.asm.ClassReader.SKIP_CODE;
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import static org.objectweb.asm.ClassReader.*;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
  * Abstract implementation of a class info cache.
  */
-public abstract class AbstractClassInfoCache implements IClassInfoCache
-{
-  protected final Logger logger = Logger.getLogger(getClass());
+public abstract class AbstractClassInfoCache implements IClassInfoCache {
+  protected final Log logger = LogFactory.getLog(getClass());
 
   private final Map<String, ClassInfo> classes;
 
   /**
    * Constructor.
    */
-  public AbstractClassInfoCache()
-  {
+  public AbstractClassInfoCache() {
     this.classes = new TreeMap<>();
   }
 
-  public boolean isInterface(String className)
-  {
+  public boolean isInterface(String className) {
     assert className != null : "Precondition: className != null";
 
     return getClassInfo(className).isInterface();
   }
 
-  public Type getSuperClass(String className)
-  {
+  public Type getSuperClass(String className) {
     assert className != null : "Precondition: className != null";
 
     String superClassName = getClassInfo(className).getSuperClassName();
-    return superClassName == null? null : Type.getObjectType(superClassName);
+    return superClassName == null ? null : Type.getObjectType(superClassName);
   }
 
-  public boolean hasSuperClass(String className, String superClassName)
-  {
+  public boolean hasSuperClass(String className, String superClassName) {
     assert className != null : "Precondition: className != null";
     assert superClassName != null : "Precondition: superClassName != null";
 
     Type classType = Type.getObjectType(className);
-    if (classType.getSort() == Type.ARRAY)
-    {
+    if (classType.getSort() == Type.ARRAY) {
       return hasSuperClassArray(className, superClassName);
     }
 
     return getClassInfo(className).hasSuperClass(superClassName);
   }
 
-  private boolean hasSuperClassArray(String className, String superClassName)
-  {
+  private boolean hasSuperClassArray(String className, String superClassName) {
     Type classType = Type.getObjectType(className);
     Type superClassType = Type.getObjectType(superClassName);
 
-    if (superClassType.getSort() != Type.ARRAY)
-    {
+    if (superClassType.getSort() != Type.ARRAY) {
       // only possible non array super class is Object
       return superClassType.equals(Type.getType(Object.class));
     }
 
-    if (classType.getDimensions() != superClassType.getDimensions())
-    {
+    if (classType.getDimensions() != superClassType.getDimensions()) {
       // arrays dimension mismatch
       return false;
     }
 
-    if (classType.getElementType().getSort() != Type.OBJECT)
-    {
+    if (classType.getElementType().getSort() != Type.OBJECT) {
       // primitive arrays -> no inheritance
       return classType.getElementType().equals(superClassType.getElementType());
     }
@@ -94,75 +79,62 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
   }
 
   @Override
-  public boolean isExecutor(ClassNode clazz, MethodNode method)
-  {
+  public boolean isExecutor(ClassNode clazz, MethodNode method) {
     return isExecutor(clazz.name, method.name, method.desc);
   }
 
-  protected boolean isExecutor(String owner, String name, String desc)
-  {
-    if (owner.startsWith("["))
-    {
+  protected boolean isExecutor(String owner, String name, String desc) {
+    if (owner.startsWith("[")) {
       // Arrays are no executors
       return false;
     }
 
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isExecutor(name + desc);
-    if (logger.isDebugEnabled())
-    {
-      logger.debug(methodName(owner, name, desc) + " is " + (result? "an" : "no") + " executor");
+    if (logger.isDebugEnabled()) {
+      logger.debug(methodName(owner, name, desc) + " is " + (result ? "an" : "no") + " executor");
     }
 
     return result;
   }
 
-  public boolean isInterruptible(ClassNode owner, MethodNode method)
-  {
+  public boolean isInterruptible(ClassNode owner, MethodNode method) {
     return isInterruptible(owner.name, method.name, method.desc);
   }
 
-  public boolean isInterruptible(MethodInsnNode method)
-  {
+  public boolean isInterruptible(MethodInsnNode method) {
     return isInterruptible(method.owner, method.name, method.desc);
   }
 
-  public boolean isInterruptible(String owner, String name, String desc)
-  {
-    if (owner.startsWith("["))
-    {
+  public boolean isInterruptible(String owner, String name, String desc) {
+    if (owner.startsWith("[")) {
       // Arrays are not interruptible
       return false;
     }
 
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
-    if (logger.isDebugEnabled())
-    {
-      logger.debug(methodName(owner, name, desc) + " is" + (result? " " : " not ") + "interruptible");
+    if (logger.isDebugEnabled()) {
+      logger.debug(methodName(owner, name, desc) + " is" + (result ? " " : " not ") + "interruptible");
     }
 
     return result;
   }
 
-  public boolean isInterrupt(MethodInsnNode method)
-  {
+  public boolean isInterrupt(MethodInsnNode method) {
     return isInterrupt(method.owner, method.name, method.desc);
   }
 
-  public boolean isInterrupt(String owner, String name, String desc)
-  {
-    if (owner.startsWith("["))
-    {
+  public boolean isInterrupt(String owner, String name, String desc) {
+    if (owner.startsWith("[")) {
       // Arrays are not interruptible
       return false;
     }
 
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterrupt(name + desc);
-    if (logger.isDebugEnabled())
-    {
-      logger.debug(methodName(owner, name, desc) + " is " + (result? "an" : "no") + " interrupt");
+    if (logger.isDebugEnabled()) {
+      logger.debug(methodName(owner, name, desc) + " is " + (result ? "an" : "no") + " interrupt");
     }
 
     return result;
@@ -174,11 +146,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
    * @param className internal name of class
    * @return class info
    */
-  protected ClassInfo getClassInfo(String className)
-  {
+  protected ClassInfo getClassInfo(String className) {
     ClassInfo classInfo = classes.get(className);
-    if (classInfo == null)
-    {
+    if (classInfo == null) {
       classInfo = process(className);
       classes.put(className, classInfo);
     }
@@ -192,27 +162,22 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
    *
    * @param owner class to parse
    */
-  protected ClassInfo process(String owner)
-  {
+  protected ClassInfo process(String owner) {
     assert owner != null : "Precondition: owner != null";
     assert !classes.containsKey(owner) : "Check: !classes.containsKey(owner)";
 
-    if (logger.isDebugEnabled())
-    {
+    if (logger.isDebugEnabled()) {
       logger.debug("Computing interruptible status for class " + owner);
     }
 
     String className = null;
-    try
-    {
+    try {
       Deque<String> toProcess = new LinkedList<>();
       ClassInfo result = scan(owner, toProcess);
 
-      while (!toProcess.isEmpty())
-      {
+      while (!toProcess.isEmpty()) {
         className = toProcess.pollFirst();
-        if (!result.hasSuperClass(className))
-        {
+        if (!result.hasSuperClass(className)) {
           result.addSuperClass(className);
           result.merge(getClassInfo(className));
         }
@@ -221,9 +186,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
       classes.put(owner, result);
 
       return result;
-    }
-    catch (IOException e)
-    {
+    } catch (IOException e) {
       throw new NotTransformableException("Referenced class " + className + " not found", e);
     }
   }
@@ -243,8 +206,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
    * @param reader class reader with byte code
    * @return class info visitor
    */
-  protected ClassInfoVisitor read(ClassReader reader)
-  {
+  protected ClassInfoVisitor read(ClassReader reader) {
     ClassInfoVisitor classInfoVisitor = new ClassInfoVisitor();
     reader.accept(classInfoVisitor, SKIP_CODE + SKIP_DEBUG + SKIP_FRAMES);
     return classInfoVisitor;
@@ -259,11 +221,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache
    * @param toProcess classes to process
    * @return ClassInfo
    */
-  protected ClassInfo scan(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess)
-  {
+  protected ClassInfo scan(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
     ClassInfo result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
-    if (classInfoVisitor.getSuperClassName() != null)
-    {
+    if (classInfoVisitor.getSuperClassName() != null) {
       // check super classes always first
       toProcess.addFirst(classInfoVisitor.getSuperClassName());
     }

@@ -1,76 +1,34 @@
 package org.serialthreads.transformer.strategies;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TableSwitchInsnNode;
-import org.objectweb.asm.tree.TryCatchBlockNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.context.SerialThread;
-import org.serialthreads.context.SerialThreadManager;
+import org.serialthreads.context.*;
 import org.serialthreads.context.Stack;
-import org.serialthreads.context.StackFrame;
-import org.serialthreads.context.ThreadFinishedException;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.code.ValueCodeFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.ATHROW;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.DUP_X1;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.ICONST_1;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.POP;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
-import static org.serialthreads.transformer.code.MethodCode.firstLocal;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
-import static org.serialthreads.transformer.code.MethodCode.isRun;
-import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
-import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
+import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
  * Base class for all method transformers.
  */
 @SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
-public abstract class AbstractMethodTransformer
-{
-  protected final Logger log = Logger.getLogger(getClass());
+public abstract class AbstractMethodTransformer {
+  protected final Log log = LogFactory.getLog(getClass());
 
   protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
   protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
@@ -100,8 +58,7 @@ public abstract class AbstractMethodTransformer
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
-  {
+  protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     this.clazz = clazz;
     this.method = method;
     this.classInfoCache = classInfoCache;
@@ -113,19 +70,15 @@ public abstract class AbstractMethodTransformer
    *
    * @exception AnalyzerException
    */
-  protected void analyze() throws AnalyzerException
-  {
+  protected void analyze() throws AnalyzerException {
     frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
 
     interruptibleMethodCalls = new LinkedHashMap<>();
-    for (int i = 0; i < method.instructions.size(); i++)
-    {
+    for (int i = 0; i < method.instructions.size(); i++) {
       AbstractInsnNode instruction = method.instructions.get(i);
-      if (instruction instanceof MethodInsnNode)
-      {
+      if (instruction instanceof MethodInsnNode) {
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
-        if (classInfoCache.isInterruptible(methodCall))
-        {
+        if (classInfoCache.isInterruptible(methodCall)) {
           interruptibleMethodCalls.put(methodCall, i);
         }
       }
@@ -140,12 +93,10 @@ public abstract class AbstractMethodTransformer
    * @param startIndex first method index, should be -1 for run(), 0 otherwise
    * @return generated restore code
    */
-  protected InsnList restoreCodeDispatcher(InsnList getMethod, List<InsnList> restoreCodes, int startIndex)
-  {
+  protected InsnList restoreCodeDispatcher(InsnList getMethod, List<InsnList> restoreCodes, int startIndex) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (restoreCodes.size() == 1)
-    {
+    if (restoreCodes.size() == 1) {
       // just one method call -> nothing to dispatch -> execute directly
       return restoreCodes.get(0);
     }
@@ -154,8 +105,7 @@ public abstract class AbstractMethodTransformer
 
     // Label to the specific restore code for every method call
     LabelNode[] labels = new LabelNode[restoreCodes.size()];
-    for (int i = 0; i < labels.length; i++)
-    {
+    for (int i = 0; i < labels.length; i++) {
       labels[i] = new LabelNode();
     }
     LabelNode defaultLabel = new LabelNode();
@@ -173,8 +123,7 @@ public abstract class AbstractMethodTransformer
     result.add(new InsnNode(ATHROW));
 
     // reverse iteration to put first restore code at the end
-    for (int i = labels.length - 1; i >= 0; i--)
-    {
+    for (int i = labels.length - 1; i >= 0; i--) {
       result.add(labels[i]);
       result.add(restoreCodes.get(i));
     }
@@ -192,14 +141,12 @@ public abstract class AbstractMethodTransformer
    * @param suppressOwner suppress capturing of owner?
    * @return generated restore codes for method calls
    */
-  protected List<InsnList> insertCaptureCode(boolean suppressOwner)
-  {
+  protected List<InsnList> insertCaptureCode(boolean suppressOwner) {
     boolean moreThanOne = interruptibleMethodCalls.size() > 1;
 
     List<InsnList> restoreCodes = new ArrayList<>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
-    for (Entry<MethodInsnNode, Integer> entry : interruptibleMethodCalls.entrySet())
-    {
+    for (Entry<MethodInsnNode, Integer> entry : interruptibleMethodCalls.entrySet()) {
       Frame frameBefore = frames[entry.getValue()];
       MethodInsnNode methodCall = entry.getKey();
       Frame frameAfter = frames[entry.getValue() + 1];
@@ -219,9 +166,8 @@ public abstract class AbstractMethodTransformer
    * @param frameAfter frame after method call
    * @return restore code
    */
-  protected InsnList createRestoreCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
-  {
-    return classInfoCache.isInterrupt(methodCall)?
+  protected InsnList createRestoreCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
+    return classInfoCache.isInterrupt(methodCall) ?
       createRestoreCodeForInterrupt(methodCall, frameAfter) :
       createRestoreCodeForMethod(frameBefore, methodCall, frameAfter);
   }
@@ -233,10 +179,8 @@ public abstract class AbstractMethodTransformer
    * @param frame frame after method call
    * @return restore code
    */
-  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, Frame frame)
-  {
-    if (log.isDebugEnabled())
-    {
+  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, Frame frame) {
+    if (log.isDebugEnabled()) {
       log.debug("      Creating restore code for interrupt");
     }
 
@@ -285,14 +229,10 @@ public abstract class AbstractMethodTransformer
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected void createCaptureCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
-  {
-    if (classInfoCache.isInterrupt(methodCall))
-    {
+  protected void createCaptureCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+    if (classInfoCache.isInterrupt(methodCall)) {
       createCaptureCodeForInterrupt(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
-    }
-    else
-    {
+    } else {
       createCaptureCodeForMethod(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
     }
   }
@@ -307,10 +247,8 @@ public abstract class AbstractMethodTransformer
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected void createCaptureCodeForInterrupt(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
-  {
-    if (log.isDebugEnabled())
-    {
+  protected void createCaptureCodeForInterrupt(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+    if (log.isDebugEnabled()) {
       log.debug("      Creating capture code for interrupt");
     }
 
@@ -342,8 +280,7 @@ public abstract class AbstractMethodTransformer
   /**
    * Dummy return for the given method.
    */
-  protected InsnList dummyReturn()
-  {
+  protected InsnList dummyReturn() {
     InsnList result = new InsnList();
     result.add(dummyReturnStatement(method));
     return result;
@@ -365,10 +302,8 @@ public abstract class AbstractMethodTransformer
    * Replace all return instructions by ThreadFinishedException.
    * Needed for transformation of IRunnable.run().
    */
-  protected void replaceReturns()
-  {
-    for (AbstractInsnNode returnInstruction : returnInstructions(method))
-    {
+  protected void replaceReturns() {
+    for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
       InsnList instructions = new InsnList();
       // TODO 2009-11-21 mh: implement once, jump to implementation
       instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
@@ -393,20 +328,16 @@ public abstract class AbstractMethodTransformer
    * @param tryCode restore code which can cause a NullPointerException during access of this.$$thread$$
    * @param restoreCode remaining restore code, executed directly after tryCode
    */
-  protected void insertMethodGetThreadStartCode(int localThread, InsnList tryCode, InsnList restoreCode)
-  {
+  protected void insertMethodGetThreadStartCode(int localThread, InsnList tryCode, InsnList restoreCode) {
     final boolean isMethodNotStatic = isNotStatic(method);
 
     InsnList instructions = new InsnList();
 
     // store thread always in a new local variable
-    if (isMethodNotStatic)
-    {
+    if (isMethodNotStatic) {
       instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
-    }
-    else
-    {
+    } else {
       instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC));
       instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     }
@@ -424,8 +355,7 @@ public abstract class AbstractMethodTransformer
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
 
-    if (isMethodNotStatic)
-    {
+    if (isMethodNotStatic) {
       InsnList handler = new InsnList();
 
       // try / catch (NullPointerException) for thread access
@@ -458,50 +388,40 @@ public abstract class AbstractMethodTransformer
    * @param localFrame number of local containing the frame
    * @return generated capture code
    */
-  protected InsnList pushToFrame(MethodInsnNode methodCall, Frame frame, int localFrame)
-  {
+  protected InsnList pushToFrame(MethodInsnNode methodCall, Frame frame, int localFrame) {
     InsnList push = new InsnList();
 
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
 
     // get rid of dummy return value of called method first
-    if (isCallNotVoid)
-    {
+    if (isCallNotVoid) {
       push.add(popReturnValue(methodCall));
     }
 
     // save stack
     // the topmost element is a dummy return value, if the called method returns one
     int[] stackIndexes = stackIndexes(frame);
-    for (int stack = isCallNotVoid? frame.getStackSize() - 2 : frame.getStackSize() - 1; stack >= 0; stack--)
-    {
+    for (int stack = isCallNotVoid ? frame.getStackSize() - 2 : frame.getStackSize() - 1; stack >= 0; stack--) {
       ExtendedValue value = (ExtendedValue) frame.getStack(stack);
-      if (value.isConstant() || value.isHoldInLocal())
-      {
+      if (value.isConstant() || value.isHoldInLocal()) {
         // just pop the value from stack, because the stack value is constant or stored in a local too.
         push.add(code(value).pop());
-      }
-      else
-      {
+      } else {
         push.add(code(value).pushStack(stackIndexes[stack], localFrame));
       }
     }
 
     // save locals separated by type
-    for (IValueCode code : ValueCodeFactory.CODES)
-    {
+    for (IValueCode code : ValueCodeFactory.CODES) {
       List<Integer> pushLocals = new ArrayList<>(frame.getLocals());
 
       // do not store local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
-      {
+      for (int local = isMethodNotStatic ? 1 : 0, end = frame.getLocals() - 1; local <= end; local++) {
         BasicValue value = (BasicValue) frame.getLocal(local);
-        if (code.isResponsibleFor(value.getType()))
-        {
+        if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
-          if (!extendedValue.isHoldInLowerLocal(local))
-          {
+          if (!extendedValue.isHoldInLowerLocal(local)) {
             pushLocals.add(local);
           }
         }
@@ -510,23 +430,19 @@ public abstract class AbstractMethodTransformer
       Iterator<Integer> iter = pushLocals.iterator();
 
       // for first locals use fast stack
-      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++)
-      {
+      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
         IValueCode localCode = code((BasicValue) frame.getLocal(local));
         push.add(localCode.pushLocalVariableFast(local, i, localFrame));
       }
 
       // for too high locals use "slow" storage in (dynamic) array
-      if (iter.hasNext())
-      {
+      if (iter.hasNext()) {
         push.add(code.getLocals(localFrame));
-        for (int i = 0; iter.hasNext(); i++)
-        {
+        for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
           IValueCode localCode = code((BasicValue) frame.getLocal(local));
-          if (iter.hasNext())
-          {
+          if (iter.hasNext()) {
             push.add(new InsnNode(DUP));
           }
           push.add(localCode.pushLocalVariable(local, i));
@@ -542,8 +458,7 @@ public abstract class AbstractMethodTransformer
    *
    * @param methodCall method call to process
    */
-  protected InsnList popReturnValue(MethodInsnNode methodCall)
-  {
+  protected InsnList popReturnValue(MethodInsnNode methodCall) {
     InsnList result = new InsnList();
     result.add(code(Type.getReturnType(methodCall.desc)).pop());
     return result;
@@ -559,13 +474,11 @@ public abstract class AbstractMethodTransformer
    * @param localFrame number of local containing the current frame
    * @return generated capture code
    */
-  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, int localPreviousFrame, int localFrame)
-  {
+  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, int localPreviousFrame, int localFrame) {
     InsnList result = new InsnList();
 
     // save method index of this method
-    if (containsMoreThanOneMethodCall)
-    {
+    if (containsMoreThanOneMethodCall) {
       // frame.method = position;
       result.add(new VarInsnNode(ALOAD, localFrame));
       result.add(push(position));
@@ -573,16 +486,12 @@ public abstract class AbstractMethodTransformer
     }
 
     // save owner of method call one level above
-    if (isNotStatic(method) && !suppressOwner)
-    {
+    if (isNotStatic(method) && !suppressOwner) {
       // previousFrame.owner = this;
-      if (localPreviousFrame < 0)
-      {
+      if (localPreviousFrame < 0) {
         result.add(new VarInsnNode(ALOAD, localFrame));
         result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "previous", FRAME_IMPL_DESC));
-      }
-      else
-      {
+      } else {
         result.add(new VarInsnNode(ALOAD, localPreviousFrame));
       }
       result.add(new VarInsnNode(ALOAD, 0));
@@ -601,8 +510,7 @@ public abstract class AbstractMethodTransformer
    * @param localThread number of local containing the thread
    * @return generated capture code
    */
-  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, String methodName, int localThread)
-  {
+  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, String methodName, int localThread) {
     InsnList result = new InsnList();
 
     final boolean isMethodNotStatic = isNotStatic(method);
@@ -610,23 +518,18 @@ public abstract class AbstractMethodTransformer
     // save method index of this method and owner of method call one level above
     boolean pushOwner = isMethodNotStatic && !isRun(clazz, method, classInfoCache);
     boolean pushMethod = containsMoreThanOneMethodCall;
-    if (pushOwner && pushMethod)
-    {
+    if (pushOwner && pushMethod) {
       // save owner of this method for calling method and index of interrupted method
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(new VarInsnNode(ALOAD, 0));
       result.add(push(position));
       result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V"));
-    }
-    else if (pushOwner)
-    {
+    } else if (pushOwner) {
       // save owner of this method for calling method
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(new VarInsnNode(ALOAD, 0));
       result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V"));
-    }
-    else if (pushMethod)
-    {
+    } else if (pushMethod) {
       // save index of interrupted method
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(push(position));
@@ -644,38 +547,30 @@ public abstract class AbstractMethodTransformer
    * @param localFrame number of local containing the frame
    * @return generated restore code
    */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, Frame frame, int localFrame)
-  {
+  protected InsnList popFromFrame(MethodInsnNode methodCall, Frame frame, int localFrame) {
     InsnList result = new InsnList();
 
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
 
     // restore locals by type
-    for (IValueCode code : ValueCodeFactory.CODES)
-    {
+    for (IValueCode code : ValueCodeFactory.CODES) {
       List<Integer> popLocals = new ArrayList<>();
       InsnList copyLocals = new InsnList();
 
       // do not restore local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic? 1 : 0, end = frame.getLocals() - 1; local <= end; local++)
-      {
+      for (int local = isMethodNotStatic ? 1 : 0, end = frame.getLocals() - 1; local <= end; local++) {
         BasicValue value = (BasicValue) frame.getLocal(local);
-        if (code.isResponsibleFor(value.getType()))
-        {
+        if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
-          if (extendedValue.isHoldInLowerLocal(local))
-          {
+          if (extendedValue.isHoldInLowerLocal(local)) {
             // the value of the local is hold in a lower local too -> copy
-            if (log.isDebugEnabled())
-            {
+            if (log.isDebugEnabled()) {
               log.debug("        Detected codes with the same value: " + extendedValue.getLowestLocal() + "/" + local);
             }
             copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
             copyLocals.add(code(extendedValue).store(local));
-          }
-          else
-          {
+          } else {
             // normal case -> pop local from frame
             popLocals.add(local);
           }
@@ -686,23 +581,19 @@ public abstract class AbstractMethodTransformer
       Iterator<Integer> iter = popLocals.iterator();
 
       // for first locals use fast stack
-      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++)
-      {
+      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
         IValueCode localCode = code((BasicValue) frame.getLocal(local));
         result.add(localCode.popLocalVariableFast(local, i, localFrame));
       }
 
       // for too high locals use "slow" storage in (dynamic) array
-      if (iter.hasNext())
-      {
+      if (iter.hasNext()) {
         result.add(code.getLocals(localFrame));
-        for (int i = 0; iter.hasNext(); i++)
-        {
+        for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
           IValueCode localCode = code((BasicValue) frame.getLocal(local));
-          if (iter.hasNext())
-          {
+          if (iter.hasNext()) {
             result.add(new InsnNode(DUP));
           }
           result.add(localCode.popLocalVariable(local, i));
@@ -716,29 +607,21 @@ public abstract class AbstractMethodTransformer
     // restore stack
     // the topmost element is a dummy return value, if the called method is not a void method
     int[] stackIndexes = stackIndexes(frame);
-    for (int stack = 0, end = isCallNotVoid? frame.getStackSize() - 1 : frame.getStackSize(); stack < end; stack++)
-    {
+    for (int stack = 0, end = isCallNotVoid ? frame.getStackSize() - 1 : frame.getStackSize(); stack < end; stack++) {
       ExtendedValue value = (ExtendedValue) frame.getStack(stack);
-      if (value.isConstant())
-      {
+      if (value.isConstant()) {
         // the stack value is constant -> push constant
-        if (log.isDebugEnabled())
-        {
+        if (log.isDebugEnabled()) {
           log.debug("        Detected constant value on stack: " + value.toString() + " / value " + value.getConstant());
         }
         result.add(code(value).push(value.getConstant()));
-      }
-      else if (value.isHoldInLocal())
-      {
+      } else if (value.isHoldInLocal()) {
         // the stack value was already stored in local variable -> load local
-        if (log.isDebugEnabled())
-        {
+        if (log.isDebugEnabled()) {
           log.debug("        Detected value of local on stack: " + value.toString() + " / local " + value.getLowestLocal());
         }
         result.add(code(value).load(value.getLowestLocal()));
-      }
-      else
-      {
+      } else {
         // normal case -> pop stack from frame
         result.add(code(value).popStack(stackIndexes[stack], localFrame));
       }
@@ -753,17 +636,13 @@ public abstract class AbstractMethodTransformer
    * @param frame Frame
    * @return array stack element -> stack element index
    */
-  private int[] stackIndexes(Frame frame)
-  {
+  private int[] stackIndexes(Frame frame) {
     int[] result = new int[frame.getStackSize()];
     Arrays.fill(result, -1);
-    for (IValueCode code : ValueCodeFactory.CODES)
-    {
-      for (int stack = 0, end = frame.getStackSize(), i = 0; stack < end; stack++)
-      {
+    for (IValueCode code : ValueCodeFactory.CODES) {
+      for (int stack = 0, end = frame.getStackSize(), i = 0; stack < end; stack++) {
         BasicValue value = (BasicValue) frame.getStack(stack);
-        if (code.isResponsibleFor(value.getType()))
-        {
+        if (code.isResponsibleFor(value.getType())) {
           result[stack] = i++;
         }
       }

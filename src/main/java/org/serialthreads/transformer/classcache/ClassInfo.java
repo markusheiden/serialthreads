@@ -1,6 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.Type;
 import org.serialthreads.Executor;
 import org.serialthreads.Interrupt;
@@ -15,9 +16,8 @@ import java.util.TreeSet;
 /**
  * Class info for scanned classes.
  */
-public class ClassInfo
-{
-  private final Logger logger = Logger.getLogger(getClass());
+public class ClassInfo {
+  private final Log logger = LogFactory.getLog(getClass());
 
   private static final Type TYPE_EXECUTOR = Type.getType(Executor.class);
   private static final Type TYPE_INTERRUPTIBLE = Type.getType(Interruptible.class);
@@ -38,8 +38,7 @@ public class ClassInfo
    * @param superClassName Internal name of the direct super class
    * @param methods Methods directly defined in the class and their interruptible status
    */
-  public ClassInfo(boolean isInterface, String className, String superClassName, Map<String, MethodInfo> methods)
-  {
+  public ClassInfo(boolean isInterface, String className, String superClassName, Map<String, MethodInfo> methods) {
     this.isInterface = isInterface;
     this.type = Type.getObjectType(className);
     this.className = className;
@@ -49,10 +48,8 @@ public class ClassInfo
 
     superClasses.add(className);
 
-    for (MethodInfo method : methods.values())
-    {
-      if (method.hasAnnotation(TYPE_INTERRUPT) && !method.getDesc().equals("()V"))
-      {
+    for (MethodInfo method : methods.values()) {
+      if (method.hasAnnotation(TYPE_INTERRUPT) && !method.getDesc().equals("()V")) {
         throw new NotTransformableException(
           "Interrupt method " + method.getID() + " in class " + className +
             " must not have parameters nor a return value");
@@ -63,24 +60,21 @@ public class ClassInfo
   /**
    * Is the class an interface?.
    */
-  public boolean isInterface()
-  {
+  public boolean isInterface() {
     return isInterface;
   }
 
   /**
    * Get ASM type representation fpr this class.
    */
-  public Type getType()
-  {
+  public Type getType() {
     return type;
   }
 
   /**
    * (Internal) name of this class.
    */
-  public String getClassName()
-  {
+  public String getClassName() {
     return className;
   }
 
@@ -89,8 +83,7 @@ public class ClassInfo
    *
    * @return internal of super or null for java/lang/Object
    */
-  public String getSuperClassName()
-  {
+  public String getSuperClassName() {
     return superClassName;
   }
 
@@ -99,8 +92,7 @@ public class ClassInfo
    *
    * @param methodId method ID = name + desc
    */
-  public boolean isExecutor(String methodId)
-  {
+  public boolean isExecutor(String methodId) {
     return getMethodInfo(methodId).hasAnnotation(TYPE_EXECUTOR);
   }
 
@@ -109,8 +101,7 @@ public class ClassInfo
    *
    * @param methodId method ID = name + desc
    */
-  public boolean isInterruptible(String methodId)
-  {
+  public boolean isInterruptible(String methodId) {
     return getMethodInfo(methodId).hasAnnotation(TYPE_INTERRUPTIBLE);
   }
 
@@ -119,8 +110,7 @@ public class ClassInfo
    *
    * @param methodId method ID = name + desc
    */
-  public final boolean isInterrupt(String methodId)
-  {
+  public final boolean isInterrupt(String methodId) {
     return getMethodInfo(methodId).hasAnnotation(TYPE_INTERRUPT);
   }
 
@@ -129,16 +119,14 @@ public class ClassInfo
    *
    * @param methodId method ID = name + desc
    */
-  protected MethodInfo getMethodInfo(String methodId)
-  {
+  protected MethodInfo getMethodInfo(String methodId) {
     return methods.get(methodId);
   }
 
   /**
    * All methods IDs of this class.
    */
-  protected Set<String> getMethods()
-  {
+  protected Set<String> getMethods() {
     return methods.keySet();
   }
 
@@ -147,8 +135,7 @@ public class ClassInfo
    *
    * @param superClassName name of super class to check
    */
-  public boolean hasSuperClass(String superClassName)
-  {
+  public boolean hasSuperClass(String superClassName) {
     return superClasses.contains(superClassName);
   }
 
@@ -157,16 +144,14 @@ public class ClassInfo
    *
    * @param superClassName name of super class
    */
-  protected void addSuperClass(String superClassName)
-  {
+  protected void addSuperClass(String superClassName) {
     superClasses.add(superClassName);
   }
 
   /**
    * All super classes or interfaces this class extends or implements.
    */
-  public Set<String> getSuperClasses()
-  {
+  public Set<String> getSuperClasses() {
     return superClasses;
   }
 
@@ -175,32 +160,24 @@ public class ClassInfo
    *
    * @param classInfo interruptible status of superclass
    */
-  protected void merge(ClassInfo classInfo)
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected void merge(ClassInfo classInfo) {
+    if (logger.isDebugEnabled()) {
       logger.debug("Merging interruptible status of class " + classInfo.getClassName() + " into status of class " + getClassName());
     }
 
     superClasses.addAll(classInfo.getSuperClasses());
-    for (String methodId : classInfo.getMethods())
-    {
+    for (String methodId : classInfo.getMethods()) {
       MethodInfo method = classInfo.getMethodInfo(methodId);
       MethodInfo ownerMethod = getMethodInfo(methodId);
-      if (ownerMethod == null)
-      {
+      if (ownerMethod == null) {
         // copy inherited method info to this class
         ownerMethod = method.copy();
         methods.put(methodId, ownerMethod);
-      }
-      else if (method.hasAnnotation(TYPE_INTERRUPTIBLE) != ownerMethod.hasAnnotation(TYPE_INTERRUPTIBLE))
-      {
+      } else if (method.hasAnnotation(TYPE_INTERRUPTIBLE) != ownerMethod.hasAnnotation(TYPE_INTERRUPTIBLE)) {
         throw new NotTransformableException(
           "Interruptible status of method " + methodId + " in class " + getClassName() +
             " does not match its definition in the super class or interface " + classInfo.getClassName());
-      }
-      else if (method.hasAnnotation(TYPE_INTERRUPT) != ownerMethod.hasAnnotation(TYPE_INTERRUPT))
-      {
+      } else if (method.hasAnnotation(TYPE_INTERRUPT) != ownerMethod.hasAnnotation(TYPE_INTERRUPT)) {
         throw new NotTransformableException(
           "Interrupt status of method " + methodId + " in class " + getClassName() +
             " does not match its definition in the super class or interface " + classInfo.getClassName());

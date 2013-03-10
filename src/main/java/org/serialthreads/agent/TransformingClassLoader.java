@@ -1,6 +1,7 @@
 package org.serialthreads.agent;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -22,7 +23,7 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
  * ClassLoader which applies a transformer to the loaded classes.
  */
 public class TransformingClassLoader extends ClassLoader {
-  private final Logger logger = Logger.getLogger(getClass());
+  private final Log logger = LogFactory.getLog(getClass());
 
   private final String[] classPrefixes;
   private final ITransformer transformer;
