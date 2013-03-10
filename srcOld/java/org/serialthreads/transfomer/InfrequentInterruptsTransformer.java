@@ -1,17 +1,7 @@
 package org.serialthreads.transfomer;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transfomer.context.infrequent.DynamicContext;
@@ -24,24 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
-import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.ICONST_1;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
-import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
-import static org.serialthreads.transformer.code.MethodCode.isAbstract;
-import static org.serialthreads.transformer.code.MethodCode.isInterface;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
 
 /**
  * Class adapter executing byte code enhancement of all methods.

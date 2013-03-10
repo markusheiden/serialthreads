@@ -7,19 +7,15 @@ import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
-import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
-import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
-import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.*;
 import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqualsValue;
 
 /**
  * Test for ExtendedVerifier.
  */
-public class ExtendedVerifierTest
-{
+public class ExtendedVerifierTest {
   @Test
-  public void testMerge() throws Exception
-  {
+  public void testMerge() throws Exception {
     ExtendedVerifier verifier = new ExtendedVerifier(
       new ClassInfoCacheASM(getClass().getClassLoader()), null, null, null, false);
 

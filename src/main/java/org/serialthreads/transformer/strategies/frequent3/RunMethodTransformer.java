@@ -1,30 +1,20 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.ICONST_0;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 
 /**
  * Method transformer for run methods.
  */
 @SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
-class RunMethodTransformer extends MethodTransformer
-{
+class RunMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
    *
@@ -32,8 +22,7 @@ class RunMethodTransformer extends MethodTransformer
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected RunMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
-  {
+  protected RunMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, method, classInfoCache);
   }
 
@@ -43,8 +32,7 @@ class RunMethodTransformer extends MethodTransformer
    * @return Transformed method
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public MethodNode transform() throws AnalyzerException
-  {
+  public MethodNode transform() throws AnalyzerException {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     analyze();
 
@@ -62,12 +50,10 @@ class RunMethodTransformer extends MethodTransformer
    *
    * @param restoreCodes restore codes for all method calls in the method
    */
-  private void createRestoreHandlerRun(List<InsnList> restoreCodes)
-  {
+  private void createRestoreHandlerRun(List<InsnList> restoreCodes) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (log.isDebugEnabled())
-    {
+    if (log.isDebugEnabled()) {
       log.debug("    Creating restore handler for run");
     }
 
@@ -82,8 +68,7 @@ class RunMethodTransformer extends MethodTransformer
     // reset method to 0 for the case that there is just one normal restore code, because
     // if there is just one normal restore code, the method index will not be captured.
     // so we set the correct one (0) for this case.
-    if (restoreCodes.size() <= 1)
-    {
+    if (restoreCodes.size() <= 1) {
       startRestoreCode.add(new VarInsnNode(ALOAD, localFrame));
       startRestoreCode.add(new InsnNode(ICONST_0));
       startRestoreCode.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));

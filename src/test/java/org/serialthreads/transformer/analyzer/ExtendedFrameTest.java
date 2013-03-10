@@ -3,12 +3,7 @@ package org.serialthreads.transformer.analyzer;
 import org.junit.Test;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.IincInsnNode;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
 import static org.junit.Assert.assertEquals;
@@ -18,11 +13,9 @@ import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqu
 /**
  * Test for ExtendedFrame.
  */
-public class ExtendedFrameTest
-{
+public class ExtendedFrameTest {
   @Test
-  public void testConstructor_ii()
-  {
+  public void testConstructor_ii() {
     ExtendedFrame frame = new ExtendedFrame(2, 2);
 
     frame.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
@@ -37,20 +30,16 @@ public class ExtendedFrameTest
     assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
 
-    try
-    {
+    try {
       frame.push(BasicValue.INT_VALUE);
       fail("Expected max stack = 2");
-    }
-    catch (IndexOutOfBoundsException e)
-    {
+    } catch (IndexOutOfBoundsException e) {
       // expected
     }
   }
 
   @Test
-  public void testConstructor_frame()
-  {
+  public void testConstructor_frame() {
     ExtendedFrame src = new ExtendedFrame(2, 2);
     src.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
     src.setLocal(1, BasicValue.INT_VALUE);
@@ -67,20 +56,16 @@ public class ExtendedFrameTest
     assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
 
-    try
-    {
+    try {
       frame.push(BasicValue.INT_VALUE);
       fail("Expected max stack = 2");
-    }
-    catch (IndexOutOfBoundsException e)
-    {
+    } catch (IndexOutOfBoundsException e) {
       // expected
     }
   }
 
   @Test
-  public void testExecute_const() throws Exception
-  {
+  public void testExecute_const() throws Exception {
     testExecute_const(new InsnNode(Opcodes.ACONST_NULL), Type.getObjectType("null"), null);
     testExecute_const(new InsnNode(Opcodes.ICONST_M1), Type.INT_TYPE, -1);
     testExecute_const(new InsnNode(Opcodes.ICONST_0), Type.INT_TYPE, 0);
@@ -104,8 +89,7 @@ public class ExtendedFrameTest
     testExecute_const(new LdcInsnNode("TEST"), Type.getType(String.class), "TEST");
   }
 
-  private void testExecute_const(AbstractInsnNode instruction, Type type, Object constant) throws Exception
-  {
+  private void testExecute_const(AbstractInsnNode instruction, Type type, Object constant) throws Exception {
     ExtendedVerifier interpreter = new ExtendedVerifier(null, null, null, null, false);
 
     ExtendedFrame frame = new ExtendedFrame(0, 1);
@@ -115,8 +99,7 @@ public class ExtendedFrameTest
   }
 
   @Test
-  public void testExecute_store() throws Exception
-  {
+  public void testExecute_store() throws Exception {
     testExecute_store(new VarInsnNode(Opcodes.ISTORE, 0), Type.INT_TYPE);
     testExecute_store(new VarInsnNode(Opcodes.LSTORE, 0), Type.LONG_TYPE);
     testExecute_store(new VarInsnNode(Opcodes.FSTORE, 0), Type.FLOAT_TYPE);
@@ -126,8 +109,7 @@ public class ExtendedFrameTest
     testExecute_store(new IincInsnNode(0, 1), Type.INT_TYPE);
   }
 
-  private void testExecute_store(AbstractInsnNode instruction, Type type) throws Exception
-  {
+  private void testExecute_store(AbstractInsnNode instruction, Type type) throws Exception {
     ExtendedVerifier interpreter = new ExtendedVerifier(null, null, null, null, false);
 
     ExtendedFrame frame = new ExtendedFrame(4, 4);
@@ -146,8 +128,7 @@ public class ExtendedFrameTest
   }
 
   @Test
-  public void testSetLocal()
-  {
+  public void testSetLocal() {
     ExtendedFrame frame = new ExtendedFrame(1, 0);
 
     frame.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
@@ -161,8 +142,7 @@ public class ExtendedFrameTest
   }
 
   @Test
-  public void testPush()
-  {
+  public void testPush() {
     ExtendedFrame frame = new ExtendedFrame(0, 1);
 
     frame.push(BasicValue.INT_VALUE);
@@ -175,13 +155,10 @@ public class ExtendedFrameTest
     assertEqualsValue(ExtendedValue.valueInLocal(Type.INT_TYPE, 0), frame.getStack(0));
     frame.clearStack();
 
-    try
-    {
+    try {
       frame.push(BasicValue.UNINITIALIZED_VALUE);
       fail("IllegalArgumentException expected");
-    }
-    catch (IllegalArgumentException e)
-    {
+    } catch (IllegalArgumentException e) {
       // expected
     }
   }

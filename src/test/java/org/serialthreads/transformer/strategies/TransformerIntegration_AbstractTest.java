@@ -2,7 +2,6 @@ package org.serialthreads.transformer.strategies;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -16,14 +15,12 @@ import java.io.PrintWriter;
 /**
  * Integration test for transformer.
  */
-public abstract class TransformerIntegration_AbstractTest
-{
+public abstract class TransformerIntegration_AbstractTest {
   protected IStrategy strategy;
 
   @Before
   @After
-  public void setUp()
-  {
+  public void setUp() {
     SerialThreadManager.DEBUG = true;
   }
 
@@ -31,13 +28,10 @@ public abstract class TransformerIntegration_AbstractTest
    * Check that transformation does not alter behaviour.
    */
   @Test
-  public void testTransform() throws Exception
-  {
-    Class<?> clazz = new TransformingClassLoader(strategy)
-    {
+  public void testTransform() throws Exception {
+    Class<?> clazz = new TransformingClassLoader(strategy) {
       @Override
-      protected ClassVisitor createVisitor(ClassWriter writer)
-      {
+      protected ClassVisitor createVisitor(ClassWriter writer) {
         return new TraceClassVisitor(writer, new PrintWriter(System.out));
       }
     }.loadClass(TestInterruptible.class.getName());
@@ -48,8 +42,7 @@ public abstract class TransformerIntegration_AbstractTest
    * Check if the test assumptions are correct by executing without a transformer.
    */
   @Test
-  public void testNoTransform() throws Exception
-  {
+  public void testNoTransform() throws Exception {
     // disable debug mode to not throw an exception in SerialThreadManager.interrupt()
     SerialThreadManager.DEBUG = false;
 

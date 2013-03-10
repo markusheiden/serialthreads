@@ -1,10 +1,6 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
@@ -12,19 +8,14 @@ import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.serialthreads.transformer.code.MethodCode.firstLocal;
-import static org.serialthreads.transformer.code.MethodCode.firstParam;
-import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
 
 /**
  * Method transformer for copies of concrete methods.
  */
 @SuppressWarnings({"UnusedAssignment"})
-class ConcreteCopyMethodTransformer extends MethodTransformer
-{
+class ConcreteCopyMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
    *
@@ -32,8 +23,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected ConcreteCopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
-  {
+  protected ConcreteCopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     // create copy of method with shortened signature
     super(clazz, MethodNodeCopier.copy(method), classInfoCache);
   }
@@ -44,8 +34,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
    * @return Transformed method
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public MethodNode transform() throws AnalyzerException
-  {
+  public MethodNode transform() throws AnalyzerException {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     analyze();
 
@@ -59,8 +48,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
     method.desc = changeCopyDesc(method.desc);
     clazz.methods.add(method);
 
-    if (log.isDebugEnabled())
-    {
+    if (log.isDebugEnabled()) {
       log.debug("      Copied concrete method " + methodName(clazz, method));
     }
 
@@ -72,12 +60,10 @@ class ConcreteCopyMethodTransformer extends MethodTransformer
    *
    * @param restoreCodes restore codes for all method calls in the method
    */
-  private void createRestoreHandlerCopy(List<InsnList> restoreCodes)
-  {
+  private void createRestoreHandlerCopy(List<InsnList> restoreCodes) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (log.isDebugEnabled())
-    {
+    if (log.isDebugEnabled()) {
       log.debug("    Creating restore handler for copied method");
     }
 

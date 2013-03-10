@@ -10,9 +10,7 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.serialthreads.transformer.code.MethodCode.isAbstract;
-import static org.serialthreads.transformer.code.MethodCode.isInterface;
-import static org.serialthreads.transformer.code.MethodCode.isRun;
+import static org.serialthreads.transformer.code.MethodCode.*;
 
 /**
  * Class adapter executing byte code enhancement of all methods.
@@ -20,8 +18,7 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
  * The thread and frame will be added to the signature of all interruptible methods.
  * This transformation needs no static thread holder, SimpleSerialThreadManager2 can be used.
  */
-public class FrequentInterruptsTransformer3 extends AbstractTransformer
-{
+public class FrequentInterruptsTransformer3 extends AbstractTransformer {
   public static final String STRATEGY = "FREQUENT3";
 
   /**
@@ -29,42 +26,35 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer
    *
    * @param classInfoCache class cache to use
    */
-  public FrequentInterruptsTransformer3(IClassInfoCache classInfoCache)
-  {
+  public FrequentInterruptsTransformer3(IClassInfoCache classInfoCache) {
     super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return "Transformer " + STRATEGY;
   }
 
   @Override
-  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
-  {
-    if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache))
-    {
+  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
+    if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache)) {
       // do not transform IRunnable.run() itself
       return null;
     }
 
-    if (isAbstract(method))
-    {
+    if (isAbstract(method)) {
       // change signature of abstract methods
       return Arrays.asList(
         new AbstractCopyMethodTransformer(clazz, method, classInfoCache).transform(),
         new AbstractMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
-    if (hasNoInterruptibleMethodCalls(method))
-    {
+    if (hasNoInterruptibleMethodCalls(method)) {
       // no transformation needed
       return null;
     }
 
-    if (isRun(clazz, method, classInfoCache))
-    {
+    if (isRun(clazz, method, classInfoCache)) {
       // take special care of run method
       return Arrays.asList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());

@@ -6,18 +6,14 @@ import org.objectweb.asm.Type;
 import java.util.Collections;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.*;
 
 /**
  * Test for {@link MethodInfo}.
  */
-public class MethodInfoTest
-{
+public class MethodInfoTest {
   @Test
-  public void testDefault()
-  {
+  public void testDefault() {
     MethodInfo info = new MethodInfo("name", "desc", Collections.singleton(Type.INT_TYPE.getDescriptor()));
 
     assertEquals("namedesc", info.getID());
@@ -28,32 +24,28 @@ public class MethodInfoTest
   }
 
   @Test
-  public void testToString()
-  {
+  public void testToString() {
     MethodInfo info = new MethodInfo("name", "desc", Collections.singleton(Type.INT_TYPE.getDescriptor()));
 
     assertEquals("Method info namedesc", info.toString());
   }
 
   @Test
-  public void testHasAnnotation()
-  {
+  public void testHasAnnotation() {
     MethodInfo info = new MethodInfo("name", "desc", Collections.singleton(Type.INT_TYPE.getDescriptor()));
 
     assertTrue(info.hasAnnotation(Type.INT_TYPE));
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void testGetAnnotations_immutable()
-  {
+  public void testGetAnnotations_immutable() {
     MethodInfo info = new MethodInfo("name", "desc", new HashSet<>(Collections.singleton(Type.INT_TYPE.getDescriptor())));
 
     info.getAnnotations().add("something");
   }
 
   @Test
-  public void testCopy()
-  {
+  public void testCopy() {
     MethodInfo info = new MethodInfo("name", "desc", Collections.singleton(Type.INT_TYPE.getDescriptor()));
     MethodInfo copy = info.copy();
 

@@ -1,33 +1,18 @@
 package org.serialthreads.transformer.strategies.singleframe;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.IFNONNULL;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.POP;
+import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 
 /**
  * Method transformer for concrete methods.
  */
 @SuppressWarnings({"UnusedAssignment"})
-class ConcreteMethodTransformer extends MethodTransformer
-{
+class ConcreteMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
    *
@@ -35,8 +20,7 @@ class ConcreteMethodTransformer extends MethodTransformer
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected ConcreteMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
-  {
+  protected ConcreteMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, method, classInfoCache);
   }
 
@@ -46,8 +30,7 @@ class ConcreteMethodTransformer extends MethodTransformer
    * @return Transformed method
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public MethodNode transform() throws AnalyzerException
-  {
+  public MethodNode transform() throws AnalyzerException {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     analyze();
 
@@ -65,10 +48,8 @@ class ConcreteMethodTransformer extends MethodTransformer
   /**
    * Insert frame restoring code at the begin of an interruptible method.
    */
-  private void createRestoreHandlerMethod()
-  {
-    if (log.isDebugEnabled())
-    {
+  private void createRestoreHandlerMethod() {
+    if (log.isDebugEnabled()) {
       log.debug("    Creating restore handler for method");
     }
 

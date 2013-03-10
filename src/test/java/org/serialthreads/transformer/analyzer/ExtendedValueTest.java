@@ -8,19 +8,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test for ExtendedValue.
  */
-public class ExtendedValueTest
-{
+public class ExtendedValueTest {
   @Test
-  public void testValue()
-  {
+  public void testValue() {
     ExtendedValue value = ExtendedValue.value(Type.INT_TYPE);
     assertEquals(Type.INT_TYPE, value.getType());
     assertFalse(value.isConstant());
@@ -28,8 +23,7 @@ public class ExtendedValueTest
   }
 
   @Test
-  public void testValueInLocal()
-  {
+  public void testValueInLocal() {
     Set<Integer> locals1 = new HashSet<>(Arrays.asList(1));
 
     ExtendedValue value = ExtendedValue.valueInLocal(Type.INT_TYPE, 1);
@@ -41,8 +35,7 @@ public class ExtendedValueTest
   }
 
   @Test
-  public void testValueInLocals()
-  {
+  public void testValueInLocals() {
     Set<Integer> locals12 = new HashSet<>(Arrays.asList(1, 2));
 
     ExtendedValue value = ExtendedValue.valueInLocal(Type.INT_TYPE, 1).addLocal(2);
@@ -54,8 +47,7 @@ public class ExtendedValueTest
   }
 
   @Test
-  public void testConstantValue()
-  {
+  public void testConstantValue() {
     ExtendedValue value = ExtendedValue.constantValue(Type.INT_TYPE, 1);
     assertEquals(Type.INT_TYPE, value.getType());
     assertTrue(value.isConstant());
@@ -64,8 +56,7 @@ public class ExtendedValueTest
   }
 
   @Test
-  public void testConstantInLocals()
-  {
+  public void testConstantInLocals() {
     Set<Integer> locals12 = new HashSet<>(Arrays.asList(1, 2));
 
     ExtendedValue value = ExtendedValue.constantInLocals(Type.INT_TYPE, 1, locals12);
@@ -78,24 +69,21 @@ public class ExtendedValueTest
   }
 
   @Test
-  public void testAddLocal()
-  {
+  public void testAddLocal() {
     ExtendedValue value = ExtendedValue.value(Type.INT_TYPE);
     ExtendedValue local1 = ExtendedValue.valueInLocal(Type.INT_TYPE, 1);
     assertEqualsValue(local1, value.addLocal(1));
   }
 
   @Test
-  public void testRemoveLocal()
-  {
+  public void testRemoveLocal() {
     ExtendedValue value = ExtendedValue.value(Type.INT_TYPE);
     ExtendedValue local1 = ExtendedValue.valueInLocal(Type.INT_TYPE, 1);
     assertEqualsValue(value, local1.removeLocal(1));
   }
 
   @Test
-  public void testEqualsValue()
-  {
+  public void testEqualsValue() {
     ExtendedValue const1Local1A = ExtendedValue.constantValue(Type.INT_TYPE, 1).addLocal(1);
     ExtendedValue const1Local1B = ExtendedValue.constantValue(Type.INT_TYPE, 1).addLocal(1);
     assertEqualsValue(const1Local1A, const1Local1B);
@@ -120,29 +108,22 @@ public class ExtendedValueTest
    * @param expected expected value
    * @param value value
    */
-  public static void assertEqualsValue(ExtendedValue expected, Value value)
-  {
+  public static void assertEqualsValue(ExtendedValue expected, Value value) {
     assertTrue("expected ExtendedValue but was: <" + value.getClass().getName() + ">", value instanceof ExtendedValue);
     ExtendedValue ev = (ExtendedValue) value;
     assertNotSame(expected, ev);
-    if (expected.isConstant())
-    {
+    if (expected.isConstant()) {
       assertTrue("expected a constant value: <" + expected.getConstant() + "> but was: none", ev.isConstant());
       assertEquals("expected constant: <" + expected.getConstant() + "> but was: <" + ev.getConstant() + ">",
         expected.getConstant(), ev.getConstant());
-    }
-    else
-    {
+    } else {
       assertFalse("expected no constant value", ev.isConstant());
     }
-    if (expected.isHoldInLocal())
-    {
+    if (expected.isHoldInLocal()) {
       assertTrue("expected value which is hold in a local", ev.isHoldInLocal());
       assertEquals("expected locals: <" + expected.getLocals() + "> but was: <" + ev.getLocals() + ">",
         expected.getLocals(), ev.getLocals());
-    }
-    else
-    {
+    } else {
       assertFalse("expected value which is not hold in any local", ev.isHoldInLocal());
     }
     assertTrue(expected.equalsValue((ExtendedValue) value));

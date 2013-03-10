@@ -11,21 +11,15 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
-import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
-import static org.serialthreads.transformer.code.MethodCode.isAbstract;
-import static org.serialthreads.transformer.code.MethodCode.isInterface;
-import static org.serialthreads.transformer.code.MethodCode.isRun;
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
 
 /**
  * Class adapter executing byte code enhancement of all methods.
  * The signature of all interruptible methods will not be changed.
  * This transformation needs a static thread holder, so SimpleSerialThreadManager has to be used.
  */
-public class FrequentInterruptsTransformer extends AbstractTransformer
-{
+public class FrequentInterruptsTransformer extends AbstractTransformer {
   public static final String STRATEGY = "FREQUENT";
 
   /**
@@ -33,34 +27,28 @@ public class FrequentInterruptsTransformer extends AbstractTransformer
    *
    * @param classInfoCache class cache to use
    */
-  public FrequentInterruptsTransformer(IClassInfoCache classInfoCache)
-  {
+  public FrequentInterruptsTransformer(IClassInfoCache classInfoCache) {
     super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return "Transformer " + STRATEGY;
   }
 
   @Override
-  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
-  {
-    if (isAbstract(method))
-    {
+  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
+    if (isAbstract(method)) {
       // abstract methods need no transformation
       return null;
     }
 
-    if (hasNoInterruptibleMethodCalls(method))
-    {
+    if (hasNoInterruptibleMethodCalls(method)) {
       // no transformation needed
       return null;
     }
 
-    if (isRun(clazz, method, classInfoCache))
-    {
+    if (isRun(clazz, method, classInfoCache)) {
       // take special care of run method
       return Arrays.asList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());
@@ -72,15 +60,12 @@ public class FrequentInterruptsTransformer extends AbstractTransformer
   }
 
   @Override
-  protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors)
-  {
-    if (isInterface(clazz) || implementTransformedRunnable(clazz, constructors))
-    {
+  protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
+    if (isInterface(clazz) || implementTransformedRunnable(clazz, constructors)) {
       return;
     }
 
-    if (log.isDebugEnabled())
-    {
+    if (log.isDebugEnabled()) {
       log.debug("  Creating stack");
     }
 

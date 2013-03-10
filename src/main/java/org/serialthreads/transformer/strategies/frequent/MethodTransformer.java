@@ -1,40 +1,20 @@
 package org.serialthreads.transformer.strategies.frequent;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
-import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
-import static org.serialthreads.transformer.code.MethodCode.firstLocal;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
-import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
-import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
  * Base class for method transformers of {@link org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3}.
  */
 @SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
-abstract class MethodTransformer extends AbstractMethodTransformer
-{
+abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Constructor.
    *
@@ -42,8 +22,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected MethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
-  {
+  protected MethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, method, classInfoCache);
   }
 
@@ -52,10 +31,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer
   //
 
   @Override
-  protected void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner)
-  {
-    if (log.isDebugEnabled())
-    {
+  protected void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+    if (log.isDebugEnabled()) {
       log.debug("      Creating capture code for method call to " + methodName(methodCall));
     }
 
@@ -96,10 +73,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer
   //
 
   @Override
-  protected InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
-  {
-    if (log.isDebugEnabled())
-    {
+  protected InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
+    if (log.isDebugEnabled()) {
       log.debug("      Creating restore code for method call to " + methodName(methodCall));
     }
 
@@ -119,12 +94,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, frameBefore))
-    {
+    if (isSelfCall(methodCall, frameBefore)) {
       restore.add(new VarInsnNode(ALOAD, 0));
-    }
-    else if (isNotStatic(clonedCall))
-    {
+    } else if (isNotStatic(clonedCall)) {
       // get owner
       restore.add(new VarInsnNode(ALOAD, localFrame));
       restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
@@ -157,13 +129,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer
     // restore stack "under" the returned value, if any
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
     final boolean needToSaveReturnValue = isNotVoid(clonedCall) && frameAfter.getStackSize() > 1;
-    if (needToSaveReturnValue)
-    {
+    if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
     }
     restore.add(popFromFrame(clonedCall, frameAfter, localFrame));
-    if (needToSaveReturnValue)
-    {
+    if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
     }
     restore.add(new JumpInsnNode(GOTO, normal));
@@ -176,8 +146,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer
    *
    * @param methodCall method call
    */
-  private MethodInsnNode copyMethodCall(MethodInsnNode methodCall)
-  {
+  private MethodInsnNode copyMethodCall(MethodInsnNode methodCall) {
     return (MethodInsnNode) methodCall.clone(null);
   }
 
@@ -189,8 +158,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer
    * Fix maxs of method.
    * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
    */
-  protected void fixMaxs()
-  {
+  protected void fixMaxs() {
     method.maxLocals += 1;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
