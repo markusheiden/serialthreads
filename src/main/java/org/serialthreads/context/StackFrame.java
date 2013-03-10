@@ -1,7 +1,7 @@
 package org.serialthreads.context;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
@@ -13,7 +13,10 @@ import java.util.Arrays;
  */
 @SuppressWarnings("unused")
 public class StackFrame implements Serializable {
-  private final Log logger = LogFactory.getLog(getClass());
+  /**
+   * Logger.
+   */
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   public static int DEFAULT_FRAME_SIZE = 64;
   public static final int FAST_FRAME_SIZE = 8;

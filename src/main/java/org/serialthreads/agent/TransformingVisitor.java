@@ -1,17 +1,20 @@
 package org.serialthreads.agent;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.serialthreads.transformer.ITransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Visitor executing byte code enhancement of a class.
  */
 public class TransformingVisitor extends ClassNode {
-  private final Log log = LogFactory.getLog(getClass());
+  /**
+   * Logger.
+   */
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected final ClassVisitor cv;
   protected final ITransformer transformer;
@@ -23,7 +26,7 @@ public class TransformingVisitor extends ClassNode {
    * @param transformer byte code transformer
    */
   public TransformingVisitor(ClassVisitor cv, ITransformer transformer) {
-    this.cv = log.isDebugEnabled() ? new CheckClassAdapter(cv) : cv;
+    this.cv = logger.isDebugEnabled() ? new CheckClassAdapter(cv) : cv;
     this.transformer = transformer;
   }
 

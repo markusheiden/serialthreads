@@ -68,8 +68,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
       return;
     }
 
-    if (log.isDebugEnabled()) {
-      log.debug("  Creating stack");
+    if (logger.isDebugEnabled()) {
+      logger.debug("  Creating stack");
     }
 
     // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptible method?

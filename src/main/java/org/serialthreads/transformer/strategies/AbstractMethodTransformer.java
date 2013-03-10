@@ -1,7 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -14,6 +12,8 @@ import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.code.ValueCodeFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -28,7 +28,10 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
  */
 @SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
 public abstract class AbstractMethodTransformer {
-  protected final Log log = LogFactory.getLog(getClass());
+  /**
+   * Logger.
+   */
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
   protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
@@ -180,8 +183,8 @@ public abstract class AbstractMethodTransformer {
    * @return restore code
    */
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, Frame frame) {
-    if (log.isDebugEnabled()) {
-      log.debug("      Creating restore code for interrupt");
+    if (logger.isDebugEnabled()) {
+      logger.debug("      Creating restore code for interrupt");
     }
 
     int local = firstLocal(method);
@@ -248,8 +251,8 @@ public abstract class AbstractMethodTransformer {
    * @param suppressOwner suppress capturing of owner?
    */
   protected void createCaptureCodeForInterrupt(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
-    if (log.isDebugEnabled()) {
-      log.debug("      Creating capture code for interrupt");
+    if (logger.isDebugEnabled()) {
+      logger.debug("      Creating capture code for interrupt");
     }
 
     int local = firstLocal(method);
@@ -565,8 +568,8 @@ public abstract class AbstractMethodTransformer {
           ExtendedValue extendedValue = (ExtendedValue) value;
           if (extendedValue.isHoldInLowerLocal(local)) {
             // the value of the local is hold in a lower local too -> copy
-            if (log.isDebugEnabled()) {
-              log.debug("        Detected codes with the same value: " + extendedValue.getLowestLocal() + "/" + local);
+            if (logger.isDebugEnabled()) {
+              logger.debug("        Detected codes with the same value: " + extendedValue.getLowestLocal() + "/" + local);
             }
             copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
             copyLocals.add(code(extendedValue).store(local));
@@ -611,14 +614,14 @@ public abstract class AbstractMethodTransformer {
       ExtendedValue value = (ExtendedValue) frame.getStack(stack);
       if (value.isConstant()) {
         // the stack value is constant -> push constant
-        if (log.isDebugEnabled()) {
-          log.debug("        Detected constant value on stack: " + value.toString() + " / value " + value.getConstant());
+        if (logger.isDebugEnabled()) {
+          logger.debug("        Detected constant value on stack: " + value.toString() + " / value " + value.getConstant());
         }
         result.add(code(value).push(value.getConstant()));
       } else if (value.isHoldInLocal()) {
         // the stack value was already stored in local variable -> load local
-        if (log.isDebugEnabled()) {
-          log.debug("        Detected value of local on stack: " + value.toString() + " / local " + value.getLowestLocal());
+        if (logger.isDebugEnabled()) {
+          logger.debug("        Detected value of local on stack: " + value.toString() + " / local " + value.getLowestLocal());
         }
         result.add(code(value).load(value.getLowestLocal()));
       } else {

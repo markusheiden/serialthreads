@@ -1,12 +1,12 @@
 package org.serialthreads.transformer.classcache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.Type;
 import org.serialthreads.Executor;
 import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.transformer.NotTransformableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +17,10 @@ import java.util.TreeSet;
  * Class info for scanned classes.
  */
 public class ClassInfo {
-  private final Log logger = LogFactory.getLog(getClass());
+  /**
+   * Logger.
+   */
+  private final Logger logger = LoggerFactory.getLogger(getClass());
 
   private static final Type TYPE_EXECUTOR = Type.getType(Executor.class);
   private static final Type TYPE_INTERRUPTIBLE = Type.getType(Interruptible.class);

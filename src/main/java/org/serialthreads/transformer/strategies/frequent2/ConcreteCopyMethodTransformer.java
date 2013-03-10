@@ -47,8 +47,8 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     method.desc = changeCopyDesc(method.desc);
     clazz.methods.add(method);
 
-    if (log.isDebugEnabled()) {
-      log.debug("      Copied concrete method " + methodName(clazz, method));
+    if (logger.isDebugEnabled()) {
+      logger.debug("      Copied concrete method " + methodName(clazz, method));
     }
 
     return method;
@@ -62,8 +62,8 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
   private void createRestoreHandlerCopy(List<InsnList> restoreCodes) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (log.isDebugEnabled()) {
-      log.debug("    Creating restore handler for copied method");
+    if (logger.isDebugEnabled()) {
+      logger.debug("    Creating restore handler for copied method");
     }
 
     int param = firstParam(method);

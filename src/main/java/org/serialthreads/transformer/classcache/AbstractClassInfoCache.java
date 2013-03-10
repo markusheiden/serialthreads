@@ -1,13 +1,13 @@
 package org.serialthreads.transformer.classcache;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.serialthreads.transformer.NotTransformableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,7 +19,10 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
  * Abstract implementation of a class info cache.
  */
 public abstract class AbstractClassInfoCache implements IClassInfoCache {
-  protected final Log logger = LogFactory.getLog(getClass());
+  /**
+   * Logger.
+   */
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final Map<String, ClassInfo> classes;
 

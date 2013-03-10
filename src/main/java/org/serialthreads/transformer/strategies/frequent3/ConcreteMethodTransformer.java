@@ -49,8 +49,8 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * Insert frame restoring code at the begin of an interruptible method.
    */
   private void createRestoreHandlerMethod() {
-    if (log.isDebugEnabled()) {
-      log.debug("    Creating restore handler for method");
+    if (logger.isDebugEnabled()) {
+      logger.debug("    Creating restore handler for method");
     }
 
     int local = firstLocal(method);

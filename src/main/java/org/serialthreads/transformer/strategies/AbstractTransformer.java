@@ -1,7 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -15,6 +13,8 @@ import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IntValueCode;
 import org.serialthreads.transformer.debug.Debugger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +27,10 @@ import static org.serialthreads.transformer.code.MethodCode.*;
  * Base implementation of a transformer.
  */
 public abstract class AbstractTransformer implements ITransformer {
-  protected final Log log = LogFactory.getLog(getClass());
+  /**
+   * Logger.
+   */
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
   protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
@@ -63,8 +66,8 @@ public abstract class AbstractTransformer implements ITransformer {
 
   @Override
   public void transform(ClassNode clazz) {
-    if (log.isDebugEnabled()) {
-      log.info("Transforming class " + clazz.name + " with " + toString());
+    if (logger.isDebugEnabled()) {
+      logger.info("Transforming class " + clazz.name + " with " + toString());
     }
 
     // separate constructors and methods
@@ -87,7 +90,7 @@ public abstract class AbstractTransformer implements ITransformer {
       } else {
         allTransformedMethods.addAll(transformedMethods);
 
-        if (log.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
           // analyze methods again to be sure that they are correct
           reanalyzeMethods(clazz, transformedMethods);
         }
@@ -96,16 +99,16 @@ public abstract class AbstractTransformer implements ITransformer {
 
     if (allTransformedMethods.isEmpty()) {
       // Class needs no transformation, but it should be loaded with this class loader
-      if (log.isDebugEnabled()) {
-        log.debug("  Class " + clazz.name + " needs no transformation");
+      if (logger.isDebugEnabled()) {
+        logger.debug("  Class " + clazz.name + " needs no transformation");
       }
       throw new LoadUntransformedException(clazz.name);
     }
 
     afterTransformation(clazz, constructors);
 
-    if (log.isDebugEnabled()) {
-      log.debug("Finished transforming of class " + clazz.name);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Finished transforming of class " + clazz.name);
     }
   }
 
@@ -152,8 +155,8 @@ public abstract class AbstractTransformer implements ITransformer {
         ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
       } catch (Exception e) {
         // disassemble erroneous method
-        log.debug("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage());
-        log.debug("Byte code:\n" + Debugger.debug(clazz.name, method));
+        logger.debug("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage());
+        logger.debug("Byte code:\n" + Debugger.debug(clazz.name, method));
         throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
       }
     }
@@ -167,8 +170,8 @@ public abstract class AbstractTransformer implements ITransformer {
    * @return transformed methods or null, if the method needs to transformation
    */
   protected List<MethodNode> transformMethod(ClassNode clazz, MethodNode method) {
-    if (log.isDebugEnabled()) {
-      log.debug("  Transforming method " + methodName(clazz, method));
+    if (logger.isDebugEnabled()) {
+      logger.debug("  Transforming method " + methodName(clazz, method));
     }
 
     if (classInfoCache.isExecutor(clazz, method)) {
@@ -178,15 +181,15 @@ public abstract class AbstractTransformer implements ITransformer {
     }
 
     if (!classInfoCache.isInterruptible(clazz, method)) {
-      if (log.isDebugEnabled()) {
-        log.debug("    Not interruptible -> abort transformation of method");
+      if (logger.isDebugEnabled()) {
+        logger.debug("    Not interruptible -> abort transformation of method");
       }
 
       return null;
     }
 
     try {
-      if (log.isDebugEnabled()) {
+      if (logger.isDebugEnabled()) {
         logDebug(method);
       }
 
@@ -247,8 +250,8 @@ public abstract class AbstractTransformer implements ITransformer {
       return false;
     }
 
-    if (log.isDebugEnabled()) {
-      log.debug("  Implement ITransformedRunnable");
+    if (logger.isDebugEnabled()) {
+      logger.debug("  Implement ITransformedRunnable");
     }
 
     // make class implement ITransformedRunnable
@@ -282,8 +285,8 @@ public abstract class AbstractTransformer implements ITransformer {
   protected void transformConstructor(ClassNode clazz, MethodNode constructor) {
     assert constructor.name.equals("<init>") : "Precondition: constructor.name.equals(\"<init>\")";
 
-    if (log.isDebugEnabled()) {
-      log.debug("    Transforming constructor " + methodName(clazz, constructor));
+    if (logger.isDebugEnabled()) {
+      logger.debug("    Transforming constructor " + methodName(clazz, constructor));
     }
 
     constructor.maxStack = Math.max(5, constructor.maxStack);
@@ -337,8 +340,8 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method method
    */
   protected void logDebug(MethodNode method) {
-    log.debug("    Max stack : " + method.maxStack);
-    log.debug("    Max locals: " + method.maxLocals);
+    logger.debug("    Max stack : " + method.maxStack);
+    logger.debug("    Max locals: " + method.maxLocals);
   }
 
   /**
@@ -350,11 +353,11 @@ public abstract class AbstractTransformer implements ITransformer {
   protected void logDebug(Frame frame) {
     for (int i = 0; i < frame.getLocals(); i++) {
       BasicValue local = (BasicValue) frame.getLocal(i);
-      log.debug("        Local " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local));
+      logger.debug("        Local " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local));
     }
     for (int i = 0; i < frame.getStackSize(); i++) {
       BasicValue stack = (BasicValue) frame.getStack(i);
-      log.debug("        Stack " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack));
+      logger.debug("        Stack " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack));
     }
   }
 }

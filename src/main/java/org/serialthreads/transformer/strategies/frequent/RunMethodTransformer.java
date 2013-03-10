@@ -52,8 +52,8 @@ class RunMethodTransformer extends MethodTransformer {
   private void createRestoreHandlerRun(List<InsnList> restoreCodes) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (log.isDebugEnabled()) {
-      log.debug("    Creating restore handler for run");
+    if (logger.isDebugEnabled()) {
+      logger.debug("    Creating restore handler for run");
     }
 
     int local = firstLocal(method);
