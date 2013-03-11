@@ -10,8 +10,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test runnable for transformer integration tests.
  */
-public class TestInterruptible implements IRunnable
-{
+public class TestInterruptible extends AbstractTestInterruptible implements ITestInterruptible, IRunnable {
   public boolean z;
   public char c;
   public byte b;
@@ -26,8 +25,7 @@ public class TestInterruptible implements IRunnable
   /**
    * Execute transformed runnable via serial thread manager.
    */
-  public void runTransformed()
-  {
+  public void runTransformed() {
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(this);
     SerialThreadManager.registerManager(manager);
     manager.execute();
@@ -37,20 +35,20 @@ public class TestInterruptible implements IRunnable
    * Execute runnable.
    */
   @Interruptible
-  public void run()
-  {
+  public void run() {
     long l1 = testLong(true, (char) 1, (byte) 3, (short) 5, 7, 11L);
     double d1 = testDouble(13.0F, 17.0D);
     int i1 = testStatic(19);
 
     test = i1 + l1 + (long) d1;
 
+    notInterruptible();
+
     checkResult();
   }
 
   @Interruptible
-  public long testLong(boolean z, char c, byte b, short s, int i, long j)
-  {
+  public long testLong(boolean z, char c, byte b, short s, int i, long j) {
     z = !z;
     SerialThreadManager.interrupt();
     this.z = z;
@@ -74,8 +72,7 @@ public class TestInterruptible implements IRunnable
   }
 
   @Interruptible
-  public double testDouble(float f, double d)
-  {
+  public double testDouble(float f, double d) {
     f++;
     SerialThreadManager.interrupt();
     this.f = f;
@@ -87,8 +84,7 @@ public class TestInterruptible implements IRunnable
   }
 
   @Interruptible
-  public static int testStatic(int i)
-  {
+  public static int testStatic(int i) {
     i++;
     SerialThreadManager.interrupt();
     i += 3;
@@ -96,12 +92,16 @@ public class TestInterruptible implements IRunnable
     return i;
   }
 
+  @Interruptible
+  public static void notInterruptible() {
+    System.out.println("Not interruptible method has been called");
+  }
+
   //
   // Check results of execution ("self test")
   //
 
-  private void checkResult()
-  {
+  private void checkResult() {
     assertEquals(false, z); // !true
     assertEquals((char) 2, c); // 1++
     assertEquals((byte) 4, b); // 3++

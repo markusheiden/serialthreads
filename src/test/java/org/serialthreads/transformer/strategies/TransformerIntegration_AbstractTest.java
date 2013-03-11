@@ -16,6 +16,9 @@ import java.io.PrintWriter;
  * Integration test for transformer.
  */
 public abstract class TransformerIntegration_AbstractTest {
+  /**
+   * Strategy under test.
+   */
   protected IStrategy strategy;
 
   @Before
