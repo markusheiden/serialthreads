@@ -54,8 +54,10 @@ public class SingleFrameExecutionTransformer extends AbstractTransformer {
     }
 
     if (hasNoInterruptibleMethodCalls(method)) {
-      // no transformation needed
-      return null;
+      // copied method not needed, because it will be called never
+      // TODO 2013-03-11 mh: Simplify method transformer?
+      return Arrays.asList(
+        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     if (isRun(clazz, method, classInfoCache)) {
