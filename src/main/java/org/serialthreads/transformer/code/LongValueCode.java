@@ -13,6 +13,7 @@ public class LongValueCode extends AbstractValueCode {
     super(Type.LONG_TYPE, "Long", LLOAD, LSTORE, LALOAD, LASTORE, LCONST_0, LRETURN);
   }
 
+  @Override
   public AbstractInsnNode push(Object value) {
     long l = (Long) value;
 
@@ -37,6 +38,7 @@ public class LongValueCode extends AbstractValueCode {
     return instructions;
   }
 
+  @Override
   public boolean isResponsibleFor(Type type) {
     return type != null && Type.LONG == type.getSort();
   }

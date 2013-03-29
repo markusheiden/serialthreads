@@ -7,8 +7,7 @@ import org.serialthreads.Executor;
  * Expects that getThread() is never called!
  * Expects that IRunnables are transformed to ITransformedRunnables!
  */
-public class SimpleSerialThreadManager2 extends SerialThreadManager
-{
+public class SimpleSerialThreadManager2 extends SerialThreadManager {
   private final ChainedRunnable[] chains;
   private ChainedRunnable lastExecuted;
 
@@ -17,8 +16,7 @@ public class SimpleSerialThreadManager2 extends SerialThreadManager
    *
    * @param runnables runnables
    */
-  public SimpleSerialThreadManager2(IRunnable... runnables)
-  {
+  public SimpleSerialThreadManager2(IRunnable... runnables) {
     assert runnables.length > 0 : "Precondition: runnables.length > 0";
 
     chains = ChainedRunnable.chain(runnables);
@@ -32,22 +30,18 @@ public class SimpleSerialThreadManager2 extends SerialThreadManager
   /**
    * Simple serial execution of all runnables.
    */
+  @Override
   @Executor
-  public void execute()
-  {
+  public void execute() {
     // loop until a chain finishes
     ChainedRunnable chain = lastExecuted;
-    try
-    {
+    try {
       //noinspection InfiniteLoopStatement
-      while (true)
-      {
+      while (true) {
         chain = chain.next;
         chain.runnable.run();
       }
-    }
-    catch (ThreadFinishedException e)
-    {
+    } catch (ThreadFinishedException e) {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.runnable.getThread()).reset();
@@ -59,27 +53,23 @@ public class SimpleSerialThreadManager2 extends SerialThreadManager
   /**
    * Simple serial execution of all runnables for a given number of interrupts.
    */
+  @Override
   @Executor
-  public void execute(int interrupts)
-  {
+  public void execute(int interrupts) {
     assert interrupts > 0 : "Precondition: interrupts > 0";
 
     int loops = interrupts * chains.length;
 
     // loop until a chain finishes
     ChainedRunnable chain = lastExecuted;
-    try
-    {
-      do
-      {
+    try {
+      do {
         chain = chain.next;
         chain.runnable.run();
       } while (--loops != 0);
 
       // execution finished, because the given number of interrupts have been processed
-    }
-    catch (ThreadFinishedException e)
-    {
+    } catch (ThreadFinishedException e) {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.runnable.getThread()).reset();

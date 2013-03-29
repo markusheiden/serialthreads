@@ -34,6 +34,7 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   /**
    * Execute runnable.
    */
+  @Override
   @Interruptible
   public void run() {
     long l1 = testLong(true, (char) 1, (byte) 3, (short) 5, 7, 11L);
@@ -47,6 +48,7 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     checkResult();
   }
 
+  @Override
   @Interruptible
   public long testLong(boolean z, char c, byte b, short s, int i, long j) {
     z = !z;
@@ -71,6 +73,7 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     return j;
   }
 
+  @Override
   @Interruptible
   public double testDouble(float f, double d) {
     f++;

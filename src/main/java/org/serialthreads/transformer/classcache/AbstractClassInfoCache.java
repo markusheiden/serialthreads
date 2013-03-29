@@ -33,12 +33,14 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     this.classes = new TreeMap<>();
   }
 
+  @Override
   public boolean isInterface(String className) {
     assert className != null : "Precondition: className != null";
 
     return getClassInfo(className).isInterface();
   }
 
+  @Override
   public Type getSuperClass(String className) {
     assert className != null : "Precondition: className != null";
 
@@ -46,6 +48,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     return superClassName == null ? null : Type.getObjectType(superClassName);
   }
 
+  @Override
   public boolean hasSuperClass(String className, String superClassName) {
     assert className != null : "Precondition: className != null";
     assert superClassName != null : "Precondition: superClassName != null";
@@ -101,14 +104,17 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     return result;
   }
 
+  @Override
   public boolean isInterruptible(ClassNode owner, MethodNode method) {
     return isInterruptible(owner.name, method.name, method.desc);
   }
 
+  @Override
   public boolean isInterruptible(MethodInsnNode method) {
     return isInterruptible(method.owner, method.name, method.desc);
   }
 
+  @Override
   public boolean isInterruptible(String owner, String name, String desc) {
     if (owner.startsWith("[")) {
       // Arrays are not interruptible
@@ -124,6 +130,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     return result;
   }
 
+  @Override
   public boolean isInterrupt(MethodInsnNode method) {
     return isInterrupt(method.owner, method.name, method.desc);
   }

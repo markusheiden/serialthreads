@@ -161,6 +161,7 @@ public abstract class AbstractValueCode implements IValueCode {
     return instructions;
   }
 
+  @Override
   public InsnList getStacks(int localFrame) {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));

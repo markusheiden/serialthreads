@@ -15,6 +15,7 @@ public class FloatValueCode extends AbstractValueCode {
     super(Type.FLOAT_TYPE, "Float", FLOAD, FSTORE, FALOAD, FASTORE, FCONST_0, FRETURN);
   }
 
+  @Override
   public AbstractInsnNode push(Object value) {
     float f = (Float) value;
 
@@ -27,6 +28,7 @@ public class FloatValueCode extends AbstractValueCode {
     return new LdcInsnNode(f);
   }
 
+  @Override
   public boolean isResponsibleFor(Type type) {
     return type != null && Type.FLOAT == type.getSort();
   }

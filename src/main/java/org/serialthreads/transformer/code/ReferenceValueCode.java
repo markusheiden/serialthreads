@@ -63,6 +63,7 @@ public class ReferenceValueCode extends AbstractValueCode {
     return instructions;
   }
 
+  @Override
   public AbstractInsnNode push(Object value) {
     if (value == null) {
       return new InsnNode(ACONST_NULL);
@@ -71,6 +72,7 @@ public class ReferenceValueCode extends AbstractValueCode {
     return new LdcInsnNode(value);
   }
 
+  @Override
   public boolean isCompatibleWith(Type type) {
     assert type != null : "Precondition: type != null2";
 

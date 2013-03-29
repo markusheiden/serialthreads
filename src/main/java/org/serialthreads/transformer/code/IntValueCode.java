@@ -16,6 +16,7 @@ public class IntValueCode extends AbstractValueCode {
     super(Type.INT_TYPE, "Int", ILOAD, ISTORE, IALOAD, IASTORE, ICONST_0, IRETURN);
   }
 
+  @Override
   public AbstractInsnNode push(Object value) {
     int i = (Integer) value;
 
@@ -50,6 +51,7 @@ public class IntValueCode extends AbstractValueCode {
     }
   }
 
+  @Override
   public boolean isResponsibleFor(Type type) {
     return
       type != null &&

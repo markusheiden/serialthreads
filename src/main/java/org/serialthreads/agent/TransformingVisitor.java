@@ -30,6 +30,7 @@ public class TransformingVisitor extends ClassNode {
     this.transformer = transformer;
   }
 
+  @Override
   public void visitEnd() {
     super.visitEnd();
 

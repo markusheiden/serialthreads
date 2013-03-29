@@ -62,6 +62,7 @@ public class TransformingClassLoader extends ClassLoader {
    * <p/>
    * Tries to transform class first, if possible.
    */
+  @Override
   protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
     Class<?> result = findLoadedClass(name);
     if (result == null) {

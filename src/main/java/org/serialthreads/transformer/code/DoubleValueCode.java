@@ -13,6 +13,7 @@ public class DoubleValueCode extends AbstractValueCode {
     super(Type.DOUBLE_TYPE, "Double", DLOAD, DSTORE, DALOAD, DASTORE, DCONST_0, DRETURN);
   }
 
+  @Override
   public AbstractInsnNode push(Object value) {
     double d = (Double) value;
 
@@ -37,6 +38,7 @@ public class DoubleValueCode extends AbstractValueCode {
     return instructions;
   }
 
+  @Override
   public boolean isResponsibleFor(Type type) {
     return type != null && Type.DOUBLE == type.getSort();
   }
