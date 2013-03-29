@@ -16,8 +16,7 @@ import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocals
 /**
  * Verifier which can merge extended values.
  */
-public class ExtendedVerifier extends SimpleVerifier
-{
+public class ExtendedVerifier extends SimpleVerifier {
   /**
    * The class that is verified.
    */
@@ -58,8 +57,7 @@ public class ExtendedVerifier extends SimpleVerifier
     Type currentClass,
     Type currentSuperClass,
     List<Type> currentClassInterfaces,
-    boolean isInterface)
-  {
+    boolean isInterface) {
     super(currentClass, currentSuperClass, currentClassInterfaces, isInterface);
 
     this.currentClass = currentClass;
@@ -70,14 +68,12 @@ public class ExtendedVerifier extends SimpleVerifier
   }
 
   @Override
-  public BasicValue merge(BasicValue v, BasicValue w)
-  {
+  public BasicValue merge(BasicValue v, BasicValue w) {
     assert v != null : "Precondition: v != null";
     assert w != null : "Precondition: w != null";
 
     BasicValue result = super.merge(v, w);
-    if (result.equals(UNINITIALIZED_VALUE))
-    {
+    if (result.equals(UNINITIALIZED_VALUE)) {
       // return uninitialized value
       return result;
     }
@@ -87,8 +83,7 @@ public class ExtendedVerifier extends SimpleVerifier
 
     final ExtendedValue ev = (ExtendedValue) v;
     final ExtendedValue ew = (ExtendedValue) w;
-    if (ev != result || !ev.equalsValue(ew))
-    {
+    if (ev != result || !ev.equalsValue(ew)) {
       // the type has been changed -> create new value with merged constant and locals or
       // the type has not been changed, but the constant or the locals have to be merged
 
@@ -98,7 +93,7 @@ public class ExtendedVerifier extends SimpleVerifier
       Set<Integer> mergedLocals = new HashSet<>(ev.getLocals());
       mergedLocals.retainAll(ew.getLocals());
 
-      return isConstant?
+      return isConstant ?
         constantInLocals(result.getType(), ev.getConstant(), mergedLocals) :
         valueInLocals(result.getType(), mergedLocals);
     }
@@ -108,20 +103,16 @@ public class ExtendedVerifier extends SimpleVerifier
   }
 
   @Override
-  protected boolean isInterface(final Type t)
-  {
-    if (t.equals(currentClass))
-    {
+  protected boolean isInterface(final Type t) {
+    if (t.equals(currentClass)) {
       return isInterface;
     }
     return classInfoCache.isInterface(t.getInternalName());
   }
 
   @Override
-  protected Type getSuperClass(Type t)
-  {
-    if (t.equals(currentClass))
-    {
+  protected Type getSuperClass(Type t) {
+    if (t.equals(currentClass)) {
       return currentSuperClass;
     }
 
@@ -130,28 +121,20 @@ public class ExtendedVerifier extends SimpleVerifier
 
   @Override
   @SuppressWarnings("unchecked")
-  protected boolean isAssignableFrom(final Type t, final Type u)
-  {
-    if (t.equals(u))
-    {
+  protected boolean isAssignableFrom(final Type t, final Type u) {
+    if (t.equals(u)) {
       return true;
     }
-    if (t.equals(currentClass))
-    {
+    if (t.equals(currentClass)) {
       return getSuperClass(u) != null && isAssignableFrom(t, getSuperClass(u));
     }
-    if (u.equals(currentClass))
-    {
-      if (isAssignableFrom(t, currentSuperClass))
-      {
+    if (u.equals(currentClass)) {
+      if (isAssignableFrom(t, currentSuperClass)) {
         return true;
       }
-      if (currentClassInterfaces != null)
-      {
-        for (Type v : currentClassInterfaces)
-        {
-          if (isAssignableFrom(t, v))
-          {
+      if (currentClassInterfaces != null) {
+        for (Type v : currentClassInterfaces) {
+          if (isAssignableFrom(t, v)) {
             return true;
           }
         }
@@ -162,8 +145,7 @@ public class ExtendedVerifier extends SimpleVerifier
   }
 
   @Override
-  protected Class getClass(Type t)
-  {
+  protected Class getClass(Type t) {
     throw new UnsupportedOperationException("Classes should be loaded via the class info cache");
   }
 }

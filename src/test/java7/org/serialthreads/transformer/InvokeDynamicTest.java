@@ -13,12 +13,9 @@ import java.io.PrintWriter;
 /**
  * Test of invoke dynamic.
  */
-public class InvokeDynamicTest
-{
-  public static void main(String[] args)
-  {
-    try
-    {
+public class InvokeDynamicTest {
+  public static void main(String[] args) {
+    try {
       System.out.println("================================================================================");
       printClass(InvokeDynamicTest.class);
 
@@ -30,24 +27,19 @@ public class InvokeDynamicTest
 
       System.out.println("================================================================================");
       new InvokeDynamicTest().run();
-    }
-    catch (IOException e)
-    {
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private static void printClass(Class<?> clazz) throws IOException
-  {
+  private static void printClass(Class<?> clazz) throws IOException {
     ClassReader r = new ClassReader(clazz.getResourceAsStream(clazz.getSimpleName() + ".class"));
     Printer printer = new ASMifier();
     r.accept(new TraceClassVisitor(null, printer, new PrintWriter(System.out)), 0);
   }
 
-  public void run()
-  {
-    try
-    {
+  public void run() {
+    try {
       System.out.println("Unbound:");
       MethodHandleTestTarget.overrideHandle.invoke(new MethodHandleTestTarget(), new Stack("", 0), new StackFrame(null, 0));
       SubMethodHandleTestTarget.overriddenHandle.invoke(new SubMethodHandleTestTarget(), new Stack("", 0), new StackFrame(null, 0));
@@ -62,9 +54,7 @@ public class InvokeDynamicTest
       MethodHandleTestTarget.privateHandle.bindTo(new MethodHandleTestTarget()).invoke(new Stack("", 0), new StackFrame(null, 0));
       MethodHandleTestTarget.privateStaticHandle.invoke(new Stack("", 0), new StackFrame(null, 0));
 //      MethodHandleTestTarget.varargsHandle.bindTo(new MethodHandleTestTarget()).asFixedArity().invoke("1", "2");
-    }
-    catch (Throwable throwable)
-    {
+    } catch (Throwable throwable) {
       throwable.printStackTrace();
     }
   }

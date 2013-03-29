@@ -10,8 +10,7 @@ import java.util.Map;
 /**
  * Copies method nodes.
  */
-public class MethodNodeCopier
-{
+public class MethodNodeCopier {
   /**
    * Copy method without instructions.
    *
@@ -19,8 +18,7 @@ public class MethodNodeCopier
    * @return copied method
    */
   @SuppressWarnings({"UnusedDeclaration"})
-  public static MethodNode copyEmpty(MethodNode method)
-  {
+  public static MethodNode copyEmpty(MethodNode method) {
     String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);
     return new MethodNode(method.access, method.name, method.desc, method.signature, exceptions);
   }
@@ -32,11 +30,9 @@ public class MethodNodeCopier
    * @param method method
    * @return copied method
    */
-  public static MethodNode copy(MethodNode method)
-  {
+  public static MethodNode copy(MethodNode method) {
     String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);
-    MethodNode result = new MethodNode(method.access, method.name, method.desc, method.signature, exceptions)
-    {
+    MethodNode result = new MethodNode(method.access, method.name, method.desc, method.signature, exceptions) {
       /**
        * Label remapping.
        * Old label -> new label.
@@ -44,11 +40,9 @@ public class MethodNodeCopier
       private final Map<Label, Label> labels = new HashMap<>();
 
       @Override
-      protected LabelNode getLabelNode(Label label)
-      {
+      protected LabelNode getLabelNode(Label label) {
         Label newLabel = labels.get(label);
-        if (newLabel == null)
-        {
+        if (newLabel == null) {
           newLabel = new Label();
           labels.put(label, newLabel);
         }

@@ -7,8 +7,7 @@ import org.serialthreads.Interruptible;
  * <p/>
  * TODO 2010-02-03 mh: move to org.serialthreads?
  */
-public interface IRunnable
-{
+public interface IRunnable {
   /**
    * Run serial thread.
    */

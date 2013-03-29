@@ -5,8 +5,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 /**
  * Transformation strategy.
  */
-public interface IStrategy
-{
+public interface IStrategy {
   /**
    * Create a new transformer.
    *

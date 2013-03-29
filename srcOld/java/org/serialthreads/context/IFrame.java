@@ -4,8 +4,7 @@ package org.serialthreads.context;
  * Interface for frames.
  * Used for context which capture java stack frames.
  */
-public interface IFrame
-{
+public interface IFrame {
   /**
    * Push stack object.
    *

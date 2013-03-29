@@ -10,11 +10,9 @@ import static org.junit.Assert.fail;
 /**
  * Test for ExtendedAnalyzer.
  */
-public class ExtendedAnalyzerTest
-{
+public class ExtendedAnalyzerTest {
   @Test
-  public void testNewFrame_ii()
-  {
+  public void testNewFrame_ii() {
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
 
     ExtendedFrame frame = analyzer.newFrame(2, 2);
@@ -31,20 +29,16 @@ public class ExtendedAnalyzerTest
     assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
 
-    try
-    {
+    try {
       frame.push(BasicValue.INT_VALUE);
       fail("Expected max stack = 2");
-    }
-    catch (IndexOutOfBoundsException e)
-    {
+    } catch (IndexOutOfBoundsException e) {
       // expected
     }
   }
 
   @Test
-  public void testNewFrame_frame()
-  {
+  public void testNewFrame_frame() {
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
 
     ExtendedFrame src = new ExtendedFrame(2, 2);
@@ -63,13 +57,10 @@ public class ExtendedAnalyzerTest
     assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
 
-    try
-    {
+    try {
       frame.push(BasicValue.INT_VALUE);
       fail("Expected max stack = 2");
-    }
-    catch (IndexOutOfBoundsException e)
-    {
+    } catch (IndexOutOfBoundsException e) {
       // expected
     }
   }

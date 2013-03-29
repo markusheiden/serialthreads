@@ -10,28 +10,22 @@ import java.lang.invoke.MethodHandles.Lookup;
 /**
  * Test target for method handle test in {@link org.serialthreads.transformer.InvokeDynamicTest}.
  */
-public class SubMethodHandleTestTarget extends MethodHandleTestTarget
-{
+public class SubMethodHandleTestTarget extends MethodHandleTestTarget {
   public static MethodHandle overriddenHandle;
   public static MethodHandle overriddenSuperHandle;
 
-  static
-  {
-    try
-    {
+  static {
+    try {
       Lookup lookup = MethodHandles.lookup();
       overriddenHandle = lookup.findVirtual(SubMethodHandleTestTarget.class, "test", StackFrame.METHOD_TYPE);
       overriddenSuperHandle = lookup.findSpecial(MethodHandleTestTarget.class, "test", StackFrame.METHOD_TYPE, SubMethodHandleTestTarget.class);
-    }
-    catch (Exception e)
-    {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   @Override
-  void test(Stack stack, StackFrame frame)
-  {
+  void test(Stack stack, StackFrame frame) {
     System.out.println("overridden");
   }
 }

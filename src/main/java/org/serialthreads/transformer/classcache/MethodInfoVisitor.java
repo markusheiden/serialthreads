@@ -11,16 +11,14 @@ import java.util.Set;
 /**
  * Visitor which checks all methods for the presence of the @Interruptible annotation.
  */
-public class MethodInfoVisitor extends MethodVisitor
-{
+public class MethodInfoVisitor extends MethodVisitor {
   private final String methodName;
   private final String methodDesc;
   private final Set<String> methodAnnotations = new HashSet<>();
 
   private final Map<String, MethodInfo> methods;
 
-  public MethodInfoVisitor(String name, String desc, Map<String, MethodInfo> methods)
-  {
+  public MethodInfoVisitor(String name, String desc, Map<String, MethodInfo> methods) {
     super(Opcodes.ASM4);
 
     methodName = name;
@@ -29,15 +27,13 @@ public class MethodInfoVisitor extends MethodVisitor
   }
 
   @Override
-  public AnnotationVisitor visitAnnotation(String desc, boolean visible)
-  {
+  public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
     methodAnnotations.add(desc);
     return null;
   }
 
   @Override
-  public void visitEnd()
-  {
+  public void visitEnd() {
     MethodInfo method = new MethodInfo(methodName, methodDesc, methodAnnotations);
     methods.put(method.getID(), method);
   }

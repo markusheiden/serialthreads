@@ -11,24 +11,20 @@ import java.util.List;
 /**
  * Extended Textifier which adds frame infos after each byte code.
  */
-class DebugPrinter extends Textifier
-{
+class DebugPrinter extends Textifier {
   private int instruction;
   private final Frame[] frames;
 
-  public DebugPrinter(Frame[] frames)
-  {
+  public DebugPrinter(Frame[] frames) {
     this.instruction = 0;
     this.frames = frames;
   }
 
-  private void addByteCodeIndexWithoutFrame(int lastSize)
-  {
+  private void addByteCodeIndexWithoutFrame(int lastSize) {
     String index = "000" + Integer.toString(instruction);
     index = index.substring(index.length() - 4, index.length());
 
-    for (int i = lastSize; i < text.size(); i++)
-    {
+    for (int i = lastSize; i < text.size(); i++) {
       String line = (String) text.get(i);
       text.set(i, index.toUpperCase() + line);
     }
@@ -37,24 +33,19 @@ class DebugPrinter extends Textifier
 
   }
 
-  private void addByteCodeIndex(int lastSize)
-  {
+  private void addByteCodeIndex(int lastSize) {
     Frame frame = frames[instruction];
-    if (frame != null)
-    {
+    if (frame != null) {
       List<String> frameText = new ArrayList<>();
-      for (int i = 0; i < frame.getLocals(); i++)
-      {
+      for (int i = 0; i < frame.getLocals(); i++) {
         BasicValue local = (BasicValue) frame.getLocal(i);
-        if (local != BasicValue.UNINITIALIZED_VALUE)
-        {
-          frameText.add(tab3 + "Local: " + i + ": " + (local.isReference()? local.getType().getDescriptor() : local) + "\n");
+        if (local != BasicValue.UNINITIALIZED_VALUE) {
+          frameText.add(tab3 + "Local: " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local) + "\n");
         }
       }
-      for (int i = 0; i < frame.getStackSize(); i++)
-      {
+      for (int i = 0; i < frame.getStackSize(); i++) {
         BasicValue stack = (BasicValue) frame.getStack(i);
-        frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference()? stack.getType().getDescriptor() : stack) + "\n");
+        frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack) + "\n");
       }
 
       text.addAll(lastSize, frameText);
@@ -63,10 +54,8 @@ class DebugPrinter extends Textifier
     addByteCodeIndexWithoutFrame(lastSize);
   }
 
-  private void addNoByteCodeIndex(int lastSize)
-  {
-    for (int i = lastSize; i < text.size(); i++)
-    {
+  private void addNoByteCodeIndex(int lastSize) {
+    for (int i = lastSize; i < text.size(); i++) {
       String line = (String) text.get(i);
       text.set(i, "----" + line);
     }
@@ -77,96 +66,84 @@ class DebugPrinter extends Textifier
   //
 
   @Override
-  public void visitInsn(int opcode)
-  {
+  public void visitInsn(int opcode) {
     int lastSize = text.size();
     super.visitInsn(opcode);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitIntInsn(int opcode, int operand)
-  {
+  public void visitIntInsn(int opcode, int operand) {
     int lastSize = text.size();
     super.visitIntInsn(opcode, operand);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitVarInsn(int opcode, int var)
-  {
+  public void visitVarInsn(int opcode, int var) {
     int lastSize = text.size();
     super.visitVarInsn(opcode, var);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitTypeInsn(int opcode, String type)
-  {
+  public void visitTypeInsn(int opcode, String type) {
     int lastSize = text.size();
     super.visitTypeInsn(opcode, type);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitFieldInsn(int opcode, String owner, String name, String desc)
-  {
+  public void visitFieldInsn(int opcode, String owner, String name, String desc) {
     int lastSize = text.size();
     super.visitFieldInsn(opcode, owner, name, desc);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitMethodInsn(int opcode, String owner, String name, String desc)
-  {
+  public void visitMethodInsn(int opcode, String owner, String name, String desc) {
     int lastSize = text.size();
     super.visitMethodInsn(opcode, owner, name, desc);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitJumpInsn(int opcode, Label label)
-  {
+  public void visitJumpInsn(int opcode, Label label) {
     int lastSize = text.size();
     super.visitJumpInsn(opcode, label);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitLdcInsn(Object cst)
-  {
+  public void visitLdcInsn(Object cst) {
     int lastSize = text.size();
     super.visitLdcInsn(cst);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitIincInsn(int var, int increment)
-  {
+  public void visitIincInsn(int var, int increment) {
     int lastSize = text.size();
     super.visitIincInsn(var, increment);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels)
-  {
+  public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
     int lastSize = text.size();
     super.visitTableSwitchInsn(min, max, dflt, labels);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels)
-  {
+  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
     int lastSize = text.size();
     super.visitLookupSwitchInsn(dflt, keys, labels);
     addByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitMultiANewArrayInsn(String desc, int dims)
-  {
+  public void visitMultiANewArrayInsn(String desc, int dims) {
     int lastSize = text.size();
     super.visitMultiANewArrayInsn(desc, dims);
     addByteCodeIndex(lastSize);
@@ -177,24 +154,21 @@ class DebugPrinter extends Textifier
   //
 
   @Override
-  public void visitLabel(Label label)
-  {
+  public void visitLabel(Label label) {
     int lastSize = text.size();
     super.visitLabel(label);
     addByteCodeIndexWithoutFrame(lastSize);
   }
 
   @Override
-  public void visitLineNumber(int line, Label start)
-  {
+  public void visitLineNumber(int line, Label start) {
     int lastSize = text.size();
     super.visitLineNumber(line, start);
     addByteCodeIndexWithoutFrame(lastSize);
   }
 
   @Override
-  public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack)
-  {
+  public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
     int lastSize = text.size();
     super.visitFrame(type, nLocal, local, nStack, stack);
     addByteCodeIndexWithoutFrame(lastSize);
@@ -205,24 +179,21 @@ class DebugPrinter extends Textifier
   //
 
   @Override
-  public void visitTryCatchBlock(Label start, Label end, Label handler, String type)
-  {
+  public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
     int lastSize = text.size();
     super.visitTryCatchBlock(start, end, handler, type);
     addNoByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index)
-  {
+  public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
     int lastSize = text.size();
     super.visitLocalVariable(name, desc, signature, start, end, index);
     addNoByteCodeIndex(lastSize);
   }
 
   @Override
-  public void visitMaxs(int maxStack, int maxLocals)
-  {
+  public void visitMaxs(int maxStack, int maxLocals) {
     int lastSize = text.size();
     super.visitMaxs(maxStack, maxLocals);
     addNoByteCodeIndex(lastSize);

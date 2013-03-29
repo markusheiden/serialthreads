@@ -15,23 +15,18 @@ import java.io.StringWriter;
 /**
  * Class to aid debugging of a method's byte code.
  */
-public class Debugger
-{
-  public static String debug(ClassNode clazz)
-  {
+public class Debugger {
+  public static String debug(ClassNode clazz) {
     StringBuilder result = new StringBuilder(65536);
     result.append("Class ").append(clazz.name).append("\n");
     result.append(debug(clazz, (String) null));
     return result.toString();
   }
 
-  public static String debug(ClassNode clazz, String methodToDebug)
-  {
+  public static String debug(ClassNode clazz, String methodToDebug) {
     StringBuilder result = new StringBuilder(65536);
-    for (MethodNode method : clazz.methods)
-    {
-      if (methodToDebug == null || method.name.startsWith(methodToDebug))
-      {
+    for (MethodNode method : clazz.methods) {
+      if (methodToDebug == null || method.name.startsWith(methodToDebug)) {
         result.append(debug(clazz.name, method));
       }
     }
@@ -39,20 +34,15 @@ public class Debugger
     return result.toString();
   }
 
-  public static String debug(ClassNode clazz, MethodNode method)
-  {
+  public static String debug(ClassNode clazz, MethodNode method) {
     return debug(clazz.name, method);
   }
 
-  public static String debug(String owner, MethodNode method)
-  {
+  public static String debug(String owner, MethodNode method) {
     Analyzer<BasicValue> analyzer = new Analyzer<>(new SimpleVerifier());
-    try
-    {
+    try {
       analyzer.analyze(owner, method);
-    }
-    catch (Exception e)
-    {
+    } catch (Exception e) {
       // ignore, we are only interested in the frames
     }
     Frame[] frames = analyzer.getFrames();

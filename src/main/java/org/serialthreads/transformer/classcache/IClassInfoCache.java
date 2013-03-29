@@ -8,8 +8,7 @@ import org.objectweb.asm.tree.MethodNode;
 /**
  * Interface for class info cache.
  */
-public interface IClassInfoCache
-{
+public interface IClassInfoCache {
   /**
    * Is the class an interface.
    *

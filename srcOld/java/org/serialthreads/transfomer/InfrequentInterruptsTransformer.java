@@ -25,8 +25,7 @@ import static org.serialthreads.transformer.code.MethodCode.*;
  * TODO 2008-08-29 mh: Need to fix longs and doubles (size==2)?
  * TODO 2008-08-30 mh: Check all Type#getSort() to handle boolean, char, byte, short too
  */
-public class InfrequentInterruptsTransformer extends AbstractTransformer
-{
+public class InfrequentInterruptsTransformer extends AbstractTransformer {
   public static final String STRATEGY = "INFREQUENT";
 
   protected static final String THREAD_IMPL_NAME = Type.getType(DynamicContext.class).getInternalName();
@@ -37,27 +36,22 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
    *
    * @param isInterruptableCache class cache to use
    */
-  public InfrequentInterruptsTransformer(IIsInterruptableCache isInterruptableCache)
-  {
+  public InfrequentInterruptsTransformer(IIsInterruptableCache isInterruptableCache) {
     super(DynamicContext.class, DynamicContext.class, isInterruptableCache);
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return "Transformer " + STRATEGY;
   }
 
   @Override
-  protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors)
-  {
-    if (isInterface(clazz) || implementTransformedRunnable(clazz, constructors))
-    {
+  protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
+    if (isInterface(clazz) || implementTransformedRunnable(clazz, constructors)) {
       return;
     }
 
-    if (logger.isDebugEnabled())
-    {
+    if (logger.isDebugEnabled()) {
       logger.debug("  Creating context");
     }
 
@@ -67,11 +61,9 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
   }
 
   @Override
-  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException
-  {
+  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
     Map<MethodInsnNode, Integer> methodCalls = interruptableMethodCalls(method.instructions);
-    if (isAbstract(method) || methodCalls.isEmpty())
-    {
+    if (isAbstract(method) || methodCalls.isEmpty()) {
       return Collections.emptyList();
     }
 
@@ -90,18 +82,15 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
    *
    * @param method method to alter
    */
-  protected void fixMaxs(MethodNode method)
-  {
+  protected void fixMaxs(MethodNode method) {
     method.maxLocals++;
     // 2 extra stack elements + 1 extra element due to possible dup2 to optimization overhead
     method.maxStack = Math.max(method.maxStack + 2 + 1, 5);
   }
 
   @Override
-  protected void createCaptureCodeForInterrupt(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall)
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected void createCaptureCodeForInterrupt(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall) {
+    if (logger.isDebugEnabled()) {
       logger.debug("      Creating capture code for interrupt");
     }
 
@@ -135,10 +124,8 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
   }
 
   @Override
-  protected void createCaptureCodeForMethod(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall)
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected void createCaptureCodeForMethod(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall) {
+    if (logger.isDebugEnabled()) {
       logger.debug("      Creating capture code for method call");
     }
 
@@ -170,10 +157,8 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
   }
 
   @Override
-  protected InsnList createRestoreCodeForInterrupt(MethodNode method, MethodInsnNode methodCall, Frame frame)
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected InsnList createRestoreCodeForInterrupt(MethodNode method, MethodInsnNode methodCall, Frame frame) {
+    if (logger.isDebugEnabled()) {
       logger.debug("      Creating restore code for interrupt");
     }
 
@@ -196,10 +181,8 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
   }
 
   @Override
-  protected InsnList createRestoreCodeForMethod(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter)
-  {
-    if (logger.isDebugEnabled())
-    {
+  protected InsnList createRestoreCodeForMethod(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
+    if (logger.isDebugEnabled()) {
       logger.debug("      Creating restore code for method call");
     }
 
@@ -213,8 +196,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
     InsnList restore = popFromFrame(method, methodCall, frameAfter, localThread);
 
     // call interrupted method
-    if (isCallNotStatic)
-    {
+    if (isCallNotStatic) {
       // pop owner
       restore.add(new VarInsnNode(ALOAD, localThread));
       restore.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "popOwner", "()" + OBJECT_DESC));
@@ -237,12 +219,10 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer
    * @param method method to alter
    * @param restoreCodes restore codes for all method calls in the method
    */
-  protected void createRestoreCode(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes)
-  {
+  protected void createRestoreCode(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes) {
     Assert.isTrue(!restoreCodes.isEmpty(), "Precondition: !restoreCodes.isEmpty()");
 
-    if (logger.isDebugEnabled())
-    {
+    if (logger.isDebugEnabled()) {
       logger.debug("    Creating retore code for method");
     }
 

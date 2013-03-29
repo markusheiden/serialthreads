@@ -7,8 +7,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 /**
  * Method transformer for abstract methods.
  */
-class AbstractMethodTransformer extends MethodTransformer
-{
+class AbstractMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
    *
@@ -16,8 +15,7 @@ class AbstractMethodTransformer extends MethodTransformer
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
-  {
+  protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, method, classInfoCache);
   }
 
@@ -26,8 +24,7 @@ class AbstractMethodTransformer extends MethodTransformer
    *
    * @return Transformed method
    */
-  public MethodNode transform()
-  {
+  public MethodNode transform() {
     // add thread and previousFrame arguments to the original method
     method.desc = changeDesc(method.desc);
 

@@ -8,8 +8,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 /**
  * Value specific code generation.
  */
-public interface IValueCode
-{
+public interface IValueCode {
   /**
    * Generate code to get the array for locals of the frame.
    *

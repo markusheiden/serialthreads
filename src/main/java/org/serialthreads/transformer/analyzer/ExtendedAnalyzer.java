@@ -17,8 +17,7 @@ import java.util.List;
  * Supports detection of "this" and method parameters in the locals and on the stack.
  * Always uses a verifier as interpreter.
  */
-public class ExtendedAnalyzer extends Analyzer<BasicValue>
-{
+public class ExtendedAnalyzer extends Analyzer<BasicValue> {
   /**
    * Analyze a method to compute its frames.
    *
@@ -28,13 +27,11 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue>
    * @return frames
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public static Frame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) throws AnalyzerException
-  {
+  public static Frame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) throws AnalyzerException {
     Type classType = Type.getObjectType(clazz.name);
     Type superClassType = Type.getObjectType(clazz.superName);
     List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
-    for (String interfaceName : clazz.interfaces)
-    {
+    for (String interfaceName : clazz.interfaces) {
       interfaceTypes.add(Type.getObjectType(interfaceName));
     }
     boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
@@ -57,20 +54,17 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue>
     Type currentClass,
     Type currentSuperClass,
     List<Type> currentClassInterfaces,
-    boolean isInterface)
-  {
+    boolean isInterface) {
     super(new ExtendedVerifier(classInfoCache, currentClass, currentSuperClass, currentClassInterfaces, isInterface));
   }
 
   @Override
-  protected ExtendedFrame newFrame(int nLocals, int nStack)
-  {
+  protected ExtendedFrame newFrame(int nLocals, int nStack) {
     return new ExtendedFrame(nLocals, nStack);
   }
 
   @Override
-  protected ExtendedFrame newFrame(Frame<? extends BasicValue> src)
-  {
+  protected ExtendedFrame newFrame(Frame<? extends BasicValue> src) {
     return new ExtendedFrame(src);
   }
 }

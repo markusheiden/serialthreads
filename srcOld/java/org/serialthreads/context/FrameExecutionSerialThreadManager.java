@@ -7,8 +7,7 @@ import org.serialthreads.Executor;
  * Expects that getThread() is never called!
  * Expects that IRunnables are transformed to ITransformedRunnables!
  */
-public class FrameExecutionSerialThreadManager extends SerialThreadManager
-{
+public class FrameExecutionSerialThreadManager extends SerialThreadManager {
   private final ChainedRunnable[] chains;
   private ChainedRunnable lastExecuted;
 
@@ -17,8 +16,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager
    *
    * @param runnables runnables
    */
-  public FrameExecutionSerialThreadManager(IRunnable... runnables)
-  {
+  public FrameExecutionSerialThreadManager(IRunnable... runnables) {
     assert runnables.length > 0 : "Precondition: runnables.length > 0";
 
     chains = ChainedRunnable.chain(runnables);
@@ -33,24 +31,19 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager
    * Simple serial execution of all runnables.
    */
   @Executor
-  public void execute()
-  {
+  public void execute() {
     // loop until a chain finishes
     ChainedRunnable chain = lastExecuted;
 
     // loop until a chain finishes
     ((Stack) chain.thread).first.executor = new InitialFrameExecutor();
-    try
-    {
+    try {
       //noinspection InfiniteLoopStatement
-      while (true)
-      {
+      while (true) {
         chain = chain.next;
         executeFrame((Stack) chain.thread);
       }
-    }
-    catch (ThreadFinishedException e)
-    {
+    } catch (ThreadFinishedException e) {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.thread).reset();
@@ -63,8 +56,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager
    * Simple serial execution of all runnables for a given number of interrupts.
    */
   @Executor
-  public void execute(int interrupts)
-  {
+  public void execute(int interrupts) {
     assert interrupts > 0 : "Precondition: interrupts > 0";
 
     int loops = interrupts * chains.length;
@@ -74,16 +66,12 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager
 
     // loop until a chain finishes
     ((Stack) chain.thread).first.executor = new InitialFrameExecutor();
-    try
-    {
-      do
-      {
+    try {
+      do {
         chain = chain.next;
         executeFrame((Stack) chain.thread);
       } while (--loops != 0);
-    }
-    catch (ThreadFinishedException e)
-    {
+    } catch (ThreadFinishedException e) {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.thread).reset();
@@ -92,14 +80,11 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager
     lastExecuted = chain;
   }
 
-  private void executeFrame(Stack thread)
-  {
+  private void executeFrame(Stack thread) {
     StackFrame frame = thread.frame;
-    do
-    {
+    do {
       frame.executor.executeFrame(thread, frame);
-      if (thread.serializing)
-      {
+      if (thread.serializing) {
         // thread has been interrupted again, so exit run() for now
         return;
       }

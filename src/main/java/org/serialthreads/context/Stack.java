@@ -5,8 +5,7 @@ import java.io.Serializable;
 /**
  * Stack for all frames of a thread.
  */
-public class Stack extends SerialThread implements Serializable
-{
+public class Stack extends SerialThread implements Serializable {
   /**
    * Initial size of the stack.
    */
@@ -33,8 +32,7 @@ public class Stack extends SerialThread implements Serializable
    * @param name name of the thread
    * @param frameSize size of frames
    */
-  public Stack(String name, int frameSize)
-  {
+  public Stack(String name, int frameSize) {
     super(name);
 
     this.frameSize = frameSize;
@@ -48,8 +46,7 @@ public class Stack extends SerialThread implements Serializable
    * @param lastFrame last frame of the stack
    * @return Added frame
    */
-  public StackFrame addFrame(StackFrame lastFrame)
-  {
+  public StackFrame addFrame(StackFrame lastFrame) {
     return new StackFrame(lastFrame, frameSize);
   }
 
@@ -58,8 +55,7 @@ public class Stack extends SerialThread implements Serializable
    *
    * @return the frame for the method
    */
-  public final StackFrame enterMethod()
-  {
+  public final StackFrame enterMethod() {
     return frame = frame.next;
   }
 
@@ -69,8 +65,7 @@ public class Stack extends SerialThread implements Serializable
    *
    * @return the frame for the method
    */
-  public final StackFrame enterFirstMethod()
-  {
+  public final StackFrame enterFirstMethod() {
     return frame = first;
   }
 
@@ -80,8 +75,7 @@ public class Stack extends SerialThread implements Serializable
    * @param owner owner of the called method == this in the called method. for the frame one level above
    * @param method index of method which will be left
    */
-  public final void leaveMethod(Object owner, int method)
-  {
+  public final void leaveMethod(Object owner, int method) {
     frame.method = method;
     frame.previous.owner = owner;
   }
@@ -91,8 +85,7 @@ public class Stack extends SerialThread implements Serializable
    *
    * @param owner owner of the called method == this in the called method. for the frame one level above
    */
-  public final void leaveMethod(Object owner)
-  {
+  public final void leaveMethod(Object owner) {
     frame.previous.owner = owner;
   }
 
@@ -101,8 +94,7 @@ public class Stack extends SerialThread implements Serializable
    *
    * @param method index of method which will be left
    */
-  public final void leaveMethod(int method)
-  {
+  public final void leaveMethod(int method) {
     frame.method = method;
   }
 
@@ -112,11 +104,9 @@ public class Stack extends SerialThread implements Serializable
    *
    * @param resetTo frame to reset to
    */
-  public final void resetTo(StackFrame resetTo)
-  {
+  public final void resetTo(StackFrame resetTo) {
     StackFrame frame = resetTo.next;
-    while (frame != null)
-    {
+    while (frame != null) {
       frame.reset();
       frame = frame.next;
     }
@@ -125,8 +115,7 @@ public class Stack extends SerialThread implements Serializable
   /**
    * Resets the complete stack.
    */
-  public final void reset()
-  {
+  public final void reset() {
     resetTo(first);
   }
 }

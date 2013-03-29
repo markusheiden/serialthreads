@@ -6,11 +6,9 @@ import org.serialthreads.transformer.strategies.TransformerIntegration_AbstractT
 /**
  * Integration-test for {@link org.serialthreads.transformer.strategies.frequent2.FrequentInterruptsTransformer2}.
  */
-public class FrequentInterruptsTransformer2_IntegrationTest extends TransformerIntegration_AbstractTest
-{
+public class FrequentInterruptsTransformer2_IntegrationTest extends TransformerIntegration_AbstractTest {
   @Override
-  public void setUp()
-  {
+  public void setUp() {
     strategy = Strategies.FREQUENT2;
     super.setUp();
   }

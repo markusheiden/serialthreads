@@ -6,8 +6,7 @@ import org.serialthreads.Interrupt;
 /**
  * Manages the access to serial threads for transformed classes.
  */
-public abstract class SerialThreadManager
-{
+public abstract class SerialThreadManager {
   public static boolean DEBUG = true;
 
   private static final ThreadLocal<SerialThreadManager> threadManagers = new ThreadLocal<>();
@@ -19,8 +18,7 @@ public abstract class SerialThreadManager
    *
    * @param manager thread manager
    */
-  public static void registerManager(SerialThreadManager manager)
-  {
+  public static void registerManager(SerialThreadManager manager) {
     assert threadManagers.get() == null : "Precondition: no manager registered for this thread yet";
 
     threadManagers.set(manager);
@@ -31,8 +29,7 @@ public abstract class SerialThreadManager
   /**
    * Get the current thread.
    */
-  public static SerialThread getThread()
-  {
+  public static SerialThread getThread() {
     return threadManagers.get().currentThread;
   }
 
@@ -41,10 +38,8 @@ public abstract class SerialThreadManager
    * This is a dummy method which calls will be eliminated by the byte code transformation!
    */
   @Interrupt
-  public static void interrupt()
-  {
-    if (DEBUG)
-    {
+  public static void interrupt() {
+    if (DEBUG) {
       throw new IllegalThreadStateException("Byte code transformation failed");
     }
   }

@@ -5,8 +5,7 @@ import java.io.Serializable;
 /**
  * Stores the state of a serial thread.
  */
-public class SerialThread implements Serializable
-{
+public class SerialThread implements Serializable {
   /**
    * Is the thread in the capturing or restoring phase?.
    */
@@ -22,22 +21,19 @@ public class SerialThread implements Serializable
    *
    * @param name name of the thread
    */
-  public SerialThread(String name)
-  {
+  public SerialThread(String name) {
     this.name = name;
   }
 
   /**
    * Name of the thread.
    */
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return name;
   }
 }

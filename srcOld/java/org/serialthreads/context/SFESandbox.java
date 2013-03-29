@@ -5,39 +5,30 @@ import org.serialthreads.Executor;
 /**
  * Sandbox for single frame execution.
  */
-public class SFESandbox implements IRunnable, IFrameExecutor
-{
+public class SFESandbox implements IRunnable, IFrameExecutor {
   private final Stack $$thread$$ = new Stack("test", 10);
 
   @Executor
-  public void execute()
-  {
+  public void execute() {
     // loop until a chain finishes
     Stack thread = null;
     thread.first.executor = new InitialFrameExecutor();
-    try
-    {
+    try {
       //noinspection InfiniteLoopStatement
-      while (true)
-      {
+      while (true) {
         // thread = thread.next;
         executeFrame(thread);
       }
-    }
-    catch (ThreadFinishedException e)
-    {
+    } catch (ThreadFinishedException e) {
       // expected: execution finished normally due to the end of a serial thread
     }
   }
 
-  public void executeFrame(Stack thread)
-  {
+  public void executeFrame(Stack thread) {
     StackFrame frame = thread.frame;
-    do
-    {
+    do {
       frame.executor.executeFrame(thread, frame);
-      if (thread.serializing)
-      {
+      if (thread.serializing) {
         // thread has been interrupted again, so exit run() for now
         return;
       }
@@ -49,15 +40,12 @@ public class SFESandbox implements IRunnable, IFrameExecutor
     throw new ThreadFinishedException(thread.toString());
   }
 
-  public void run()
-  {
+  public void run() {
     Stack thread = $$thread$$;
     StackFrame frame = thread.frame;
-    do
-    {
+    do {
       frame.executor.executeFrame(thread, frame);
-      if (thread.serializing)
-      {
+      if (thread.serializing) {
         // thread has been interrupted again, so exit run() for now
         return;
       }
@@ -69,15 +57,12 @@ public class SFESandbox implements IRunnable, IFrameExecutor
   }
 
   @Override
-  public void executeFrame(Stack thread, StackFrame frame)
-  {
+  public void executeFrame(Stack thread, StackFrame frame) {
     ((TargetClass) frame.owner).copiedMethod(thread, frame);
   }
 
-  private static class TargetClass
-  {
-    public void copiedMethod(Stack thread, StackFrame frame)
-    {
+  private static class TargetClass {
+    public void copiedMethod(Stack thread, StackFrame frame) {
     }
   }
 }

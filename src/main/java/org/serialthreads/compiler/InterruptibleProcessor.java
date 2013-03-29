@@ -22,14 +22,11 @@ import java.util.Set;
  */
 @SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class InterruptibleProcessor extends AbstractProcessor
-{
+public class InterruptibleProcessor extends AbstractProcessor {
   @Override
-  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv)
-  {
+  public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     Scanner scanner = new Scanner();
-    for (Element root : roundEnv.getRootElements())
-    {
+    for (Element root : roundEnv.getRootElements()) {
       root.accept(scanner, null);
     }
 
@@ -40,17 +37,12 @@ public class InterruptibleProcessor extends AbstractProcessor
   /**
    * Inner visitor class for scanning types.
    */
-  private class Scanner extends ElementScanner6<Void, Void>
-  {
+  private class Scanner extends ElementScanner6<Void, Void> {
     @Override
-    public Void visitExecutable(ExecutableElement element, Void dummy)
-    {
-      try
-      {
+    public Void visitExecutable(ExecutableElement element, Void dummy) {
+      try {
         check(element);
-      }
-      catch (RuntimeException e)
-      {
+      } catch (RuntimeException e) {
         processingEnv.getMessager().printMessage(Kind.WARNING, e.getMessage());
       }
       return super.visitExecutable(element, dummy);
@@ -62,32 +54,25 @@ public class InterruptibleProcessor extends AbstractProcessor
    *
    * @param overrider Method to check, whether it overrides something
    */
-  private void check(ExecutableElement overrider)
-  {
+  private void check(ExecutableElement overrider) {
     Types types = processingEnv.getTypeUtils();
     Elements elements = processingEnv.getElementUtils();
 
     boolean interruptible = overrider.getAnnotation(Interruptible.class) != null;
 
     TypeElement overriderType = (TypeElement) overrider.getEnclosingElement();
-    for (TypeMirror superType : types.directSupertypes(overriderType.asType()))
-    {
+    for (TypeMirror superType : types.directSupertypes(overriderType.asType())) {
       TypeElement overriddenType = (TypeElement) types.asElement(superType);
-      for (Element overridden : elements.getAllMembers(overriddenType))
-      {
-        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, overriderType))
-        {
+      for (Element overridden : elements.getAllMembers(overriddenType)) {
+        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, overriderType)) {
           boolean overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
 
-          if (interruptible && !overriddenInterruptible)
-          {
+          if (interruptible && !overriddenInterruptible) {
             processingEnv.getMessager().printMessage(Kind.NOTE,
               "Method " + overrider + " may not be interruptible, because the overridden method in " +
                 overriddenType.getQualifiedName() + " is not interruptible",
               overrider);
-          }
-          else if (!interruptible && overriddenInterruptible)
-          {
+          } else if (!interruptible && overriddenInterruptible) {
             processingEnv.getMessager().printMessage(Kind.NOTE,
               "Method " + overrider + " should be interruptible, because the overridden method in " +
                 overriddenType.getQualifiedName() + " is interruptible",

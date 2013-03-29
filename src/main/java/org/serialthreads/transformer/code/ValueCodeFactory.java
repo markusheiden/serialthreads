@@ -6,8 +6,7 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 /**
  * Factory to get value code for a type.
  */
-public class ValueCodeFactory
-{
+public class ValueCodeFactory {
   private static final IValueCode INT_CODE = new IntValueCode();
   private static final IValueCode LONG_CODE = new LongValueCode();
   private static final IValueCode FLOAT_CODE = new FloatValueCode();
@@ -22,8 +21,7 @@ public class ValueCodeFactory
    *
    * @param value basic value
    */
-  public static IValueCode code(BasicValue value)
-  {
+  public static IValueCode code(BasicValue value) {
     assert value.getType() != null : "Precondition: value.getType() != null";
 
     return code(value.getType());
@@ -34,12 +32,10 @@ public class ValueCodeFactory
    *
    * @param type type
    */
-  public static IValueCode code(Type type)
-  {
+  public static IValueCode code(Type type) {
     assert type != null : "Precondition: type != null";
 
-    switch (type.getSort())
-    {
+    switch (type.getSort()) {
       case Type.BOOLEAN:
       case Type.CHAR:
       case Type.BYTE:

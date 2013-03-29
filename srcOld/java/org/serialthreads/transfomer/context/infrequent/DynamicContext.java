@@ -10,8 +10,7 @@ import static org.serialthreads.context.ArrayResizer.resize;
  * Context.
  * Used to store the content of all frames of a thread.
  */
-public class DynamicContext extends SerialThread implements IFrame
-{
+public class DynamicContext extends SerialThread implements IFrame {
   private final Logger logger = Logger.getLogger(getClass());
 
   protected static final int maxMethods = 16;
@@ -59,8 +58,7 @@ public class DynamicContext extends SerialThread implements IFrame
    *
    * @param name name of the thread
    */
-  public DynamicContext(String name)
-  {
+  public DynamicContext(String name) {
     super(name);
 
     ownerPtr = 0;
@@ -91,233 +89,166 @@ public class DynamicContext extends SerialThread implements IFrame
     localDoubles = new double[maxLocalDoubles];
   }
 
-  public final void pushMethod(Object owner)
-  {
-    try
-    {
+  public final void pushMethod(Object owner) {
+    try {
       owners[ownerPtr++] = owner;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       owners = resize(owners, owner);
     }
   }
 
-  public final void pushMethod(int method)
-  {
-    try
-    {
+  public final void pushMethod(int method) {
+    try {
       methods[methodPtr++] = method;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       methods = resize(methods, method);
     }
   }
 
-  public final void pushMethod(Object owner, int method)
-  {
-    try
-    {
+  public final void pushMethod(Object owner, int method) {
+    try {
       owners[ownerPtr++] = owner;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       owners = resize(owners, owner);
     }
-    try
-    {
+    try {
       methods[methodPtr++] = method;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       methods = resize(methods, method);
     }
   }
 
-  public final Object popOwner()
-  {
+  public final Object popOwner() {
     return owners[--ownerPtr];
   }
 
-  public final int popMethod()
-  {
+  public final int popMethod() {
     return methods[--methodPtr];
   }
 
-  public final void pushStackObject(Object object)
-  {
-    try
-    {
+  public final void pushStackObject(Object object) {
+    try {
       stackObjects[stackObjectPtr++] = object;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       stackObjects = resize(stackObjects, object);
     }
   }
 
-  public final Object popStackObject()
-  {
+  public final Object popStackObject() {
     final int ptr = --stackObjectPtr;
     final Object result = stackObjects[ptr];
     stackObjects[ptr] = null;
     return result;
   }
 
-  public final void pushStackInt(int value)
-  {
-    try
-    {
+  public final void pushStackInt(int value) {
+    try {
       stackInts[stackIntPtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       stackInts = resize(stackInts, value);
     }
   }
 
-  public final int popStackInt()
-  {
+  public final int popStackInt() {
     return stackInts[--stackIntPtr];
   }
 
-  public final void pushStackLong(long value)
-  {
-    try
-    {
+  public final void pushStackLong(long value) {
+    try {
       stackLongs[stackLongPtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       stackLongs = resize(stackLongs, value);
     }
   }
 
-  public final long popStackLong()
-  {
+  public final long popStackLong() {
     return stackLongs[--stackLongPtr];
   }
 
-  public final void pushStackFloat(float value)
-  {
-    try
-    {
+  public final void pushStackFloat(float value) {
+    try {
       stackFloats[stackFloatPtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       stackFloats = resize(stackFloats, value);
     }
   }
 
-  public final float popStackFloat()
-  {
+  public final float popStackFloat() {
     return stackFloats[--stackFloatPtr];
   }
 
-  public final void pushStackDouble(double value)
-  {
-    try
-    {
+  public final void pushStackDouble(double value) {
+    try {
       stackDoubles[stackDoublePtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       stackDoubles = resize(stackDoubles, value);
     }
   }
 
-  public final double popStackDouble()
-  {
+  public final double popStackDouble() {
     return stackDoubles[--stackDoublePtr];
   }
 
-  public final void pushLocalObject(Object object)
-  {
-    try
-    {
+  public final void pushLocalObject(Object object) {
+    try {
       localObjects[localObjectPtr++] = object;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       localObjects = resize(localObjects, object);
     }
   }
 
-  public final Object popLocalObject()
-  {
+  public final Object popLocalObject() {
     final int ptr = --localObjectPtr;
     final Object result = localObjects[ptr];
     localObjects[ptr] = null;
     return result;
   }
 
-  public final void pushLocalInt(int value)
-  {
-    try
-    {
+  public final void pushLocalInt(int value) {
+    try {
       localInts[localIntPtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       localInts = resize(localInts, value);
     }
   }
 
-  public final int popLocalInt()
-  {
+  public final int popLocalInt() {
     return localInts[--localIntPtr];
   }
 
-  public final void pushLocalLong(long value)
-  {
-    try
-    {
+  public final void pushLocalLong(long value) {
+    try {
       localLongs[localLongPtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       localLongs = resize(localLongs, value);
     }
   }
 
-  public final long popLocalLong()
-  {
+  public final long popLocalLong() {
     return localLongs[--localLongPtr];
   }
 
-  public final void pushLocalFloat(float value)
-  {
-    try
-    {
+  public final void pushLocalFloat(float value) {
+    try {
       localFloats[localFloatPtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       localFloats = resize(localFloats, value);
     }
   }
 
-  public final float popLocalFloat()
-  {
+  public final float popLocalFloat() {
     return localFloats[--localFloatPtr];
   }
 
-  public final void pushLocalDouble(double value)
-  {
-    try
-    {
+  public final void pushLocalDouble(double value) {
+    try {
       localDoubles[localDoublePtr++] = value;
-    }
-    catch (ArrayIndexOutOfBoundsException e)
-    {
+    } catch (ArrayIndexOutOfBoundsException e) {
       localDoubles = resize(localDoubles, value);
     }
   }
 
-  public final double popLocalDouble()
-  {
+  public final double popLocalDouble() {
     return localDoubles[--localDoublePtr];
   }
 
@@ -328,8 +259,7 @@ public class DynamicContext extends SerialThread implements IFrame
   /**
    * Check if the context is completly empty.
    */
-  public boolean isEmpty()
-  {
+  public boolean isEmpty() {
     return
       ownerPtr == 0 &&
         methodPtr == 0 &&
@@ -347,8 +277,7 @@ public class DynamicContext extends SerialThread implements IFrame
         localDoublePtr == 0;
   }
 
-  public void logSizes()
-  {
+  public void logSizes() {
     logger.debug("Owners: " + ownerPtr + " / " + owners.length);
     logger.debug("Methods: " + methodPtr + " / " + methods.length);
     logger.debug("Stack objects: " + stackObjectPtr + " / " + stackObjects.length);

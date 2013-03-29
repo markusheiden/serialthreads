@@ -11,13 +11,11 @@ import static org.junit.Assert.assertFalse;
 /**
  * Test for ClassInfoCache.
  */
-public abstract class ClassInfoCacheAbstractTest
-{
+public abstract class ClassInfoCacheAbstractTest {
   protected IClassInfoCache cache;
 
   @Test
-  public void testIsInterruptible()
-  {
+  public void testIsInterruptible() {
     String mapName = Type.getType(Map.class).getInternalName();
     String sortedMapName = Type.getType(SortedMap.class).getInternalName();
     String objectDesc = Type.getType(Object.class).getDescriptor();
