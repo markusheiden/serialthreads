@@ -16,17 +16,16 @@ public final class ChainedRunnable {
   public static ChainedRunnable[] chain(IRunnable... runnables) {
     int count = runnables.length;
 
-    // create and chain serial chains for all runnables
-    ChainedRunnable[] chains = new ChainedRunnable[count];
-    chains[0] = new ChainedRunnable(runnables[0]);
+    ChainedRunnable[] result = new ChainedRunnable[count];
+    result[0] = new ChainedRunnable(runnables[0]);
     for (int i = 1; i < count; i++) {
       ChainedRunnable chain = new ChainedRunnable(runnables[i]);
-      chains[i] = chain;
-      chains[i - 1].next = chain;
+      result[i] = chain;
+      result[i - 1].next = chain;
     }
-    chains[count - 1].next = chains[0];
+    result[count - 1].next = result[0];
 
-    return chains;
+    return result;
   }
 
   /**
