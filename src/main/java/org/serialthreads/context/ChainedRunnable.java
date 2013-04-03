@@ -1,9 +1,11 @@
 package org.serialthreads.context;
 
+import org.serialthreads.Executor;
+
 /**
  * Linked list element for runnables.
  */
-public final class ChainedRunnable {
+public class ChainedRunnable {
   public final ITransformedRunnable runnable;
   public final SerialThread thread;
   public ChainedRunnable next;
@@ -38,5 +40,24 @@ public final class ChainedRunnable {
     this.thread = this.runnable.getThread();
 
     // thread.first.method == -1 -> dummy restore -> start normal execution of run()
+  }
+
+  /**
+   * Constructor.
+   */
+  protected ChainedRunnable() {
+    this.runnable = null;
+    this.thread = null;
+  }
+
+  /**
+   * Run chained runnable.
+   *
+   * @return Next in chain
+   */
+  @Executor
+  public ChainedRunnable run() {
+    runnable.run();
+    return next;
   }
 }
