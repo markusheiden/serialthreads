@@ -37,21 +37,18 @@ public class SerialThreadTest extends AbstractPerformanceTest {
   @Override
   protected void doStartThreads() throws Exception {
     ready = false;
-    managerThread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          SimpleSerialThreadManager manager = new SimpleSerialThreadManager(counters);
-          SerialThreadManager.registerManager(manager);
-          synchronized (lock) {
-            ready = true;
-            lock.wait();
-          }
-          manager.execute();
-          System.out.println("stopped scheduling");
-        } catch (Exception e) {
-          e.printStackTrace();
+    managerThread = new Thread(() -> {
+      try {
+        SimpleSerialThreadManager manager = new SimpleSerialThreadManager(counters);
+        SerialThreadManager.registerManager(manager);
+        synchronized (lock) {
+          ready = true;
+          lock.wait();
         }
+        manager.execute();
+        System.out.println("stopped scheduling");
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }, "Serial thread manager");
     managerThread.start();

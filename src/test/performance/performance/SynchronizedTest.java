@@ -18,8 +18,8 @@ public class SynchronizedTest extends AbstractPerformanceTest {
 
   @Override
   protected void doStop() {
-    for (int i = 0; i < threads.length; i++) {
-      threads[i].interrupt();
+    for (Thread thread : threads) {
+      thread.interrupt();
     }
   }
 
