@@ -13,7 +13,7 @@ public class Strategies {
   /**
    * Strategy for frequent interrupts.
    */
-  public static IStrategy FREQUENT = new IStrategy() {
+  public static final IStrategy FREQUENT = new IStrategy() {
     @Override
     public ITransformer getTransformer(IClassInfoCache classInfoCache) {
       return new FrequentInterruptsTransformer(classInfoCache);
