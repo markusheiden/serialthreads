@@ -482,7 +482,7 @@ public class StackFrame implements Serializable {
   //
 
   /**
-   * Check if the frame is completly empty.
+   * Check if the frame is completely empty.
    */
   public boolean isEmpty() {
     return
