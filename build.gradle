@@ -1,0 +1,40 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'org.serialthreads'
+archivesBaseName = 'serialhtreads'
+version = '1.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile(group: 'ch.qos.logback', name: 'logback-classic', version: '1.+')
+  // compile (group: 'org.ow2.asm', name: 'asm-debug-all', version: '4.1+')
+  compile(files('asm-debug-all-5.0_ALPHA.jar'))
+  testCompile(group: 'junit', name: 'junit', version: '4.+')
+}
+
+jar {
+  manifest {
+    attributes(
+      "Implementation-Title": "SerialThreads",
+      "Implementation-Version": version,
+      "Premain-Class": "org.serialthreads.agent.Agent",
+      "Agent-Class": "org.serialthreads.agent.Agent",
+      "Can-Redefine-Classes": true,
+      "Can-Retransform-Classes": false)
+  }
+}
+
+test {
+  // ignore failing tests
+  ignoreFailures = true
+
+  // workaround for gradle (included asm) not supporting jdk8
+  scanForTestClasses = false
+  // probably have to tweak the include and exclude patterns, depending on the naming scheme you use
+  include '**/*Test.*'
+  exclude '**/*Abstract*.*'
+}
