@@ -54,8 +54,8 @@ class ConcreteMethodTransformer extends MethodTransformer {
     }
 
     int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
+    final int localThread = local++; // == param thread
+    final int localPreviousFrame = local++; // == param previousFrame
     final int localFrame = local++;
 
     LabelNode normal = new LabelNode();
