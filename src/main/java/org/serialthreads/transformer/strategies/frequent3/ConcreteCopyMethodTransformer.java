@@ -78,8 +78,9 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
 
     InsnList restore = new InsnList();
 
-    if (paramPreviousFrame != localPreviousFrame) {
-      // TODO 2011-10-04 mh: Avoid this copy, it is needed just for capturing the return value. Fix order of copies?
+    // The (previous) frame is just needed for storing the return value of this method
+    if (paramPreviousFrame != localPreviousFrame && isNotVoid(method)) {
+      // TODO 2009-10-22 mh: How to avoid this copy???
       restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
     }

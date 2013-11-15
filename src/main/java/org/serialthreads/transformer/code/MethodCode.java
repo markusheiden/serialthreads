@@ -143,6 +143,15 @@ public class MethodCode {
   }
 
   /**
+   * Check if the method is not void.
+   *
+   * @param method method
+   */
+  public static boolean isNotVoid(MethodNode method) {
+    return !Type.getReturnType(method.desc).equals(Type.VOID_TYPE);
+  }
+
+  /**
    * Check if the method is IRunnable.run() or an implementation of it.
    *
    * @param clazz owner of method
