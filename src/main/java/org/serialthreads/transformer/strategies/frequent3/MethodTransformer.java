@@ -4,6 +4,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -99,8 +100,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
+    IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      instructions.insert(returnInstruction, code(returnType).pushReturnValue(localPreviousFrame));
+      instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localPreviousFrame));
       instructions.remove(returnInstruction);
     }
   }
