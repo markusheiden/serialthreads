@@ -18,9 +18,11 @@ public class ReferenceValueCode extends AbstractValueCode {
   }
 
   @Override
-  public InsnList popReturnValue(int localFrame) {
-    InsnList instructions = super.popReturnValue(localFrame);
-    instructions.add(clear("returnObject", localFrame));
+  public InsnList popReturnValue(int localThread) {
+    InsnList instructions = super.popReturnValue(localThread);
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(pushNull());
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "returnObject", type.getDescriptor()));
 
     return instructions;
   }

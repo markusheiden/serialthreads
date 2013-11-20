@@ -102,7 +102,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localPreviousFrame));
+      instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
       instructions.remove(returnInstruction);
     }
   }
@@ -148,7 +148,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(normal);
     // restore return value of call, if any
     if (isNotVoid(methodCall)) {
-      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
     // insert capture code
@@ -216,7 +216,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // restore stack "under" the returned value, if any
     restore.add(popFromFrame(methodCall, frameAfter, localFrame));
     if (isNotVoid(methodCall)) {
-      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
     restore.add(new JumpInsnNode(GOTO, normal));
 

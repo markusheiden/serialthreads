@@ -5,6 +5,7 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
+import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -14,7 +15,12 @@ import static org.objectweb.asm.Opcodes.*;
  */
 public abstract class AbstractValueCode implements IValueCode {
   /**
-   * Internal name of frame class.
+   * Internal name of the thread class.
+   */
+  protected static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
+
+  /**
+   * Internal name of the frame class.
    */
   protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
 
@@ -117,11 +123,11 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList pushReturnValue(int localFrame) {
+  public InsnList pushReturnValue(int localThread) {
     InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new InsnNode(SWAP));
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(new InsnNode(RETURN));
     return instructions;
   }
@@ -153,10 +159,10 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList popReturnValue(int localFrame) {
+  public InsnList popReturnValue(int localThread) {
     InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     return instructions;
   }

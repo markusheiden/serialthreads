@@ -33,13 +33,6 @@ public class StackFrame implements Serializable {
   public int method;
   public MethodHandle methodHandle;
 
-  // Return value of the method
-  public Object returnObject;
-  public int returnInt;
-  public long returnLong;
-  public float returnFloat;
-  public double returnDouble;
-
   // size of frame
   private int size;
 
@@ -170,8 +163,6 @@ public class StackFrame implements Serializable {
     method = -1;
     methodHandle = null;
 
-    returnObject = null;
-
     this.size = size;
 
     stackObjectPtr = 0;
@@ -222,8 +213,6 @@ public class StackFrame implements Serializable {
     owner = null;
     method = -1;
     methodHandle = null;
-
-    returnObject = null;
 
     stackObjectPtr = 0;
     // TODO 2010-03-18 mh: reset fast stack too

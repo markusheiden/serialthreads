@@ -26,6 +26,13 @@ public class Stack extends SerialThread implements Serializable {
    */
   public StackFrame frame;
 
+  // Return value of the last executed method
+  public Object returnObject;
+  public int returnInt;
+  public long returnLong;
+  public float returnFloat;
+  public double returnDouble;
+
   /**
    * Constructor.
    *
@@ -38,6 +45,8 @@ public class Stack extends SerialThread implements Serializable {
     this.frameSize = frameSize;
     first = new StackFrame(null, frameSize);
     frame = first;
+
+    returnObject = null;
   }
 
   /**
