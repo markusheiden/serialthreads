@@ -102,7 +102,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
+      AbstractInsnNode previous = returnInstruction.getPrevious();
+      if (previous instanceof MethodInsnNode && isNotVoid((MethodInsnNode) previous) && isInterruptible((MethodInsnNode) previous)) {
+        // Tail call optimization:
+        // The return value has already been saved into the thread by the capture code of the called method
+        instructions.insert(returnInstruction, new InsnNode(RETURN));
+      } else {
+        // Default case:
+        // Save return value into the thread
+        instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
+      }
       instructions.remove(returnInstruction);
     }
   }
@@ -146,8 +155,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // normal execution
     capture.add(normal);
-    // restore return value of call, if any
-    if (isNotVoid(methodCall)) {
+    // restore return value of call, if any, but not for tail calls
+    if (isNotVoid(methodCall) && !(isInterruptible(methodCall) && isReturn(methodCall.getNext()))) {
       capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
@@ -215,7 +224,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // restore stack "under" the returned value, if any
     restore.add(popFromFrame(methodCall, frameAfter, localFrame));
-    if (isNotVoid(methodCall)) {
+    // restore return value of call, if any, but not for tail calls
+    if (isNotVoid(methodCall) && !(isInterruptible(methodCall) && isReturn(methodCall.getNext()))) {
       restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
     restore.add(new JumpInsnNode(GOTO, normal));
@@ -234,6 +244,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     result.desc = changeCopyDesc(methodCall.desc);
 
     return result;
+  }
+
+  /**
+   * Check if the given instruction is an interruptible method call.
+   *
+   * @param instruction Instruction
+   */
+  private boolean isInterruptible(MethodInsnNode instruction) {
+    return interruptibleMethodCalls.containsKey(instruction);
   }
 
   //
