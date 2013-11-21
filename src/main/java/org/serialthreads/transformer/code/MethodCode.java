@@ -248,13 +248,22 @@ public class MethodCode {
     List<AbstractInsnNode> result = new ArrayList<>();
     for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext(); ) {
       AbstractInsnNode instruction = iter.next();
-      int opcode = instruction.getOpcode();
-      if (opcode >= IRETURN && opcode <= RETURN) {
+      if (isReturn(instruction)) {
         result.add(instruction);
       }
     }
 
     return result;
+  }
+
+  /**
+   * Is an instruction a return?.
+   *
+   * @param instruction Instruction
+   */
+  public static boolean isReturn(AbstractInsnNode instruction) {
+    int opcode = instruction.getOpcode();
+    return opcode >= IRETURN && opcode <= RETURN;
   }
 
   //
