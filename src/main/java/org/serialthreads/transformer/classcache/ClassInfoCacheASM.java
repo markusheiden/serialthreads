@@ -32,9 +32,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
    */
   @Override
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Scanning class " + className);
-    }
+    logger.debug("Scanning class {}", className);
 
     InputStream classFile = _classLoader.getResourceAsStream(className + ".class");
     return scan(read(new ClassReader(classFile)), toProcess);

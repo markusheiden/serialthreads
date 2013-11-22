@@ -51,9 +51,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
       return;
     }
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("  Creating context");
-    }
+    logger.debug("  Creating context");
 
     // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptable method?
     // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
@@ -90,9 +88,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
   @Override
   protected void createCaptureCodeForInterrupt(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating capture code for interrupt");
-    }
+    logger.debug("      Creating capture code for interrupt");
 
     final int localThread = method.maxLocals;
 
@@ -125,9 +121,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
   @Override
   protected void createCaptureCodeForMethod(ClassNode clazz, MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating capture code for method call");
-    }
+    logger.debug("      Creating capture code for method call");
 
     final int localThread = method.maxLocals;
 
@@ -158,9 +152,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
   @Override
   protected InsnList createRestoreCodeForInterrupt(MethodNode method, MethodInsnNode methodCall, Frame frame) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating restore code for interrupt");
-    }
+    logger.debug("      Creating restore code for interrupt");
 
     final int localThread = method.maxLocals;
 
@@ -182,9 +174,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
   @Override
   protected InsnList createRestoreCodeForMethod(MethodNode method, Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating restore code for method call");
-    }
+    logger.debug("      Creating restore code for method call");
 
     final boolean isCallNotStatic = isNotStatic(methodCall);
 
@@ -222,9 +212,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
   protected void createRestoreCode(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes) {
     Assert.isTrue(!restoreCodes.isEmpty(), "Precondition: !restoreCodes.isEmpty()");
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("    Creating retore code for method");
-    }
+    logger.debug("    Creating retore code for method");
 
     final int localThread = method.maxLocals;
 

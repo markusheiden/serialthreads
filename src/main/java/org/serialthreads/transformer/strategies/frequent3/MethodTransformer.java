@@ -93,9 +93,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return;
     }
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Replacing returns");
-    }
+    logger.debug("      Replacing returns");
 
     InsnList instructions = method.instructions;
 
@@ -111,7 +109,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method
         instructions.insert(returnInstruction, new InsnNode(RETURN));
-        logger.debug("        Tail call optimized to " + methodName((MethodInsnNode) previous));
+        if (logger.isDebugEnabled()) {
+          logger.debug("        Tail call optimized to {}", methodName((MethodInsnNode) previous));
+        }
       } else {
         // Default case:
         // Save return value into the thread

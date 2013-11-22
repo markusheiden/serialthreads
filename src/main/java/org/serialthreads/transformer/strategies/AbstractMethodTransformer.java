@@ -183,9 +183,7 @@ public abstract class AbstractMethodTransformer {
    * @return restore code
    */
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, Frame frame) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating restore code for interrupt");
-    }
+    logger.debug("      Creating restore code for interrupt");
 
     int local = firstLocal(method);
     final int localThread = local++;
@@ -251,9 +249,7 @@ public abstract class AbstractMethodTransformer {
    * @param suppressOwner suppress capturing of owner?
    */
   protected void createCaptureCodeForInterrupt(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating capture code for interrupt");
-    }
+    logger.debug("      Creating capture code for interrupt");
 
     int local = firstLocal(method);
     final int localThread = local++;

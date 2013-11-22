@@ -176,9 +176,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     assert owner != null : "Precondition: owner != null";
     assert !classes.containsKey(owner) : "Check: !classes.containsKey(owner)";
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("Computing interruptible status for class " + owner);
-    }
+    logger.debug("Computing interruptible status for class {}", owner);
 
     String className = null;
     try {

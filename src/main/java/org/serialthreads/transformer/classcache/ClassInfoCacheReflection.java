@@ -60,9 +60,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
 
   @Override
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Scanning class " + className);
-    }
+    logger.debug("Scanning class {}", className);
 
     // remove class info visitor, because we scan a class at max once
     ClassInfoVisitor classInfoVisitor = _classes.remove(className);

@@ -164,9 +164,7 @@ public class ClassInfo {
    * @param classInfo interruptible status of superclass
    */
   protected void merge(ClassInfo classInfo) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Merging interruptible status of class " + classInfo.getClassName() + " into status of class " + getClassName());
-    }
+    logger.debug("Merging interruptible status of class {} into status of class {}", classInfo.getClassName(), getClassName());
 
     superClasses.addAll(classInfo.getSuperClasses());
     for (String methodId : classInfo.getMethods()) {
