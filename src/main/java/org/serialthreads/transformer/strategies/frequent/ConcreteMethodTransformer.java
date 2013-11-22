@@ -51,9 +51,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
   private void createRestoreHandlerMethod(List<InsnList> restoreCodes) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("    Creating restore handler for method");
-    }
+    logger.debug("    Creating restore handler for method");
 
     int local = firstLocal(method);
     final int localThread = local++;

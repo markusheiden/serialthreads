@@ -65,9 +65,7 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
       return;
     }
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("  Creating stack");
-    }
+    logger.debug("  Creating stack");
 
     // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptible method?
     // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?

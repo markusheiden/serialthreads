@@ -99,17 +99,13 @@ public abstract class AbstractTransformer implements ITransformer {
 
     if (allTransformedMethods.isEmpty()) {
       // Class needs no transformation, but it should be loaded with this class loader
-      if (logger.isDebugEnabled()) {
-        logger.debug("  Class " + clazz.name + " needs no transformation");
-      }
+      logger.debug("  Class {} needs no transformation", clazz.name);
       throw new LoadUntransformedException(clazz.name);
     }
 
     afterTransformation(clazz, constructors);
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("Finished transforming of class " + clazz.name);
-    }
+    logger.debug("Finished transforming of class {}", clazz.name);
   }
 
   /**
@@ -181,9 +177,7 @@ public abstract class AbstractTransformer implements ITransformer {
     }
 
     if (!classInfoCache.isInterruptible(clazz, method)) {
-      if (logger.isDebugEnabled()) {
-        logger.debug("    Not interruptible -> abort transformation of method");
-      }
+      logger.debug("    Not interruptible -> abort transformation of method");
 
       return null;
     }
@@ -250,9 +244,7 @@ public abstract class AbstractTransformer implements ITransformer {
       return false;
     }
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("  Implement ITransformedRunnable");
-    }
+    logger.debug("  Implement ITransformedRunnable");
 
     // make class implement ITransformedRunnable
     if (clazz.interfaces.contains(ITRANSFORMED_RUNNABLE_NAME)) {

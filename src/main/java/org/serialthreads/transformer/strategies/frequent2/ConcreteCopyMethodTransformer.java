@@ -62,9 +62,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
   private void createRestoreHandlerCopy(List<InsnList> restoreCodes) {
     assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("    Creating restore handler for copied method");
-    }
+    logger.debug("    Creating restore handler for copied method");
 
     int param = firstParam(method);
     final int paramThread = param++;

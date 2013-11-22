@@ -564,9 +564,7 @@ public abstract class AbstractMethodTransformer {
           ExtendedValue extendedValue = (ExtendedValue) value;
           if (extendedValue.isHoldInLowerLocal(local)) {
             // the value of the local is hold in a lower local too -> copy
-            if (logger.isDebugEnabled()) {
-              logger.debug("        Detected codes with the same value: " + extendedValue.getLowestLocal() + "/" + local);
-            }
+            logger.debug("        Detected codes with the same value: {}/{}", extendedValue.getLowestLocal(), local);
             copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
             copyLocals.add(code(extendedValue).store(local));
           } else {
@@ -610,15 +608,11 @@ public abstract class AbstractMethodTransformer {
       ExtendedValue value = (ExtendedValue) frame.getStack(stack);
       if (value.isConstant()) {
         // the stack value is constant -> push constant
-        if (logger.isDebugEnabled()) {
-          logger.debug("        Detected constant value on stack: " + value.toString() + " / value " + value.getConstant());
-        }
+        logger.debug("        Detected constant value on stack: {} / value {}", value.toString(), value.getConstant());
         result.add(code(value).push(value.getConstant()));
       } else if (value.isHoldInLocal()) {
         // the stack value was already stored in local variable -> load local
-        if (logger.isDebugEnabled()) {
-          logger.debug("        Detected value of local on stack: " + value.toString() + " / local " + value.getLowestLocal());
-        }
+        logger.debug("        Detected value of local on stack: {} / local {}", value.toString(), value.getLowestLocal());
         result.add(code(value).load(value.getLowestLocal()));
       } else {
         // normal case -> pop stack from frame
