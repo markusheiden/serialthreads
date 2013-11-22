@@ -52,7 +52,8 @@ public abstract class AbstractMethodTransformer {
   protected final MethodNode method;
 
   protected Frame[] frames;
-  protected Map<MethodInsnNode, Integer> interruptibleMethodCalls;
+  protected final Map<MethodInsnNode, Integer> interruptibleMethodCalls = new LinkedHashMap<>();
+  protected final Set<AbstractInsnNode> tailCalls = new HashSet<>();
 
   /**
    * Constructor.
@@ -76,13 +77,16 @@ public abstract class AbstractMethodTransformer {
   protected void analyze() throws AnalyzerException {
     frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
 
-    interruptibleMethodCalls = new LinkedHashMap<>();
     for (int i = 0; i < method.instructions.size(); i++) {
       AbstractInsnNode instruction = method.instructions.get(i);
       if (instruction instanceof MethodInsnNode) {
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
         if (classInfoCache.isInterruptible(methodCall)) {
           interruptibleMethodCalls.put(methodCall, i);
+          if (isNotVoid(methodCall) && isReturn(methodCall.getNext())) {
+            tailCalls.add(methodCall);
+            tailCalls.add(methodCall.getNext());
+          }
         }
       }
     }

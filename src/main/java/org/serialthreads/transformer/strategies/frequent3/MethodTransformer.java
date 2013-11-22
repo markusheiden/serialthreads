@@ -105,7 +105,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
       AbstractInsnNode previous = previousInstruction(returnInstruction);
-      if (previous instanceof MethodInsnNode && isNotVoid((MethodInsnNode) previous) && isInterruptible((MethodInsnNode) previous)) {
+      if (isTailCall(previous)) {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method
         instructions.insert(returnInstruction, new InsnNode(RETURN));
@@ -158,7 +158,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(normal);
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      if (isInterruptible(methodCall) && isReturn(nextInstruction(methodCall))) {
+      if (isTailCall(methodCall)) {
         logger.debug("        Tail call optimized");
       } else {
         capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
@@ -229,7 +229,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(popFromFrame(methodCall, frameAfter, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      if (isInterruptible(methodCall) && isReturn(nextInstruction(methodCall))) {
+      if (isTailCall(methodCall)) {
         logger.debug("        Tail call optimized");
       } else {
         restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
@@ -260,6 +260,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   private boolean isInterruptible(MethodInsnNode instruction) {
     return interruptibleMethodCalls.containsKey(instruction);
+  }
+
+  /**
+   * Check if the given instruction is a tail call.
+   *
+   * @param instruction Instruction
+   */
+  private boolean isTailCall(AbstractInsnNode instruction) {
+    return tailCalls.contains(instruction);
   }
 
   //
