@@ -94,7 +94,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     }
 
     if (logger.isDebugEnabled()) {
-      logger.debug("      Replacing returns in " + methodName(clazz, method));
+      logger.debug("      Replacing returns");
     }
 
     InsnList instructions = method.instructions;
