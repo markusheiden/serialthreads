@@ -109,9 +109,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method
         instructions.insert(returnInstruction, new InsnNode(RETURN));
-        if (logger.isDebugEnabled()) {
-          logger.debug("        Tail call optimized to {}", methodName((MethodInsnNode) previous));
-        }
+        logger.debug("        Tail call optimized to {}", methodName((MethodInsnNode) previous));
       } else {
         // Default case:
         // Save return value into the thread
@@ -135,9 +133,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   @Override
   protected void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
-    }
+    logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     int local = firstLocal(method);
     final int localThread = local++; // param thread
@@ -185,9 +181,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   @Override
   protected InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
-    }
+    logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
 

@@ -33,9 +33,7 @@ class AbstractCopyMethodTransformer extends MethodTransformer {
     method.desc = changeCopyDesc(method.desc);
     clazz.methods.add(method);
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("      Copied abstract method {}", methodName(clazz, method));
-    }
+    logger.debug("      Copied abstract method {}", methodName(clazz, method));
 
     return method;
   }
