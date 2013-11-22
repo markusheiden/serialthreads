@@ -66,9 +66,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
   @Override
   public void transform(ClassNode clazz) {
-    if (logger.isDebugEnabled()) {
-      logger.info("Transforming class " + clazz.name + " with " + toString());
-    }
+    logger.info("Transforming class {} with {}", clazz.name, toString());
 
     // separate constructors and methods
     List<MethodNode> constructors = new ArrayList<>(clazz.methods.size());
@@ -167,7 +165,7 @@ public abstract class AbstractTransformer implements ITransformer {
    */
   protected List<MethodNode> transformMethod(ClassNode clazz, MethodNode method) {
     if (logger.isDebugEnabled()) {
-      logger.debug("  Transforming method " + methodName(clazz, method));
+      logger.debug("  Transforming method {}", methodName(clazz, method));
     }
 
     if (classInfoCache.isExecutor(clazz, method)) {
@@ -278,7 +276,7 @@ public abstract class AbstractTransformer implements ITransformer {
     assert constructor.name.equals("<init>") : "Precondition: constructor.name.equals(\"<init>\")";
 
     if (logger.isDebugEnabled()) {
-      logger.debug("    Transforming constructor " + methodName(clazz, constructor));
+      logger.debug("    Transforming constructor {}", methodName(clazz, constructor));
     }
 
     constructor.maxStack = Math.max(5, constructor.maxStack);

@@ -120,7 +120,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   @Override
   protected void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     if (logger.isDebugEnabled()) {
-      logger.debug("      Creating capture code for method call to " + methodName(methodCall));
+      logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
     }
 
     int local = firstLocal(method);
@@ -166,7 +166,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   @Override
   protected InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
     if (logger.isDebugEnabled()) {
-      logger.debug("      Creating restore code for method call to " + methodName(methodCall));
+      logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
     }
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);

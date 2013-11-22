@@ -98,7 +98,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isExecutor(name + desc);
     if (logger.isDebugEnabled()) {
-      logger.debug(methodName(owner, name, desc) + " is " + (result ? "an" : "no") + " executor");
+      logger.debug("{} is {} executor", methodName(owner, name, desc), result ? "an" : "no");
     }
 
     return result;
@@ -124,7 +124,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
     if (logger.isDebugEnabled()) {
-      logger.debug(methodName(owner, name, desc) + " is" + (result ? " " : " not ") + "interruptible");
+      logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
     }
 
     return result;
@@ -144,7 +144,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterrupt(name + desc);
     if (logger.isDebugEnabled()) {
-      logger.debug(methodName(owner, name, desc) + " is " + (result ? "an" : "no") + " interrupt");
+      logger.debug("{} is {} interrupt", methodName(owner, name, desc), result ? "an" : "no");
     }
 
     return result;

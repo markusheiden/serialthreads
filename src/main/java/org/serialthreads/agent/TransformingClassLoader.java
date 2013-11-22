@@ -156,7 +156,7 @@ public class TransformingClassLoader extends ClassLoader {
     if (logger.isDebugEnabled()) {
       StringWriter output = new StringWriter(4096);
       new ClassReader(result).accept(new TraceClassVisitor(new PrintWriter(output)), SKIP_FRAMES + SKIP_DEBUG);
-      logger.debug("Byte code:\n" + output);
+      logger.debug("Byte code:\n{}", output);
     }
 
     return result;

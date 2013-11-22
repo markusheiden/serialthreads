@@ -48,7 +48,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     clazz.methods.add(method);
 
     if (logger.isDebugEnabled()) {
-      logger.debug("      Copied concrete method " + methodName(clazz, method));
+      logger.debug("      Copied concrete method {}", methodName(clazz, method));
     }
 
     return method;
