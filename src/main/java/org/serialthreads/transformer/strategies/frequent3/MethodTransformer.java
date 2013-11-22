@@ -93,6 +93,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return;
     }
 
+    if (logger.isDebugEnabled()) {
+      logger.debug("      Replacing returns in " + methodName(clazz, method));
+    }
+
     InsnList instructions = method.instructions;
 
     int local = firstLocal(method);
@@ -102,11 +106,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      AbstractInsnNode previous = returnInstruction.getPrevious();
+      AbstractInsnNode previous = previousInstruction(returnInstruction);
       if (previous instanceof MethodInsnNode && isNotVoid((MethodInsnNode) previous) && isInterruptible((MethodInsnNode) previous)) {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method
         instructions.insert(returnInstruction, new InsnNode(RETURN));
+        logger.debug("        Tail call optimized to " + methodName((MethodInsnNode) previous));
       } else {
         // Default case:
         // Save return value into the thread
@@ -156,8 +161,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // normal execution
     capture.add(normal);
     // restore return value of call, if any, but not for tail calls
-    if (isNotVoid(methodCall) && !(isInterruptible(methodCall) && isReturn(methodCall.getNext()))) {
-      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+    if (isNotVoid(methodCall)) {
+      if (isInterruptible(methodCall) && isReturn(nextInstruction(methodCall))) {
+        logger.debug("        Tail call optimized");
+      } else {
+        capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      }
     }
 
     // insert capture code
@@ -225,8 +234,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // restore stack "under" the returned value, if any
     restore.add(popFromFrame(methodCall, frameAfter, localFrame));
     // restore return value of call, if any, but not for tail calls
-    if (isNotVoid(methodCall) && !(isInterruptible(methodCall) && isReturn(methodCall.getNext()))) {
-      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+    if (isNotVoid(methodCall)) {
+      if (isInterruptible(methodCall) && isReturn(nextInstruction(methodCall))) {
+        logger.debug("        Tail call optimized");
+      } else {
+        restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      }
     }
     restore.add(new JumpInsnNode(GOTO, normal));
 

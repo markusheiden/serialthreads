@@ -266,6 +266,40 @@ public class MethodCode {
     return opcode >= IRETURN && opcode <= RETURN;
   }
 
+  /**
+   * The previous instruction. Skips labels etc.
+   *
+   * @param instruction Instruction
+   */
+  public static AbstractInsnNode previousInstruction(AbstractInsnNode instruction) {
+    AbstractInsnNode result = instruction;
+    do {
+      result = result.getPrevious();
+      if (result.getOpcode() >= 0) {
+        return result;
+      }
+    } while (result != null);
+
+    return null;
+  }
+
+  /**
+   * The next instruction. Skips labels etc.
+   *
+   * @param instruction Instruction
+   */
+  public static AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
+    AbstractInsnNode result = instruction;
+    do {
+      result = result.getNext();
+      if (result.getOpcode() >= 0) {
+        return result;
+      }
+    } while (result != null);
+
+    return null;
+  }
+
   //
   // Log / debug code
   //
