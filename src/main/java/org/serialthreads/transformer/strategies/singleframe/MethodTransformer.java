@@ -72,7 +72,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
-    for (MethodInsnNode methodCall : interruptibleMethodCalls.keySet()) {
+    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall)) {
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localThread));
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localFrame));

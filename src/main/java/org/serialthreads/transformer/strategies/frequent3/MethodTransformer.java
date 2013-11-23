@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
+import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
@@ -73,7 +74,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
-    for (MethodInsnNode methodCall : interruptibleMethodCalls.keySet()) {
+    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall)) {
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localThread));
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localFrame));
@@ -259,7 +260,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param instruction Instruction
    */
   private boolean isInterruptible(MethodInsnNode instruction) {
-    return interruptibleMethodCalls.containsKey(instruction);
+    return interruptibleMethodCalls.contains(instruction);
   }
 
   /**
@@ -268,7 +269,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param instruction Instruction
    */
   private boolean isTailCall(AbstractInsnNode instruction) {
-    return tailCalls.contains(instruction);
+    MetaInfo metaInfo = metaInfos.get(instruction);
+    return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL);
   }
 
   //

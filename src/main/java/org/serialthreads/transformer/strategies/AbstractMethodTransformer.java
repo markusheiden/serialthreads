@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
@@ -42,18 +41,27 @@ public abstract class AbstractMethodTransformer {
   protected static final String THREAD = "$$thread$$";
   protected static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
 
-  protected final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
-  protected final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
-  protected final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
-  protected final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
+  protected static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
+  protected static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
+  protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
+  protected static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
+
+  protected static final String TAG_INTERRUPTIBLE = "INTERRUPTIBLE";
+  protected static final String TAG_TAIL_CALL = "TAIL_CALL";
 
   protected final IClassInfoCache classInfoCache;
   protected final ClassNode clazz;
   protected final MethodNode method;
 
-  protected Frame[] frames;
-  protected final Map<MethodInsnNode, Integer> interruptibleMethodCalls = new LinkedHashMap<>();
-  protected final Set<AbstractInsnNode> tailCalls = new HashSet<>();
+  /**
+   * Meta information about instructions.
+   */
+  protected final Map<AbstractInsnNode, MetaInfo> metaInfos = new LinkedHashMap<>();
+
+  /**
+   * Interruptible method calls.
+   */
+  protected final Set<MethodInsnNode> interruptibleMethodCalls = new LinkedHashSet<>();
 
   /**
    * Constructor.
@@ -75,21 +83,37 @@ public abstract class AbstractMethodTransformer {
    * @exception AnalyzerException
    */
   protected void analyze() throws AnalyzerException {
-    frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
+    // Init meta information
+    Frame[] frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
+    for (int i = 0, e = method.instructions.size(), s = e - 1; i < e; i++) {
+      metaInfos.put(method.instructions.get(i), new MetaInfo(frames[i], i < s ? frames[i + 1] : null));
+    }
 
-    for (int i = 0; i < method.instructions.size(); i++) {
+    // Tag special instructions
+    for (int i = 0, e = method.instructions.size(); i < e; i++) {
       AbstractInsnNode instruction = method.instructions.get(i);
       if (instruction instanceof MethodInsnNode) {
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
         if (classInfoCache.isInterruptible(methodCall)) {
-          interruptibleMethodCalls.put(methodCall, i);
+          interruptibleMethodCalls.add(methodCall);
+          tag(instruction, TAG_INTERRUPTIBLE);
           if (isNotVoid(methodCall) && isReturn(methodCall.getNext())) {
-            tailCalls.add(methodCall);
-            tailCalls.add(methodCall.getNext());
+            tag(instruction, TAG_TAIL_CALL);
+            tag(instruction.getNext(), TAG_TAIL_CALL);
           }
         }
       }
     }
+  }
+
+  /**
+   * Tag an instruction.
+   *
+   * @param instruction Instruction
+   * @param tag Tag
+   */
+  private void tag(AbstractInsnNode instruction, String tag) {
+    metaInfos.get(instruction).tags.add(tag);
   }
 
   /**
@@ -153,13 +177,11 @@ public abstract class AbstractMethodTransformer {
 
     List<InsnList> restoreCodes = new ArrayList<>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
-    for (Entry<MethodInsnNode, Integer> entry : interruptibleMethodCalls.entrySet()) {
-      Frame frameBefore = frames[entry.getValue()];
-      MethodInsnNode methodCall = entry.getKey();
-      Frame frameAfter = frames[entry.getValue() + 1];
+    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
+      MetaInfo metaInfo = metaInfos.get(methodCall);
 
-      restoreCodes.add(createRestoreCode(frameBefore, methodCall, frameAfter));
-      createCaptureCode(frameBefore, methodCall, frameAfter, methodCallIndex++, moreThanOne, suppressOwner);
+      restoreCodes.add(createRestoreCode(metaInfo.frameBefore, methodCall, metaInfo.frameAfter));
+      createCaptureCode(metaInfo.frameBefore, methodCall, metaInfo.frameAfter, methodCallIndex++, moreThanOne, suppressOwner);
     }
 
     return restoreCodes;
