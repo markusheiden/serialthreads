@@ -32,8 +32,7 @@ public class DoubleValueCode extends AbstractValueCode {
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new InsnNode(DUP_X2));
     instructions.add(new InsnNode(POP));
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-    instructions.add(new InsnNode(RETURN));
+    doPushReturnValueImpl(instructions);
     return instructions;
   }
 

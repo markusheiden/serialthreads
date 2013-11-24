@@ -127,9 +127,13 @@ public abstract class AbstractValueCode implements IValueCode {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new InsnNode(SWAP));
+    doPushReturnValueImpl(instructions);
+    return instructions;
+  }
+
+  protected final void doPushReturnValueImpl(InsnList instructions) {
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(new InsnNode(RETURN));
-    return instructions;
   }
 
   @Override
