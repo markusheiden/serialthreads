@@ -314,7 +314,7 @@ public abstract class AbstractMethodTransformer {
    * Insert frame capturing code after returning from a method call.
    *
    * @param methodCall method call to generate capturing code for
-   * @param metaInfo
+   * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
