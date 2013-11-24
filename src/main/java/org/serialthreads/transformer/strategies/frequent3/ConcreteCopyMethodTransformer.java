@@ -5,7 +5,6 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.MethodNodeCopier;
-import org.serialthreads.transformer.strategies.MetaInfo;
 
 import java.util.List;
 
@@ -82,17 +81,11 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
       restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
     }
 
-    MethodInsnNode methodCall = null;
-    boolean needsFrame = interruptibleMethodCalls.size() != 1;
-    if (!needsFrame) {
-      methodCall = interruptibleMethodCalls.iterator().next();
-      MetaInfo metaInfo = metaInfos.get(methodCall);
-      needsFrame = !isSelfCall(methodCall, metaInfo) || !isTailCall(metaInfo);
-    }
-
     // frame = previousFrame.next
     restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    if (needsFrame()) {
+      restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    }
     restore.add(new VarInsnNode(ASTORE, localFrame));
 
     if (paramThread != localThread) {
