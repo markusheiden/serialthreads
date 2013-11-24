@@ -6,7 +6,7 @@ what about restore code for run()? helper method calls real run()?
 generate method handles
 remember method handles during serialize
 
-
+test
 -------------------------------------------------------------------------------
 
 SFE new:
