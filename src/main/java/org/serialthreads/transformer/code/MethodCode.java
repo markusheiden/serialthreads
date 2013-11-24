@@ -272,13 +272,11 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static AbstractInsnNode previousInstruction(AbstractInsnNode instruction) {
-    AbstractInsnNode result = instruction;
-    do {
-      result = result.getPrevious();
+    for (AbstractInsnNode result = instruction.getPrevious(); result != null; result = result.getPrevious()) {
       if (result.getOpcode() >= 0) {
         return result;
       }
-    } while (result != null);
+    }
 
     return null;
   }
@@ -289,13 +287,11 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
-    AbstractInsnNode result = instruction;
-    do {
-      result = result.getNext();
+    for (AbstractInsnNode result = instruction.getNext(); result != null; result = result.getNext()) {
       if (result.getOpcode() >= 0) {
         return result;
       }
-    } while (result != null);
+    }
 
     return null;
   }
