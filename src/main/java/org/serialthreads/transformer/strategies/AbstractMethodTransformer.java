@@ -285,7 +285,7 @@ public abstract class AbstractMethodTransformer {
 
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
-    capture.add(pushToFrame(methodCall, metaInfo.frameAfter, localFrame));
+    capture.add(pushToFrame(methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo.frameBefore), localPreviousFrame, localFrame));
 
     // "start" serializing
@@ -407,18 +407,18 @@ public abstract class AbstractMethodTransformer {
   //
 
   /**
-   * Save current frame after returning from a method call.
+   * Save current frameAfter after returning from a method call.
    *
    * @param methodCall method call to process
-   * @param frame frame after method call
-   * @param localFrame number of local containing the frame
-   * @return generated capture code
+   * @param metaInfo Meta information about method call
+   * @param localFrame number of local containing the frameAfter  @return generated capture code
    */
-  protected InsnList pushToFrame(MethodInsnNode methodCall, Frame frame, int localFrame) {
+  protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
     InsnList push = new InsnList();
 
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
+    Frame frameAfter = metaInfo.frameAfter;
 
     // get rid of dummy return value of called method first
     if (isCallNotVoid) {
@@ -427,9 +427,9 @@ public abstract class AbstractMethodTransformer {
 
     // save stack
     // the topmost element is a dummy return value, if the called method returns one
-    int[] stackIndexes = stackIndexes(frame);
-    for (int stack = isCallNotVoid ? frame.getStackSize() - 2 : frame.getStackSize() - 1; stack >= 0; stack--) {
-      ExtendedValue value = (ExtendedValue) frame.getStack(stack);
+    int[] stackIndexes = stackIndexes(frameAfter);
+    for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
+      ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
       if (value.isConstant() || value.isHoldInLocal()) {
         // just pop the value from stack, because the stack value is constant or stored in a local too.
         push.add(code(value).pop());
@@ -440,11 +440,11 @@ public abstract class AbstractMethodTransformer {
 
     // save locals separated by type
     for (IValueCode code : ValueCodeFactory.CODES) {
-      List<Integer> pushLocals = new ArrayList<>(frame.getLocals());
+      List<Integer> pushLocals = new ArrayList<>(frameAfter.getLocals());
 
       // do not store local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic ? 1 : 0, end = frame.getLocals() - 1; local <= end; local++) {
-        BasicValue value = (BasicValue) frame.getLocal(local);
+      for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
+        BasicValue value = (BasicValue) frameAfter.getLocal(local);
         if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
           if (!extendedValue.isHoldInLowerLocal(local)) {
@@ -458,7 +458,7 @@ public abstract class AbstractMethodTransformer {
       // for first locals use fast stack
       for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
-        IValueCode localCode = code((BasicValue) frame.getLocal(local));
+        IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
         push.add(localCode.pushLocalVariableFast(local, i, localFrame));
       }
 
@@ -467,7 +467,7 @@ public abstract class AbstractMethodTransformer {
         push.add(code.getLocals(localFrame));
         for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
-          IValueCode localCode = code((BasicValue) frame.getLocal(local));
+          IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
           if (iter.hasNext()) {
             push.add(new InsnNode(DUP));
           }

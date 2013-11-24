@@ -149,8 +149,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
+    InsnList x = pushToFrame(methodCall, metaInfo, localFrame);
+    logger.error("        Push size {} for {}", x.size(), methodName(methodCall));
+
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, metaInfo.frameAfter, localFrame));
+    capture.add(pushToFrame(methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
     capture.add(new InsnNode(RETURN));
 

@@ -49,7 +49,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, metaInfo.frameAfter, localFrame));
+    capture.add(pushToFrame(methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo.frameBefore), localPreviousFrame, localFrame));
     capture.add(dummyReturnStatement(method));
 
