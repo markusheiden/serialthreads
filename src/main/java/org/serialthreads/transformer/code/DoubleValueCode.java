@@ -27,13 +27,12 @@ public class DoubleValueCode extends AbstractValueCode {
   }
 
   @Override
-  public InsnList pushReturnValue(int localFrame) {
+  public InsnList pushReturnValue(int localThread) {
     InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new InsnNode(DUP_X2));
     instructions.add(new InsnNode(POP));
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(new InsnNode(RETURN));
     return instructions;
   }
