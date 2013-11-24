@@ -330,8 +330,7 @@ public abstract class AbstractMethodTransformer {
 
     LabelNode exception = new LabelNode();
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      method.instructions.insertBefore(returnInstruction, new JumpInsnNode(GOTO, exception));
-      method.instructions.remove(returnInstruction);
+      method.instructions.set(returnInstruction, new JumpInsnNode(GOTO, exception));
     }
 
     InsnList instructions = new InsnList();
