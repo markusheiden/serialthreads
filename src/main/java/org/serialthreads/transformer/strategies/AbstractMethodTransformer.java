@@ -326,20 +326,24 @@ public abstract class AbstractMethodTransformer {
    * Needed for transformation of IRunnable.run().
    */
   protected void replaceReturns() {
-    for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      InsnList instructions = new InsnList();
-      // TODO 2009-11-21 mh: implement once, jump to implementation
-      instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
-      instructions.add(new InsnNode(DUP));
-      // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
-      instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC));
-      instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V"));
-      instructions.add(new InsnNode(ATHROW));
+    // TODO 2013-11-24 mh: implement as method -> call method?
 
-      method.instructions.insertBefore(returnInstruction, instructions);
+    LabelNode exception = new LabelNode();
+    for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
+      method.instructions.insertBefore(returnInstruction, new JumpInsnNode(GOTO, exception));
       method.instructions.remove(returnInstruction);
     }
+
+    InsnList instructions = new InsnList();
+    instructions.add(exception);
+    instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
+    instructions.add(new InsnNode(DUP));
+    // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
+    instructions.add(new VarInsnNode(ALOAD, 0));
+    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC));
+    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V"));
+    instructions.add(new InsnNode(ATHROW));
+    method.instructions.insert(method.instructions.getLast(), instructions);
   }
 
   /**
