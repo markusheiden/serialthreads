@@ -50,9 +50,9 @@ public abstract class AbstractMethodTransformer {
   protected static final String TAG_INTERRUPT = "INTERRUPT";
   protected static final String TAG_TAIL_CALL = "TAIL_CALL";
 
-  protected final IClassInfoCache classInfoCache;
   protected final ClassNode clazz;
   protected final MethodNode method;
+  protected final IClassInfoCache classInfoCache;
 
   /**
    * Meta information about instructions.
@@ -86,8 +86,8 @@ public abstract class AbstractMethodTransformer {
   protected void analyze() throws AnalyzerException {
     // Init meta information
     Frame[] frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
-    for (int i = 0, e = method.instructions.size(), s = e - 1; i < e; i++) {
-      metaInfos.put(method.instructions.get(i), new MetaInfo(frames[i], i < s ? frames[i + 1] : null));
+    for (int i = 0, e = method.instructions.size(), last = e - 1; i < e; i++) {
+      metaInfos.put(method.instructions.get(i), new MetaInfo(frames[i], i < last ? frames[i + 1] : null));
     }
 
     // Tag special instructions
