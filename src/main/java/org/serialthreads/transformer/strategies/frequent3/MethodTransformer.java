@@ -108,14 +108,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       if (isTailCall(previous)) {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method
-        instructions.insert(returnInstruction, new InsnNode(RETURN));
-        logger.debug("        Tail call optimized to {}", methodName((MethodInsnNode) previous));
+        instructions.set(returnInstruction, new InsnNode(RETURN));
+        logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
       } else {
         // Default case:
         // Save return value into the thread
         instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
+        instructions.remove(returnInstruction);
       }
-      instructions.remove(returnInstruction);
     }
   }
 
@@ -159,7 +159,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
       if (isTailCall(methodCall)) {
-        logger.debug("        Tail call optimized");
+        logger.debug("        Optimized tail call");
       } else {
         capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
       }
