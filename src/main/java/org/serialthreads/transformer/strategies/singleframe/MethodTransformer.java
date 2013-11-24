@@ -181,7 +181,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, metaInfo.frameBefore)) {
+    if (isSelfCall(methodCall, metaInfo)) {
       // self call: owner == this
       restore.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(clonedCall)) {

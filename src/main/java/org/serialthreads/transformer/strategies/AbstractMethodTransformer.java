@@ -286,7 +286,7 @@ public abstract class AbstractMethodTransformer {
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
     capture.add(pushToFrame(methodCall, metaInfo, localFrame));
-    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo.frameBefore), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
 
     // "start" serializing
     capture.add(new VarInsnNode(ALOAD, localThread));

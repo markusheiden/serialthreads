@@ -9,6 +9,7 @@ import org.objectweb.asm.tree.analysis.Value;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.strategies.MetaInfo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,13 +50,15 @@ public class MethodCode {
    * Is the call a call to a method on the same object (this)?
    *
    * @param methodCall method call
-   * @param frameBefore frame directly before method call
+   * @param metaInfo Meta information about method call
    */
-  public static boolean isSelfCall(MethodInsnNode methodCall, Frame frameBefore) {
+  public static boolean isSelfCall(MethodInsnNode methodCall, MetaInfo metaInfo) {
     if (methodCall.getOpcode() == Opcodes.INVOKESTATIC) {
       // static methods have no owner
       return false;
     }
+
+    Frame frameBefore = metaInfo.frameBefore;
 
     // "pop" all arguments from stack
     Type[] argumentTypes = Type.getArgumentTypes(methodCall.desc);

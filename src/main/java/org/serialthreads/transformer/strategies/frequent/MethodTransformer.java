@@ -50,7 +50,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // capture frame and return early
     capture.add(pushToFrame(methodCall, metaInfo, localFrame));
-    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo.frameBefore), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
     capture.add(dummyReturnStatement(method));
 
     // normal execution
@@ -90,7 +90,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, metaInfo.frameBefore)) {
+    if (isSelfCall(methodCall, metaInfo)) {
       restore.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(clonedCall)) {
       // get owner
