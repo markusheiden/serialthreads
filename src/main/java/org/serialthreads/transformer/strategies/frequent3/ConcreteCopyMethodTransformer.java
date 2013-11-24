@@ -5,6 +5,7 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.MethodNodeCopier;
+import org.serialthreads.transformer.strategies.MetaInfo;
 
 import java.util.List;
 
@@ -79,6 +80,14 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
       // TODO 2009-10-22 mh: How to avoid this copy???
       restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
+    }
+
+    MethodInsnNode methodCall = null;
+    boolean needsFrame = interruptibleMethodCalls.size() != 1;
+    if (!needsFrame) {
+      methodCall = interruptibleMethodCalls.iterator().next();
+      MetaInfo metaInfo = metaInfos.get(methodCall);
+      needsFrame = !isSelfCall(methodCall, metaInfo) || !isTailCall(metaInfo);
     }
 
     // frame = previousFrame.next

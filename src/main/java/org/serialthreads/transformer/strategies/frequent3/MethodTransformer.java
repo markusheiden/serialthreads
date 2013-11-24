@@ -158,7 +158,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(normal);
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      if (isTailCall(methodCall)) {
+      if (isTailCall(metaInfo)) {
         logger.debug("        Optimized tail call");
       } else {
         capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
@@ -229,7 +229,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(popFromFrame(methodCall, metaInfo, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      if (isTailCall(methodCall)) {
+      if (isTailCall(metaInfo)) {
         logger.debug("        Tail call optimized");
       } else {
         restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
@@ -258,8 +258,17 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    *
    * @param instruction Instruction
    */
-  private boolean isTailCall(AbstractInsnNode instruction) {
+  protected final boolean isTailCall(AbstractInsnNode instruction) {
     MetaInfo metaInfo = metaInfos.get(instruction);
+    return metaInfo != null && isTailCall(metaInfo);
+  }
+
+  /**
+   * Check if the given instruction is a tail call.
+   *
+   * @param metaInfo Meta information about method call
+   */
+  protected final boolean isTailCall(MetaInfo metaInfo) {
     return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL);
   }
 
