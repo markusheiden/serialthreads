@@ -22,7 +22,7 @@ public class MetaInfo {
   /**
    * Tags.
    */
-  public final Set<String> tags = new HashSet<>();
+  public final Set<Object> tags = new HashSet<>();
 
   /**
    * Constructor.

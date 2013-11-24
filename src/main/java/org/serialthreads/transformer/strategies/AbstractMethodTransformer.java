@@ -180,8 +180,8 @@ public abstract class AbstractMethodTransformer {
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
 
-      restoreCodes.add(createRestoreCode(metaInfo.frameBefore, methodCall, metaInfo.frameAfter));
-      createCaptureCode(metaInfo.frameBefore, methodCall, metaInfo.frameAfter, methodCallIndex++, moreThanOne, suppressOwner);
+      restoreCodes.add(createRestoreCode(methodCall, metaInfo));
+      createCaptureCode(methodCall, metaInfo, methodCallIndex++, moreThanOne, suppressOwner);
     }
 
     return restoreCodes;
@@ -190,25 +190,24 @@ public abstract class AbstractMethodTransformer {
   /**
    * Create method specific frame restore code.
    *
-   * @param frameBefore frame before method call
    * @param methodCall method call to generate restore code for
-   * @param frameAfter frame after method call
+   * @param metaInfo Meta information about method call
    * @return restore code
    */
-  protected InsnList createRestoreCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
+  protected InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo) {
     return classInfoCache.isInterrupt(methodCall) ?
-      createRestoreCodeForInterrupt(methodCall, frameAfter) :
-      createRestoreCodeForMethod(frameBefore, methodCall, frameAfter);
+      createRestoreCodeForInterrupt(methodCall, metaInfo) :
+      createRestoreCodeForMethod(methodCall, metaInfo);
   }
 
   /**
    * Create restore code for ending an interrupt.
    *
    * @param methodCall method call to generate capturing code for
-   * @param frame frame after method call
+   * @param metaInfo Meta information about method call
    * @return restore code
    */
-  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, Frame frame) {
+  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
 
     int local = firstLocal(method);
@@ -228,7 +227,7 @@ public abstract class AbstractMethodTransformer {
 
     // restore frame
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
-    restore.add(popFromFrame(methodCall, frame, localFrame));
+    restore.add(popFromFrame(methodCall, metaInfo.frameAfter, localFrame));
 
     // resume
     restore.add(new JumpInsnNode(GOTO, normal));
@@ -239,42 +238,39 @@ public abstract class AbstractMethodTransformer {
   /**
    * Create method specific frame restore code.
    *
-   * @param frameBefore frame before method call
    * @param methodCall method call to generate restore code for
-   * @param frameAfter frame after method call
+   * @param metaInfo Meta information about method call
    * @return restore code
    */
-  protected abstract InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter);
+  protected abstract InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo);
 
   /**
    * Insert frame capturing code after a given method call.
    *
-   * @param frameBefore frame before method call
    * @param methodCall method call to generate capturing code for
-   * @param frameAfter frame after method call
+   * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected void createCaptureCode(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     if (classInfoCache.isInterrupt(methodCall)) {
-      createCaptureCodeForInterrupt(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
+      createCaptureCodeForInterrupt(methodCall, metaInfo, position, containsMoreThanOneMethodCall, suppressOwner);
     } else {
-      createCaptureCodeForMethod(frameBefore, methodCall, frameAfter, position, containsMoreThanOneMethodCall, suppressOwner);
+      createCaptureCodeForMethod(methodCall, metaInfo, position, containsMoreThanOneMethodCall, suppressOwner);
     }
   }
 
   /**
    * Insert frame capturing code when starting an interrupt.
    *
-   * @param frameBefore frame before method call
    * @param methodCall method call to generate capturing code for
-   * @param frameAfter frame after method call
+   * @param metaInfo
    * @param position position of method call in method
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected void createCaptureCodeForInterrupt(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for interrupt");
 
     int local = firstLocal(method);
@@ -286,8 +282,8 @@ public abstract class AbstractMethodTransformer {
 
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
-    capture.add(pushToFrame(methodCall, frameAfter, localFrame));
-    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, frameBefore), localPreviousFrame, localFrame));
+    capture.add(pushToFrame(methodCall, metaInfo.frameAfter, localFrame));
+    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo.frameBefore), localPreviousFrame, localFrame));
 
     // "start" serializing
     capture.add(new VarInsnNode(ALOAD, localThread));
@@ -314,14 +310,13 @@ public abstract class AbstractMethodTransformer {
   /**
    * Insert frame capturing code after returning from a method call.
    *
-   * @param frameBefore frame before method call
    * @param methodCall method call to generate capturing code for
-   * @param frameAfter frame after method call
+   * @param metaInfo
    * @param position position of method call in method
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected abstract void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner);
+  protected abstract void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner);
 
   /**
    * Replace all return instructions by ThreadFinishedException.

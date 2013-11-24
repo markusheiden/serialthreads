@@ -2,7 +2,6 @@ package org.serialthreads.transformer.strategies.frequent3;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
@@ -133,7 +132,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   @Override
-  protected void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     int local = firstLocal(method);
@@ -151,7 +150,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, frameAfter, localFrame));
+    capture.add(pushToFrame(methodCall, metaInfo.frameAfter, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
     capture.add(new InsnNode(RETURN));
 
@@ -181,7 +180,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
+  protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
@@ -200,7 +199,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, frameBefore)) {
+    if (isSelfCall(methodCall, metaInfo.frameBefore)) {
       // self call: owner == this
       restore.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(clonedCall)) {
@@ -227,7 +226,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(restoreFrame);
 
     // restore stack "under" the returned value, if any
-    restore.add(popFromFrame(methodCall, frameAfter, localFrame));
+    restore.add(popFromFrame(methodCall, metaInfo.frameAfter, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
       if (isTailCall(methodCall)) {

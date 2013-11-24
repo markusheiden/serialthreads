@@ -2,9 +2,9 @@ package org.serialthreads.transformer.strategies.frequent2;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
+import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
@@ -52,7 +52,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected void createCaptureCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     int local = firstLocal(method);
@@ -70,8 +70,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, frameAfter, localFrame));
-    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, frameBefore), localPreviousFrame, localFrame));
+    capture.add(pushToFrame(methodCall, metaInfo.frameAfter, localFrame));
+    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo.frameBefore), localPreviousFrame, localFrame));
     capture.add(dummyReturnStatement(method));
 
     // normal execution
@@ -92,7 +92,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected InsnList createRestoreCodeForMethod(Frame frameBefore, MethodInsnNode methodCall, Frame frameAfter) {
+  protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
@@ -111,7 +111,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, frameBefore)) {
+    if (isSelfCall(methodCall, metaInfo.frameBefore)) {
       restore.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(clonedCall)) {
       // get owner
@@ -145,11 +145,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // restore stack "under" the returned value, if any
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
-    final boolean needToSaveReturnValue = isNotVoid(clonedCall) && frameAfter.getStackSize() > 1;
+    final boolean needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
     if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
     }
-    restore.add(popFromFrame(clonedCall, frameAfter, localFrame));
+    restore.add(popFromFrame(clonedCall, metaInfo.frameAfter, localFrame));
     if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
     }
