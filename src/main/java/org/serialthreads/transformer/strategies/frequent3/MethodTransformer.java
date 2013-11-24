@@ -254,15 +254,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
-   * Check if the given instruction is an interruptible method call.
-   *
-   * @param instruction Instruction
-   */
-  private boolean isInterruptible(MethodInsnNode instruction) {
-    return interruptibleMethodCalls.contains(instruction);
-  }
-
-  /**
    * Check if the given instruction is a tail call.
    *
    * @param instruction Instruction
