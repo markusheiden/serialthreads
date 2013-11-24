@@ -226,7 +226,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(restoreFrame);
 
     // restore stack "under" the returned value, if any
-    restore.add(popFromFrame(methodCall, metaInfo.frameAfter, localFrame));
+    restore.add(popFromFrame(methodCall, metaInfo, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
       if (isTailCall(methodCall)) {

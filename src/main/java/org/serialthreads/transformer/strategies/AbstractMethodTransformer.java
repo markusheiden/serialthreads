@@ -230,7 +230,7 @@ public abstract class AbstractMethodTransformer {
 
     // restore frame
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
-    restore.add(popFromFrame(methodCall, metaInfo.frameAfter, localFrame));
+    restore.add(popFromFrame(methodCall, metaInfo, localFrame));
 
     // resume
     restore.add(new JumpInsnNode(GOTO, normal));
@@ -414,15 +414,19 @@ public abstract class AbstractMethodTransformer {
    * @param localFrame number of local containing the frameAfter  @return generated capture code
    */
   protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    InsnList push = new InsnList();
+    InsnList result = new InsnList();
 
+    if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
+      return result;
+    }
+
+    Frame frameAfter = metaInfo.frameAfter;
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
-    Frame frameAfter = metaInfo.frameAfter;
 
     // get rid of dummy return value of called method first
     if (isCallNotVoid) {
-      push.add(popReturnValue(methodCall));
+      result.add(popReturnValue(methodCall));
     }
 
     // save stack
@@ -432,9 +436,9 @@ public abstract class AbstractMethodTransformer {
       ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
       if (value.isConstant() || value.isHoldInLocal()) {
         // just pop the value from stack, because the stack value is constant or stored in a local too.
-        push.add(code(value).pop());
+        result.add(code(value).pop());
       } else {
-        push.add(code(value).pushStack(stackIndexes[stack], localFrame));
+        result.add(code(value).pushStack(stackIndexes[stack], localFrame));
       }
     }
 
@@ -459,24 +463,24 @@ public abstract class AbstractMethodTransformer {
       for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
         IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
-        push.add(localCode.pushLocalVariableFast(local, i, localFrame));
+        result.add(localCode.pushLocalVariableFast(local, i, localFrame));
       }
 
       // for too high locals use "slow" storage in (dynamic) array
       if (iter.hasNext()) {
-        push.add(code.getLocals(localFrame));
+        result.add(code.getLocals(localFrame));
         for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
           IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
           if (iter.hasNext()) {
-            push.add(new InsnNode(DUP));
+            result.add(new InsnNode(DUP));
           }
-          push.add(localCode.pushLocalVariable(local, i));
+          result.add(localCode.pushLocalVariable(local, i));
         }
       }
     }
 
-    return push;
+    return result;
   }
 
   /**
@@ -569,13 +573,17 @@ public abstract class AbstractMethodTransformer {
    * Restore current frame before resuming the method call
    *
    * @param methodCall method call to process
-   * @param frame frame after method call
-   * @param localFrame number of local containing the frame
-   * @return generated restore code
+   * @param metaInfo Meta information about method call
+   * @param localFrame number of local containing the frame  @return generated restore code
    */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, Frame frame, int localFrame) {
+  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
     InsnList result = new InsnList();
 
+    if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
+      return result;
+    }
+
+    Frame frameAfter = metaInfo.frameAfter;
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
 
@@ -585,8 +593,8 @@ public abstract class AbstractMethodTransformer {
       InsnList copyLocals = new InsnList();
 
       // do not restore local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic ? 1 : 0, end = frame.getLocals() - 1; local <= end; local++) {
-        BasicValue value = (BasicValue) frame.getLocal(local);
+      for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
+        BasicValue value = (BasicValue) frameAfter.getLocal(local);
         if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
           if (extendedValue.isHoldInLowerLocal(local)) {
@@ -595,7 +603,7 @@ public abstract class AbstractMethodTransformer {
             copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
             copyLocals.add(code(extendedValue).store(local));
           } else {
-            // normal case -> pop local from frame
+            // normal case -> pop local from frameAfter
             popLocals.add(local);
           }
         }
@@ -607,7 +615,7 @@ public abstract class AbstractMethodTransformer {
       // for first locals use fast stack
       for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
-        IValueCode localCode = code((BasicValue) frame.getLocal(local));
+        IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
         result.add(localCode.popLocalVariableFast(local, i, localFrame));
       }
 
@@ -616,7 +624,7 @@ public abstract class AbstractMethodTransformer {
         result.add(code.getLocals(localFrame));
         for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
-          IValueCode localCode = code((BasicValue) frame.getLocal(local));
+          IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
           if (iter.hasNext()) {
             result.add(new InsnNode(DUP));
           }
@@ -630,9 +638,9 @@ public abstract class AbstractMethodTransformer {
 
     // restore stack
     // the topmost element is a dummy return value, if the called method is not a void method
-    int[] stackIndexes = stackIndexes(frame);
-    for (int stack = 0, end = isCallNotVoid ? frame.getStackSize() - 1 : frame.getStackSize(); stack < end; stack++) {
-      ExtendedValue value = (ExtendedValue) frame.getStack(stack);
+    int[] stackIndexes = stackIndexes(frameAfter);
+    for (int stack = 0, end = isCallNotVoid ? frameAfter.getStackSize() - 1 : frameAfter.getStackSize(); stack < end; stack++) {
+      ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
       if (value.isConstant()) {
         // the stack value is constant -> push constant
         logger.debug("        Detected constant value on stack: {} / value {}", value.toString(), value.getConstant());
@@ -642,7 +650,7 @@ public abstract class AbstractMethodTransformer {
         logger.debug("        Detected value of local on stack: {} / local {}", value.toString(), value.getLowestLocal());
         result.add(code(value).load(value.getLowestLocal()));
       } else {
-        // normal case -> pop stack from frame
+        // normal case -> pop stack from frameAfter
         result.add(code(value).popStack(stackIndexes[stack], localFrame));
       }
     }
