@@ -36,11 +36,11 @@ public interface IValueCode {
   public InsnList pushLocalVariable(int local, int index);
 
   /**
-   * Generate code to capture the current stack as a return value to a frame.
+   * Generate code to capture the current stack as a return value into the thread.
    *
-   * @param localFrame frame to push to
+   * @param localThread Thread to push to
    */
-  public InsnList pushReturnValue(int localFrame);
+  public InsnList pushReturnValue(int localThread);
 
   /**
    * Generate code to restore a local variable from a frame.

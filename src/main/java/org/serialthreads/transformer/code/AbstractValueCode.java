@@ -131,6 +131,12 @@ public abstract class AbstractValueCode implements IValueCode {
     return instructions;
   }
 
+  /**
+   * Generate code to capture the return value into the thread.
+   * Required objects on the stack: Thread, Value.
+   *
+   * @param instructions Instructions
+   */
   protected final void doPushReturnValueImpl(InsnList instructions) {
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(new InsnNode(RETURN));
