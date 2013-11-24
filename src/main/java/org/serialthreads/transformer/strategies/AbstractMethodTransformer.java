@@ -47,6 +47,7 @@ public abstract class AbstractMethodTransformer {
   protected static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
   protected static final String TAG_INTERRUPTIBLE = "INTERRUPTIBLE";
+  protected static final String TAG_INTERRUPT = "INTERRUPT";
   protected static final String TAG_TAIL_CALL = "TAIL_CALL";
 
   protected final IClassInfoCache classInfoCache;
@@ -97,7 +98,9 @@ public abstract class AbstractMethodTransformer {
         if (classInfoCache.isInterruptible(methodCall)) {
           interruptibleMethodCalls.add(methodCall);
           tag(instruction, TAG_INTERRUPTIBLE);
-          if (isNotVoid(methodCall) && isReturn(methodCall.getNext())) {
+          if (classInfoCache.isInterrupt(methodCall)) {
+            tag(instruction, TAG_INTERRUPT);
+          } else if (isNotVoid(methodCall) && isReturn(methodCall.getNext())) {
             tag(instruction, TAG_TAIL_CALL);
             tag(instruction.getNext(), TAG_TAIL_CALL);
           }
@@ -195,7 +198,7 @@ public abstract class AbstractMethodTransformer {
    * @return restore code
    */
   protected InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return classInfoCache.isInterrupt(methodCall) ?
+    return metaInfo.tags.contains(TAG_INTERRUPT) ?
       createRestoreCodeForInterrupt(methodCall, metaInfo) :
       createRestoreCodeForMethod(methodCall, metaInfo);
   }
@@ -254,7 +257,7 @@ public abstract class AbstractMethodTransformer {
    * @param suppressOwner suppress capturing of owner?
    */
   protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
-    if (classInfoCache.isInterrupt(methodCall)) {
+    if (metaInfo.tags.contains(TAG_INTERRUPT)) {
       createCaptureCodeForInterrupt(methodCall, metaInfo, position, containsMoreThanOneMethodCall, suppressOwner);
     } else {
       createCaptureCodeForMethod(methodCall, metaInfo, position, containsMoreThanOneMethodCall, suppressOwner);
@@ -265,7 +268,7 @@ public abstract class AbstractMethodTransformer {
    * Insert frame capturing code when starting an interrupt.
    *
    * @param methodCall method call to generate capturing code for
-   * @param metaInfo
+   * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
