@@ -32,7 +32,7 @@ public class TestDouble implements IRunnable {
     double local8 = local7 + 1;
     double local9 = local8 + 1;
 
-    doubleerrupt();
+    interrupt();
 
     value0 = local0;
     value1 = local1;
@@ -45,11 +45,11 @@ public class TestDouble implements IRunnable {
     value8 = local8;
     value9 = local9;
 
-    doubleerrupt();
+    interrupt();
   }
 
   @Interrupt
-  private void doubleerrupt() {
+  private void interrupt() {
     // method call will be redirected to interrupt code
   }
 }

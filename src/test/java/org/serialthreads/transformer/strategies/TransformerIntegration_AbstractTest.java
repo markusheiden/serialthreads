@@ -1,6 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.ClassVisitor;
@@ -24,10 +23,12 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   protected IStrategy strategy;
 
+  /**
+   * Class loader executing the strategy.
+   */
   private TransformingClassLoader classLoader;
 
   @Before
-  @After
   public void setUp() {
     SerialThreadManager.DEBUG = true;
 
@@ -81,7 +82,7 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
-   * Test that local are stored and restored correctly.
+   * Test that locals are stored and restored correctly.
    *
    * @param clazz Class of test object
    * @param parser Parser for the primitive type which is tested
@@ -96,6 +97,18 @@ public abstract class TransformerIntegration_AbstractTest {
     for (int i = 0; i < 9; i++) {
       assertEquals(parser.parse("" + i), field("value" + i));
     }
+  }
+
+  /**
+   * Test that tail calls return the correct value.
+   */
+  @Test
+  public void testTailCall() throws Exception {
+    create(TestTailCall.class);
+    run();
+    assertEquals(-1, field("value"));
+    run();
+    assertEquals(1, field("value"));
   }
 
   //
@@ -130,7 +143,7 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
-   * Run test object once.
+   * Run test object once (until the next interrupt).
    */
   private void run() throws Exception {
     test.getClass().getMethod("run").invoke(test);

@@ -32,7 +32,7 @@ public class TestFloat implements IRunnable {
     float local8 = local7 + 1;
     float local9 = local8 + 1;
 
-    floaterrupt();
+    interrupt();
 
     value0 = local0;
     value1 = local1;
@@ -45,11 +45,11 @@ public class TestFloat implements IRunnable {
     value8 = local8;
     value9 = local9;
 
-    floaterrupt();
+    interrupt();
   }
 
   @Interrupt
-  private void floaterrupt() {
+  private void interrupt() {
     // method call will be redirected to interrupt code
   }
 }
