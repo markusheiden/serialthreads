@@ -44,8 +44,8 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testTransform() throws Exception {
-    Class<?> clazz = classLoader.loadClass(TestInterruptible.class.getName());
-    clazz.getMethod("runTransformed").invoke(clazz.newInstance());
+    create(TestInterruptible.class);
+    invoke("runTransformed");
   }
 
   /**
@@ -62,59 +62,58 @@ public abstract class TransformerIntegration_AbstractTest {
 
   @Test
   public void testLocalStorage_int() throws Exception {
-    create(TestInt.class);
-    run();
-    for (int i = 0; i < 9; i++) {
-      assertEquals(-1, field("value" + i));
-    }
-    run();
-    for (int i = 0; i < 9; i++) {
-      assertEquals(i, field("value" + i));
-    }
+    testLocalStorage(TestInt.class, Integer::parseInt);
   }
 
   @Test
   public void testLocalStorage_long() throws Exception {
-    create(TestLong.class);
-    run();
-    for (int i = 0; i < 9; i++) {
-      assertEquals((long) -1, field("value" + i));
-    }
-    run();
-    for (int i = 0; i < 9; i++) {
-      assertEquals((long) i, field("value" + i));
-    }
+    testLocalStorage(TestLong.class, Long::parseLong);
   }
 
   @Test
   public void testLocalStorage_float() throws Exception {
-    create(TestFloat.class);
-    run();
-    for (int i = 0; i < 9; i++) {
-      assertEquals((float) -1, field("value" + i));
-    }
-    run();
-    for (int i = 0; i < 9; i++) {
-      assertEquals((float) i, field("value" + i));
-    }
+    testLocalStorage(TestFloat.class, Float::parseFloat);
   }
 
   @Test
   public void testLocalStorage_double() throws Exception {
-    create(TestDouble.class);
+    testLocalStorage(TestDouble.class, Double::parseDouble);
+  }
+
+  /**
+   * Test that local are stored and restored correctly.
+   *
+   * @param clazz Class of test object
+   * @param parser Parser for the primitive type which is tested
+   */
+  private void testLocalStorage(Class<? extends IRunnable> clazz, Parser parser) throws Exception {
+    create(clazz);
     run();
     for (int i = 0; i < 9; i++) {
-      assertEquals((double) -1, field("value" + i));
+      assertEquals(parser.parse("-1"), field("value" + i));
     }
     run();
     for (int i = 0; i < 9; i++) {
-      assertEquals((double) i, field("value" + i));
+      assertEquals(parser.parse("" + i), field("value" + i));
     }
   }
 
   //
   // Reflection test support
   //
+
+  /**
+   * SAM interface for a number parser.
+   */
+  private static interface Parser {
+    /**
+     * Parse a number from a string.
+     *
+     * @param value String representation of number
+     * @return Number
+     */
+    public Object parse(String value);
+  }
 
   /**
    * Test object.
@@ -145,5 +144,15 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   private Object field(String name) throws Exception {
     return test.getClass().getField(name).get(test);
+  }
+
+  /**
+   * Invoke a method without parameters on the test object.
+   *
+   * @param name Name of the method
+   * @return Value of the field
+   */
+  private Object invoke(String name) throws Exception {
+    return test.getClass().getMethod(name).invoke(test);
   }
 }
