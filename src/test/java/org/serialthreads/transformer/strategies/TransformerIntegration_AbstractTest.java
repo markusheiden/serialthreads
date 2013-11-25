@@ -61,8 +61,8 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   @Test
-  public void testLocalStorage_Integer() throws Exception {
-    create(TestInteger.class);
+  public void testLocalStorage_int() throws Exception {
+    create(TestInt.class);
     run();
     for (int i = 0; i < 9; i++) {
       assertEquals(-1, field("value" + i));
@@ -70,6 +70,45 @@ public abstract class TransformerIntegration_AbstractTest {
     run();
     for (int i = 0; i < 9; i++) {
       assertEquals(i, field("value" + i));
+    }
+  }
+
+  @Test
+  public void testLocalStorage_long() throws Exception {
+    create(TestLong.class);
+    run();
+    for (int i = 0; i < 9; i++) {
+      assertEquals((long) -1, field("value" + i));
+    }
+    run();
+    for (int i = 0; i < 9; i++) {
+      assertEquals((long) i, field("value" + i));
+    }
+  }
+
+  @Test
+  public void testLocalStorage_float() throws Exception {
+    create(TestFloat.class);
+    run();
+    for (int i = 0; i < 9; i++) {
+      assertEquals((float) -1, field("value" + i));
+    }
+    run();
+    for (int i = 0; i < 9; i++) {
+      assertEquals((float) i, field("value" + i));
+    }
+  }
+
+  @Test
+  public void testLocalStorage_double() throws Exception {
+    create(TestDouble.class);
+    run();
+    for (int i = 0; i < 9; i++) {
+      assertEquals((double) -1, field("value" + i));
+    }
+    run();
+    for (int i = 0; i < 9; i++) {
+      assertEquals((double) i, field("value" + i));
     }
   }
 
