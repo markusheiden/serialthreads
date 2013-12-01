@@ -81,13 +81,11 @@ public class ExtendedAnalyzerTest {
     LabelNode label1 = new LabelNode();
     LabelNode label2 = new LabelNode();
 
-    // 0: local1 = 1
+    // 0: define local1, local2 and local3
     instructions.add(new InsnNode(ICONST_1));
     instructions.add(new VarInsnNode(ISTORE, 1));
-    // 2: local2 = 1
     instructions.add(new InsnNode(ICONST_1));
     instructions.add(new VarInsnNode(ISTORE, 2));
-    // 4: local3 = 1
     instructions.add(new InsnNode(ICONST_1));
     instructions.add(new VarInsnNode(ISTORE, 3));
 
@@ -111,7 +109,7 @@ public class ExtendedAnalyzerTest {
     instructions.add(new InsnNode(IRETURN));
 
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
-    ExtendedFrame[] frames = analyzer.analyze("test", method);
+    ExtendedFrame[] frames = analyzer.analyze("Test", method);
 
     // Check that at instruction 15 just local 1 is declared as needed for the remaining code
     assertEquals(setOf(1), frames[15].neededLocals);
