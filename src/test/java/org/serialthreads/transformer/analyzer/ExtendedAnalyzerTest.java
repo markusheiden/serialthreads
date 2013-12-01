@@ -79,6 +79,7 @@ public class ExtendedAnalyzerTest {
     InsnList instructions = method.instructions;
 
     LabelNode label1 = new LabelNode();
+    LabelNode label2 = new LabelNode();
 
     // 0: local1 = 1
     instructions.add(new InsnNode(ICONST_1));
@@ -92,27 +93,35 @@ public class ExtendedAnalyzerTest {
 
     instructions.add(new InsnNode(ICONST_0));
     // 7: branch
-    instructions.add(new JumpInsnNode(IFEQ, label1));
+    instructions.add(new JumpInsnNode(IFEQ, label2));
 
     // 8: usage of local2
     instructions.add(new VarInsnNode(ILOAD, 2));
     instructions.add(new VarInsnNode(ISTORE, 2));
+    instructions.add(new JumpInsnNode(GOTO, label1));
+
+    instructions.add(label2);
+    // 12: usage of local3
+    instructions.add(new VarInsnNode(ILOAD, 3));
+    instructions.add(new VarInsnNode(ISTORE, 3));
 
     instructions.add(label1);
-
-    // 11: return local1 -> a this point just local1 is needed for the remaining code
+    // 15: return local1 -> a this point just local1 is needed for the remaining code
     instructions.add(new VarInsnNode(ILOAD, 1));
     instructions.add(new InsnNode(IRETURN));
 
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
     ExtendedFrame[] frames = analyzer.analyze("test", method);
 
-    // Check that at instruction 11 just local 1 is declared as needed for the remaining code
-    assertEquals(setOf(1), frames[11].neededLocals);
-    // Check that at instruction 7 just locals 1 & 2 are declared as needed for the remaining code
+    // Check that at instruction 15 just local 1 is declared as needed for the remaining code
+    assertEquals(setOf(1), frames[15].neededLocals);
+    // Check that at instruction 8 just locals 1 & 2 are declared as needed for the remaining code
     assertEquals(setOf(1, 2), frames[8].neededLocals);
-    // Check that at instruction 6 (merge point) just locals 1 & 2 are declared as needed for the remaining code
-    assertEquals(setOf(1, 2), frames[7].neededLocals);
+    // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code
+    assertEquals(setOf(1, 3), frames[12].neededLocals);
+
+    // Check that at instruction 6 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
+    assertEquals(setOf(1, 2, 3), frames[7].neededLocals);
   }
 
   /**
