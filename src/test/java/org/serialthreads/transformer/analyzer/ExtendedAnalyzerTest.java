@@ -109,7 +109,7 @@ public class ExtendedAnalyzerTest {
     instructions.add(new VarInsnNode(ILOAD, 1));
     instructions.add(new InsnNode(IRETURN));
 
-    ExtendedFrame[] frames = analyzer.analyze("est", method);
+    ExtendedFrame[] frames = analyzer.analyze("Test", method);
 
     // Check that at instruction 15 just local 1 is declared as needed for the remaining code
     assertEquals(setOf(1), frames[15].neededLocals);
@@ -120,6 +120,33 @@ public class ExtendedAnalyzerTest {
 
     // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
     assertEquals(setOf(1, 2, 3), frames[7].neededLocals);
+  }
+
+  @Test
+  public void testBackflow_endless() throws Exception {
+    MethodNode method = new MethodNode(0, "test", "()I", null, new String[0]);
+    method.maxLocals = 3;
+    method.maxStack = 1;
+    InsnList instructions = method.instructions;
+
+    LabelNode label1 = new LabelNode();
+
+    // 0: define local1 and local2
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new VarInsnNode(ISTORE, 1));
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new VarInsnNode(ISTORE, 2));
+
+    instructions.add(label1);
+    // 5: usage of local1 -> at this point just local1 is needed for the remaining code
+    instructions.add(new VarInsnNode(ILOAD, 1));
+    instructions.add(new VarInsnNode(ISTORE, 1));
+    instructions.add(new JumpInsnNode(GOTO, label1));
+
+    ExtendedFrame[] frames = analyzer.analyze("Test", method);
+
+    // Check that at instruction 5 locals 1 is declared as needed for the remaining code
+    assertEquals(setOf(1), frames[5].neededLocals);
   }
 
   /**
