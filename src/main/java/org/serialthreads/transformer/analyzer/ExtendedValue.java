@@ -133,7 +133,7 @@ public class ExtendedValue extends BasicValue {
   }
 
   /**
-   * Does this value is hold in a local that is lower than the given one?
+   * Is this value hold in a local that is lower than the given one?
    *
    * @param local number of local
    */
