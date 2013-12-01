@@ -92,16 +92,16 @@ public class ExtendedAnalyzerTest {
     instructions.add(new VarInsnNode(ISTORE, 3));
 
     instructions.add(new InsnNode(ICONST_0));
-    // 7: branch
+    // 7: (pseudo) conditional branch -> at this point local1, local2 and local3 are needed for the remaining code
     instructions.add(new JumpInsnNode(IFEQ, label2));
 
-    // 8: usage of local2
+    // 8: usage of local2 -> at this point just local2 and local1 are needed for the remaining code
     instructions.add(new VarInsnNode(ILOAD, 2));
     instructions.add(new VarInsnNode(ISTORE, 2));
     instructions.add(new JumpInsnNode(GOTO, label1));
 
     instructions.add(label2);
-    // 12: usage of local3
+    // 12: usage of local3 -> at this point just local3 and local1 are needed for the remaining code
     instructions.add(new VarInsnNode(ILOAD, 3));
     instructions.add(new VarInsnNode(ISTORE, 3));
 
@@ -120,7 +120,7 @@ public class ExtendedAnalyzerTest {
     // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code
     assertEquals(setOf(1, 3), frames[12].neededLocals);
 
-    // Check that at instruction 6 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
+    // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
     assertEquals(setOf(1, 2, 3), frames[7].neededLocals);
   }
 
