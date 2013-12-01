@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 
 /**
  * Method related code.
@@ -267,6 +266,16 @@ public class MethodCode {
   public static boolean isReturn(AbstractInsnNode instruction) {
     int opcode = instruction.getOpcode();
     return opcode >= IRETURN && opcode <= RETURN;
+  }
+
+  /**
+   * Is an instruction a load?.
+   *
+   * @param instruction Instruction
+   */
+  public static boolean isLoad(AbstractInsnNode instruction) {
+    int opcode = instruction.getOpcode();
+    return opcode >= ILOAD && opcode <= ALOAD;
   }
 
   /**

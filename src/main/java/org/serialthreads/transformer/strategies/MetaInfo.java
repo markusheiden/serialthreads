@@ -1,6 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
-import org.objectweb.asm.tree.analysis.Frame;
+import org.serialthreads.transformer.analyzer.ExtendedFrame;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,12 +12,12 @@ public class MetaInfo {
   /**
    * Frame before instruction.
    */
-  public final Frame frameBefore;
+  public final ExtendedFrame frameBefore;
 
   /**
    * Frame after instruction.
    */
-  public final Frame frameAfter;
+  public final ExtendedFrame frameAfter;
 
   /**
    * Tags.
@@ -30,7 +30,7 @@ public class MetaInfo {
    * @param frameBefore Frame before instruction
    * @param frameAfter Frame after instruction
    */
-  public MetaInfo(Frame frameBefore, Frame frameAfter) {
+  public MetaInfo(ExtendedFrame frameBefore, ExtendedFrame frameAfter) {
     this.frameBefore = frameBefore;
     this.frameAfter = frameAfter;
   }

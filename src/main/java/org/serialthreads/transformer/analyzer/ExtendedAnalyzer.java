@@ -1,16 +1,17 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static org.serialthreads.transformer.code.MethodCode.isLoad;
+import static org.serialthreads.transformer.code.MethodCode.isReturn;
 
 /**
  * Extended analyzer.
@@ -18,6 +19,12 @@ import java.util.List;
  * Always uses a verifier as interpreter.
  */
 public class ExtendedAnalyzer extends Analyzer<BasicValue> {
+  /**
+   * Backward flow of instructions.
+   * To instruction index -> From instruction index.
+   */
+  private final Map<Integer, NavigableSet<Integer>> backflow = new HashMap<>();
+
   /**
    * Analyze a method to compute its frames.
    *
@@ -56,6 +63,79 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     List<Type> currentClassInterfaces,
     boolean isInterface) {
     super(new ExtendedVerifier(classInfoCache, currentClass, currentSuperClass, currentClassInterfaces, isInterface));
+  }
+
+  @Override
+  public Frame<BasicValue>[] analyze(String owner, MethodNode m) throws AnalyzerException {
+    Frame<BasicValue>[] result = super.analyze(owner, m);
+
+    InsnList instructions = m.instructions;
+
+    SortedSet<Integer> startingPoints = new TreeSet<>();
+    for (int i = 0; i < instructions.size(); i++) {
+      AbstractInsnNode instruction = instructions.get(i);
+      if (isReturn(instruction) || instruction.getOpcode() == ATHROW) {
+        startingPoints.add(i);
+      }
+    }
+
+    while (!startingPoints.isEmpty()) {
+      traceBack(m, startingPoints, result);
+    }
+
+    return result;
+  }
+
+  private void traceBack(MethodNode m, SortedSet<Integer> startingPoints, Frame<BasicValue>[] frames) {
+    Integer index = startingPoints.last();
+    startingPoints.remove(index);
+    ExtendedFrame firstFrame = (ExtendedFrame) frames[index];
+    if (firstFrame == null) {
+      return;
+    }
+
+    InsnList instructions = m.instructions;
+
+    while (true) {
+      AbstractInsnNode instruction = instructions.get(index);
+      ExtendedFrame frame = (ExtendedFrame) frames[index];
+
+      if (isLoad(instruction)) {
+        frame.neededLocals.add(((VarInsnNode) instruction).var);
+      }
+
+      NavigableSet<Integer> froms = backflow.get(index);
+      if (froms == null || froms.isEmpty()) {
+        // no predecessors at all -> we are finished with the current starting point
+        return;
+      }
+
+      // Update needed locals of all other predecessors
+      for (Integer from : froms) {
+        ExtendedFrame fromFrame = (ExtendedFrame) frames[from];
+        boolean modified = fromFrame.neededLocals.addAll(frame.neededLocals);
+        if (modified) {
+          startingPoints.add(from);
+        }
+      }
+
+      index = froms.lower(index);
+      if (index == null) {
+        // no direct predecessor -> we are finished with the current starting point
+        return;
+      }
+      startingPoints.remove(index);
+    }
+  }
+
+  @Override
+  protected void newControlFlowEdge(int from, int to) {
+    NavigableSet<Integer> froms = backflow.get(to);
+    if (froms == null) {
+      froms = new TreeSet<>();
+      backflow.put(to, froms);
+    }
+    froms.add(from);
   }
 
   @Override

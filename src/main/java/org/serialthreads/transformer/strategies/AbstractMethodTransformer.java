@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.*;
 import org.serialthreads.context.Stack;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
+import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
@@ -87,7 +88,7 @@ public abstract class AbstractMethodTransformer {
     // Init meta information
     Frame[] frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
     for (int i = 0, e = method.instructions.size(), last = e - 1; i < e; i++) {
-      metaInfos.put(method.instructions.get(i), new MetaInfo(frames[i], i < last ? frames[i + 1] : null));
+      metaInfos.put(method.instructions.get(i), new MetaInfo((ExtendedFrame) frames[i], i < last ? (ExtendedFrame) frames[i + 1] : null));
     }
 
     // Tag special instructions
@@ -420,7 +421,7 @@ public abstract class AbstractMethodTransformer {
       return result;
     }
 
-    Frame frameAfter = metaInfo.frameAfter;
+    ExtendedFrame frameAfter = metaInfo.frameAfter;
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
 
@@ -448,7 +449,7 @@ public abstract class AbstractMethodTransformer {
 
       // do not store local 0 for non static methods, because it always contains "this"
       for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-        BasicValue value = (BasicValue) frameAfter.getLocal(local);
+        BasicValue value = frameAfter.getLocal(local);
         if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
           if (!extendedValue.isHoldInLowerLocal(local)) {
@@ -583,7 +584,7 @@ public abstract class AbstractMethodTransformer {
       return result;
     }
 
-    Frame frameAfter = metaInfo.frameAfter;
+    ExtendedFrame frameAfter = metaInfo.frameAfter;
     final boolean isMethodNotStatic = isNotStatic(method);
     final boolean isCallNotVoid = isNotVoid(methodCall);
 

@@ -4,13 +4,21 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.serialthreads.transformer.analyzer.ExtendedValue.*;
 
 /**
  * Frame for extended analyzer.
  * Supports detection of stack elements that have the same value as a local.
  */
-public class ExtendedFrame extends Frame<BasicValue> {
+public final class ExtendedFrame extends Frame<BasicValue> {
+  /**
+   * Need locals.
+   */
+  public final Set<Integer> neededLocals = new HashSet<>();
+
   /**
    * Constructs a new frame with the given size.
    *
@@ -164,5 +172,24 @@ public class ExtendedFrame extends Frame<BasicValue> {
       // convert the value to an extended value -> new value
       super.push(value(value.getType()));
     }
+  }
+
+  //
+  // Backflow analysis related stuff
+  //
+
+  /**
+   * Is this value hold in a needed local that is lower than the given one?
+   *
+   * @param local Local
+   */
+  public boolean isHoldInLowerNeededLocal(int local) {
+    for (int lowerLocal : ((ExtendedValue) getLocal(local)).getLocals()) {
+      if (lowerLocal < local && neededLocals.contains(lowerLocal)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
