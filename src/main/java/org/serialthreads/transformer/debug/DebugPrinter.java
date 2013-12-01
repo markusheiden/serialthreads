@@ -2,8 +2,8 @@ package org.serialthreads.transformer.debug;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.Textifier;
+import org.serialthreads.transformer.analyzer.ExtendedFrame;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +13,9 @@ import java.util.List;
  */
 class DebugPrinter extends Textifier {
   private int instruction;
-  private final Frame[] frames;
+  private final ExtendedFrame[] frames;
 
-  public DebugPrinter(Frame[] frames) {
+  public DebugPrinter(ExtendedFrame[] frames) {
     this.instruction = 0;
     this.frames = frames;
   }
@@ -34,17 +34,18 @@ class DebugPrinter extends Textifier {
   }
 
   private void addByteCodeIndex(int lastSize) {
-    Frame frame = frames[instruction];
+    ExtendedFrame frame = frames[instruction];
     if (frame != null) {
       List<String> frameText = new ArrayList<>();
       for (int i = 0; i < frame.getLocals(); i++) {
-        BasicValue local = (BasicValue) frame.getLocal(i);
+        BasicValue local = frame.getLocal(i);
         if (local != BasicValue.UNINITIALIZED_VALUE) {
           frameText.add(tab3 + "Local: " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local) + "\n");
         }
       }
+      frameText.add(tab3 + "Needed locals: " + frame.neededLocals + "\n");
       for (int i = 0; i < frame.getStackSize(); i++) {
-        BasicValue stack = (BasicValue) frame.getStack(i);
+        BasicValue stack = frame.getStack(i);
         frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack) + "\n");
       }
 

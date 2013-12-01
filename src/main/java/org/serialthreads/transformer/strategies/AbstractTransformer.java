@@ -150,7 +150,7 @@ public abstract class AbstractTransformer implements ITransformer {
       } catch (Exception e) {
         // disassemble erroneous method
         logger.debug("Unable to analyze transformed method {}: {}", methodName(clazz, method), e.getMessage());
-        logger.debug("Byte code:\n{}", Debugger.debug(clazz.name, method));
+        logger.debug("Byte code:\n{}", Debugger.debug(clazz, method));
         throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
       }
     }

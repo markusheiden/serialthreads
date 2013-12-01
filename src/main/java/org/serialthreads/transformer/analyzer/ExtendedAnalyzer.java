@@ -34,7 +34,18 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
    * @return frames
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
-  public static Frame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) throws AnalyzerException {
+  public static ExtendedFrame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) throws AnalyzerException {
+    return create(clazz, classInfoCache).analyze(clazz.name, method);
+  }
+
+  /**
+   * Constructs a new {@link ExtendedAnalyzer} to analyze a specific class.
+   * This class will not be loaded into the JVM since it may be incorrect.
+   *
+   * @param clazz owner of method
+   * @param classInfoCache class info cache
+   */
+  public static ExtendedAnalyzer create(ClassNode clazz, IClassInfoCache classInfoCache) {
     Type classType = Type.getObjectType(clazz.name);
     Type superClassType = Type.getObjectType(clazz.superName);
     List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
@@ -43,26 +54,16 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     }
     boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
 
-    return new ExtendedAnalyzer(classInfoCache, classType, superClassType, interfaceTypes, isInterface).analyze(clazz.name, method);
+    return new ExtendedAnalyzer(new ExtendedVerifier(classInfoCache, classType, superClassType, interfaceTypes, isInterface));
   }
 
   /**
-   * Constructs a new {@link ExtendedAnalyzer} to analyze a specific class.
-   * This class will not be loaded into the JVM since it may be incorrect.
+   * Constructs a new {@link ExtendedAnalyzer}.
    *
-   * @param classInfoCache class info cache
-   * @param currentClass the class that is analyzed.
-   * @param currentSuperClass the super class of the class that is analyzed.
-   * @param currentClassInterfaces the interfaces implemented by the class that is analyzed.
-   * @param isInterface if the class that is analyzed is an interface.
+   * @param verifier Verifier
    */
-  public ExtendedAnalyzer(
-    IClassInfoCache classInfoCache,
-    Type currentClass,
-    Type currentSuperClass,
-    List<Type> currentClassInterfaces,
-    boolean isInterface) {
-    super(new ExtendedVerifier(classInfoCache, currentClass, currentSuperClass, currentClassInterfaces, isInterface));
+  public ExtendedAnalyzer(ExtendedVerifier verifier) {
+    super(verifier);
   }
 
   @Override
@@ -86,6 +87,14 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     }
 
 
+    return result;
+  }
+
+  @Override
+  public ExtendedFrame[] getFrames() {
+    Frame<BasicValue>[] frames = super.getFrames();
+    ExtendedFrame[] result = new ExtendedFrame[frames.length];
+    System.arraycopy(frames, 0, result, 0, frames.length);
     return result;
   }
 

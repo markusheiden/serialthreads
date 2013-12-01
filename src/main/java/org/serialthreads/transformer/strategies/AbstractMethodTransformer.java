@@ -452,7 +452,7 @@ public abstract class AbstractMethodTransformer {
         BasicValue value = frameAfter.getLocal(local);
         if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
-          if (!extendedValue.isHoldInLowerLocal(local)) {
+          if (frameAfter.neededLocals.contains(local) && !frameAfter.isHoldInLowerNeededLocal(local)) {
             pushLocals.add(local);
           }
         }
@@ -598,7 +598,10 @@ public abstract class AbstractMethodTransformer {
         BasicValue value = frameAfter.getLocal(local);
         if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
-          if (extendedValue.isHoldInLowerLocal(local)) {
+          if (!frameAfter.neededLocals.contains(local)) {
+            // Ignore not needed locals
+            continue;
+          } else if (frameAfter.isHoldInLowerNeededLocal(local)) {
             // the value of the local is hold in a lower local too -> copy
             logger.debug("        Detected codes with the same value: {}/{}", extendedValue.getLowestLocal(), local);
             copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));

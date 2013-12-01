@@ -4,6 +4,7 @@ import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
+import org.serialthreads.transformer.debug.Debugger;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ class RunMethodTransformer extends MethodTransformer {
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
+    System.err.println(Debugger.debug(clazz, method));
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
     analyze();
 

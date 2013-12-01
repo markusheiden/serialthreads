@@ -19,7 +19,7 @@ import static org.objectweb.asm.Opcodes.*;
 public class ExtendedAnalyzerTest {
   @Test
   public void testNewFrame_ii() {
-    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
+    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(new ExtendedVerifier(null, null, null, null, false));
 
     ExtendedFrame frame = analyzer.newFrame(2, 2);
 
@@ -45,7 +45,7 @@ public class ExtendedAnalyzerTest {
 
   @Test
   public void testNewFrame_frame() {
-    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
+    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(new ExtendedVerifier(null, null, null, null, false));
 
     ExtendedFrame src = new ExtendedFrame(2, 2);
     src.setLocal(0, BasicValue.UNINITIALIZED_VALUE);
@@ -108,8 +108,8 @@ public class ExtendedAnalyzerTest {
     instructions.add(new VarInsnNode(ILOAD, 1));
     instructions.add(new InsnNode(IRETURN));
 
-    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
-    ExtendedFrame[] frames = analyzer.analyze("Test", method);
+    ExtendedAnalyzer analyzer = new ExtendedAnalyzer(new ExtendedVerifier(null, null, null, null, false));
+    ExtendedFrame[] frames = analyzer.analyze("est", method);
 
     // Check that at instruction 15 just local 1 is declared as needed for the remaining code
     assertEquals(setOf(1), frames[15].neededLocals);
