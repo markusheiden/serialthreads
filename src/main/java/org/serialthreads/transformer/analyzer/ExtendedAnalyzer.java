@@ -67,6 +67,14 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
   }
 
   @Override
+  public ExtendedFrame[] getFrames() {
+    Frame<BasicValue>[] frames = super.getFrames();
+    ExtendedFrame[] result = new ExtendedFrame[frames.length];
+    System.arraycopy(frames, 0, result, 0, frames.length);
+    return result;
+  }
+
+  @Override
   public ExtendedFrame[] analyze(String owner, MethodNode m) throws AnalyzerException {
     Frame<BasicValue>[] frames = super.analyze(owner, m);
     ExtendedFrame[] result = new ExtendedFrame[frames.length];
@@ -86,15 +94,6 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
       traceBack(m, startingPoints, result);
     }
 
-
-    return result;
-  }
-
-  @Override
-  public ExtendedFrame[] getFrames() {
-    Frame<BasicValue>[] frames = super.getFrames();
-    ExtendedFrame[] result = new ExtendedFrame[frames.length];
-    System.arraycopy(frames, 0, result, 0, frames.length);
     return result;
   }
 
