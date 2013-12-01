@@ -98,10 +98,10 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
     while (true) {
       AbstractInsnNode instruction = instructions.get(index);
-      ExtendedFrame frame = (ExtendedFrame) frames[index];
+      ExtendedFrame frameBefore = (ExtendedFrame) frames[index];
 
       if (isLoad(instruction)) {
-        frame.neededLocals.add(((VarInsnNode) instruction).var);
+        frameBefore.neededLocals.add(((VarInsnNode) instruction).var);
       }
 
       NavigableSet<Integer> froms = backflow.get(index);
@@ -113,7 +113,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
       // Update needed locals of all other predecessors
       for (Integer from : froms) {
         ExtendedFrame fromFrame = (ExtendedFrame) frames[from];
-        boolean modified = fromFrame.neededLocals.addAll(frame.neededLocals);
+        boolean modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
         if (modified) {
           startingPoints.add(from);
         }
