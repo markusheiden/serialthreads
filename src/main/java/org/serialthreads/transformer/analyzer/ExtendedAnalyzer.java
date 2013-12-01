@@ -11,7 +11,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import java.util.*;
 
 import static org.serialthreads.transformer.code.MethodCode.isLoad;
-import static org.serialthreads.transformer.code.MethodCode.isReturn;
 
 /**
  * Extended analyzer.
@@ -19,6 +18,19 @@ import static org.serialthreads.transformer.code.MethodCode.isReturn;
  * Always uses a verifier as interpreter.
  */
 public class ExtendedAnalyzer extends Analyzer<BasicValue> {
+  /**
+   * Opcodes considered as starting points.
+   * Jump instructions have to considered too, because of methods with an endless loop (-> no return).
+   */
+  private static final Set<Integer> STARTING_POINT_OPCODES = new TreeSet<>(Arrays.asList(
+    IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN,
+    ATHROW,
+    GOTO,
+    IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
+    IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE,
+    IF_ACMPEQ, IF_ACMPNE
+  ));
+
   /**
    * Backward flow of instructions.
    * To instruction index -> From instruction index.
@@ -85,8 +97,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     SortedSet<Integer> startingPoints = new TreeSet<>();
     for (int i = 0; i < instructions.size(); i++) {
       AbstractInsnNode instruction = instructions.get(i);
-      int opcode = instruction.getOpcode();
-      if (isReturn(instruction) || opcode == ATHROW || opcode == GOTO) {
+      if (STARTING_POINT_OPCODES.contains(instruction.getOpcode())) {
         startingPoints.add(i);
       }
     }
@@ -98,16 +109,25 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     return result;
   }
 
-  private void traceBack(MethodNode m, SortedSet<Integer> startingPoints, ExtendedFrame[] frames) {
+  /**
+   * Traces from the last starting point to one of its predecessors, until there is no more predecessor.
+   * Updates the needed locals on its way.
+   *
+   * @param method Method
+   * @param startingPoints Starting points
+   * @param frames Frames
+   */
+  private void traceBack(MethodNode method, SortedSet<Integer> startingPoints, ExtendedFrame[] frames) {
+    // Use last starting point
     Integer index = startingPoints.last();
     startingPoints.remove(index);
     ExtendedFrame firstFrame = frames[index];
     if (firstFrame == null) {
+      // No frame -> unreachable code -> no need to compute
       return;
     }
 
-    InsnList instructions = m.instructions;
-
+    InsnList instructions = method.instructions;
     while (true) {
       AbstractInsnNode instruction = instructions.get(index);
       ExtendedFrame frameBefore = frames[index];
@@ -131,6 +151,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         }
       }
 
+      // move backwards to nearest predecessor
       index = froms.lower(index);
       if (index == null) {
         // no direct predecessor -> we are finished with the current starting point
