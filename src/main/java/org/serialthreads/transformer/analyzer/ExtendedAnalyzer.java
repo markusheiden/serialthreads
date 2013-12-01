@@ -66,8 +66,10 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
   }
 
   @Override
-  public Frame<BasicValue>[] analyze(String owner, MethodNode m) throws AnalyzerException {
-    Frame<BasicValue>[] result = super.analyze(owner, m);
+  public ExtendedFrame[] analyze(String owner, MethodNode m) throws AnalyzerException {
+    Frame<BasicValue>[] frames = super.analyze(owner, m);
+    ExtendedFrame[] result = new ExtendedFrame[frames.length];
+    System.arraycopy(frames, 0, result, 0, frames.length);
 
     InsnList instructions = m.instructions;
 
@@ -83,13 +85,14 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
       traceBack(m, startingPoints, result);
     }
 
+
     return result;
   }
 
-  private void traceBack(MethodNode m, SortedSet<Integer> startingPoints, Frame<BasicValue>[] frames) {
+  private void traceBack(MethodNode m, SortedSet<Integer> startingPoints, ExtendedFrame[] frames) {
     Integer index = startingPoints.last();
     startingPoints.remove(index);
-    ExtendedFrame firstFrame = (ExtendedFrame) frames[index];
+    ExtendedFrame firstFrame = frames[index];
     if (firstFrame == null) {
       return;
     }
@@ -98,7 +101,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
     while (true) {
       AbstractInsnNode instruction = instructions.get(index);
-      ExtendedFrame frameBefore = (ExtendedFrame) frames[index];
+      ExtendedFrame frameBefore = frames[index];
 
       if (isLoad(instruction)) {
         frameBefore.neededLocals.add(((VarInsnNode) instruction).var);
@@ -112,7 +115,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
       // Update needed locals of all other predecessors
       for (Integer from : froms) {
-        ExtendedFrame fromFrame = (ExtendedFrame) frames[from];
+        ExtendedFrame fromFrame = frames[from];
         boolean modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
         if (modified) {
           startingPoints.add(from);

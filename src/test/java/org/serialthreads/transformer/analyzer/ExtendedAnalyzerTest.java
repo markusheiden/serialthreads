@@ -2,14 +2,12 @@ package org.serialthreads.transformer.analyzer;
 
 import org.junit.Test;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -76,26 +74,53 @@ public class ExtendedAnalyzerTest {
   @Test
   public void testBackflow_simple() throws Exception {
     MethodNode method = new MethodNode(0, "test", "()I", null, new String[0]);
-    method.maxLocals = 3;
+    method.maxLocals = 4;
     method.maxStack = 1;
-
     InsnList instructions = method.instructions;
+
+    LabelNode label1 = new LabelNode();
+
     // 0: local1 = 1
     instructions.add(new InsnNode(ICONST_1));
     instructions.add(new VarInsnNode(ISTORE, 1));
     // 2: local2 = 1
     instructions.add(new InsnNode(ICONST_1));
     instructions.add(new VarInsnNode(ISTORE, 2));
+    // 4: local3 = 1
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new VarInsnNode(ISTORE, 3));
 
-    // 4: return local1 -> a this point just local1 is needed for the remaining code
+    instructions.add(new InsnNode(ICONST_0));
+    // 7: branch
+    instructions.add(new JumpInsnNode(IFEQ, label1));
+
+    // 8: usage of local2
+    instructions.add(new VarInsnNode(ILOAD, 2));
+    instructions.add(new VarInsnNode(ISTORE, 2));
+
+    instructions.add(label1);
+
+    // 11: return local1 -> a this point just local1 is needed for the remaining code
     instructions.add(new VarInsnNode(ILOAD, 1));
     instructions.add(new InsnNode(IRETURN));
 
     ExtendedAnalyzer analyzer = new ExtendedAnalyzer(null, null, null, null, false);
-    Frame[] frames = analyzer.analyze("test", method);
+    ExtendedFrame[] frames = analyzer.analyze("test", method);
 
-    // Check that at instruction 4 just local 1 is declared as needed for the remaining code
-    ExtendedFrame frame4 = (ExtendedFrame) frames[4];
-    assertEquals(Collections.singleton(1), frame4.neededLocals);
+    // Check that at instruction 11 just local 1 is declared as needed for the remaining code
+    assertEquals(setOf(1), frames[11].neededLocals);
+    // Check that at instruction 7 just locals 1 & 2 are declared as needed for the remaining code
+    assertEquals(setOf(1, 2), frames[8].neededLocals);
+    // Check that at instruction 6 (merge point) just locals 1 & 2 are declared as needed for the remaining code
+    assertEquals(setOf(1, 2), frames[7].neededLocals);
+  }
+
+  /**
+   * Create set of Integers.
+   *
+   * @param ints Integers
+   */
+  private static Set<Integer> setOf(Integer... ints) {
+    return new HashSet<>(Arrays.asList(ints));
   }
 }
