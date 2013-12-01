@@ -142,6 +142,12 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
   }
 
   @Override
+  protected boolean newControlFlowExceptionEdge(int from, int to) {
+    newControlFlowEdge(from, to);
+    return true;
+  }
+
+  @Override
   protected ExtendedFrame newFrame(int nLocals, int nStack) {
     return new ExtendedFrame(nLocals, nStack);
   }
