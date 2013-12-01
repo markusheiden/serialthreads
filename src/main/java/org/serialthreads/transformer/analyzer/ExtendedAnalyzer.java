@@ -85,7 +85,8 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     SortedSet<Integer> startingPoints = new TreeSet<>();
     for (int i = 0; i < instructions.size(); i++) {
       AbstractInsnNode instruction = instructions.get(i);
-      if (isReturn(instruction) || instruction.getOpcode() == ATHROW) {
+      int opcode = instruction.getOpcode();
+      if (isReturn(instruction) || opcode == ATHROW || opcode == GOTO) {
         startingPoints.add(i);
       }
     }
