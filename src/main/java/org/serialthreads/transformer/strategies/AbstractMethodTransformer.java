@@ -463,7 +463,7 @@ public abstract class AbstractMethodTransformer {
       // for first locals use fast stack
       for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
-        IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
+        IValueCode localCode = code(frameAfter.getLocal(local));
         result.add(localCode.pushLocalVariableFast(local, i, localFrame));
       }
 
@@ -472,7 +472,7 @@ public abstract class AbstractMethodTransformer {
         result.add(code.getLocals(localFrame));
         for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
-          IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
+          IValueCode localCode = code(frameAfter.getLocal(local));
           if (iter.hasNext()) {
             result.add(new InsnNode(DUP));
           }
@@ -595,7 +595,7 @@ public abstract class AbstractMethodTransformer {
 
       // do not restore local 0 for non static methods, because it always contains "this"
       for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-        BasicValue value = (BasicValue) frameAfter.getLocal(local);
+        BasicValue value = frameAfter.getLocal(local);
         if (code.isResponsibleFor(value.getType())) {
           ExtendedValue extendedValue = (ExtendedValue) value;
           if (extendedValue.isHoldInLowerLocal(local)) {
@@ -616,7 +616,7 @@ public abstract class AbstractMethodTransformer {
       // for first locals use fast stack
       for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
         int local = iter.next();
-        IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
+        IValueCode localCode = code(frameAfter.getLocal(local));
         result.add(localCode.popLocalVariableFast(local, i, localFrame));
       }
 
@@ -625,7 +625,7 @@ public abstract class AbstractMethodTransformer {
         result.add(code.getLocals(localFrame));
         for (int i = 0; iter.hasNext(); i++) {
           int local = iter.next();
-          IValueCode localCode = code((BasicValue) frameAfter.getLocal(local));
+          IValueCode localCode = code(frameAfter.getLocal(local));
           if (iter.hasNext()) {
             result.add(new InsnNode(DUP));
           }
