@@ -12,32 +12,50 @@ public class Stack extends SerialThread implements Serializable {
   protected static final int MAX_LEVELS = 256;
 
   /**
-   * Default frame size.
-   */
-  private final int frameSize;
-
-  /**
    * Frame for the first method.
    */
   public final StackFrame first;
+
+  /**
+   * Return value of the last executed method: Object.
+   */
+  public Object returnObject;
+
+  /**
+   * Return value of the last executed method: int.
+   */
+  public int returnInt;
+
+  /**
+   * Return value of the last executed method: long.
+   */
+  public long returnLong;
+
+  /**
+   * Return value of the last executed method: float.
+   */
+  public float returnFloat;
+
+  /**
+   * Return value of the last executed method: double.
+   */
+  public double returnDouble;
 
   /**
    * The currently active frame.
    */
   public StackFrame frame;
 
-  // Return value of the last executed method
-  public Object returnObject;
-  public int returnInt;
-  public long returnLong;
-  public float returnFloat;
-  public double returnDouble;
+  /**
+   * Default frame size.
+   */
+  private final int frameSize;
 
   /**
    * Constructor.
    *
-   * @param name name of the thread
-   * @param frameSize size of frames
+   * @param name Name of the thread
+   * @param frameSize Default size of frames
    */
   public Stack(String name, int frameSize) {
     super(name);
@@ -52,7 +70,7 @@ public class Stack extends SerialThread implements Serializable {
   /**
    * Increase the stack by one frame.
    *
-   * @param lastFrame last frame of the stack
+   * @param lastFrame Last frame of the stack
    * @return Added frame
    */
   public StackFrame addFrame(StackFrame lastFrame) {
@@ -81,8 +99,8 @@ public class Stack extends SerialThread implements Serializable {
   /**
    * Leave non-static method, and the caller contains more than one interruptible method call.
    *
-   * @param owner owner of the called method == this in the called method. for the frame one level above
-   * @param method index of method which will be left
+   * @param owner Owner of the called method == this in the called method. for the frame one level above
+   * @param method Index of method which will be left
    */
   public final void leaveMethod(Object owner, int method) {
     frame.method = method;
@@ -92,7 +110,7 @@ public class Stack extends SerialThread implements Serializable {
   /**
    * Leave non-static method, and the caller contains exactly one interruptible method call.
    *
-   * @param owner owner of the called method == this in the called method. for the frame one level above
+   * @param owner Owner of the called method == this in the called method. for the frame one level above
    */
   public final void leaveMethod(Object owner) {
     frame.previous.owner = owner;
@@ -101,7 +119,7 @@ public class Stack extends SerialThread implements Serializable {
   /**
    * Leave static method, and the caller contains more than one interruptible method call.
    *
-   * @param method index of method which will be left
+   * @param method Index of method which will be left
    */
   public final void leaveMethod(int method) {
     frame.method = method;
@@ -111,7 +129,7 @@ public class Stack extends SerialThread implements Serializable {
    * Resets all frames below this.
    * Needed after an exception has been thrown to clean up the stack.
    *
-   * @param resetTo frame to reset to
+   * @param resetTo Frame to reset to
    */
   public final void resetTo(StackFrame resetTo) {
     StackFrame frame = resetTo.next;
