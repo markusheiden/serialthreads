@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Stack for all frames of a thread.
  */
-public class Stack extends SerialThread implements Serializable {
+public final class Stack extends SerialThread implements Serializable {
   /**
    * Initial size of the stack.
    */

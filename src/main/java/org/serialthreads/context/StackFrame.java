@@ -12,7 +12,7 @@ import java.util.Arrays;
  * Used to store the content of a stack frame.
  */
 @SuppressWarnings("unused")
-public class StackFrame implements Serializable {
+public final class StackFrame implements Serializable {
   /**
    * Logger.
    */
