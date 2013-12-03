@@ -101,7 +101,7 @@ public abstract class AbstractMethodTransformer {
           tag(instruction, TAG_INTERRUPTIBLE);
           if (classInfoCache.isInterrupt(methodCall)) {
             tag(instruction, TAG_INTERRUPT);
-          } else if (isNotVoid(methodCall) && isReturn(methodCall.getNext())) {
+          } else if (isReturn(methodCall.getNext())) {
             tag(instruction, TAG_TAIL_CALL);
             tag(instruction.getNext(), TAG_TAIL_CALL);
           }
