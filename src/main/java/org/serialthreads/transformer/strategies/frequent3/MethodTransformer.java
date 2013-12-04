@@ -135,6 +135,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
+    if (!needsFrame() && isTailCall(metaInfo)) {
+      // No frame needed -> no capture code
+      // Tail call -> no need for separate early return statement
+      // So no extra code at all is needed here
+      logger.debug("        Optimized no frame tail call");
+      return;
+    }
+
     int local = firstLocal(method);
     final int localThread = local++; // param thread
     final int localPreviousFrame = local++; // param previousFrame
@@ -156,7 +164,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // normal execution
     capture.add(normal);
-    // restore return value of call, if any, but not for tail calls
+    // restore return value of call, if any.
+    // but not for tail calls, because the return value already has been stored in the stack by the called method
     if (isNotVoid(methodCall)) {
       if (isTailCall(metaInfo)) {
         logger.debug("        Optimized tail call");
