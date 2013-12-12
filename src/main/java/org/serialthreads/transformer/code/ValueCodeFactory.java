@@ -7,13 +7,14 @@ import org.objectweb.asm.tree.analysis.BasicValue;
  * Factory to get value code for a type.
  */
 public class ValueCodeFactory {
-  private static final IValueCode INT_CODE = new IntValueCode();
-  private static final IValueCode LONG_CODE = new LongValueCode();
-  private static final IValueCode FLOAT_CODE = new FloatValueCode();
-  private static final IValueCode DOUBLE_CODE = new DoubleValueCode();
+  private static final ReferenceValueCode OBJECT_CODE = new ReferenceValueCode(Type.getType(Object.class));
+  private static final IntValueCode INT_CODE = new IntValueCode();
+  private static final LongValueCode LONG_CODE = new LongValueCode();
+  private static final FloatValueCode FLOAT_CODE = new FloatValueCode();
+  private static final DoubleValueCode DOUBLE_CODE = new DoubleValueCode();
 
   public static final IValueCode[] CODES = {
-    new ReferenceValueCode(Type.getType(Object.class)), INT_CODE, LONG_CODE, FLOAT_CODE, DOUBLE_CODE
+    OBJECT_CODE, INT_CODE, LONG_CODE, FLOAT_CODE, DOUBLE_CODE
   };
 
   /**
