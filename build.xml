@@ -15,7 +15,7 @@
     <pathelement location="${classes}"/>
     <fileset dir="${lib}">
       <include name="*.jar"/>
-      <exclude name="asm-all-4.0.jar"/>
+      <exclude name="asm-all-*.jar"/>
     </fileset>
   </path>
 
