@@ -1,6 +1,7 @@
 package org.serialthreads.transformer.debug;
 
 import org.objectweb.asm.Label;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.util.Textifier;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
@@ -16,6 +17,8 @@ class DebugPrinter extends Textifier {
   private final ExtendedFrame[] frames;
 
   public DebugPrinter(ExtendedFrame[] frames) {
+    super(Opcodes.ASM5);
+
     this.instruction = 0;
     this.frames = frames;
   }
@@ -102,9 +105,9 @@ class DebugPrinter extends Textifier {
   }
 
   @Override
-  public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+  public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
     int lastSize = text.size();
-    super.visitMethodInsn(opcode, owner, name, desc);
+    super.visitMethodInsn(opcode, owner, name, desc, itf);
     addByteCodeIndex(lastSize);
   }
 

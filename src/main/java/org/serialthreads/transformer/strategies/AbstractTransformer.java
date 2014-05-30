@@ -287,10 +287,10 @@ public abstract class AbstractTransformer implements ITransformer {
       instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
       instructions.add(new InsnNode(DUP));
       instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC));
-      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC));
+      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC, false));
+      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC, false));
       instructions.add(IntValueCode.push(defaultFrameSize));
-      instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V"));
+      instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
       instructions.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
 
       constructor.instructions.insertBefore(returnInstruction, instructions);

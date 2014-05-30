@@ -154,7 +154,7 @@ public abstract class AbstractMethodTransformer {
     result.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
     result.add(new InsnNode(DUP));
     result.add(new LdcInsnNode("Invalid method pointer"));
-    result.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V"));
+    result.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V", false));
     result.add(new InsnNode(ATHROW));
 
     // reverse iteration to put first restore code at the end
@@ -340,8 +340,8 @@ public abstract class AbstractMethodTransformer {
     instructions.add(new InsnNode(DUP));
     // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
     instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC));
-    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V"));
+    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC, false));
+    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V", false));
     instructions.add(new InsnNode(ATHROW));
     method.instructions.insert(method.instructions.getLast(), instructions);
   }
@@ -365,7 +365,7 @@ public abstract class AbstractMethodTransformer {
       instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
     } else {
-      instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC));
+      instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
       instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     }
     LabelNode retry = new LabelNode();
@@ -391,7 +391,7 @@ public abstract class AbstractMethodTransformer {
       // Pop NPE from stack
       handler.add(new InsnNode(POP));
       handler.add(new VarInsnNode(ALOAD, 0));
-      handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC));
+      handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
       handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
       handler.add(new InsnNode(DUP_X1));
       handler.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
@@ -554,17 +554,17 @@ public abstract class AbstractMethodTransformer {
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(new VarInsnNode(ALOAD, 0));
       result.add(push(position));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V"));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V", false));
     } else if (pushOwner) {
       // save owner of this method for calling method
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(new VarInsnNode(ALOAD, 0));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V"));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V", false));
     } else if (pushMethod) {
       // save index of interrupted method
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(push(position));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V"));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V", false));
     }
 
     return result;
