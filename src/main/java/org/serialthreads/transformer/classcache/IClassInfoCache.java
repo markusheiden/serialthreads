@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -40,7 +41,7 @@ public interface IClassInfoCache {
   public boolean isExecutor(ClassNode clazz, MethodNode method);
 
   /**
-   * Check if method is interruptible.
+   * Check if the method is interruptible.
    * This includes interrupt methods.
    *
    * @param owner owner of method
@@ -55,6 +56,14 @@ public interface IClassInfoCache {
    * @param method method call
    */
   public boolean isInterruptible(MethodInsnNode method);
+
+  /**
+   * Check if the method is interruptible.
+   * This includes interrupt methods.
+   *
+   * @param method method call
+   */
+  public boolean isInterruptible(Handle method);
 
   /**
    * Check if method is interruptible.

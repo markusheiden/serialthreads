@@ -1,6 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -110,6 +111,12 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   @Override
   public boolean isInterruptible(MethodInsnNode method) {
     return isInterruptible(method.owner, method.name, method.desc);
+  }
+
+  @Override
+  public boolean isInterruptible(Handle method) {
+    // TODO 2014-06-02 mh: Check tag for invoke?
+    return isInterruptible(method.getOwner(), method.getName(), method.getDesc());
   }
 
   @Override
