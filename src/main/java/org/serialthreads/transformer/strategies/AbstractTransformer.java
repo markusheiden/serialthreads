@@ -125,12 +125,10 @@ public abstract class AbstractTransformer implements ITransformer {
 
         if (!classInfoCache.isExecutor(clazz, method)) {
           throw new NotTransformableException(
-            "Not interruptible method " + org.serialthreads.transformer.code.MethodCode.methodName(clazz, method) +
-              " calls interruptible method " + org.serialthreads.transformer.code.MethodCode.methodName(methodCall));
+            "Not interruptible method " + methodName(clazz, method) + " calls interruptible method " + methodName(methodCall));
         } else if (!isRun(methodCall, classInfoCache)) {
           throw new NotTransformableException(
-            "Executor " + org.serialthreads.transformer.code.MethodCode.methodName(clazz, method) +
-              " may only call run, but called " + org.serialthreads.transformer.code.MethodCode.methodName(methodCall));
+            "Executor " + methodName(clazz, method) + " may only call run, but called " + methodName(methodCall));
         }
       }
     }
