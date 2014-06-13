@@ -6,6 +6,48 @@ what about restore code for run()? helper method calls real run()?
 generate method handles
 remember method handles during serialize
 
+
+  private void dynamicXXX(ClassNode clazz) {
+    for (MethodNode method : clazz.methods) {
+      AbstractInsnNode[] instructions = method.instructions.toArray();
+      for (AbstractInsnNode instruction : instructions) {
+        if (instruction instanceof InvokeDynamicInsnNode) {
+          InvokeDynamicInsnNode dynamic = (InvokeDynamicInsnNode) instruction;
+          System.err.println(">>> " + methodName(clazz, method) + ": " + dynamic.bsm + " [" + dynamic.bsmArgs.length + "]");
+//          dynamic.desc = changeDescXXX(dynamic.desc);
+          for (int i = 0; i < dynamic.bsmArgs.length; i++) {
+            Object bsmArg = dynamic.bsmArgs[i];
+            System.err.println(">>>-   " + bsmArg);
+          }
+
+          for (int i = 0; i < dynamic.bsmArgs.length; i++) {
+            Object bsmArg = dynamic.bsmArgs[i];
+            if (bsmArg instanceof Handle) {
+              Handle handle = (Handle) bsmArg;
+              if (classInfoCache.isInterruptible(handle)) {
+                String desc = changeDescXXX(handle.getDesc());
+                dynamic.bsmArgs[i - 1] = Type.getType(desc);
+                dynamic.bsmArgs[i] = new Handle(handle.getTag(), handle.getOwner(), handle.getName(), desc);
+                dynamic.bsmArgs[i + 1] = Type.getType(desc);
+              }
+            }
+          }
+
+          for (int i = 0; i < dynamic.bsmArgs.length; i++) {
+            Object bsmArg = dynamic.bsmArgs[i];
+            System.err.println(">>>+   " + bsmArg);
+          }
+        }
+      }
+    }
+  }
+
+  protected String changeDescXXX(String desc) {
+    int index = desc.indexOf(")");
+    return desc.substring(0, index) + THREAD_IMPL_DESC + FRAME_IMPL_DESC + desc.substring(index);
+  }
+
+
 test
 -------------------------------------------------------------------------------
 
