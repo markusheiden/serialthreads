@@ -109,6 +109,14 @@ public interface IValueCode {
   public VarInsnNode store(int i);
 
   /**
+   * Copy a local into another local.
+   *
+   * @param from Number of local variable to copy from
+   * @param to Number of local variable to copy to
+   */
+  public InsnList move(int from, int to);
+
+  /**
    * Pop value from stack.
    */
   public AbstractInsnNode pop();

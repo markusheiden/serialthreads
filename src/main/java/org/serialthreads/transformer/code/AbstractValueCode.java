@@ -281,6 +281,16 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
+  public InsnList move(int from, int to) {
+    InsnList instructions = new InsnList();
+    if (from != to) {
+      instructions.add(load(from));
+      instructions.add(store(to));
+    }
+    return instructions;
+  }
+
+  @Override
   public InsnNode pop() {
     return new InsnNode(type.getSize() == 1 ? POP : POP2);
   }
