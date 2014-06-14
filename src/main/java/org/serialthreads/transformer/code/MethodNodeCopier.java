@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.MethodNode;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jdk.internal.org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 /**
  * Copies method nodes.
