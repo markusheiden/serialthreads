@@ -4,4 +4,4 @@ Allows to execute many serial threads on one java thread. This is done by captur
 
 # TODO
 
-   * Lambda cannot be interrupted.
+   * Lambdas cannot be interrupted.
