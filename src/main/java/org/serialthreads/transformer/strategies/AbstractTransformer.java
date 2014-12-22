@@ -337,11 +337,11 @@ public abstract class AbstractTransformer implements ITransformer {
   protected void logDebug(Frame frame) {
     for (int i = 0; i < frame.getLocals(); i++) {
       BasicValue local = (BasicValue) frame.getLocal(i);
-      logger.debug("        Local " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local));
+      logger.debug("        Local {}: {}", i, local.isReference() ? local.getType().getDescriptor() : local);
     }
     for (int i = 0; i < frame.getStackSize(); i++) {
       BasicValue stack = (BasicValue) frame.getStack(i);
-      logger.debug("        Stack " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack));
+      logger.debug("        Stack {}: {}", i, stack.isReference() ? stack.getType().getDescriptor() : stack);
     }
   }
 }
