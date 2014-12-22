@@ -3,6 +3,7 @@ package org.serialthreads.transformer.strategies.singleframe;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
@@ -92,6 +93,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return;
     }
 
+    logger.debug("      Replacing returns");
+
     InsnList instructions = method.instructions;
 
     int local = firstLocal(method);
@@ -99,9 +102,20 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localPreviousFrame = local++; // param previousFrame
     final int localFrame = local++;
 
+    IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      instructions.insert(returnInstruction, code(returnType).pushReturnValue(localThread));
-      instructions.remove(returnInstruction);
+      AbstractInsnNode previous = previousInstruction(returnInstruction);
+      if (isTailCall(previous)) {
+        // Tail call optimization:
+        // The return value has already been saved into the thread by the capture code of the called method
+        instructions.set(returnInstruction, new InsnNode(RETURN));
+        logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
+      } else {
+        // Default case:
+        // Save return value into the thread
+        instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
+        instructions.remove(returnInstruction);
+      }
     }
   }
 
@@ -120,6 +134,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   @Override
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
+
+    if (!needsFrame() && isTailCall(metaInfo)) {
+      // No frame needed -> no capture code
+      // Tail call -> no need for separate early return statement
+      // So no extra code at all is needed here
+      logger.debug("        Optimized no frame tail call");
+      return;
+    }
 
     int local = firstLocal(method);
     final int localThread = local++; // param thread
@@ -142,9 +164,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // normal execution
     capture.add(normal);
-    // restore return value of call, if any
+    // restore return value of call, if any.
+    // but not for tail calls, because the return value already has been stored in the stack by the called method
     if (isNotVoid(methodCall)) {
-      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      if (isTailCall(metaInfo)) {
+        logger.debug("        Optimized tail call");
+      } else {
+        capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      }
     }
 
     // insert capture code
@@ -209,8 +236,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // restore stack "under" the returned value, if any
     restore.add(popFromFrame(methodCall, metaInfo, localFrame));
+    // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      if (isTailCall(metaInfo)) {
+        logger.debug("        Tail call optimized");
+      } else {
+        restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      }
     }
     restore.add(new JumpInsnNode(GOTO, normal));
 
@@ -228,6 +260,45 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     result.desc = changeCopyDesc(methodCall.desc);
 
     return result;
+  }
+
+  /**
+   * Does the method need a frame for storing its state?.
+   * <p/>
+   * A frame is not needed, if following conditions apply:
+   * - There is just one interruptible method call (-> no need to store the method index)
+   * - The method call is a self call (-> no need to store the method owner)
+   * - The method is a tail call (-> needs no storing of locals and stack)
+   * The third condition is somewhat suboptimal,
+   * but for first the easiest way to implement the detection, that neither the locals nor the stack is needed / used.
+   */
+  protected final boolean needsFrame() {
+    if (interruptibleMethodCalls.size() != 1) {
+      return true;
+    }
+
+    MethodInsnNode methodCall = interruptibleMethodCalls.iterator().next();
+    MetaInfo metaInfo = metaInfos.get(methodCall);
+    return !isSelfCall(methodCall, metaInfo) || !isTailCall(metaInfo);
+  }
+
+  /**
+   * Check if the given instruction is a tail call.
+   *
+   * @param instruction Instruction
+   */
+  protected final boolean isTailCall(AbstractInsnNode instruction) {
+    MetaInfo metaInfo = metaInfos.get(instruction);
+    return metaInfo != null && isTailCall(metaInfo);
+  }
+
+  /**
+   * Check if the given instruction is a tail call.
+   *
+   * @param metaInfo Meta information about method call
+   */
+  protected final boolean isTailCall(MetaInfo metaInfo) {
+    return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL);
   }
 
   //

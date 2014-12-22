@@ -74,19 +74,26 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
 
     InsnList restore = new InsnList();
 
-    // TODO 2011-10-04 mh: Avoid this copy, it is needed just for capturing the return value. Fix order of copies?
-    restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
+    // The (previous) frame is just needed for storing the return value of this method
+    if (paramPreviousFrame != localPreviousFrame && isNotVoid(method)) {
+      // TODO 2009-10-22 mh: How to avoid this copy???
+      restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+      restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
+    }
 
     // frame = previousFrame.next
     restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    if (needsFrame()) {
+      restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    }
     restore.add(new VarInsnNode(ASTORE, localFrame));
 
-    // thread = currentThread;
-    // TODO 2009-10-22 mh: how to avoid this copy???
-    restore.add(new VarInsnNode(ALOAD, paramThread));
-    restore.add(new VarInsnNode(ASTORE, localThread));
+    if (paramThread != localThread) {
+      // thread = currentThread;
+      // TODO 2009-10-22 mh: How to avoid this copy???
+      restore.add(new VarInsnNode(ALOAD, paramThread));
+      restore.add(new VarInsnNode(ASTORE, localThread));
+    }
 
     // restore code dispatcher
     InsnList getMethod = new InsnList();

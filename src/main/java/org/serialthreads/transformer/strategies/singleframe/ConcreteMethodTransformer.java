@@ -52,26 +52,28 @@ class ConcreteMethodTransformer extends MethodTransformer {
     logger.debug("    Creating restore handler for method");
 
     int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
+    final int localThread = local++; // == param thread
+    final int localPreviousFrame = local++; // == param previousFrame
     final int localFrame = local++;
-
-    LabelNode normal = new LabelNode();
 
     // frame = previousFrame.next
     InsnList getFrame = new InsnList();
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    getFrame.add(new InsnNode(DUP));
-    getFrame.add(new JumpInsnNode(IFNONNULL, normal));
+    if (needsFrame()) {
+      LabelNode normal = new LabelNode();
 
-    getFrame.add(new InsnNode(POP));
-    // frame = thread.addFrame(previousFrame);
-    getFrame.add(new VarInsnNode(ALOAD, localThread));
-    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC, false));
+      getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+      getFrame.add(new InsnNode(DUP));
+      getFrame.add(new JumpInsnNode(IFNONNULL, normal));
 
-    getFrame.add(normal);
+      getFrame.add(new InsnNode(POP));
+      // frame = thread.addFrame(previousFrame);
+      getFrame.add(new VarInsnNode(ALOAD, localThread));
+      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC, false));
+
+      getFrame.add(normal);
+    }
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     method.instructions.insertBefore(method.instructions.getFirst(), getFrame);
