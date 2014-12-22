@@ -649,11 +649,11 @@ public abstract class AbstractMethodTransformer {
       ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
       if (value.isConstant()) {
         // the stack value is constant -> push constant
-        logger.debug("        Detected constant value on stack: {} / value {}", value.toString(), value.getConstant());
+        logger.debug("        Detected constant value on stack: {} / value {}", value, value.getConstant());
         result.add(code(value).push(value.getConstant()));
       } else if (value.isHoldInLocal()) {
         // the stack value was already stored in local variable -> load local
-        logger.debug("        Detected value of local on stack: {} / local {}", value.toString(), value.getLowestLocal());
+        logger.debug("        Detected value of local on stack: {} / local {}", value, value.getLowestLocal());
         result.add(code(value).load(value.getLowestLocal()));
       } else {
         // normal case -> pop stack from frameAfter
