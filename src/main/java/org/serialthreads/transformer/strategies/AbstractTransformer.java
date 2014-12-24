@@ -324,8 +324,8 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method method
    */
   protected void logDebug(MethodNode method) {
-    logger.debug("    Max stack : " + method.maxStack);
-    logger.debug("    Max locals: " + method.maxLocals);
+    logger.debug("    Max stack : {}", method.maxStack);
+    logger.debug("    Max locals: {}", method.maxLocals);
   }
 
   /**

@@ -66,17 +66,17 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     ClassInfoVisitor classInfoVisitor = _classes.remove(className);
     if (classInfoVisitor != null) {
       // scan not yet loaded class with asm to avoid circular class loading
-      logger.debug("  Direct ASM scan of " + className);
+      logger.debug("  Direct ASM scan of {}", className);
       return scan(classInfoVisitor, toProcess);
     }
 
     InputStream classFile = _classLoader.getResourceAsStream(className + ".class");
     if (classFile != null) {
-      logger.debug("  Class file based ASM scan of " + className);
+      logger.debug("  Class file based ASM scan of {}", className);
       return scan(read(new ClassReader(classFile)), toProcess);
     }
 
-    logger.error("  Reflection scan of " + className);
+    logger.error("  Reflection scan of {}", className);
     return scanReflection(_classLoader, className, toProcess);
   }
 

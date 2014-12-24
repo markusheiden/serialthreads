@@ -278,17 +278,17 @@ public class DynamicContext extends SerialThread implements IFrame {
   }
 
   public void logSizes() {
-    logger.debug("Owners: " + ownerPtr + " / " + owners.length);
-    logger.debug("Methods: " + methodPtr + " / " + methods.length);
-    logger.debug("Stack objects: " + stackObjectPtr + " / " + stackObjects.length);
-    logger.debug("Stack ints: " + stackIntPtr + " / " + stackInts.length);
-    logger.debug("Stack longs: " + stackLongPtr + " / " + stackLongs.length);
-    logger.debug("Stack floats: " + stackFloatPtr + " / " + stackFloats.length);
-    logger.debug("Stack doubles: " + stackDoublePtr + " / " + stackDoubles.length);
-    logger.debug("Local objects: " + localObjectPtr + " / " + localObjects.length);
-    logger.debug("Local ints: " + localIntPtr + " / " + localInts.length);
-    logger.debug("Local longs: " + localLongPtr + " / " + localLongs.length);
-    logger.debug("Local floats: " + localFloatPtr + " / " + localFloats.length);
-    logger.debug("Local doubles: " + localDoublePtr + " / " + localDoubles.length);
+    logger.debug("Owners:        {} / {}", ownerPtr, owners.length);
+    logger.debug("Methods:       {} / {}", methodPtr, methods.length);
+    logger.debug("Stack objects: {} / {}", stackObjectPtr, stackObjects.length);
+    logger.debug("Stack ints:    {} / {}", stackIntPtr, stackInts.length);
+    logger.debug("Stack longs:   {} / {}", stackLongPtr, stackLongs.length);
+    logger.debug("Stack floats:  {} / {}", stackFloatPtr, stackFloats.length);
+    logger.debug("Stack doubles: {} / {}", stackDoublePtr, stackDoubles.length);
+    logger.debug("Local objects: {} / {}", localObjectPtr, localObjects.length);
+    logger.debug("Local ints:    {} / {}", localIntPtr, localInts.length);
+    logger.debug("Local longs:   {} / {}", localLongPtr, localLongs.length);
+    logger.debug("Local floats:  {} / {}", localFloatPtr, localFloats.length);
+    logger.debug("Local doubles: {} / {}", localDoublePtr, localDoubles.length);
   }
 }

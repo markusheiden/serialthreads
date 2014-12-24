@@ -51,7 +51,7 @@ public class Agent implements ClassFileTransformer {
 
     boolean failure = true;
     try {
-      logger.debug("Transforming class " + className + (classBeingRedefined != null ? " (redefining)" : " (initial)"));
+      logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
       _classInfoCache.start(loader, className, classfileBuffer);
 
       ClassReader reader = new ClassReader(classfileBuffer);
@@ -61,7 +61,7 @@ public class Agent implements ClassFileTransformer {
       byte[] result = writer.toByteArray();
       failure = false;
 
-      logger.info("Successfully transformed class " + className + (classBeingRedefined != null ? " (redefining)" : " (initial)"));
+      logger.info("Successfully transformed class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
       _classInfoCache.stop(className);
 
       return result;
@@ -70,16 +70,16 @@ public class Agent implements ClassFileTransformer {
       failure = false;
       return null;
     } catch (NotTransformableException e) {
-      logger.error("Unable to transform " + className, e);
+      logger.error("Unable to transform {}", className, e);
       failure = false;
       throw e;
     } catch (RuntimeException | Error e) {
-      logger.error("Failed to transform " + className, e);
+      logger.error("Failed to transform {}", className, e);
       failure = false;
       throw e;
     } finally {
       if (failure) {
-        logger.error("Failed to transform " + className);
+        logger.error("Failed to transform {}", className);
       }
     }
   }
