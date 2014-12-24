@@ -66,7 +66,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
   @Override
   public void transform(ClassNode clazz) {
-    logger.info("Transforming class {} with {}", clazz.name, toString());
+    logger.info("Transforming class {} with {}", clazz.name, this);
 
     // separate constructors and methods
     List<MethodNode> constructors = new ArrayList<>(clazz.methods.size());
