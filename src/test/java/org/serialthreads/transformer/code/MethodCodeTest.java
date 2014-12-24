@@ -13,6 +13,7 @@ public class MethodCodeTest {
    */
   @Test
   public void testEscapeForMethodName() throws Exception {
-    assertEquals("Lorg_serialthreads_Test_", MethodCode.escapeForMethodName("Lorg/serialthreads/Test;"));
+    assertEquals("org_serialthreads_Test_test__Lorg_serialthreads_Test__V",
+      MethodCode.escapeForMethodName("org/serialthreads/Test/test([Lorg/serialthreads/Test;)V"));
   }
 }
