@@ -87,13 +87,14 @@ public abstract class AbstractMethodTransformer {
   protected void analyze() throws AnalyzerException {
     // Init meta information
     Frame[] frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
-    for (int i = 0, e = method.instructions.size(), last = e - 1; i < e; i++) {
-      metaInfos.put(method.instructions.get(i), new MetaInfo((ExtendedFrame) frames[i], i < last ? (ExtendedFrame) frames[i + 1] : null));
+    InsnList instructions = method.instructions;
+    for (int i = 0, e = instructions.size(), last = e - 1; i < e; i++) {
+      metaInfos.put(instructions.get(i), new MetaInfo((ExtendedFrame) frames[i], i < last ? (ExtendedFrame) frames[i + 1] : null));
     }
 
     // Tag special instructions
-    for (int i = 0, e = method.instructions.size(); i < e; i++) {
-      AbstractInsnNode instruction = method.instructions.get(i);
+    for (int i = 0, e = instructions.size(); i < e; i++) {
+      AbstractInsnNode instruction = instructions.get(i);
       if (instruction instanceof MethodInsnNode) {
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
         if (classInfoCache.isInterruptible(methodCall)) {

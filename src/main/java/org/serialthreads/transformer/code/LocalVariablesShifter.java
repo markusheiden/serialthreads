@@ -2,8 +2,6 @@ package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.tree.*;
 
-import java.util.Iterator;
-
 /**
  * Shifts the local variables of a method.
  * Used for adding parameters.
@@ -18,8 +16,7 @@ public class LocalVariablesShifter {
    */
   public static void shift(int point, int shift, MethodNode method) {
     // adopt instructions
-    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext(); ) {
-      AbstractInsnNode instruction = iter.next();
+    for (AbstractInsnNode instruction : method.instructions.toArray()) {
       if (instruction instanceof VarInsnNode) {
         VarInsnNode varInstruction = (VarInsnNode) instruction;
         varInstruction.var = remap(point, shift, varInstruction.var);

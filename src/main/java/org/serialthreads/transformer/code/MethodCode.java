@@ -12,7 +12,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -248,8 +247,7 @@ public class MethodCode {
    */
   public static List<AbstractInsnNode> returnInstructions(MethodNode method) {
     List<AbstractInsnNode> result = new ArrayList<>();
-    for (Iterator<AbstractInsnNode> iter = method.instructions.iterator(); iter.hasNext(); ) {
-      AbstractInsnNode instruction = iter.next();
+    for (AbstractInsnNode instruction : method.instructions.toArray()) {
       if (isReturn(instruction)) {
         result.add(instruction);
       }

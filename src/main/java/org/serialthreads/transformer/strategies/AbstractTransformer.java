@@ -113,8 +113,7 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method Method to check
    */
   private void check(ClassNode clazz, MethodNode method) {
-    AbstractInsnNode[] instructions = method.instructions.toArray();
-    for (AbstractInsnNode instruction : instructions) {
+    for (AbstractInsnNode instruction : method.instructions.toArray()) {
       if (instruction.getType() == AbstractInsnNode.METHOD_INSN) {
         MethodInsnNode methodCall = (MethodInsnNode) instruction;
 
@@ -203,8 +202,7 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method method node to transform
    */
   protected boolean hasNoInterruptibleMethodCalls(MethodNode method) {
-    for (int i = 0; i < method.instructions.size(); i++) {
-      AbstractInsnNode instruction = method.instructions.get(i);
+    for (AbstractInsnNode instruction : method.instructions.toArray()) {
       if (instruction instanceof MethodInsnNode) {
         if (classInfoCache.isInterruptible((MethodInsnNode) instruction)) {
           return false;
