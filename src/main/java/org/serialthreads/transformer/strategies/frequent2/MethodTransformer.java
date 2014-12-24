@@ -34,7 +34,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @return changed name
    */
   protected String changeCopyName(String name, String desc) {
-    return name + "$$" + desc.replaceAll("[()\\[/;]", "_") + "$$";
+    return name + "$$" + escapeForMethodName(desc) + "$$";
   }
 
   /**

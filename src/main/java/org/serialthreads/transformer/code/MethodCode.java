@@ -236,6 +236,16 @@ public class MethodCode {
     return true;
   }
 
+  /**
+   * Escapes descriptor to make it suitable for method names.
+   *
+   * @param desc Descriptor.
+
+   */
+  public static String escapeForMethodName(String desc) {
+    return desc.replaceAll("[()\\[/;]", "_");
+  }
+
   //
   // code related to the instructions of a method
   //
