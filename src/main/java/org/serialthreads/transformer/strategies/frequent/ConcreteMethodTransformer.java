@@ -7,7 +7,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 
 /**
  * Method transformer for concrete methods.
@@ -52,10 +51,9 @@ class ConcreteMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for method");
 
-    int local = firstLocal(method);
-    final int localThread = local++;
-    final int localPreviousFrame = local++;
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
     LabelNode getThread = new LabelNode();

@@ -66,10 +66,9 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     final int paramThread = param++;
     final int paramPreviousFrame = param++;
 
-    int local = firstLocal(method);
-    final int localThread = local++;
-    final int localPreviousFrame = local++;
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     InsnList restore = new InsnList();
 

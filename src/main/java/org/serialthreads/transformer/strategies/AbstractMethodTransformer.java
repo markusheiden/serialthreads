@@ -101,6 +101,27 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
+   * Local holding the thread.
+   */
+  public int localThread() {
+    return firstLocal(method) + 0;
+  }
+
+  /**
+   * Local holding the previous frame.
+   */
+  public int localPreviousFrame() {
+    return firstLocal(method) + 1;
+  }
+
+  /**
+   * Local holding the current frame.
+   */
+  public int localFrame() {
+    return firstLocal(method) + 2;
+  }
+
+  /**
    * Analyze a method to compute frames.
    * Extract all interruptible method calls.
    *
@@ -239,10 +260,9 @@ public abstract class AbstractMethodTransformer {
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
 
-    int local = firstLocal(method);
-    final int localThread = local++;
-    final int localPreviousFrame = local++;
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     InsnList restore = new InsnList();
 
@@ -302,10 +322,9 @@ public abstract class AbstractMethodTransformer {
   protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for interrupt");
 
-    int local = firstLocal(method);
-    final int localThread = local++;
-    final int localPreviousFrame = local++;
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     InsnList capture = new InsnList();
 

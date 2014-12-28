@@ -55,10 +55,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
 
@@ -97,10 +96,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
+    // Introduce new local holding the return value
     final int localReturnValue = method.maxLocals;
 
     // label "normal" points the code directly after the method call

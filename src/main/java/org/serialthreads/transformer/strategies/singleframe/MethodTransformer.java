@@ -68,10 +68,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void addThreadAndFrame() {
     InsnList instructions = method.instructions;
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall)) {
@@ -97,10 +96,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     InsnList instructions = method.instructions;
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     IValueCode returnTypeCode = code(returnType);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
@@ -143,10 +141,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return;
     }
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
 
@@ -194,10 +191,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
+    // Introduce new local holding the return value
     final int localReturnValue = method.maxLocals;
 
     // label "normal" points the code directly after the method call

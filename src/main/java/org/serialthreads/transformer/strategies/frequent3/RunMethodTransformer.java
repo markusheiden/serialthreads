@@ -7,7 +7,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 
 /**
  * Method transformer for run methods.
@@ -54,10 +53,9 @@ class RunMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for run");
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     // dummy startup restore code to avoid to check thread.serializing.
     // empty frames are expected to have method = -1.

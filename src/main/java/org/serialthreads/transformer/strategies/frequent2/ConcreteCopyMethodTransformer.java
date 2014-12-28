@@ -8,7 +8,8 @@ import org.serialthreads.transformer.code.MethodNodeCopier;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.MethodCode.firstParam;
+import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
  * Method transformer for copies of concrete methods.
@@ -65,10 +66,9 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     final int paramThread = param++;
     final int paramPreviousFrame = param++;
 
-    int local = firstLocal(method);
-    final int localThread = local++; // param thread
-    final int localPreviousFrame = local++; // param previousFrame
-    final int localFrame = local++;
+    final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
+    final int localFrame = localFrame();
 
     InsnList restore = new InsnList();
 
