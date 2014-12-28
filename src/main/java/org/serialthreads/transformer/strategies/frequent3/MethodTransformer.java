@@ -69,7 +69,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList instructions = method.instructions;
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
