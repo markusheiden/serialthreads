@@ -84,8 +84,20 @@ public abstract class AbstractMethodTransformer {
    * Local 0: thread, local 1: previous frame, local 2: current frame.
    */
   public void shiftLocals() {
-    LocalVariablesShifter.shift(firstLocal(method), 3, method);
-    // TODO markus 2014-12-28: Name the new locals.
+    int firstLocal = firstLocal(method);
+
+    LocalVariablesShifter.shift(firstLocal, 3, method);
+
+    InsnList instructions = method.instructions;
+    LabelNode first = new LabelNode();
+    instructions.insertBefore(instructions.getFirst(), first);
+    LabelNode last = new LabelNode();
+    instructions.insert(instructions.getLast(), last);
+
+    List<LocalVariableNode> locals = method.localVariables;
+    locals.add(new LocalVariableNode("thread", THREAD_DESC, null, first, last, firstLocal + 0));
+    locals.add(new LocalVariableNode("previousFrame", FRAME_IMPL_DESC, null, first, last, firstLocal + 1));
+    locals.add(new LocalVariableNode("frame", FRAME_IMPL_DESC, null, first, last, firstLocal + 2));
   }
 
   /**
