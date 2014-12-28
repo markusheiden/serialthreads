@@ -3,7 +3,6 @@ package org.serialthreads.transformer.strategies.frequent2;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
@@ -35,7 +34,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
-    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+    shiftLocals();
     analyze();
 
     // create copy of method with shortened signature

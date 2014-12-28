@@ -3,7 +3,6 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.LocalVariablesShifter;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
@@ -31,7 +30,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * @exception AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
-    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+    shiftLocals();
     analyze();
 
     voidReturns();

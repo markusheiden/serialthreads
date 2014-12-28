@@ -12,6 +12,7 @@ import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
+import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.ValueCodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,15 @@ public abstract class AbstractMethodTransformer {
     this.clazz = clazz;
     this.method = method;
     this.classInfoCache = classInfoCache;
+  }
+
+  /**
+   * Shift index of the locals to get place for the three needed new locals.
+   * Local 0: thread, local 1: previous frame, local 2: current frame.
+   */
+  public void shiftLocals() {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+    // TODO markus 2014-12-28: Name the new locals.
   }
 
   /**
