@@ -83,7 +83,7 @@ public abstract class AbstractMethodTransformer {
    * Shift index of the locals to get place for the three needed new locals.
    * Local 0: thread, local 1: previous frame, local 2: current frame.
    */
-  public void shiftLocals() {
+  protected void shiftLocals() {
     int firstLocal = firstLocal(method);
 
     LocalVariablesShifter.shift(firstLocal, 3, method);
@@ -101,23 +101,39 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
+   * Local of parameter holding the thread.
+   * This method is used for method copies. These have the thread as the first parameter.
+   */
+  protected int paramThread() {
+    return firstParam(method) + 0;
+  }
+
+  /**
+   * Local of parameter holding the previous frame.
+   * This method is used for method copies. These have the previous frame as the second parameter.
+   */
+  protected int paramPreviousFrame() {
+    return firstParam(method) + 1;
+  }
+
+  /**
    * Local holding the thread.
    */
-  public int localThread() {
+  protected int localThread() {
     return firstLocal(method) + 0;
   }
 
   /**
    * Local holding the previous frame.
    */
-  public int localPreviousFrame() {
+  protected int localPreviousFrame() {
     return firstLocal(method) + 1;
   }
 
   /**
    * Local holding the current frame.
    */
-  public int localFrame() {
+  protected int localFrame() {
     return firstLocal(method) + 2;
   }
 

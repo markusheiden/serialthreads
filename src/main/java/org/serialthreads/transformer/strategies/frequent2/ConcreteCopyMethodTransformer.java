@@ -8,7 +8,6 @@ import org.serialthreads.transformer.code.MethodNodeCopier;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.firstParam;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -62,9 +61,8 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for copied method");
 
-    int param = firstParam(method);
-    final int paramThread = param++;
-    final int paramPreviousFrame = param++;
+    final int paramThread = paramThread();
+    final int paramPreviousFrame = paramPreviousFrame();
 
     final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
