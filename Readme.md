@@ -5,6 +5,7 @@ Allows to execute many serial threads on one java thread. This is done by captur
 # TODO
 
    * Lambdas cannot be interrupted.
+   * Exceptions are not handled for interruptible methods.
 
 Introduce paramThread() etc.???
 Name locals
