@@ -15,7 +15,6 @@ import java.security.ProtectionDomain;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * Byte code enhancement agent.
@@ -55,7 +54,7 @@ public class Agent implements ClassFileTransformer {
       _classInfoCache.start(loader, className, classfileBuffer);
 
       ClassReader reader = new ClassReader(classfileBuffer);
-      ClassWriter writer = new ClassWriter(COMPUTE_MAXS + COMPUTE_FRAMES);
+      ClassWriter writer = new ClassWriter(COMPUTE_FRAMES);
       ClassVisitor visitor = new TransformingVisitor(writer, _transformer);
       reader.accept(visitor, SKIP_FRAMES);
       byte[] result = writer.toByteArray();

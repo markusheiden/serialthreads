@@ -56,7 +56,7 @@
             <manifestEntries>
               <Premain-Class>org.serialthreads.agent.Agent</Premain-Class>
               <Agent-Class>org.serialthreads.agent.Agent</Agent-Class>
-              <Can-Redefine-Classes>true</Can-Redefine-Classes>
+              <Can-Redefine-Classes>false</Can-Redefine-Classes>
               <Can-Retransform-Classes>false</Can-Retransform-Classes>
             </manifestEntries>
           </archive>
