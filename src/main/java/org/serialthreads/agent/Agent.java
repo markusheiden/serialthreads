@@ -28,8 +28,15 @@ public class Agent implements ClassFileTransformer {
    */
   private static final Logger logger = LoggerFactory.getLogger(Agent.class);
 
-  private final ClassInfoCacheReflection _classInfoCache;
-  private final ITransformer _transformer;
+  /**
+   * Information about all classes.
+   */
+  private final ClassInfoCacheReflection classInfoCache;
+
+  /**
+   * Class transformer.
+   */
+  private final ITransformer transformer;
 
   /**
    * Creates a new class file transformer.
@@ -37,8 +44,8 @@ public class Agent implements ClassFileTransformer {
    * @param strategy strategy to use
    */
   public Agent(IStrategy strategy) {
-    _classInfoCache = new ClassInfoCacheReflection();
-    _transformer = strategy.getTransformer(_classInfoCache);
+    classInfoCache = new ClassInfoCacheReflection();
+    transformer = strategy.getTransformer(classInfoCache);
   }
 
   @Override
@@ -51,17 +58,17 @@ public class Agent implements ClassFileTransformer {
     boolean failure = true;
     try {
       logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
-      _classInfoCache.start(loader, className, classfileBuffer);
+      classInfoCache.start(loader, className, classfileBuffer);
 
       ClassReader reader = new ClassReader(classfileBuffer);
       ClassWriter writer = new ClassWriter(COMPUTE_FRAMES);
-      ClassVisitor visitor = new TransformingVisitor(writer, _transformer);
+      ClassVisitor visitor = new TransformingVisitor(writer, transformer);
       reader.accept(visitor, SKIP_FRAMES);
       byte[] result = writer.toByteArray();
       failure = false;
 
       logger.info("Successfully transformed class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
-      _classInfoCache.stop(className);
+      classInfoCache.stop(className);
 
       return result;
     } catch (LoadUntransformedException e) {

@@ -10,7 +10,10 @@ import java.util.Deque;
  * Checks and caches which methods are marked as interruptible.
  */
 public class ClassInfoCacheASM extends AbstractClassInfoCache {
-  private final ClassLoader _classLoader;
+  /**
+   * Class loader to load class files.
+   */
+  private final ClassLoader classLoader;
 
   /**
    * Constructor.
@@ -20,7 +23,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
   public ClassInfoCacheASM(ClassLoader classLoader) {
     assert classLoader != null : "Precondition: classLoader != null";
 
-    _classLoader = classLoader;
+    this.classLoader = classLoader;
   }
 
   /**
@@ -34,7 +37,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
 
-    InputStream classFile = _classLoader.getResourceAsStream(className + ".class");
+    InputStream classFile = classLoader.getResourceAsStream(className + ".class");
     return scan(read(new ClassReader(classFile)), toProcess);
   }
 }

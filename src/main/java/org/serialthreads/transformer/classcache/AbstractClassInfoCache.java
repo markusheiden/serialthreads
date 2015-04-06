@@ -25,6 +25,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    */
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+  /**
+   * Classes with their information.
+   */
   private final Map<String, ClassInfo> classes;
 
   /**
@@ -217,7 +220,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    */
   protected ClassInfoVisitor read(ClassReader reader) {
     ClassInfoVisitor classInfoVisitor = new ClassInfoVisitor();
-    reader.accept(classInfoVisitor, SKIP_CODE + SKIP_DEBUG + SKIP_FRAMES);
+    reader.accept(classInfoVisitor, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
     return classInfoVisitor;
   }
 

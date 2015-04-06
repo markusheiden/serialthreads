@@ -15,9 +15,15 @@ import java.util.*;
  * Checks and caches which methods are marked as interruptible.
  */
 public class ClassInfoCacheReflection extends AbstractClassInfoCache {
-  private ClassLoader _classLoader;
-  private final Map<String, ClassLoader> _classLoaders = new HashMap<>();
-  private final Map<String, ClassInfoVisitor> _classes = new HashMap<>();
+  /**
+   * Class loader to load class files.
+   */
+  private ClassLoader classLoader;
+
+  /**
+   * Classes with their visitors.
+   */
+  private final Map<String, ClassInfoVisitor> classes = new HashMap<>();
 
   /**
    * Start processing for a given class.
@@ -31,9 +37,8 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     assert className != null : "Precondition: className != null";
     assert byteCode != null : "Precondition: byteCode != null";
 
-    _classLoader = classLoader;
-    _classLoaders.put(className, classLoader);
-    _classes.put(className, read(new ClassReader(byteCode)));
+    this.classLoader = classLoader;
+    classes.put(className, read(new ClassReader(byteCode)));
   }
 
   /**
@@ -42,9 +47,8 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    * @param className internal name of class
    */
   public void stop(String className) {
-    _classLoader = null;
-    _classLoaders.remove(className);
-    _classes.remove(className);
+    classLoader = null;
+    classes.remove(className);
   }
 
   /**
@@ -55,7 +59,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   protected void setClassLoader(ClassLoader classLoader) {
     assert classLoader != null : "Precondition: classLoader != null";
 
-    _classLoader = classLoader;
+    this.classLoader = classLoader;
   }
 
   @Override
@@ -63,21 +67,21 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     logger.debug("Scanning class {}", className);
 
     // remove class info visitor, because we scan a class at max once
-    ClassInfoVisitor classInfoVisitor = _classes.remove(className);
+    ClassInfoVisitor classInfoVisitor = classes.remove(className);
     if (classInfoVisitor != null) {
       // scan not yet loaded class with asm to avoid circular class loading
       logger.debug("  Direct ASM scan of {}", className);
       return scan(classInfoVisitor, toProcess);
     }
 
-    InputStream classFile = _classLoader.getResourceAsStream(className + ".class");
+    InputStream classFile = classLoader.getResourceAsStream(className + ".class");
     if (classFile != null) {
       logger.debug("  Class file based ASM scan of {}", className);
       return scan(read(new ClassReader(classFile)), toProcess);
     }
 
     logger.error("  Reflection scan of {}", className);
-    return scanReflection(_classLoader, className, toProcess);
+    return scanReflection(classLoader, className, toProcess);
   }
 
   /**
