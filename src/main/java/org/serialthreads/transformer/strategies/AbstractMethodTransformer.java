@@ -501,6 +501,8 @@ public abstract class AbstractMethodTransformer {
   /**
    * Push method and owner onto frame with a given method.
    *
+   * @see Stack#leaveMethod(Object, int) etc.
+   *
    * @param position position of method call
    * @param containsMoreThanOneMethodCall contains the method more than one method call?
    * @param methodName name of method to store owner and method
