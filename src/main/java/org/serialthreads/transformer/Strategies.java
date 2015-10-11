@@ -22,7 +22,7 @@ public class Strategies {
   /**
    * Strategy for frequent interrupts which bloats the code more than FREQUENT but is slightly faster.
    */
-  public static final IStrategy FREQUENT3 =FrequentInterruptsTransformer3::new;
+  public static final IStrategy FREQUENT3 = FrequentInterruptsTransformer3::new;
 
   /**
    * Strategy for frequent interrupts which bloats the code more than FREQUENT but is slightly faster.

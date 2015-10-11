@@ -464,19 +464,6 @@ public abstract class AbstractMethodTransformer {
   //
 
   /**
-   * Pop return value from stack before saving a frame.
-   *
-   * @param methodCall method call to process
-   */
-  protected InsnList popReturnValue(MethodInsnNode methodCall) {
-    InsnList result = new InsnList();
-    if (isNotVoid(methodCall)) {
-      result.add(code(Type.getReturnType(methodCall.desc)).pop());
-    }
-    return result;
-  }
-
-  /**
    * Push method and owner onto frame.
    *
    * @param position position of method call

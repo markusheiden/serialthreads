@@ -70,7 +70,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // get rid of dummy return value of called method first
-    capture.add(popReturnValue(methodCall));
+    if (isNotVoid(methodCall)) {
+      capture.add(code(Type.getReturnType(methodCall.desc)).pop());
+    }
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
