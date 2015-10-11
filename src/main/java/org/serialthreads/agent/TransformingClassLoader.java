@@ -185,4 +185,9 @@ public class TransformingClassLoader extends ClassLoader {
   protected ClassVisitor createVisitor(ClassWriter writer) {
     return writer;
   }
+
+  @Override
+  public String toString() {
+    return transformer.toString() + " via class loader.";
+  }
 }

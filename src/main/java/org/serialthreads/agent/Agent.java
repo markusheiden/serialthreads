@@ -115,4 +115,9 @@ public class Agent implements ClassFileTransformer {
       logger.error("Failed to init agent", e);
     }
   }
+
+  @Override
+  public String toString() {
+    return transformer.toString() + " via agent.";
+  }
 }
