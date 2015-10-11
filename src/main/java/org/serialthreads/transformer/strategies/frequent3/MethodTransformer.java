@@ -200,15 +200,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, metaInfo)) {
-      // self call: owner == this
-      restore.add(new VarInsnNode(ALOAD, 0));
-    } else if (isNotStatic(clonedCall)) {
-      // get owner
-      restore.add(new VarInsnNode(ALOAD, localFrame));
-      restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
-      restore.add(new TypeInsnNode(CHECKCAST, clonedCall.owner));
-    }
+    restore.add(StackFrameCapture.popOwnerFromFrame(methodCall, metaInfo, localFrame));
 
     // jump to cloned method call with thread and frame as arguments
     restore.add(new VarInsnNode(ALOAD, localThread));

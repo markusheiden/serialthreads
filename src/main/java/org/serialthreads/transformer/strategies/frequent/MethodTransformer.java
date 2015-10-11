@@ -95,14 +95,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    if (isSelfCall(methodCall, metaInfo)) {
-      restore.add(new VarInsnNode(ALOAD, 0));
-    } else if (isNotStatic(clonedCall)) {
-      // get owner
-      restore.add(new VarInsnNode(ALOAD, localFrame));
-      restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
-      restore.add(new TypeInsnNode(CHECKCAST, clonedCall.owner));
-    }
+    restore.add(StackFrameCapture.popOwnerFromFrame(methodCall, metaInfo, localFrame));
 
     // push arguments on stack and jump to method call
     // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
