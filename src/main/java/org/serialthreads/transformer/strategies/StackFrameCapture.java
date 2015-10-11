@@ -1,5 +1,16 @@
 package org.serialthreads.transformer.strategies;
 
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -13,18 +24,6 @@ import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.code.ValueCodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
-
-import static org.serialthreads.transformer.strategies.AbstractMethodTransformer.TAG_TAIL_CALL;
 
 /**
  * Capture and restore of stack frames.

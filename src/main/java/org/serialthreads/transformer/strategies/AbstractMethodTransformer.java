@@ -3,7 +3,9 @@ package org.serialthreads.transformer.strategies;
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 import java.util.*;
 
@@ -43,10 +45,6 @@ public abstract class AbstractMethodTransformer {
   protected static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
   protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
   protected static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
-
-  protected static final String TAG_INTERRUPTIBLE = "INTERRUPTIBLE";
-  protected static final String TAG_INTERRUPT = "INTERRUPT";
-  protected static final String TAG_TAIL_CALL = "TAIL_CALL";
 
   protected final ClassNode clazz;
   protected final MethodNode method;

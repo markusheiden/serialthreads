@@ -1,16 +1,17 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
-import org.serialthreads.transformer.strategies.StackFrameCapture;
 import org.serialthreads.transformer.strategies.MetaInfo;
-
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import org.serialthreads.transformer.strategies.StackFrameCapture;
 
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
