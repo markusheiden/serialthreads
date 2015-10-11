@@ -28,7 +28,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * Transform method.
    *
    * @return Transformed method
-   * @exception AnalyzerException In case of incorrect byte code of the original method
+   * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();

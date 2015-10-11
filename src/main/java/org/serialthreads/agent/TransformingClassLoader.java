@@ -105,7 +105,7 @@ public class TransformingClassLoader extends ClassLoader {
    *
    * @param name name of class
    * @return byte code or null, if class file does not exist
-   * @exception IOException in case of IO exception while reading the class file
+   * @throws IOException in case of IO exception while reading the class file
    */
   private byte[] loadByteCode(String name) throws IOException {
     // class content

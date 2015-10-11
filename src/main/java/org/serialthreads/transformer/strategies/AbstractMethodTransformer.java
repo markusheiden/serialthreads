@@ -141,7 +141,7 @@ public abstract class AbstractMethodTransformer {
    * Analyze a method to compute frames.
    * Extract all interruptible method calls.
    *
-   * @exception AnalyzerException
+   * @throws AnalyzerException
    */
   protected void analyze() throws AnalyzerException {
     // Init meta information

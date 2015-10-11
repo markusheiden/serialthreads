@@ -44,7 +44,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
    * @param method method
    * @param classInfoCache class info cache
    * @return frames
-   * @exception AnalyzerException In case of incorrect byte code of the original method
+   * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public static ExtendedFrame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) throws AnalyzerException {
     return create(clazz, classInfoCache).analyze(clazz.name, method);
