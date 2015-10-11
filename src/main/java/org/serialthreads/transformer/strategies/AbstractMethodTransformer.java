@@ -472,7 +472,8 @@ public abstract class AbstractMethodTransformer {
    *
    * @param methodCall method call to process
    * @param metaInfo Meta information about method call
-   * @param localFrame number of local containing the frameAfter  @return generated capture code
+   * @param localFrame number of local containing the frameAfter
+   * @return generated capture code
    */
   protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
     InsnList result = new InsnList();
@@ -635,7 +636,8 @@ public abstract class AbstractMethodTransformer {
    *
    * @param methodCall method call to process
    * @param metaInfo Meta information about method call
-   * @param localFrame number of local containing the frame  @return generated restore code
+   * @param localFrame number of local containing the frame
+   * @return generated restore code
    */
   protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
     InsnList result = new InsnList();
