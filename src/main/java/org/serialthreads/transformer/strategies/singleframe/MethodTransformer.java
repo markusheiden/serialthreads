@@ -5,6 +5,7 @@ import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
+import org.serialthreads.transformer.strategies.StackFrameCapture;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -155,7 +156,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, metaInfo, localFrame));
+    capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
     capture.add(new InsnNode(RETURN));
 
@@ -173,12 +174,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
-  }
-
-  @Override
-  protected InsnList popReturnValue(MethodInsnNode methodCall) {
-    // There is no return value, because all methods have been change to void returns
-    return new InsnList();
   }
 
   //
@@ -232,7 +227,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(restoreFrame);
 
     // restore stack "under" the returned value, if any
-    restore.add(popFromFrame(methodCall, metaInfo, localFrame));
+    restore.add(StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
       if (isTailCall(metaInfo)) {

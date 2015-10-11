@@ -1,28 +1,24 @@
 package org.serialthreads.transformer.strategies;
 
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.IntValueCode.push;
+import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+
+import java.util.*;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.*;
 import org.serialthreads.context.Stack;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
-import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
-import org.serialthreads.transformer.code.ValueCodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.IntValueCode.push;
-import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
  * Base class for all method transformers.
@@ -292,7 +288,7 @@ public abstract class AbstractMethodTransformer {
 
     // restore frame
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
-    restore.add(popFromFrame(methodCall, metaInfo, localFrame));
+    restore.add(StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame));
 
     // resume
     restore.add(new JumpInsnNode(GOTO, normal));
@@ -346,7 +342,7 @@ public abstract class AbstractMethodTransformer {
 
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
-    capture.add(pushToFrame(methodCall, metaInfo, localFrame));
+    capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
 
     // "start" serializing
@@ -468,91 +464,15 @@ public abstract class AbstractMethodTransformer {
   //
 
   /**
-   * Save current frameAfter after returning from a method call.
-   *
-   * @param methodCall method call to process
-   * @param metaInfo Meta information about method call
-   * @param localFrame number of local containing the frameAfter
-   * @return generated capture code
-   */
-  protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    InsnList result = new InsnList();
-
-    if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
-      return result;
-    }
-
-    ExtendedFrame frameAfter = metaInfo.frameAfter;
-    final boolean isMethodNotStatic = isNotStatic(method);
-    final boolean isCallNotVoid = isNotVoid(methodCall);
-
-    // get rid of dummy return value of called method first
-    if (isCallNotVoid) {
-      result.add(popReturnValue(methodCall));
-    }
-
-    // save stack
-    // the topmost element is a dummy return value, if the called method returns one
-    int[] stackIndexes = stackIndexes(frameAfter);
-    for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
-      ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
-      if (value.isConstant() || value.isHoldInLocal()) {
-        // just pop the value from stack, because the stack value is constant or stored in a local too.
-        result.add(code(value).pop());
-      } else {
-        result.add(code(value).pushStack(stackIndexes[stack], localFrame));
-      }
-    }
-
-    // save locals separated by type
-    for (IValueCode code : ValueCodeFactory.CODES) {
-      List<Integer> pushLocals = new ArrayList<>(frameAfter.getLocals());
-
-      // do not store local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-        BasicValue value = frameAfter.getLocal(local);
-        if (code.isResponsibleFor(value.getType())) {
-          ExtendedValue extendedValue = (ExtendedValue) value;
-          if (frameAfter.neededLocals.contains(local) && !frameAfter.isHoldInLowerNeededLocal(local)) {
-            pushLocals.add(local);
-          }
-        }
-      }
-
-      Iterator<Integer> iter = pushLocals.iterator();
-
-      // for first locals use fast stack
-      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
-        int local = iter.next();
-        IValueCode localCode = code(frameAfter.getLocal(local));
-        result.add(localCode.pushLocalVariableFast(local, i, localFrame));
-      }
-
-      // for too high locals use "slow" storage in (dynamic) array
-      if (iter.hasNext()) {
-        result.add(code.getLocals(localFrame));
-        for (int i = 0; iter.hasNext(); i++) {
-          int local = iter.next();
-          IValueCode localCode = code(frameAfter.getLocal(local));
-          if (iter.hasNext()) {
-            result.add(new InsnNode(DUP));
-          }
-          result.add(localCode.pushLocalVariable(local, i));
-        }
-      }
-    }
-
-    return result;
-  }
-
-  /**
    * Pop return value from stack before saving a frame.
    *
    * @param methodCall method call to process
    */
   protected InsnList popReturnValue(MethodInsnNode methodCall) {
     InsnList result = new InsnList();
-    result.add(code(Type.getReturnType(methodCall.desc)).pop());
+    if (isNotVoid(methodCall)) {
+      result.add(code(Type.getReturnType(methodCall.desc)).pop());
+    }
     return result;
   }
 
@@ -626,120 +546,6 @@ public abstract class AbstractMethodTransformer {
       result.add(new VarInsnNode(ALOAD, localThread));
       result.add(push(position));
       result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V", false));
-    }
-
-    return result;
-  }
-
-  /**
-   * Restore current frame before resuming the method call
-   *
-   * @param methodCall method call to process
-   * @param metaInfo Meta information about method call
-   * @param localFrame number of local containing the frame
-   * @return generated restore code
-   */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    InsnList result = new InsnList();
-
-    if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
-      return result;
-    }
-
-    ExtendedFrame frameAfter = metaInfo.frameAfter;
-    final boolean isMethodNotStatic = isNotStatic(method);
-    final boolean isCallNotVoid = isNotVoid(methodCall);
-
-    // restore locals by type
-    for (IValueCode code : ValueCodeFactory.CODES) {
-      List<Integer> popLocals = new ArrayList<>();
-      InsnList copyLocals = new InsnList();
-
-      // do not restore local 0 for non static methods, because it always contains "this"
-      for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-        BasicValue value = frameAfter.getLocal(local);
-        if (code.isResponsibleFor(value.getType())) {
-          ExtendedValue extendedValue = (ExtendedValue) value;
-          if (!frameAfter.neededLocals.contains(local)) {
-            // Ignore not needed locals
-            continue;
-          } else if (frameAfter.isHoldInLowerNeededLocal(local)) {
-            // the value of the local is hold in a lower local too -> copy
-            logger.debug("        Detected codes with the same value: {}/{}", extendedValue.getLowestLocal(), local);
-            copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
-            copyLocals.add(code(extendedValue).store(local));
-          } else {
-            // normal case -> pop local from frameAfter
-            popLocals.add(local);
-          }
-        }
-      }
-
-      // first restore not duplicated locals, if any
-      Iterator<Integer> iter = popLocals.iterator();
-
-      // for first locals use fast stack
-      for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
-        int local = iter.next();
-        IValueCode localCode = code(frameAfter.getLocal(local));
-        result.add(localCode.popLocalVariableFast(local, i, localFrame));
-      }
-
-      // for too high locals use "slow" storage in (dynamic) array
-      if (iter.hasNext()) {
-        result.add(code.getLocals(localFrame));
-        for (int i = 0; iter.hasNext(); i++) {
-          int local = iter.next();
-          IValueCode localCode = code(frameAfter.getLocal(local));
-          if (iter.hasNext()) {
-            result.add(new InsnNode(DUP));
-          }
-          result.add(localCode.popLocalVariable(local, i));
-        }
-      }
-
-      // then restore duplicated locals
-      result.add(copyLocals);
-    }
-
-    // restore stack
-    // the topmost element is a dummy return value, if the called method is not a void method
-    int[] stackIndexes = stackIndexes(frameAfter);
-    for (int stack = 0, end = isCallNotVoid ? frameAfter.getStackSize() - 1 : frameAfter.getStackSize(); stack < end; stack++) {
-      ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
-      if (value.isConstant()) {
-        // the stack value is constant -> push constant
-        logger.debug("        Detected constant value on stack: {} / value {}", value, value.getConstant());
-        result.add(code(value).push(value.getConstant()));
-      } else if (value.isHoldInLocal()) {
-        // the stack value was already stored in local variable -> load local
-        logger.debug("        Detected value of local on stack: {} / local {}", value, value.getLowestLocal());
-        result.add(code(value).load(value.getLowestLocal()));
-      } else {
-        // normal case -> pop stack from frameAfter
-        result.add(code(value).popStack(stackIndexes[stack], localFrame));
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Compute index of all stack elements in typed stack arrays.
-   *
-   * @param frame Frame
-   * @return array stack element -> stack element index
-   */
-  private int[] stackIndexes(Frame frame) {
-    int[] result = new int[frame.getStackSize()];
-    Arrays.fill(result, -1);
-    for (IValueCode code : ValueCodeFactory.CODES) {
-      for (int stack = 0, end = frame.getStackSize(), i = 0; stack < end; stack++) {
-        BasicValue value = (BasicValue) frame.getStack(stack);
-        if (code.isResponsibleFor(value.getType())) {
-          result[stack] = i++;
-        }
-      }
     }
 
     return result;

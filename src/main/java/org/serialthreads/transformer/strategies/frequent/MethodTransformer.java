@@ -4,6 +4,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
+import org.serialthreads.transformer.strategies.StackFrameCapture;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -47,8 +48,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
+    // get rid of dummy return value of called method first
+    capture.add(popReturnValue(methodCall));
+
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, metaInfo, localFrame));
+    capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
     capture.add(dummyReturnStatement(method));
 
@@ -127,7 +131,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
     }
-    restore.add(popFromFrame(clonedCall, metaInfo, localFrame));
+    restore.add(StackFrameCapture.popFromFrame(method, clonedCall, metaInfo, localFrame));
     if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
     }
