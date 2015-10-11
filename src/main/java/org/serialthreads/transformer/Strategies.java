@@ -71,7 +71,7 @@ public class Strategies {
   };
 
   /**
-   * Strategy for infrequent interrupts.
+   * Default strategy.
    */
   public static final IStrategy DEFAULT = FREQUENT3;
 }
