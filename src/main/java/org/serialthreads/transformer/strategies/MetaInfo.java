@@ -30,7 +30,7 @@ public class MetaInfo {
   public static final String TAG_INTERRUPT = "INTERRUPT";
 
   /**
-   * Tag for tail call methods.
+   * Tag for tail calls.
    */
   public static final String TAG_TAIL_CALL = "TAIL_CALL";
 
