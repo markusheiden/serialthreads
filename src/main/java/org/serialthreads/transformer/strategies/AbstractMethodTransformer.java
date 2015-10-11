@@ -1,7 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
@@ -341,7 +340,7 @@ public abstract class AbstractMethodTransformer {
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(pushMethodToFrame(position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
 
     // "start" serializing
     capture.add(new VarInsnNode(ALOAD, localThread));
@@ -455,86 +454,5 @@ public abstract class AbstractMethodTransformer {
 
       method.instructions.add(handler);
     }
-  }
-
-  //
-  // frame related code
-  //
-
-  /**
-   * Push method and owner onto frame.
-   *
-   * @param position position of method call
-   * @param containsMoreThanOneMethodCall contains the method more than one method call?
-   * @param suppressOwner suppress saving the owner?
-   * @param localPreviousFrame number of local containing the previous frame or -1 for retrieving it via current frame
-   * @param localFrame number of local containing the current frame
-   * @return generated capture code
-   */
-  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, int localPreviousFrame, int localFrame) {
-    InsnList result = new InsnList();
-
-    // save method index of this method
-    if (containsMoreThanOneMethodCall) {
-      // frame.method = position;
-      result.add(new VarInsnNode(ALOAD, localFrame));
-      result.add(push(position));
-      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
-    }
-
-    // save owner of method call one level above
-    if (isNotStatic(method) && !suppressOwner) {
-      // previousFrame.owner = this;
-      if (localPreviousFrame < 0) {
-        result.add(new VarInsnNode(ALOAD, localFrame));
-        result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "previous", FRAME_IMPL_DESC));
-      } else {
-        result.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      }
-      result.add(new VarInsnNode(ALOAD, 0));
-      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
-    }
-
-    return result;
-  }
-
-  /**
-   * Push method and owner onto frame with a given method.
-   *
-   * @see Stack#leaveMethod(Object, int) etc.
-   *
-   * @param position position of method call
-   * @param containsMoreThanOneMethodCall contains the method more than one method call?
-   * @param methodName name of method to store owner and method
-   * @param localThread number of local containing the thread
-   * @return generated capture code
-   */
-  protected InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, String methodName, int localThread) {
-    InsnList result = new InsnList();
-
-    final boolean isMethodNotStatic = isNotStatic(method);
-
-    // save method index of this method and owner of method call one level above
-    boolean pushOwner = isMethodNotStatic && !isRun(clazz, method, classInfoCache);
-    boolean pushMethod = containsMoreThanOneMethodCall;
-    if (pushOwner && pushMethod) {
-      // save owner of this method for calling method and index of interrupted method
-      result.add(new VarInsnNode(ALOAD, localThread));
-      result.add(new VarInsnNode(ALOAD, 0));
-      result.add(push(position));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V", false));
-    } else if (pushOwner) {
-      // save owner of this method for calling method
-      result.add(new VarInsnNode(ALOAD, localThread));
-      result.add(new VarInsnNode(ALOAD, 0));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V", false));
-    } else if (pushMethod) {
-      // save index of interrupted method
-      result.add(new VarInsnNode(ALOAD, localThread));
-      result.add(push(position));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V", false));
-    }
-
-    return result;
   }
 }

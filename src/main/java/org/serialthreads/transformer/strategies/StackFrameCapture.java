@@ -1,6 +1,7 @@
 package org.serialthreads.transformer.strategies;
 
-import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.IntValueCode.push;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
@@ -11,12 +12,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
+import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
@@ -33,6 +33,11 @@ public class StackFrameCapture {
    * Logger.
    */
   private static final Logger logger = LoggerFactory.getLogger(StackFrameCapture.class);
+
+  private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
+  private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
+  private static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
+  private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
   /**
    * Save current frameAfter after returning from a method call.
@@ -102,6 +107,86 @@ public class StackFrameCapture {
           result.add(localCode.pushLocalVariable(local, i));
         }
       }
+    }
+
+    return result;
+  }
+
+  /**
+   * Push method and owner onto frame.
+   *
+   * @param method Method to capture.
+   * @param position position of method call.
+   * @param containsMoreThanOneMethodCall contains the method more than one method call?.
+   * @param suppressOwner suppress saving the owner?.
+   * @param localPreviousFrame number of local containing the previous frame or -1 for retrieving it via current frame.
+   * @param localFrame number of local containing the current frame.
+   * @return generated capture code.
+   */
+  public static InsnList pushMethodToFrame(MethodNode method, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, int localPreviousFrame, int localFrame) {
+    InsnList result = new InsnList();
+
+    // save method index of this method
+    if (containsMoreThanOneMethodCall) {
+      // frame.method = position;
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(push(position));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
+    }
+
+    // save owner of method call one level above
+    if (isNotStatic(method) && !suppressOwner) {
+      // previousFrame.owner = this;
+      if (localPreviousFrame < 0) {
+        result.add(new VarInsnNode(ALOAD, localFrame));
+        result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "previous", FRAME_IMPL_DESC));
+      } else {
+        result.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      }
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+    }
+
+    return result;
+  }
+
+  /**
+   * Push method and owner onto frame with a given method.
+   *
+   * Currently not used.
+   * @see Stack#leaveMethod(Object, int) etc.
+   *
+   * @param method Method to capture.
+   * @param position position of method call
+   * @param containsMoreThanOneMethodCall contains the method more than one method call?
+   * @param methodName name of method to store owner and method
+   * @param localThread number of local containing the thread
+   * @return generated capture code
+   */
+  public static InsnList pushMethodToFrame(MethodNode method, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, String methodName, int localThread) {
+    InsnList result = new InsnList();
+
+    final boolean isMethodNotStatic = isNotStatic(method);
+
+    // save method index of this method and owner of method call one level above
+    boolean pushOwner = isMethodNotStatic && !suppressOwner;
+    boolean pushMethod = containsMoreThanOneMethodCall;
+    if (pushOwner && pushMethod) {
+      // save owner of this method for calling method and index of interrupted method
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(push(position));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V", false));
+    } else if (pushOwner) {
+      // save owner of this method for calling method
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V", false));
+    } else if (pushMethod) {
+      // save index of interrupted method
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(push(position));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V", false));
     }
 
     return result;
