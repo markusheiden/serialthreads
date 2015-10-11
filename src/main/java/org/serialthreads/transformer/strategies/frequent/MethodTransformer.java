@@ -96,7 +96,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // call interrupted method
     restore.add(StackFrameCapture.popOwnerFromFrame(methodCall, metaInfo, localFrame));
-
     // push arguments on stack and jump to method call
     // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
     restore.add(dummyArguments(methodCall));
