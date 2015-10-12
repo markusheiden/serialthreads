@@ -15,14 +15,14 @@ public interface IClassInfoCache {
    *
    * @param clazz class
    */
-  public boolean isInterface(String clazz);
+  boolean isInterface(String clazz);
 
   /**
    * Get direct super class of this class.
    *
    * @param clazz internal name of class
    */
-  public Type getSuperClass(String clazz);
+  Type getSuperClass(String clazz);
 
   /**
    * Extends / implements this class the given super class or interface.
@@ -30,7 +30,7 @@ public interface IClassInfoCache {
    * @param clazz internal name of class
    * @param superClass super class to check class for
    */
-  public boolean hasSuperClass(String clazz, String superClass);
+  boolean hasSuperClass(String clazz, String superClass);
 
   /**
    * Check if the method is an executor.
@@ -38,7 +38,7 @@ public interface IClassInfoCache {
    * @param clazz owner of method
    * @param method method
    */
-  public boolean isExecutor(ClassNode clazz, MethodNode method);
+  boolean isExecutor(ClassNode clazz, MethodNode method);
 
   /**
    * Check if the method is interruptible.
@@ -47,7 +47,7 @@ public interface IClassInfoCache {
    * @param owner owner of method
    * @param method method
    */
-  public boolean isInterruptible(ClassNode owner, MethodNode method);
+  boolean isInterruptible(ClassNode owner, MethodNode method);
 
   /**
    * Check if the called method is interruptible.
@@ -55,7 +55,7 @@ public interface IClassInfoCache {
    *
    * @param method method call
    */
-  public boolean isInterruptible(MethodInsnNode method);
+  boolean isInterruptible(MethodInsnNode method);
 
   /**
    * Check if the method is interruptible.
@@ -63,7 +63,7 @@ public interface IClassInfoCache {
    *
    * @param method method call
    */
-  public boolean isInterruptible(Handle method);
+  boolean isInterruptible(Handle method);
 
   /**
    * Check if method is interruptible.
@@ -73,12 +73,12 @@ public interface IClassInfoCache {
    * @param name name of method
    * @param desc descriptor of method
    */
-  public boolean isInterruptible(String owner, String name, String desc);
+  boolean isInterruptible(String owner, String name, String desc);
 
   /**
    * Check if the called method is an interrupt.
    *
    * @param method method call
    */
-  public boolean isInterrupt(MethodInsnNode method);
+  boolean isInterrupt(MethodInsnNode method);
 }
