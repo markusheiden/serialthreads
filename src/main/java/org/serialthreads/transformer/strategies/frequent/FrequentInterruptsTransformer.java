@@ -11,8 +11,13 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
+import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
+import static org.serialthreads.transformer.code.MethodCode.isAbstract;
+import static org.serialthreads.transformer.code.MethodCode.isInterface;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
 
 /**
  * Class adapter executing byte code enhancement of all methods.
@@ -20,6 +25,9 @@ import static org.serialthreads.transformer.code.MethodCode.*;
  * This transformation needs a static thread holder, so SimpleSerialThreadManager has to be used.
  */
 public class FrequentInterruptsTransformer extends AbstractTransformer {
+  /**
+   * Strategy name.
+   */
   public static final String STRATEGY = "FREQUENT";
 
   /**

@@ -10,7 +10,9 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.MethodCode.isAbstract;
+import static org.serialthreads.transformer.code.MethodCode.isInterface;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
 
 /**
  * Class adapter executing byte code enhancement of all methods.
@@ -19,6 +21,9 @@ import static org.serialthreads.transformer.code.MethodCode.*;
  * This transformation needs no static thread holder, SimpleSerialThreadManager2 can be used.
  */
 public class FrequentInterruptsTransformer3 extends AbstractTransformer {
+  /**
+   * Strategy name.
+   */
   public static final String STRATEGY = "FREQUENT3";
 
   /**
