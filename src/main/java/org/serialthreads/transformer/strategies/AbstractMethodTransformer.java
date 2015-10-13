@@ -1,13 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
-
-import java.util.*;
-
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -20,6 +12,14 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Base class for all method transformers.
@@ -348,7 +348,7 @@ public abstract class AbstractMethodTransformer {
     capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
 
     // return early
-    capture.add(dummyReturn());
+    capture.add(interruptReturn());
 
     // replace dummy call of interrupt method by capture code
     method.instructions.insert(methodCall, capture);
@@ -356,9 +356,9 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Dummy return for the given method.
+   * Dummy return for interrupt.
    */
-  protected InsnList dummyReturn() {
+  protected InsnList interruptReturn() {
     InsnList result = new InsnList();
     result.add(dummyReturnStatement(method));
     return result;
