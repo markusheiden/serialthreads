@@ -14,7 +14,10 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 /**
  * Method related code.
@@ -60,12 +63,8 @@ public class MethodCode {
 
     // "pop" all arguments from stack
     Type[] argumentTypes = Type.getArgumentTypes(methodCall.desc);
-    int s = frameBefore.getStackSize();
-    for (int i = argumentTypes.length - 1; i >= 0; i--) {
-      s -= argumentTypes[i].getSize();
-      assert s > 0 : "Check: stack pointer is positive";
-    }
-
+    int s = frameBefore.getStackSize() - argumentTypes.length;
+    assert s > 0 : "Check: stack pointer is positive";
     Value ownerType = frameBefore.getStack(s - 1);
     return ownerType instanceof ExtendedValue && ((ExtendedValue) ownerType).getLocals().contains(0);
   }
