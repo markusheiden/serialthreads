@@ -279,9 +279,7 @@ public abstract class AbstractMethodTransformer {
     method.instructions.insert(methodCall, normal);
 
     // stop deserializing
-    // restore.add(new VarInsnNode(ALOAD, localThread));
-    // restore.add(new InsnNode(ICONST_0));
-    // restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restore.add(stopDeserializing());
 
     // restore frame
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
@@ -291,6 +289,19 @@ public abstract class AbstractMethodTransformer {
     restore.add(new JumpInsnNode(GOTO, normal));
 
     return restore;
+  }
+
+  /**
+   * Stop de-serializing when interrupt location has been reached.
+   */
+  protected InsnList stopDeserializing() {
+    final int localThread = localThread();
+
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(ICONST_0));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    return instructions;
   }
 
   /**
@@ -342,13 +353,8 @@ public abstract class AbstractMethodTransformer {
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
 
-    // "start" serializing
-    // capture.add(new VarInsnNode(ALOAD, localThread));
-    // capture.add(new InsnNode(ICONST_1));
-    // capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-
-    // return early
-    capture.add(interruptReturn());
+    // "start" serializing and return early
+    capture.add(startSerializing());
 
     // replace dummy call of interrupt method by capture code
     method.instructions.insert(methodCall, capture);
@@ -356,12 +362,17 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Dummy return for interrupt.
+   * Start serializing at interrupt.
    */
-  protected InsnList interruptReturn() {
-    InsnList result = new InsnList();
-    result.add(dummyReturnStatement(method));
-    return result;
+  protected InsnList startSerializing() {
+    final int localThread = localThread();
+
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    instructions.add(dummyReturnStatement(method));
+    return instructions;
   }
 
   /**
@@ -379,13 +390,12 @@ public abstract class AbstractMethodTransformer {
    * Replace all return instructions by ThreadFinishedException.
    * Needed for transformation of IRunnable.run().
    */
-  protected void replaceReturns() {
+  protected void replaceRunReturns() {
     // TODO 2013-11-24 mh: implement as method -> call method?
 
     LabelNode exception = new LabelNode();
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
       method.instructions.set(returnInstruction, new JumpInsnNode(GOTO, exception));
-      method.instructions.remove(returnInstruction);
     }
 
     InsnList instructions = new InsnList();

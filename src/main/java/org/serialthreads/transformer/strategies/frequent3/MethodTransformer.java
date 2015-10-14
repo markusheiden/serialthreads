@@ -85,7 +85,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * Replace returns with void returns.
    * The return value will be captured in the previous frame.
    */
-  protected void voidReturns() {
+  protected void replaceReturns() {
     logger.debug("      Replacing returns");
 
     final int localThread = localThread();
@@ -99,21 +99,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       if (isTailCall(previous)) {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method.
-        // false is already on the stack from the previous method call.
-        replacement.add(new InsnNode(ICONST_0)); // avoid
-        replacement.add(new InsnNode(IRETURN));
+        // TODO markus 2015-10-14: Just IRETURN, because "false" should be already on the stack? But that's no the case, why???
+        replacement.add(methodReturn(false));
         logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
-      } else if (returnType.getSort() != Type.VOID) {
-        // Default case:
-        // Save return value into the thread
-        replacement.add(code(returnType).pushReturnValue(localThread));
-        replacement.add(new InsnNode(ICONST_0));
-        replacement.add(new InsnNode(IRETURN));
-      } else if (!isRun(clazz, method, classInfoCache)) {
-        replacement.add(new InsnNode(ICONST_0));
-        replacement.add(new InsnNode(IRETURN));
       } else {
-        replacement.add(new InsnNode(RETURN));
+        if (returnType.getSort() != Type.VOID) {
+          // Default case:
+          // Save return value into the thread
+          replacement.add(code(returnType).pushReturnValue(localThread));
+        }
+        replacement.add(methodReturn(false));
       }
 
       method.instructions.insert(returnInstruction, replacement);
@@ -125,17 +120,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   // Capture code inserted after method calls
   //
 
+
   @Override
-  protected InsnList interruptReturn() {
-    // Always use void returns, because all methods have been change to use void returns
-    InsnList result = new InsnList();
-    if (isRun(clazz, method, classInfoCache)) {
-      result.add(new InsnNode(RETURN));
-    } else {
-      result.add(new InsnNode(ICONST_1));
-      result.add(new InsnNode(IRETURN));
-    }
-    return result;
+  protected InsnList startSerializing() {
+    // Interrupt starts serializing.
+    return methodReturn(true);
   }
 
   @Override
@@ -159,19 +148,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList capture = new InsnList();
 
     // if not serializing "GOTO" normal
-    // capture.add(new VarInsnNode(ALOAD, localThread));
-    // capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
-    if (isRun(clazz, method, classInfoCache)) {
-      capture.add(new InsnNode(RETURN));
-    } else {
-      capture.add(new InsnNode(ICONST_1));
-      capture.add(new InsnNode(IRETURN));
-    }
+    // We are already serializing
+    capture.add(methodReturn(true));
 
     // normal execution
     capture.add(normal);
@@ -192,6 +175,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
   // Restore code to be able to resume a method call
   //
+
+  @Override
+  protected InsnList stopDeserializing() {
+    // Nothing to do, because the serializing flag is not used anymore.
+    return new InsnList();
+  }
 
   @Override
   protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
@@ -220,17 +209,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(clonedCall);
 
     // if not serializing "GOTO" normal, but restore the frame first
-    // restore.add(new VarInsnNode(ALOAD, localThread));
-    // restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     restore.add(new JumpInsnNode(IFEQ, restoreFrame));
 
-    // early return, the frame already has been captured
-    if (isRun(clazz, method, classInfoCache)) {
-      restore.add(new InsnNode(RETURN));
-    } else {
-      restore.add(new InsnNode(ICONST_1));
-      restore.add(new InsnNode(IRETURN));
-    }
+    // Early return, the frame already has been captured.
+    // We are already serializing.
+    restore.add(methodReturn(true));
 
     // restore frame to be able to resume normal execution of method
     restore.add(restoreFrame);
@@ -305,6 +288,23 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
   //
   //
+
+  /**
+   * Create return instruction for method.
+   * Returns the given serializing flag, or in case of the run method uses a void return.
+   *
+   * @param serializing Serializing flag.
+   */
+  private InsnList methodReturn(boolean serializing) {
+    InsnList result = new InsnList();
+    if (isRun(clazz, method, classInfoCache)) {
+      result.add(new InsnNode(RETURN));
+    } else {
+      result.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
+      result.add(new InsnNode(IRETURN));
+    }
+    return result;
+  }
 
   /**
    * Fix maxs of method.

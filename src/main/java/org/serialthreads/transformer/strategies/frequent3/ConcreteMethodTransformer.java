@@ -32,7 +32,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    voidReturns();
+    replaceReturns();
     insertCaptureCode(false);
     createRestoreHandlerMethod();
     addThreadAndFrame();
