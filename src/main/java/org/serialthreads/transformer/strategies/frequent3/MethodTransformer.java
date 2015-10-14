@@ -99,7 +99,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       if (isTailCall(previous)) {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method.
-        // TODO markus 2015-10-14: Just IRETURN, because "false" should be already on the stack? But that's no the case, why???
         replacement.add(methodReturn(false));
         logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
       } else {
