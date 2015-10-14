@@ -135,6 +135,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // Tail call -> no need for separate early return statement
       // So no extra code at all is needed here
       logger.debug("        Optimized no frame tail call");
+      // TODO markus 2015-10-14: Move into replaceReturns()!
+      method.instructions.insert(methodCall, new InsnNode(IRETURN));
       return;
     }
 
