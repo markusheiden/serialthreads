@@ -21,7 +21,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
+import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 
 /**
  * Base implementation of a transformer.
@@ -146,8 +148,8 @@ public abstract class AbstractTransformer implements ITransformer {
         ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
       } catch (Exception e) {
         // disassemble erroneous method
-        logger.debug("Unable to analyze transformed method {}: {}", methodName(clazz, method), e.getMessage());
-        logger.debug("Byte code:\n{}", Debugger.debug(clazz, method));
+        logger.error("Unable to analyze transformed method {}: {}", methodName(clazz, method), e.getMessage());
+        logger.error("Byte code:\n{}", Debugger.debug(clazz, method));
         throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
       }
     }

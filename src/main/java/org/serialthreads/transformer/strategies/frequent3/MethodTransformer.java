@@ -3,7 +3,6 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.serialthreads.transformer.strategies.StackFrameCapture;
@@ -48,7 +47,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @return changed parameters
    */
   protected String changeCopyDesc(String desc) {
-    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.VOID_TYPE;
+    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.BOOLEAN_TYPE;
   }
 
   /**
@@ -60,7 +59,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected String changeDesc(String desc) {
     int index = desc.indexOf(")");
-    return desc.substring(0, index) + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.VOID_TYPE;
+    return desc.substring(0, index) + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.BOOLEAN_TYPE;
   }
 
   /**
@@ -87,34 +86,38 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * The return value will be captured in the previous frame.
    */
   protected void voidReturns() {
-    Type returnType = Type.getReturnType(method.desc);
-    if (returnType.getSort() == Type.VOID) {
-      // Method already has return type void
-      return;
-    }
-
     logger.debug("      Replacing returns");
-
-    InsnList instructions = method.instructions;
 
     final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    IValueCode returnTypeCode = code(returnType);
+    Type returnType = Type.getReturnType(method.desc);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
       AbstractInsnNode previous = previousInstruction(returnInstruction);
+      InsnList replacement = new InsnList();
       if (isTailCall(previous)) {
         // Tail call optimization:
-        // The return value has already been saved into the thread by the capture code of the called method
-        instructions.set(returnInstruction, new InsnNode(RETURN));
+        // The return value has already been saved into the thread by the capture code of the called method.
+        // false is already on the stack from the previous method call.
+        replacement.add(new InsnNode(ICONST_0)); // avoid
+        replacement.add(new InsnNode(IRETURN));
         logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
-      } else {
+      } else if (returnType.getSort() != Type.VOID) {
         // Default case:
         // Save return value into the thread
-        instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
-        instructions.remove(returnInstruction);
+        replacement.add(code(returnType).pushReturnValue(localThread));
+        replacement.add(new InsnNode(ICONST_0));
+        replacement.add(new InsnNode(IRETURN));
+      } else if (!isRun(clazz, method, classInfoCache)) {
+        replacement.add(new InsnNode(ICONST_0));
+        replacement.add(new InsnNode(IRETURN));
+      } else {
+        replacement.add(new InsnNode(RETURN));
       }
+
+      method.instructions.insert(returnInstruction, replacement);
+      method.instructions.remove(returnInstruction);
     }
   }
 
@@ -126,7 +129,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected InsnList interruptReturn() {
     // Always use void returns, because all methods have been change to use void returns
     InsnList result = new InsnList();
-    result.add(new InsnNode(RETURN));
+    if (isRun(clazz, method, classInfoCache)) {
+      result.add(new InsnNode(RETURN));
+    } else {
+      result.add(new InsnNode(ICONST_1));
+      result.add(new InsnNode(IRETURN));
+    }
     return result;
   }
 
@@ -151,14 +159,19 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList capture = new InsnList();
 
     // if not serializing "GOTO" normal
-    capture.add(new VarInsnNode(ALOAD, localThread));
-    capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    // capture.add(new VarInsnNode(ALOAD, localThread));
+    // capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
-    capture.add(new InsnNode(RETURN));
+    if (isRun(clazz, method, classInfoCache)) {
+      capture.add(new InsnNode(RETURN));
+    } else {
+      capture.add(new InsnNode(ICONST_1));
+      capture.add(new InsnNode(IRETURN));
+    }
 
     // normal execution
     capture.add(normal);
@@ -207,12 +220,17 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(clonedCall);
 
     // if not serializing "GOTO" normal, but restore the frame first
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    // restore.add(new VarInsnNode(ALOAD, localThread));
+    // restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     restore.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // early return, the frame already has been captured
-    restore.add(new InsnNode(RETURN));
+    if (isRun(clazz, method, classInfoCache)) {
+      restore.add(new InsnNode(RETURN));
+    } else {
+      restore.add(new InsnNode(ICONST_1));
+      restore.add(new InsnNode(IRETURN));
+    }
 
     // restore frame to be able to resume normal execution of method
     restore.add(restoreFrame);

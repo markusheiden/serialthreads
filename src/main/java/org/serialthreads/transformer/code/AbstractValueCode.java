@@ -139,7 +139,7 @@ public abstract class AbstractValueCode implements IValueCode {
    */
   protected final void doPushReturnValueImpl(InsnList instructions) {
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-    instructions.add(new InsnNode(RETURN));
+    // instructions.add(new InsnNode(RETURN));
   }
 
   @Override

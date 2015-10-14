@@ -279,9 +279,9 @@ public abstract class AbstractMethodTransformer {
     method.instructions.insert(methodCall, normal);
 
     // stop deserializing
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new InsnNode(ICONST_0));
-    restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    // restore.add(new VarInsnNode(ALOAD, localThread));
+    // restore.add(new InsnNode(ICONST_0));
+    // restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
 
     // restore frame
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
@@ -343,9 +343,9 @@ public abstract class AbstractMethodTransformer {
     capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
 
     // "start" serializing
-    capture.add(new VarInsnNode(ALOAD, localThread));
-    capture.add(new InsnNode(ICONST_1));
-    capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    // capture.add(new VarInsnNode(ALOAD, localThread));
+    // capture.add(new InsnNode(ICONST_1));
+    // capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
 
     // return early
     capture.add(interruptReturn());
@@ -385,6 +385,7 @@ public abstract class AbstractMethodTransformer {
     LabelNode exception = new LabelNode();
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
       method.instructions.set(returnInstruction, new JumpInsnNode(GOTO, exception));
+      method.instructions.remove(returnInstruction);
     }
 
     InsnList instructions = new InsnList();
