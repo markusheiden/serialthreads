@@ -8,7 +8,10 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 import org.serialthreads.transformer.strategies.StackFrameCapture;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
+import static org.serialthreads.transformer.code.MethodCode.escapeForMethodName;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
+import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
@@ -76,7 +79,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
     capture.add(dummyReturnStatement(method));
 
     // normal execution

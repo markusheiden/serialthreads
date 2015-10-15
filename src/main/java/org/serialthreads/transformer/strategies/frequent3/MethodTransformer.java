@@ -144,7 +144,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // The serializing flag is already on the stack from the cloned call.
       logger.debug("        Optimized tail call");
       if (hasMoreThanOneMethodCall()) {
-        capture.add(StackFrameCapture.pushMethodToFrame(method, position, true, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+        capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
       }
       capture.add(new InsnNode(IRETURN));
       method.instructions.insert(methodCall, capture);
@@ -156,7 +156,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
     // We are already serializing
     capture.add(methodReturn(true));
 

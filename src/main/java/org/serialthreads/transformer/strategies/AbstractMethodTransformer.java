@@ -354,7 +354,7 @@ public abstract class AbstractMethodTransformer {
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
 
     // "start" serializing and return early
     capture.add(startSerializing());
@@ -362,6 +362,20 @@ public abstract class AbstractMethodTransformer {
     // replace dummy call of interrupt method by capture code
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
+  }
+
+  /**
+   * Push method and owner onto frame.
+   *
+   * @param methodCall method call to generate capturing code for
+   * @param metaInfo Meta information about method call
+   * @param position position of method call in method
+   * @param suppressOwner suppress capturing of owner?
+   */
+  protected InsnList pushMethodToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+      return StackFrameCapture.pushMethodToFrame(method, position,
+        hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo),
+        localPreviousFrame(), localFrame());
   }
 
   /**
