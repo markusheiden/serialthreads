@@ -144,7 +144,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // So no extra code at all is needed here
       logger.debug("        Optimized tail call");
       // TODO markus 2015-10-14: Move into replaceReturns()!
-      if (needsFrame()) {
+      if (containsMoreThanOneMethodCall) {
         capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
       }
       capture.add(new InsnNode(IRETURN));
