@@ -3,7 +3,6 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.serialthreads.transformer.strategies.StackFrameCapture;
@@ -48,7 +47,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @return changed parameters
    */
   protected String changeCopyDesc(String desc) {
-    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.VOID_TYPE;
+    return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.BOOLEAN_TYPE;
   }
 
   /**
@@ -60,7 +59,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected String changeDesc(String desc) {
     int index = desc.indexOf(")");
-    return desc.substring(0, index) + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.VOID_TYPE;
+    return desc.substring(0, index) + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.BOOLEAN_TYPE;
   }
 
   /**
@@ -86,35 +85,33 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * Replace returns with void returns.
    * The return value will be captured in the previous frame.
    */
-  protected void voidReturns() {
-    Type returnType = Type.getReturnType(method.desc);
-    if (returnType.getSort() == Type.VOID) {
-      // Method already has return type void
-      return;
-    }
-
+  protected void replaceReturns() {
     logger.debug("      Replacing returns");
-
-    InsnList instructions = method.instructions;
 
     final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    IValueCode returnTypeCode = code(returnType);
+    Type returnType = Type.getReturnType(method.desc);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
       AbstractInsnNode previous = previousInstruction(returnInstruction);
+      InsnList replacement = new InsnList();
       if (isTailCall(previous)) {
         // Tail call optimization:
-        // The return value has already been saved into the thread by the capture code of the called method
-        instructions.set(returnInstruction, new InsnNode(RETURN));
+        // The return value has already been saved into the thread by the capture code of the called method.
+        replacement.add(methodReturn(false));
         logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
       } else {
-        // Default case:
-        // Save return value into the thread
-        instructions.insert(returnInstruction, returnTypeCode.pushReturnValue(localThread));
-        instructions.remove(returnInstruction);
+        if (returnType.getSort() != Type.VOID) {
+          // Default case:
+          // Save return value into the thread
+          replacement.add(code(returnType).pushReturnValue(localThread));
+        }
+        replacement.add(methodReturn(false));
       }
+
+      method.instructions.insert(returnInstruction, replacement);
+      method.instructions.remove(returnInstruction);
     }
   }
 
@@ -122,25 +119,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   // Capture code inserted after method calls
   //
 
+
   @Override
-  protected InsnList interruptReturn() {
-    // Always use void returns, because all methods have been change to use void returns
-    InsnList result = new InsnList();
-    result.add(new InsnNode(RETURN));
-    return result;
+  protected InsnList startSerializing() {
+    // Interrupt starts serializing.
+    return methodReturn(true);
   }
 
   @Override
-  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
-
-    if (!needsFrame() && isTailCall(metaInfo)) {
-      // No frame needed -> no capture code
-      // Tail call -> no need for separate early return statement
-      // So no extra code at all is needed here
-      logger.debug("        Optimized no frame tail call");
-      return;
-    }
 
     final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
@@ -150,26 +138,34 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     InsnList capture = new InsnList();
 
+    if (isTailCall(metaInfo)) {
+      // Early exit for tail calls.
+      // The return value needs not to be restored, because it has already been stored by the cloned call.
+      // The serializing flag is already on the stack from the cloned call.
+      logger.debug("        Optimized tail call");
+      if (hasMoreThanOneMethodCall()) {
+        capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
+      }
+      capture.add(new InsnNode(IRETURN));
+      method.instructions.insert(methodCall, capture);
+      return;
+    }
+
     // if not serializing "GOTO" normal
-    capture.add(new VarInsnNode(ALOAD, localThread));
-    capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
-    capture.add(new InsnNode(RETURN));
+    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
+    // We are already serializing
+    capture.add(methodReturn(true));
 
     // normal execution
     capture.add(normal);
     // restore return value of call, if any.
     // but not for tail calls, because the return value already has been stored in the stack by the called method
     if (isNotVoid(methodCall)) {
-      if (isTailCall(metaInfo)) {
-        logger.debug("        Optimized tail call");
-      } else {
-        capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
-      }
+      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
     // insert capture code
@@ -179,6 +175,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
   // Restore code to be able to resume a method call
   //
+
+  @Override
+  protected InsnList stopDeserializing() {
+    // Nothing to do, because the serializing flag is not used anymore.
+    return new InsnList();
+  }
 
   @Override
   protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
@@ -206,13 +208,21 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(new VarInsnNode(ALOAD, localFrame));
     restore.add(clonedCall);
 
+    // Early exit for tail calls.
+    // The return value needs not to be restored, because it has already been stored by the cloned call.
+    // The serializing flag is already on the stack from the cloned call.
+    if (isTailCall(metaInfo)) {
+      restore.add(new InsnNode(IRETURN));
+      logger.debug("        Tail call optimized");
+      return restore;
+    }
+
     // if not serializing "GOTO" normal, but restore the frame first
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     restore.add(new JumpInsnNode(IFEQ, restoreFrame));
 
-    // early return, the frame already has been captured
-    restore.add(new InsnNode(RETURN));
+    // Early return, the frame already has been captured.
+    // We are already serializing.
+    restore.add(methodReturn(true));
 
     // restore frame to be able to resume normal execution of method
     restore.add(restoreFrame);
@@ -221,11 +231,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      if (isTailCall(metaInfo)) {
-        logger.debug("        Tail call optimized");
-      } else {
-        restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
-      }
+      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
     restore.add(new JumpInsnNode(GOTO, normal));
 
@@ -287,6 +293,23 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
   //
   //
+
+  /**
+   * Create return instruction for method.
+   * Returns the given serializing flag, or in case of the run method uses a void return.
+   *
+   * @param serializing Serializing flag.
+   */
+  private InsnList methodReturn(boolean serializing) {
+    InsnList result = new InsnList();
+    if (isRun(clazz, method, classInfoCache)) {
+      result.add(new InsnNode(RETURN));
+    } else {
+      result.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
+      result.add(new InsnNode(IRETURN));
+    }
+    return result;
+  }
 
   /**
    * Fix maxs of method.

@@ -34,7 +34,7 @@ class RunMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    replaceReturns();
+    replaceRunReturns();
     List<InsnList> restoreCodes = insertCaptureCode(true);
     createRestoreHandlerRun(restoreCodes);
     addThreadAndFrame();

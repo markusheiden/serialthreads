@@ -232,18 +232,23 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore codes for method calls
    */
   protected List<InsnList> insertCaptureCode(boolean suppressOwner) {
-    boolean moreThanOne = interruptibleMethodCalls.size() > 1;
-
     List<InsnList> restoreCodes = new ArrayList<>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
 
       restoreCodes.add(createRestoreCode(methodCall, metaInfo));
-      createCaptureCode(methodCall, metaInfo, methodCallIndex++, moreThanOne, suppressOwner);
+      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner);
     }
 
     return restoreCodes;
+  }
+
+  /**
+   * Has the method more than one interruptible method call?.
+   */
+  protected boolean hasMoreThanOneMethodCall() {
+    return interruptibleMethodCalls.size() > 1;
   }
 
   /**
@@ -279,9 +284,7 @@ public abstract class AbstractMethodTransformer {
     method.instructions.insert(methodCall, normal);
 
     // stop deserializing
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new InsnNode(ICONST_0));
-    restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restore.add(stopDeserializing());
 
     // restore frame
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
@@ -291,6 +294,19 @@ public abstract class AbstractMethodTransformer {
     restore.add(new JumpInsnNode(GOTO, normal));
 
     return restore;
+  }
+
+  /**
+   * Stop de-serializing when interrupt location has been reached.
+   */
+  protected InsnList stopDeserializing() {
+    final int localThread = localThread();
+
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(ICONST_0));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    return instructions;
   }
 
   /**
@@ -308,14 +324,13 @@ public abstract class AbstractMethodTransformer {
    * @param methodCall method call to generate capturing code for
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
-   * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      createCaptureCodeForInterrupt(methodCall, metaInfo, position, containsMoreThanOneMethodCall, suppressOwner);
+      createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner);
     } else {
-      createCaptureCodeForMethod(methodCall, metaInfo, position, containsMoreThanOneMethodCall, suppressOwner);
+      createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner);
     }
   }
 
@@ -325,10 +340,9 @@ public abstract class AbstractMethodTransformer {
    * @param methodCall method call to generate capturing code for
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
-   * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for interrupt");
 
     final int localThread = localThread();
@@ -340,15 +354,10 @@ public abstract class AbstractMethodTransformer {
     // capture frame
     // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
 
-    // "start" serializing
-    capture.add(new VarInsnNode(ALOAD, localThread));
-    capture.add(new InsnNode(ICONST_1));
-    capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-
-    // return early
-    capture.add(interruptReturn());
+    // "start" serializing and return early
+    capture.add(startSerializing());
 
     // replace dummy call of interrupt method by capture code
     method.instructions.insert(methodCall, capture);
@@ -356,12 +365,31 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Dummy return for interrupt.
+   * Push method and owner onto frame.
+   *
+   * @param methodCall method call to generate capturing code for
+   * @param metaInfo Meta information about method call
+   * @param position position of method call in method
+   * @param suppressOwner suppress capturing of owner?
    */
-  protected InsnList interruptReturn() {
-    InsnList result = new InsnList();
-    result.add(dummyReturnStatement(method));
-    return result;
+  protected InsnList pushMethodToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+      return StackFrameCapture.pushMethodToFrame(method, position,
+        hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo),
+        localPreviousFrame(), localFrame());
+  }
+
+  /**
+   * Start serializing at interrupt.
+   */
+  protected InsnList startSerializing() {
+    final int localThread = localThread();
+
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    instructions.add(dummyReturnStatement(method));
+    return instructions;
   }
 
   /**
@@ -370,16 +398,15 @@ public abstract class AbstractMethodTransformer {
    * @param methodCall method call to generate capturing code for
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
-   * @param containsMoreThanOneMethodCall does the method contain more than one method call at all?
    * @param suppressOwner suppress capturing of owner?
    */
-  protected abstract void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner);
+  protected abstract void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner);
 
   /**
    * Replace all return instructions by ThreadFinishedException.
    * Needed for transformation of IRunnable.run().
    */
-  protected void replaceReturns() {
+  protected void replaceRunReturns() {
     // TODO 2013-11-24 mh: implement as method -> call method?
 
     LabelNode exception = new LabelNode();

@@ -7,7 +7,9 @@ import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
@@ -38,7 +40,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    voidReturns();
+    replaceReturns();
     List<InsnList> restoreCodes = insertCaptureCode(true);
     createRestoreHandlerCopy(restoreCodes);
     addThreadAndFrame();
