@@ -139,13 +139,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList capture = new InsnList();
 
     if (isTailCall(metaInfo)) {
-      // No frame needed -> no capture code
-      // Tail call -> no need for separate early return statement
-      // So no extra code at all is needed here
+      // Early exit for tail calls.
+      // The return value needs not to be restored, because it has already been stored by the cloned call.
+      // The serializing flag is already on the stack from the cloned call.
       logger.debug("        Optimized tail call");
-      // TODO markus 2015-10-14: Move into replaceReturns()!
       if (containsMoreThanOneMethodCall) {
-        capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
+        capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
       }
       capture.add(new InsnNode(IRETURN));
       method.instructions.insert(methodCall, capture);
@@ -157,7 +156,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
+    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
     // We are already serializing
     capture.add(methodReturn(true));
 
@@ -210,7 +209,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(clonedCall);
 
     // Early exit for tail calls.
-    // The return value needs not to be restored.
+    // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
     if (isTailCall(metaInfo)) {
       restore.add(new InsnNode(IRETURN));
