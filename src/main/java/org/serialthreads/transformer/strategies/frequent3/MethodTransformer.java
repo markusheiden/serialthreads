@@ -209,6 +209,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(new VarInsnNode(ALOAD, localFrame));
     restore.add(clonedCall);
 
+    // Early exit for tail calls.
+    // The return value needs not to be restored.
+    // The serializing flag is already on the stack from the cloned call.
+    if (isTailCall(metaInfo)) {
+      restore.add(new InsnNode(IRETURN));
+      logger.debug("        Tail call optimized");
+      return restore;
+    }
+
     // if not serializing "GOTO" normal, but restore the frame first
     restore.add(new JumpInsnNode(IFEQ, restoreFrame));
 
@@ -223,11 +232,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restore.add(StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame));
     // restore return value of call, if any, but not for tail calls
     if (isNotVoid(methodCall)) {
-      if (isTailCall(metaInfo)) {
-        logger.debug("        Tail call optimized");
-      } else {
-        restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
-      }
+      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
     restore.add(new JumpInsnNode(GOTO, normal));
 
