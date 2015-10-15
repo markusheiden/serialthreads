@@ -130,16 +130,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
-    if (!needsFrame() && isTailCall(metaInfo)) {
-      // No frame needed -> no capture code
-      // Tail call -> no need for separate early return statement
-      // So no extra code at all is needed here
-      logger.debug("        Optimized no frame tail call");
-      // TODO markus 2015-10-14: Move into replaceReturns()!
-      method.instructions.insert(methodCall, new InsnNode(IRETURN));
-      return;
-    }
-
     final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
@@ -147,6 +137,20 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     LabelNode normal = new LabelNode();
 
     InsnList capture = new InsnList();
+
+    if (isTailCall(metaInfo)) {
+      // No frame needed -> no capture code
+      // Tail call -> no need for separate early return statement
+      // So no extra code at all is needed here
+      logger.debug("        Optimized tail call");
+      // TODO markus 2015-10-14: Move into replaceReturns()!
+      if (needsFrame()) {
+        capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner, localPreviousFrame, localFrame));
+      }
+      capture.add(new InsnNode(IRETURN));
+      method.instructions.insert(methodCall, capture);
+      return;
+    }
 
     // if not serializing "GOTO" normal
     capture.add(new JumpInsnNode(IFEQ, normal));
@@ -162,11 +166,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // restore return value of call, if any.
     // but not for tail calls, because the return value already has been stored in the stack by the called method
     if (isNotVoid(methodCall)) {
-      if (isTailCall(metaInfo)) {
-        logger.debug("        Optimized tail call");
-      } else {
-        capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
-      }
+      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
     // insert capture code
