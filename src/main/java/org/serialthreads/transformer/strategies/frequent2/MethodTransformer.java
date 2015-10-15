@@ -1,15 +1,15 @@
 package org.serialthreads.transformer.strategies.frequent2;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
-
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.serialthreads.transformer.strategies.StackFrameCapture;
+
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
  * Base class for method transformers of {@link org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3}.
@@ -53,7 +53,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
@@ -76,7 +76,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(StackFrameCapture.pushMethodToFrame(method, position, hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
     capture.add(dummyReturnStatement(method));
 
     // normal execution

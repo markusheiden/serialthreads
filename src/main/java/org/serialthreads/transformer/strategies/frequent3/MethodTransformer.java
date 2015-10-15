@@ -127,7 +127,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   @Override
-  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner) {
+  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
@@ -143,8 +143,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // The return value needs not to be restored, because it has already been stored by the cloned call.
       // The serializing flag is already on the stack from the cloned call.
       logger.debug("        Optimized tail call");
-      if (containsMoreThanOneMethodCall) {
-        capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+      if (hasMoreThanOneMethodCall()) {
+        capture.add(StackFrameCapture.pushMethodToFrame(method, position, true, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
       }
       capture.add(new InsnNode(IRETURN));
       method.instructions.insert(methodCall, capture);
@@ -156,7 +156,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // capture frame and return early
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(StackFrameCapture.pushMethodToFrame(method, position, containsMoreThanOneMethodCall, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
+    capture.add(StackFrameCapture.pushMethodToFrame(method, position, hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame, localFrame));
     // We are already serializing
     capture.add(methodReturn(true));
 
