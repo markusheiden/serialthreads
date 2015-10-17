@@ -57,8 +57,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     }
 
     // capture frame and return early
-    capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
+    capture.add(pushToFrame(methodCall, metaInfo));
+    capture.add(pushMethodToFrame(position));
+    capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
     capture.add(dummyReturnStatement(method));
 
     // normal execution

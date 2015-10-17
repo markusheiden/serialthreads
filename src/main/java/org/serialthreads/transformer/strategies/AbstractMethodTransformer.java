@@ -345,37 +345,58 @@ public abstract class AbstractMethodTransformer {
   protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for interrupt");
 
-    final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
-    final int localFrame = localFrame();
-
     InsnList capture = new InsnList();
 
-    // capture frame
-    // TODO 2009-10-17 mh: avoid capture, if method returns directly after interrupt?
-    capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
-    capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
+    // Capture frame.
+    capture.add(pushToFrame(methodCall, metaInfo));
+    capture.add(pushMethodToFrame(position));
+    capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
 
-    // "start" serializing and return early
+    // Start serializing and return early.
     capture.add(startSerializing());
 
-    // replace dummy call of interrupt method by capture code
+    // Replace dummy call of interrupt method by capture code.
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
   }
 
   /**
-   * Push method and owner onto frame.
+   * Save current "frameAfter" after returning from a method call.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated capture code.
    */
-  protected InsnList pushMethodToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
-      return StackFrameCapture.pushMethodToFrame(method, position,
-        hasMoreThanOneMethodCall(), suppressOwner || isSelfCall(methodCall, metaInfo),
-        localPreviousFrame(), localFrame());
+  protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame());
+  }
+
+  /**
+   * Push method onto frame.
+   *
+   * @param position
+   *           position of method call.
+   * @return generated capture code.
+   */
+  protected InsnList pushMethodToFrame(int position) {
+      return StackFrameCapture.pushMethodToFrame(position, hasMoreThanOneMethodCall(), localFrame());
+  }
+
+  /**
+   * Push owner onto frame.
+   *
+   * @param methodCall
+   *           Method call to generate capturing code for
+   * @param metaInfo
+   *           Meta information about method call
+   * @param suppressOwner
+   *           Suppress saving the owner?.
+   * @return generated capture code.
+   */
+  public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+    return StackFrameCapture.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
   }
 
   /**

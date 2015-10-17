@@ -1,18 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.IntValueCode.push;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
-import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -25,6 +12,19 @@ import org.serialthreads.transformer.code.IValueCode;
 import org.serialthreads.transformer.code.ValueCodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.IntValueCode.push;
+import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
+import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Capture and restore of stack frames.
@@ -120,21 +120,15 @@ public class StackFrameCapture {
    /**
     * Push method and owner onto frame.
     *
-    * @param method
-    *           Method to capture.
     * @param position
     *           position of method call.
     * @param containsMoreThanOneMethodCall
     *           contains the method more than one method call?.
-    * @param suppressOwner
-    *           suppress saving the owner?.
-    * @param localPreviousFrame
-    *           number of local containing the previous frame or -1 for retrieving it via current frame.
     * @param localFrame
     *           number of local containing the current frame.
     * @return generated capture code.
     */
-   public static InsnList pushMethodToFrame(MethodNode method, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, int localPreviousFrame, int localFrame) {
+   public static InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, int localFrame) {
       InsnList result = new InsnList();
 
       // save method index of this method
@@ -145,7 +139,26 @@ public class StackFrameCapture {
          result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
       }
 
-      // save owner of method call one level above
+      return result;
+   }
+
+   /**
+    * Push owner onto frame.
+    *
+    * @param method
+    *           Method to capture.
+    * @param suppressOwner
+    *           suppress saving the owner?.
+    * @param localPreviousFrame
+    *           number of local containing the previous frame or -1 for retrieving it via current frame.
+    * @param localFrame
+    *           number of local containing the current frame.
+    * @return generated capture code.
+    */
+   public static InsnList pushOwnerToFrame(MethodNode method, boolean suppressOwner, int localPreviousFrame, int localFrame) {
+      InsnList result = new InsnList();
+
+      // Save owner of method call one level above.
       if (isNotStatic(method) && !suppressOwner) {
          // previousFrame.owner = this;
          if (localPreviousFrame < 0) {
