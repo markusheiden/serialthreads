@@ -191,19 +191,19 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
-    // Introduce new local holding the return value
+    // Introduce new local holding the return value.
     final int localReturnValue = method.maxLocals;
 
-    // label "normal" points the code directly after the method call
+    // Label "normal" points the code directly after the method call.
     LabelNode normal = new LabelNode();
     method.instructions.insert(methodCall, normal);
     LabelNode restoreFrame = new LabelNode();
 
     InsnList restore = new InsnList();
 
-    // call interrupted method
+    // Call interrupted method.
     restore.add(StackFrameCapture.popOwnerFromFrame(methodCall, metaInfo, localFrame));
-    // jump to cloned method call with thread and frame as arguments
+    // Jump to cloned method call with thread and frame as arguments.
     restore.add(new VarInsnNode(ALOAD, localThread));
     restore.add(new VarInsnNode(ALOAD, localFrame));
     restore.add(clonedCall);
@@ -217,19 +217,19 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return restore;
     }
 
-    // if not serializing "GOTO" normal, but restore the frame first
+    // If not serializing "GOTO" normal, but restore the frame first.
     restore.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // Early return, the frame already has been captured.
     // We are already serializing.
     restore.add(methodReturn(true));
 
-    // restore frame to be able to resume normal execution of method
+    // Restore frame to be able to resume normal execution of the method.
     restore.add(restoreFrame);
 
-    // restore stack "under" the returned value, if any
+    // Restore stack "under" the returned value, if any.
     restore.add(StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame));
-    // restore return value of call, if any, but not for tail calls
+    // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
       restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
