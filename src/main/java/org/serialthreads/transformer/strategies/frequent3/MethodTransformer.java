@@ -151,19 +151,18 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return;
     }
 
-    // if not serializing "GOTO" normal
+    // If not serializing "GOTO" normal.
     capture.add(new JumpInsnNode(IFEQ, normal));
 
-    // capture frame and return early
+    // Capture frame and return early.
     capture.add(StackFrameCapture.pushToFrame(method, methodCall, metaInfo, localFrame));
     capture.add(pushMethodToFrame(methodCall, metaInfo, position, suppressOwner));
-    // We are already serializing
+    // We are already serializing.
     capture.add(methodReturn(true));
 
-    // normal execution
+    // Normal execution.
     capture.add(normal);
-    // restore return value of call, if any.
-    // but not for tail calls, because the return value already has been stored in the stack by the called method
+    // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
       capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
