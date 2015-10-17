@@ -274,26 +274,34 @@ public abstract class AbstractMethodTransformer {
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
 
-    final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
-    final int localFrame = localFrame();
-
     InsnList restore = new InsnList();
 
     LabelNode normal = new LabelNode();
     method.instructions.insert(methodCall, normal);
 
-    // stop deserializing
+    // Stop deserializing.
     restore.add(stopDeserializing());
 
     // restore frame
-    // TODO 2009-10-17 mh: avoid restore, if method returns directly after interrupt?
-    restore.add(StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame));
+    restore.add(popFromFrame(methodCall, metaInfo));
 
     // resume
     restore.add(new JumpInsnNode(GOTO, normal));
 
     return restore;
+  }
+
+  /**
+   * Restore current frame before resuming the method call
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated restore code.
+   */
+  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
