@@ -129,7 +129,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
     }
-    restore.add(StackFrameCapture.popFromFrame(method, clonedCall, metaInfo, localFrame));
+    restore.add(popFromFrame(clonedCall, metaInfo));
     if (needToSaveReturnValue) {
       restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
     }
