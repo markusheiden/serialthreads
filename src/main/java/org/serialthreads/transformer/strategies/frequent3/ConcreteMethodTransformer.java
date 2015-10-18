@@ -30,14 +30,12 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
-    int paramPreviousFrame = MethodCode.firstLocal(method) + 1;
-
     shiftLocals();
     analyze();
 
     replaceReturns();
     insertCaptureCode(false);
-    createRestoreHandlerMethod(paramPreviousFrame);
+    createRestoreHandlerMethod();
     addThreadAndFrame();
     fixMaxs();
 
@@ -49,10 +47,11 @@ class ConcreteMethodTransformer extends MethodTransformer {
   /**
    * Insert frame restoring code at the begin of an interruptible method.
    */
-  private void createRestoreHandlerMethod(int paramPreviousFrame) {
+  private void createRestoreHandlerMethod() {
     logger.debug("    Creating restore handler for method");
 
     final int localThread = localThread();
+    int paramPreviousFrame = MethodCode.firstLocal(method) + 1;
     final int localFrame = localFrame();
 
     InsnList getFrame = new InsnList();
