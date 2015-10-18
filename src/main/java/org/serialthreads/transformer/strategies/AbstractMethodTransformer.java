@@ -168,15 +168,28 @@ public abstract class AbstractMethodTransformer {
           tag(instruction, TAG_INTERRUPTIBLE);
           if (classInfoCache.isInterrupt(methodCall)) {
             tag(instruction, TAG_INTERRUPT);
-          } else if (isReturn(methodCall.getNext())) {
+          } else if (isReturn(nextInstruction(methodCall))) {
             // Tag (tail) method call.
             tag(instruction, TAG_TAIL_CALL);
-            // Tag return too.
-            tag(instruction.getNext(), TAG_TAIL_CALL);
           }
         }
       }
     }
+  }
+
+  /**
+   * Next (real) instruction. Skips label nodes.
+   */
+  protected AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
+    AbstractInsnNode next = instruction;
+    do {
+      next = next.getNext();
+      if (next == null) {
+        return null;
+      }
+    } while (next instanceof LabelNode);
+
+    return next;
   }
 
   /**
