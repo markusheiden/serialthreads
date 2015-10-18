@@ -54,7 +54,6 @@ class RunMethodTransformer extends MethodTransformer {
     logger.debug("    Creating restore handler for run");
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     // dummy startup restore code to avoid to check thread.serializing.
