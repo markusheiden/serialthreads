@@ -98,7 +98,7 @@ public abstract class AbstractMethodTransformer {
    * This method is used for method copies. These have the thread as the first parameter.
    */
   protected int paramThread() {
-    return firstParam(method) + 0;
+    return param(0);
   }
 
   /**
@@ -106,28 +106,42 @@ public abstract class AbstractMethodTransformer {
    * This method is used for method copies. These have the previous frame as the second parameter.
    */
   protected int paramPreviousFrame() {
-    return firstParam(method) + 1;
+    return param(1);
+  }
+
+  /**
+   * Parameter p used by this transformer.
+   */
+  protected int param(int p) {
+    return firstParam(method) + p;
   }
 
   /**
    * Local holding the thread.
    */
   protected int localThread() {
-    return firstLocal(method) + 0;
+    return local(0);
   }
 
   /**
    * Local holding the previous frame.
    */
   protected int localPreviousFrame() {
-    return firstLocal(method) + 1;
+    return local(1);
   }
 
   /**
    * Local holding the current frame.
    */
   protected int localFrame() {
-    return firstLocal(method) + 2;
+    return local(2);
+  }
+
+  /**
+   * Local l used by this transformer.
+   */
+  protected int local(int l) {
+    return firstLocal(method) + l;
   }
 
   /**
@@ -292,19 +306,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Restore current frame before resuming the method call
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated restore code.
-   */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame());
-  }
-
-  /**
    * Stop de-serializing when interrupt location has been reached.
    */
   protected InsnList stopDeserializing() {
@@ -315,6 +316,19 @@ public abstract class AbstractMethodTransformer {
     instructions.add(new InsnNode(ICONST_0));
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     return instructions;
+  }
+
+  /**
+   * Restore current frame before resuming the method call
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated restore code.
+   */
+  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return StackFrameCapture.popFromFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
