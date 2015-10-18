@@ -3,7 +3,6 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-import org.serialthreads.transformer.code.MethodCode;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -51,17 +50,17 @@ class ConcreteMethodTransformer extends MethodTransformer {
     logger.debug("    Creating restore handler for method");
 
     final int localThread = localThread();
-    int paramPreviousFrame = MethodCode.firstLocal(method) + 1;
+    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     InsnList getFrame = new InsnList();
 
     // previousFrame.owner = this
-    getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     getFrame.add(new VarInsnNode(ALOAD, 0));
     getFrame.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
 
-    getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     if (needsFrame()) {
       LabelNode normal = new LabelNode();
 
@@ -73,7 +72,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
       getFrame.add(new InsnNode(POP));
       // frame = thread.addFrame(previousFrame);
       getFrame.add(new VarInsnNode(ALOAD, localThread));
-      getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
       getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC, false));
 
       getFrame.add(normal);

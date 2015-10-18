@@ -94,16 +94,14 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Local of parameter holding the thread.
-   * This method is used for method copies. These have the thread as the first parameter.
+   * Parameter holding the thread in copied methods.
    */
   protected int paramThread() {
     return param(0);
   }
 
   /**
-   * Local of parameter holding the previous frame.
-   * This method is used for method copies. These have the previous frame as the second parameter.
+   * Parameter holding the previous frame in copied methods.
    */
   protected int paramPreviousFrame() {
     return param(1);
@@ -112,12 +110,13 @@ public abstract class AbstractMethodTransformer {
   /**
    * Parameter p used by this transformer.
    */
-  protected int param(int p) {
+  private int param(int p) {
     return firstParam(method) + p;
   }
 
   /**
    * Local holding the thread.
+   * This is the parameter holding the thread in original methods.
    */
   protected int localThread() {
     return local(0);
@@ -125,13 +124,14 @@ public abstract class AbstractMethodTransformer {
 
   /**
    * Local holding the previous frame.
+   * This is the parameter holding the previous frame in original methods.
    */
   protected int localPreviousFrame() {
     return local(1);
   }
 
   /**
-   * Local holding the current frame.
+   * Newly introduced local holding the current frame.
    */
   protected int localFrame() {
     return local(2);
@@ -140,7 +140,7 @@ public abstract class AbstractMethodTransformer {
   /**
    * Local l used by this transformer.
    */
-  protected int local(int l) {
+  private int local(int l) {
     return firstLocal(method) + l;
   }
 
