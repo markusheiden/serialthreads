@@ -3,6 +3,7 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.MethodCode;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -29,12 +30,14 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
+    int paramPreviousFrame = MethodCode.firstLocal(method) + 1;
+
     shiftLocals();
     analyze();
 
     replaceReturns();
     insertCaptureCode(false);
-    createRestoreHandlerMethod();
+    createRestoreHandlerMethod(paramPreviousFrame);
     addThreadAndFrame();
     fixMaxs();
 
@@ -46,19 +49,24 @@ class ConcreteMethodTransformer extends MethodTransformer {
   /**
    * Insert frame restoring code at the begin of an interruptible method.
    */
-  private void createRestoreHandlerMethod() {
+  private void createRestoreHandlerMethod(int paramPreviousFrame) {
     logger.debug("    Creating restore handler for method");
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    // frame = previousFrame.next
     InsnList getFrame = new InsnList();
-    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+
+    // previousFrame.owner = this
+    getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+    getFrame.add(new VarInsnNode(ALOAD, 0));
+    getFrame.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+
+    getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
     if (needsFrame()) {
       LabelNode normal = new LabelNode();
 
+      // frame = previousFrame.next
       getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
       getFrame.add(new InsnNode(DUP));
       getFrame.add(new JumpInsnNode(IFNONNULL, normal));
@@ -66,7 +74,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
       getFrame.add(new InsnNode(POP));
       // frame = thread.addFrame(previousFrame);
       getFrame.add(new VarInsnNode(ALOAD, localThread));
-      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      getFrame.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "addFrame", "(" + FRAME_IMPL_DESC + ")" + FRAME_IMPL_DESC, false));
 
       getFrame.add(normal);

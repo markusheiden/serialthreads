@@ -89,7 +89,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     logger.debug("      Replacing returns");
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     Type returnType = Type.getReturnType(method.desc);
@@ -131,7 +130,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
@@ -145,7 +143,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       logger.debug("        Optimized tail call");
       if (hasMoreThanOneMethodCall()) {
         capture.add(pushMethodToFrame(position));
-        capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
       }
       capture.add(new InsnNode(IRETURN));
       method.instructions.insert(methodCall, capture);
@@ -158,7 +155,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Capture frame and return early.
     capture.add(pushToFrame(methodCall, metaInfo));
     capture.add(pushMethodToFrame(position));
-    capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
     // We are already serializing.
     capture.add(methodReturn(true));
 
@@ -171,6 +167,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
+  }
+
+  @Override
+  public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+    return new InsnList();
   }
 
   //
@@ -190,7 +191,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     MethodInsnNode clonedCall = copyMethodCall(methodCall);
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
     // Introduce new local holding the return value.
     final int localReturnValue = method.maxLocals;

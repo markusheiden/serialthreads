@@ -10,7 +10,6 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -69,17 +68,9 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     final int paramPreviousFrame = paramPreviousFrame();
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     InsnList restore = new InsnList();
-
-    // The (previous) frame is just needed for storing the return value of this method
-    if (paramPreviousFrame != localPreviousFrame && isNotVoid(method)) {
-      // TODO 2009-10-22 mh: How to avoid this copy???
-      restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-      restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
-    }
 
     // frame = previousFrame.next
     restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
