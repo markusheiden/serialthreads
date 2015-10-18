@@ -5,6 +5,7 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 
 /**
  * Method transformer for concrete methods.
@@ -55,10 +56,12 @@ class ConcreteMethodTransformer extends MethodTransformer {
 
     InsnList getFrame = new InsnList();
 
-    // previousFrame.owner = this
-    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    getFrame.add(new VarInsnNode(ALOAD, 0));
-    getFrame.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+    if (isNotStatic(method)) {
+      // previousFrame.owner = this
+      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      getFrame.add(new VarInsnNode(ALOAD, 0));
+      getFrame.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+    }
 
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     if (needsFrame()) {
