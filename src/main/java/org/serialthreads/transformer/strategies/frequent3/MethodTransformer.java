@@ -118,7 +118,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   // Capture code inserted after method calls
   //
 
-
   @Override
   protected InsnList startSerializing() {
     // Interrupt starts serializing.
