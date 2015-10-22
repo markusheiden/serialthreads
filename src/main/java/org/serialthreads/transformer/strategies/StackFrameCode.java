@@ -29,11 +29,11 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 /**
  * Capture and restore of stack frames.
  */
-public class StackFrameCapture {
+public class StackFrameCode {
    /**
     * Logger.
     */
-   private static final Logger logger = LoggerFactory.getLogger(StackFrameCapture.class);
+   private static final Logger logger = LoggerFactory.getLogger(StackFrameCode.class);
 
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();

@@ -5,7 +5,7 @@ import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
-import org.serialthreads.transformer.strategies.StackFrameCapture;
+import org.serialthreads.transformer.strategies.StackFrameCode;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
@@ -120,7 +120,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restore = new InsnList();
 
     // call interrupted method
-    restore.add(StackFrameCapture.popOwnerFromFrame(methodCall, metaInfo, localFrame));
+    restore.add(StackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
     // jump to cloned method call with thread and frame as arguments
     restore.add(new VarInsnNode(ALOAD, localThread));
     restore.add(new VarInsnNode(ALOAD, localFrame));
