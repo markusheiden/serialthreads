@@ -12,5 +12,5 @@ public interface IRunnable {
    * Run serial thread.
    */
   @Interruptible
-  public void run();
+  void run();
 }
