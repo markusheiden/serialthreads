@@ -10,7 +10,9 @@ import org.serialthreads.Interruptible;
 public interface IRunnable {
   /**
    * Run serial thread.
+   *
+   * @throws ThreadFinishedException if thread terminates
    */
   @Interruptible
-  void run();
+  void run() throws ThreadFinishedException;
 }
