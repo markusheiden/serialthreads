@@ -1,5 +1,9 @@
 package org.serialthreads.context;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.serialthreads.Executor;
 
 /**
@@ -16,12 +20,22 @@ public class ChainedRunnable {
    * @param runnables Runnables
    */
   public static ChainedRunnable[] chain(IRunnable... runnables) {
-    int count = runnables.length;
+    return chain(Arrays.asList(runnables));
+  }
+
+  /**
+   * Create linked chain array.
+   *
+   * @param runnables Runnables
+   */
+  public static ChainedRunnable[] chain(Collection<? extends IRunnable> runnables) {
+    int count = runnables.size();
 
     ChainedRunnable[] result = new ChainedRunnable[count];
-    result[0] = new ChainedRunnable(runnables[0]);
+    Iterator<? extends IRunnable> iterator = runnables.iterator();
+    result[0] = new ChainedRunnable(iterator.next());
     for (int i = 1; i < count; i++) {
-      ChainedRunnable chain = new ChainedRunnable(runnables[i]);
+      ChainedRunnable chain = new ChainedRunnable(iterator.next());
       result[i] = chain;
       result[i - 1].next = chain;
     }
