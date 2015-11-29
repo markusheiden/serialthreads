@@ -15,7 +15,7 @@ public class SFESandbox implements IRunnable, IFrameExecutor {
     thread.first.executor = new InitialFrameExecutor();
     try {
       //noinspection InfiniteLoopStatement
-      while (true) {
+      for (;;) {
         // thread = thread.next;
         executeFrame(thread);
       }

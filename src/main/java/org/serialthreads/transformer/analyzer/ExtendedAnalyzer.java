@@ -128,7 +128,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     }
 
     InsnList instructions = method.instructions;
-    while (true) {
+    for (;;) {
       AbstractInsnNode instruction = instructions.get(index);
       ExtendedFrame frameBefore = frames[index];
 

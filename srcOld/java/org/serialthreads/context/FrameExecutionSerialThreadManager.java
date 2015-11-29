@@ -39,7 +39,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
     ((Stack) chain.thread).first.executor = new InitialFrameExecutor();
     try {
       //noinspection InfiniteLoopStatement
-      while (true) {
+      for (;;) {
         chain = chain.next;
         executeFrame((Stack) chain.thread);
       }

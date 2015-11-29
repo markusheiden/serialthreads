@@ -31,7 +31,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
     ChainedRunnable chain = lastExecuted;
     try {
       //noinspection InfiniteLoopStatement
-      while (true) {
+      for (;;) {
         chain = chain.next;
         currentThread = chain.thread;
         chain.runnable.run();

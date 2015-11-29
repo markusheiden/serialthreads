@@ -32,10 +32,10 @@ public class SynchronizedTest extends AbstractPerformanceTest {
     public void run() {
       try {
         waitForStart();
-        do {
+        for (;;) {
           count++;
           tick(count);
-        } while (true);
+        }
       } catch (InterruptedException e) {
         // ignore
       } catch (Exception e) {
