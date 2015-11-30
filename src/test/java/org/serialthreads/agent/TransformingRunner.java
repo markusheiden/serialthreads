@@ -12,15 +12,15 @@ import java.lang.reflect.Method;
  * <p />
  * Expects test class to have a method "String[] getClassPrefixes()" to define the class prefixes.
  */
-public class TransformingTestRunner extends BlockJUnit4ClassRunner {
+public class TransformingRunner extends BlockJUnit4ClassRunner {
   /**
    * Constructor.
    *
    * @param clazz Test class.
    * @throws InitializationError in case of all errors.
    */
-  public TransformingTestRunner(Class<?> clazz) throws InitializationError {
-    super(getClassloader(clazz));
+  public TransformingRunner(Class<?> clazz) throws InitializationError {
+    super(loadClass(clazz));
   }
 
   /**
@@ -30,7 +30,7 @@ public class TransformingTestRunner extends BlockJUnit4ClassRunner {
    * @return Test class loaded with the {@link TransformingClassLoader}.
    * @throws InitializationError in case of all errors.
    */
-  private static Class<?> getClassloader(Class<?> clazz) throws InitializationError {
+  static Class<?> loadClass(Class<?> clazz) throws InitializationError {
     TransformingClassLoader classLoader = new TransformingClassLoader(getStrategy(clazz), getClassPrefixes(clazz));
     try {
       return Class.forName(clazz.getName(), true, classLoader);
