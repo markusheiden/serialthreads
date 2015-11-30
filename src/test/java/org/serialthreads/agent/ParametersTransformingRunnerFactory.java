@@ -9,7 +9,7 @@ import org.junit.runners.parameterized.TestWithParameters;
 /**
  * {@link ParametersRunnerFactory} to be able to use {@link TransformingRunner} with {@llink Parameterized}.
  */
-public class TransformingParametersRunnerFactory implements ParametersRunnerFactory {
+public class ParametersTransformingRunnerFactory implements ParametersRunnerFactory {
   @Override
   public BlockJUnit4ClassRunnerWithParameters createRunnerForTestWithParameters(TestWithParameters test) throws InitializationError {
     return new BlockJUnit4ClassRunnerWithParameters(loadClass(test));
