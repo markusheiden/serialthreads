@@ -4,8 +4,8 @@ import org.junit.runner.Runner;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 import org.serialthreads.transformer.IStrategy;
-
-import java.lang.reflect.Method;
+import org.serialthreads.transformer.ITransformer;
+import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**
  * {@link Runner} using a {@link TransformingClassLoader} for loading all classes.
@@ -31,8 +31,21 @@ public class TransformingRunner extends BlockJUnit4ClassRunner {
    * @throws InitializationError in case of all errors.
    */
   static Class<?> loadClass(Class<?> clazz) throws InitializationError {
-    TransformingClassLoader classLoader = new TransformingClassLoader(getStrategy(clazz), getClassPrefixes(clazz));
+    Transform annotation = clazz.getAnnotation(Transform.class);
+    if (annotation == null) {
+      throw new InitializationError("Missing @Transform at test.");
+    }
+    if (annotation.transformer() == null) {
+      throw new InitializationError("Transformer class not configured in @Transform.");
+    }
+    if (annotation.classPrefixes() == null) {
+      throw new InitializationError("Class prefixes not configured in @Transform.");
+    }
+
     try {
+      Class<? extends ITransformer> transformer = annotation.transformer();
+      String[] classPrefixes = annotation.classPrefixes();
+      TransformingClassLoader classLoader = new TransformingClassLoader(new Strategy(transformer), classPrefixes);
       return Class.forName(clazz.getName(), true, classLoader);
     } catch (Exception e) {
       throw new InitializationError(e);
@@ -40,36 +53,30 @@ public class TransformingRunner extends BlockJUnit4ClassRunner {
   }
 
   /**
-   * Get transforming strategy for test class.
-   *
-   * @param clazz Test class.
-   * @throws InitializationError in case of all errors.
+   * Transformation strategy.
    */
-  private static IStrategy getStrategy(Class<?> clazz) throws InitializationError {
-    try {
-      Method method = clazz.getMethod("getStrategy");
-      return (IStrategy) method.invoke(null);
-    } catch (Exception e) {
-      throw new InitializationError(
-        "The test class has to implement a method 'public static IStrategy getStrategy()' returning the transforming strategy. " +
-        "Failed to access transforming strategy: " + e.getMessage());
-    }
-  }
+  private static class Strategy implements IStrategy {
+    /**
+     * Transformer class.
+     */
+    private final Class<? extends ITransformer> transformerClass;
 
-  /**
-   * Get class prefixes for test class.
-   *
-   * @param clazz Test class.
-   * @throws InitializationError in case of all errors.
-   */
-  private static String[] getClassPrefixes(Class<?> clazz) throws InitializationError {
-    try {
-      Method method = clazz.getMethod("getClassPrefixes");
-      return (String[]) method.invoke(null);
-    } catch (Exception e) {
-      throw new InitializationError(
-        "The test class has to implement a method 'public static String[] getClassPrefixes()' returning the class prefixes. " +
-        "Failed to access class prefixes: " + e.getMessage());
+    /**
+     * Constructor.
+     *
+     * @param transformerClass Transformer class.
+     */
+    public Strategy(Class<? extends ITransformer> transformerClass) {
+      this.transformerClass = transformerClass;
+    }
+
+    @Override
+    public ITransformer getTransformer(IClassInfoCache classInfoCache) {
+      try {
+        return transformerClass.getConstructor(IClassInfoCache.class).newInstance(classInfoCache);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Invalid transformer specified.", e);
+      }
     }
   }
 }
