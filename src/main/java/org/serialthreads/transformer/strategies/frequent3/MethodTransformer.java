@@ -1,16 +1,16 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.serialthreads.transformer.strategies.StackFrameCode;
-
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
@@ -259,7 +259,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * - The method call is a self call (-> no need to store the method owner)
    * - The method is a tail call (-> needs no storing of locals and stack)
    * The third condition is somewhat suboptimal,
-   * but for first the easiest way to implement the detection, that neither the locals nor the stack is needed / used.
+   * but for now the easiest way to implement the detection, that neither the locals nor the stack is needed / used.
    */
   protected final boolean needsFrame() {
     if (interruptibleMethodCalls.size() != 1) {
