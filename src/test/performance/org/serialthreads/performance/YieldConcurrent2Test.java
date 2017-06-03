@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test to analyze performance of threading with java.lang.concurrent.
  */
 public class YieldConcurrent2Test extends AbstractPerformanceTest {
-  private static volatile AtomicInteger barrierCount;
+  private final AtomicInteger barrierCount = new AtomicInteger();
 
   @Before
   public void setUp() {
-    barrierCount = new AtomicInteger(0);
+    barrierCount.set(0);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new YieldConcurrentCounter(i);
     }
@@ -20,7 +20,7 @@ public class YieldConcurrent2Test extends AbstractPerformanceTest {
 
   @Override
   protected void doStop() throws Exception {
-    barrierCount.addAndGet(COUNT);
+    barrierCount.set(Integer.MAX_VALUE);
   }
 
   private class YieldConcurrentCounter extends Counter {

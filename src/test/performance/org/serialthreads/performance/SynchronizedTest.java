@@ -6,7 +6,7 @@ import org.junit.Before;
  * Test to analyze performance of threading with synchronization.
  */
 public class SynchronizedTest extends AbstractPerformanceTest {
-  private static int barrierCount;
+  private int barrierCount;
 
   @Before
   public void setUp() {
@@ -23,7 +23,7 @@ public class SynchronizedTest extends AbstractPerformanceTest {
     }
   }
 
-  private static class SynchronizedCounter extends Counter {
+  private class SynchronizedCounter extends Counter {
     public SynchronizedCounter(int number) {
       super(number);
     }

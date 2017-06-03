@@ -6,7 +6,7 @@ import org.junit.Before;
  * Test to analyze performance of threading with java.lang.concurrent.
  */
 public class Yield2Test extends AbstractPerformanceTest {
-  private static volatile int barrierCount;
+  private volatile int barrierCount;
 
   @Before
   public void setUp() {

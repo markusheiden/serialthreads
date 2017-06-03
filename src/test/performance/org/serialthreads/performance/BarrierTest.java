@@ -9,11 +9,10 @@ import java.util.concurrent.CyclicBarrier;
  * Test to analyze performance of threading with a CyclicBarrier.
  */
 public class BarrierTest extends AbstractPerformanceTest {
-  private CyclicBarrier barrier;
+  private final CyclicBarrier barrier = new CyclicBarrier(COUNT);
 
   @Before
   public void setUp() {
-    barrier = new CyclicBarrier(COUNT);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new BarrierCounter(i);
     }

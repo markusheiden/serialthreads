@@ -9,10 +9,11 @@ import java.util.concurrent.locks.LockSupport;
  * Test to analyze performance of threading with java.lang.concurrent.
  */
 public class ConcurrentTest extends AbstractPerformanceTest {
-  private static final AtomicInteger barrierCount = new AtomicInteger(COUNT);
+  private final AtomicInteger barrierCount = new AtomicInteger();
 
   @Before
   public void setUp() {
+    barrierCount.set(COUNT);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new ConcurrentCounter(i);
     }
