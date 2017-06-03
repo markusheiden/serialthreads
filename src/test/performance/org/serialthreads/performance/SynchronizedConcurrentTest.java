@@ -9,10 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
+  private final AtomicInteger waiting = new AtomicInteger();
 
   @Before
   public void setUp() {
     barrierCount.set(0);
+    waiting.set(1);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new SynchronizedConcurrentCounter(i);
     }
@@ -52,9 +54,14 @@ public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
     protected final void tick(long count) throws Exception {
       if (barrierCount.incrementAndGet() < next) {
         synchronized (lock) {
+          waiting.incrementAndGet();
           lock.wait();
         }
       } else {
+        while (waiting.get() < COUNT) {
+          Thread.yield();
+        }
+        waiting.set(1);
         synchronized (lock) {
           lock.notifyAll();
         }
