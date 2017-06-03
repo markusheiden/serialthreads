@@ -12,7 +12,7 @@ public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
 
   @Before
   public void setUp() {
-    barrierCount.set(COUNT);
+    barrierCount.set(0);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new SynchronizedConcurrentCounter(i);
     }
