@@ -38,7 +38,7 @@ public class YieldConcurrentTest extends AbstractPerformanceTest {
       if (barrierCount.decrementAndGet() != 0) {
         do {
           Thread.yield();
-        } while (currentRound == round.get());
+        } while (currentRound == (currentRound = round.get()));
       } else {
         barrierCount.set(COUNT);
         currentRound = round.incrementAndGet();
