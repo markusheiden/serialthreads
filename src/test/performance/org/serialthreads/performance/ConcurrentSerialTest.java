@@ -1,4 +1,4 @@
-package performance;
+package org.serialthreads.performance;
 
 import org.junit.Before;
 

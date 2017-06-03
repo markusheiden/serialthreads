@@ -1,18 +1,16 @@
-package performance;
+package org.serialthreads.performance;
 
 import org.junit.Before;
 
 /**
  * Test to analyze performance of threading with java.lang.concurrent.
  */
-public class YieldTest extends AbstractPerformanceTest {
+public class Yield2Test extends AbstractPerformanceTest {
   private static volatile int barrierCount;
-  private static volatile int round;
 
   @Before
   public void setUp() {
-    barrierCount = COUNT - 1;
-    round = 0;
+    barrierCount = 1;
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new YieldCounter(i);
     }
@@ -20,28 +18,25 @@ public class YieldTest extends AbstractPerformanceTest {
 
   @Override
   protected void doStop() throws Exception {
-    round++;
+    barrierCount += COUNT;
   }
 
   private class YieldCounter extends Counter {
-    private int currentRound;
+    private int nextBarrier;
 
     public YieldCounter(int number) {
       super(number);
-      currentRound = 0;
+      nextBarrier = barrierCount + COUNT;
     }
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (barrierCount != 0) {
-        --barrierCount;
+      if (++barrierCount != nextBarrier) {
         do {
           Thread.yield();
-        } while (currentRound == round);
-      } else {
-        barrierCount = COUNT - 1;
-        currentRound = ++round;
+        } while (barrierCount < nextBarrier);
       }
+      nextBarrier += COUNT;
     }
   }
 }

@@ -1,18 +1,20 @@
-package performance;
+package org.serialthreads.performance;
 
 import org.junit.Before;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test to analyze performance of threading with synchronization.
  */
-public class SynchronizedTest extends AbstractPerformanceTest {
-  private static int barrierCount;
+public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
+  private static AtomicInteger barrierCount;
 
   @Before
   public void setUp() {
-    barrierCount = COUNT - 1;
+    barrierCount = new AtomicInteger(COUNT);
     for (int i = 0; i < counters.length; i++) {
-      counters[i] = new SynchronizedCounter(i);
+      counters[i] = new SynchronizedConcurrentCounter(i);
     }
   }
 
@@ -23,9 +25,12 @@ public class SynchronizedTest extends AbstractPerformanceTest {
     }
   }
 
-  private static class SynchronizedCounter extends Counter {
-    public SynchronizedCounter(int number) {
+  private static class SynchronizedConcurrentCounter extends Counter {
+    private int next;
+
+    public SynchronizedConcurrentCounter(int number) {
       super(number);
+      next = COUNT;
     }
 
     @Override
@@ -45,15 +50,16 @@ public class SynchronizedTest extends AbstractPerformanceTest {
 
     @Override
     protected final void tick(long count) throws Exception {
-      synchronized (lock) {
-        if (barrierCount != 0) {
-          --barrierCount;
+      if (barrierCount.incrementAndGet() < next) {
+        synchronized (lock) {
           lock.wait();
-        } else {
-          barrierCount = COUNT - 1;
+        }
+      } else {
+        synchronized (lock) {
           lock.notifyAll();
         }
       }
+      next += COUNT;
     }
   }
 }

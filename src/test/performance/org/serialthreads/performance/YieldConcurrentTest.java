@@ -1,4 +1,4 @@
-package performance;
+package org.serialthreads.performance;
 
 import org.junit.Before;
 
@@ -7,12 +7,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test to analyze performance of threading with java.lang.concurrent.
  */
-public class YieldConcurrent2Test extends AbstractPerformanceTest {
+public class YieldConcurrentTest extends AbstractPerformanceTest {
   private static volatile AtomicInteger barrierCount;
+  private static volatile AtomicInteger round;
 
   @Before
   public void setUp() {
-    barrierCount = new AtomicInteger(0);
+    barrierCount = new AtomicInteger(COUNT);
+    round = new AtomicInteger(Integer.MIN_VALUE);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new YieldConcurrentCounter(i);
     }
@@ -20,25 +22,27 @@ public class YieldConcurrent2Test extends AbstractPerformanceTest {
 
   @Override
   protected void doStop() throws Exception {
-    barrierCount.addAndGet(COUNT);
+    round.incrementAndGet();
   }
 
   private class YieldConcurrentCounter extends Counter {
-    private int nextBarrier;
+    private int currentRound;
 
     public YieldConcurrentCounter(int number) {
       super(number);
-      nextBarrier = barrierCount.get() + COUNT;
+      currentRound = round.get();
     }
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (barrierCount.incrementAndGet() != nextBarrier) {
+      if (barrierCount.decrementAndGet() != 0) {
         do {
           Thread.yield();
-        } while (barrierCount.get() < nextBarrier);
+        } while (currentRound == round.get());
+      } else {
+        barrierCount.set(COUNT);
+        currentRound = round.incrementAndGet();
       }
-      nextBarrier += COUNT;
     }
   }
 }
