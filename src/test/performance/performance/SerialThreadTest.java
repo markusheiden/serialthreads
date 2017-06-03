@@ -1,36 +1,28 @@
 package performance;
 
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.serialthreads.Interruptible;
-import org.serialthreads.agent.TransformingClassLoader;
+import org.serialthreads.agent.Transform;
+import org.serialthreads.agent.TransformingRunner;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
-import org.serialthreads.transformer.Strategies;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3;
 
 /**
  * Test to analyze performance of threading with serial threads.
  */
+@RunWith(TransformingRunner.class)
+@Transform(transformer = FrequentInterruptsTransformer3.class, classPrefixes = "performance")
 public class SerialThreadTest extends AbstractPerformanceTest {
-  private Class<? extends ICounter> counterClass;
-  private Field run;
-
   private Thread managerThread;
   private volatile boolean ready;
   private final Object lock = new Object();
 
   @Before
   public void setUp() throws Exception {
-    ClassLoader cl = new TransformingClassLoader(Strategies.DEFAULT, getClass().getPackage().getName());
-    counterClass = (Class<? extends ICounter>) cl.loadClass(SerialCounter.class.getName());
-    Constructor<? extends ICounter> constructor = counterClass.getConstructor(int.class);
-    run = counterClass.getSuperclass().getDeclaredField("run");
-    run.setAccessible(true);
-    run.set(null, true);
     for (int i = 0; i < counters.length; i++) {
-      counters[i] = constructor.newInstance(i);
+      counters[i] = new SerialCounter(i);
     }
   }
 
@@ -60,7 +52,7 @@ public class SerialThreadTest extends AbstractPerformanceTest {
 
   @Override
   protected void doUnlockThreads() throws Exception {
-    System.out.println("starting all");
+    Counter.startAll();
     synchronized (lock) {
       lock.notifyAll();
     }
@@ -69,7 +61,7 @@ public class SerialThreadTest extends AbstractPerformanceTest {
   @Override
   protected void doStopCounters() throws Exception {
     System.out.println("stopping all");
-    run.setBoolean(null, false);
+    Counter.stopAll();
   }
 
   @Override
