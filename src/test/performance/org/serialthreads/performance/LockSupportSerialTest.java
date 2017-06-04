@@ -7,7 +7,7 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Test to analyze performance of threading with java.lang.concurrent.
  */
-public class ConcurrentSerialTest extends AbstractPerformanceTest {
+public class LockSupportSerialTest extends AbstractPerformanceTest {
   @Before
   public void setUp() {
     for (int i = 0; i < counters.length; i++) {

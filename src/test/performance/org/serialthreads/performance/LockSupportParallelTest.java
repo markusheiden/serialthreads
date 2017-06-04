@@ -8,7 +8,7 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Test to analyze performance of threading with java.lang.concurrent.
  */
-public class ConcurrentTest extends AbstractPerformanceTest {
+public class LockSupportParallelTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
 
   @Before
