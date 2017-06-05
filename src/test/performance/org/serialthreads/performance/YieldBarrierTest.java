@@ -33,9 +33,9 @@ public class YieldBarrierTest extends AbstractPerformanceTest {
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (barrierCount.incrementAndGet() != nextBarrier) {
+      if (barrierCount.incrementAndGet() < nextBarrier) {
         do {
-        Thread.yield();
+          Thread.yield();
         } while (barrierCount.get() < nextBarrier);
       }
       nextBarrier += COUNT;
