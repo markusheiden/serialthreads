@@ -28,7 +28,7 @@ public abstract class AbstractPerformanceTest {
 
     long count = counters[0].getCount();
     // Check that counters have run at all.
-    assertTrue("Counter did not block", count > 1);
+    assertTrue("Counters did not block", count > 1);
 
     for (int i = 1; i < counters.length; i++) {
       // check that all counters differ only by max 1, due to different stop time
