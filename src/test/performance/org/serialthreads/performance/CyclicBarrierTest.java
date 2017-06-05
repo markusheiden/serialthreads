@@ -6,9 +6,9 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 /**
- * Test to analyze performance of threading with a CyclicBarrier.
+ * Test to analyze performance of threading with a {@link CyclicBarrier}.
  */
-public class BarrierTest extends AbstractPerformanceTest {
+public class CyclicBarrierTest extends AbstractPerformanceTest {
   private final CyclicBarrier barrier = new CyclicBarrier(COUNT);
 
   @Before
