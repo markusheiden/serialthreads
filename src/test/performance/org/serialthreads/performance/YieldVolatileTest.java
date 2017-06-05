@@ -3,9 +3,9 @@ package org.serialthreads.performance;
 import org.junit.Before;
 
 /**
- * Test to analyze performance of threading with java.lang.concurrent.
+ * Test to analyze performance of threading with {@link Thread#yield()}.
  */
-public class YieldTest extends AbstractPerformanceTest {
+public class YieldVolatileTest extends AbstractPerformanceTest {
   private volatile int barrierCount;
   private volatile int round;
 
