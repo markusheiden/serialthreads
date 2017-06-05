@@ -3,11 +3,11 @@ package org.serialthreads.performance;
 import org.junit.Before;
 
 /**
- * Test to analyze performance of threading with {@link Thread#yield()}.
+ * Test to analyze performance of threading with synchronization.
  */
-public class YieldVolatileRoundTest extends AbstractPerformanceTest {
-  private volatile int barrierCount;
-  private volatile int round;
+public class SynchronizedRoundTest extends AbstractPerformanceTest {
+  private int barrierCount;
+  private int round;
 
   @Before
   public void setUp() {
@@ -36,18 +36,34 @@ public class YieldVolatileRoundTest extends AbstractPerformanceTest {
       if (decrementAndGetBarrier() > 0) {
         do {
           Thread.yield();
-        } while (currentRound == (currentRound = round));
+        } while (currentRound == (currentRound = getRound()));
       } else {
-        barrierCount = COUNT;
-        currentRound = ++round;
+        setBarrier(COUNT);
+        currentRound = incrementAndGetRound();
       }
     }
 
     private int decrementAndGetBarrier() {
-      // Synchronization needed, because the may be interrupted in middle of read-modify-write.
-      // barrierCount needs still to be volatile, because it is reset above.
       synchronized (lock) {
         return --barrierCount;
+      }
+    }
+
+    private void setBarrier(int barrier) {
+      synchronized (lock) {
+        barrierCount = barrier;
+      }
+    }
+
+    private int incrementAndGetRound() {
+      synchronized (lock) {
+        return ++round;
+      }
+    }
+
+    private int getRound() {
+      synchronized (lock) {
+        return round;
       }
     }
   }

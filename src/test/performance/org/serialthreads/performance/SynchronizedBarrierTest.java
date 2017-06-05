@@ -3,16 +3,16 @@ package org.serialthreads.performance;
 import org.junit.Before;
 
 /**
- * Test to analyze performance of threading with {@link Thread#yield()}.
+ * Test to analyze performance of threading with synchronization.
  */
-public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
-  private volatile int barrierCount;
+public class SynchronizedBarrierTest extends AbstractPerformanceTest {
+  private int barrierCount;
 
   @Before
   public void setUp() {
     barrierCount = 0;
     for (int i = 0; i < counters.length; i++) {
-      counters[i] = new YieldCounter(i);
+      counters[i] = new SynchronizedCounter(i);
     }
   }
 
@@ -21,10 +21,10 @@ public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
     barrierCount = Integer.MAX_VALUE;
   }
 
-  private class YieldCounter extends Counter {
+  private class SynchronizedCounter extends Counter {
     private int nextBarrier;
 
-    public YieldCounter(int number) {
+    public SynchronizedCounter(int number) {
       super(number);
       nextBarrier = barrierCount + COUNT;
     }
@@ -34,16 +34,22 @@ public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
       if (incrementAndGetBarrier() < nextBarrier) {
         do {
           Thread.yield();
-        } while (barrierCount < nextBarrier);
+        } while (getBarrier() < nextBarrier);
       }
       nextBarrier += COUNT;
     }
 
     private int incrementAndGetBarrier() {
       // Synchronization needed, because the may be interrupted in middle of read-modify-write.
-      // barrierCount needs still to be volatile, because it is read above.
       synchronized (lock) {
         return ++barrierCount;
+      }
+    }
+
+    private int getBarrier() {
+      // Synchronization needed, because the may be interrupted in middle of read-modify-write.
+      synchronized (lock) {
+        return barrierCount;
       }
     }
   }
