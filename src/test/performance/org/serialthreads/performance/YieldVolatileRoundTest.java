@@ -33,13 +33,21 @@ public class YieldVolatileRoundTest extends AbstractPerformanceTest {
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (--barrierCount > 0) {
+      if (decBarrier() > 0) {
         do {
           Thread.yield();
         } while (currentRound == (currentRound = round));
       } else {
         barrierCount = COUNT;
         currentRound = ++round;
+      }
+    }
+
+    private int decBarrier() {
+      // Synchronization needed, because the may be interrupted in middle of read-modify-write.
+      // barrierCount needs still to be volatile, because it is reset above.
+      synchronized (lock) {
+        return --barrierCount;
       }
     }
   }

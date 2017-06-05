@@ -31,12 +31,20 @@ public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (++barrierCount < nextBarrier) {
+      if (incBarrier() < nextBarrier) {
         do {
           Thread.yield();
         } while (barrierCount < nextBarrier);
       }
       nextBarrier += COUNT;
+    }
+
+    private int incBarrier() {
+      // Synchronization needed, because the may be interrupted in middle of read-modify-write.
+      // barrierCount needs still to be volatile, because it is reset above.
+      synchronized (lock) {
+        return ++barrierCount;
+      }
     }
   }
 }
