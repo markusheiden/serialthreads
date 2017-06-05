@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * Test to analyze performance of threading with java.lang.concurrent.
+ * Test to analyze performance of threading with {@link LockSupport}.
  */
 public class LockSupportParallelTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();

@@ -5,7 +5,7 @@ import org.junit.Before;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * Test to analyze performance of threading with java.lang.concurrent.
+ * Test to analyze performance of threading with {@link LockSupport}.
  */
 public class LockSupportSerialTest extends AbstractPerformanceTest {
   @Before
@@ -23,8 +23,10 @@ public class LockSupportSerialTest extends AbstractPerformanceTest {
 
   @Override
   protected void doStop() {
-    for (Thread thread : threads) {
-      LockSupport.unpark(thread);
+    for (int i = 0; i < 100; i++) {
+      for (Thread thread : threads) {
+        LockSupport.unpark(thread);
+      }
     }
   }
 
