@@ -3,14 +3,14 @@ package org.serialthreads.performance;
 import org.junit.Before;
 
 /**
- * Test to analyze performance of threading with java.lang.concurrent.
+ * Test to analyze performance of threading with {@link Thread#yield()}.
  */
-public class Yield2Test extends AbstractPerformanceTest {
+public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
   private volatile int barrierCount;
 
   @Before
   public void setUp() {
-    barrierCount = 1;
+    barrierCount = 0;
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new YieldCounter(i);
     }
@@ -18,7 +18,7 @@ public class Yield2Test extends AbstractPerformanceTest {
 
   @Override
   protected void doStop() throws Exception {
-    barrierCount += COUNT;
+    barrierCount = Integer.MAX_VALUE;
   }
 
   private class YieldCounter extends Counter {
@@ -31,7 +31,7 @@ public class Yield2Test extends AbstractPerformanceTest {
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (++barrierCount != nextBarrier) {
+      if (++barrierCount < nextBarrier) {
         do {
           Thread.yield();
         } while (barrierCount < nextBarrier);

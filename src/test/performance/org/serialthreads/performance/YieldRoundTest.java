@@ -35,7 +35,7 @@ public class YieldRoundTest extends AbstractPerformanceTest {
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (barrierCount.decrementAndGet() != 0) {
+      if (barrierCount.decrementAndGet() > 0) {
         do {
           Thread.yield();
         } while (currentRound == (currentRound = round.get()));

@@ -11,8 +11,8 @@ public class YieldVolatileRoundTest extends AbstractPerformanceTest {
 
   @Before
   public void setUp() {
-    barrierCount = COUNT - 1;
-    round = 0;
+    barrierCount = COUNT;
+    round = Integer.MIN_VALUE;
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new YieldCounter(i);
     }
@@ -28,18 +28,17 @@ public class YieldVolatileRoundTest extends AbstractPerformanceTest {
 
     public YieldCounter(int number) {
       super(number);
-      currentRound = 0;
+      currentRound = round;
     }
 
     @Override
     protected final void tick(long count) throws Exception {
-      if (barrierCount != 0) {
-        --barrierCount;
+      if (--barrierCount > 0) {
         do {
           Thread.yield();
-        } while (currentRound == round);
+        } while (currentRound == (currentRound = round));
       } else {
-        barrierCount = COUNT - 1;
+        barrierCount = COUNT;
         currentRound = ++round;
       }
     }
