@@ -5,7 +5,7 @@ import org.junit.Before;
 /**
  * Test to analyze performance of threading with {@link Thread#yield()}.
  */
-public class YieldVolatileTest extends AbstractPerformanceTest {
+public class YieldVolatileRoundTest extends AbstractPerformanceTest {
   private volatile int barrierCount;
   private volatile int round;
 
