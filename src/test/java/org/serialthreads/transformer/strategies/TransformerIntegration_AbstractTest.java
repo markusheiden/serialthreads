@@ -58,7 +58,7 @@ public abstract class TransformerIntegration_AbstractTest {
     SerialThreadManager.DEBUG = false;
 
     Class<?> clazz = getClass().getClassLoader().loadClass(TestInterruptible.class.getName());
-    clazz.getMethod("run").invoke(clazz.newInstance());
+    clazz.getMethod("run").invoke(clazz.getDeclaredConstructor().newInstance());
   }
 
   @Test
@@ -139,7 +139,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * @param clazz Clazz of test object
    */
   private void create(Class<? extends IRunnable> clazz) throws Exception {
-    test = classLoader.loadClass(clazz.getName()).newInstance();
+    test = classLoader.loadClass(clazz.getName()).getDeclaredConstructor().newInstance();
   }
 
   /**

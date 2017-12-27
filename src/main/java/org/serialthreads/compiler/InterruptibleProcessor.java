@@ -11,7 +11,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementScanner6;
+import javax.lang.model.util.ElementScanner7;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
@@ -21,7 +21,7 @@ import java.util.Set;
  * Checks correct usage of {@link org.serialthreads.Interruptible} annotations.
  */
 @SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_9)
 public class InterruptibleProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -37,7 +37,7 @@ public class InterruptibleProcessor extends AbstractProcessor {
   /**
    * Inner visitor class for scanning types.
    */
-  private class Scanner extends ElementScanner6<Void, Void> {
+  private class Scanner extends ElementScanner7<Void, Void> {
     @Override
     public Void visitExecutable(ExecutableElement element, Void dummy) {
       try {
