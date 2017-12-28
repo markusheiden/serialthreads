@@ -132,10 +132,8 @@ public final class Stack extends SerialThread implements Serializable {
    * @param resetTo Frame to reset to
    */
   public final void resetTo(StackFrame resetTo) {
-    StackFrame frame = resetTo.next;
-    while (frame != null) {
+    for (StackFrame frame = resetTo.next; frame != null; frame = frame.next) {
       frame.reset();
-      frame = frame.next;
     }
   }
 
