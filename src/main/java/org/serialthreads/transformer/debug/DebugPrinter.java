@@ -17,7 +17,7 @@ class DebugPrinter extends Textifier {
   private final ExtendedFrame[] frames;
 
   public DebugPrinter(ExtendedFrame[] frames) {
-    super(Opcodes.ASM5);
+    super(Opcodes.ASM6);
 
     this.instruction = 0;
     this.frames = frames;

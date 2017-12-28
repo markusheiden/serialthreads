@@ -7,7 +7,7 @@ import org.serialthreads.transformer.ITransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.objectweb.asm.Opcodes.ASM5;
+import static org.objectweb.asm.Opcodes.ASM6;
 
 /**
  * Visitor executing byte code enhancement of a class.
@@ -28,7 +28,7 @@ public class TransformingVisitor extends ClassNode {
    * @param transformer byte code transformer
    */
   public TransformingVisitor(ClassVisitor cv, ITransformer transformer) {
-    super(ASM5);
+    super(ASM6);
 
     this.cv = logger.isDebugEnabled() ? new CheckClassAdapter(cv) : cv;
     this.transformer = transformer;
