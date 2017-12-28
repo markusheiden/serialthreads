@@ -17,7 +17,6 @@ import java.io.*;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * ClassLoader which applies a transformer to the loaded classes.
@@ -147,7 +146,7 @@ public class TransformingClassLoader extends ClassLoader {
    */
   protected byte[] transform(byte[] byteCode) throws NotTransformableException {
     ClassReader reader = new ClassReader(byteCode);
-    ClassWriter writer = new ClassWriter(COMPUTE_MAXS + COMPUTE_FRAMES);
+    ClassWriter writer = new ClassWriter(COMPUTE_FRAMES);
     ClassVisitor visitor = new TransformingVisitor(createVisitor(writer), transformer);
 
     reader.accept(visitor, SKIP_FRAMES);
