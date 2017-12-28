@@ -154,12 +154,19 @@ public class TransformingClassLoader extends ClassLoader {
     byte[] result = writer.toByteArray();
 
     if (logger.isDebugEnabled()) {
-      StringWriter output = new StringWriter(4096);
-      new ClassReader(result).accept(new TraceClassVisitor(new PrintWriter(output)), SKIP_FRAMES + SKIP_DEBUG);
-      logger.debug("Byte code:\n{}", output);
+      logger.debug("Byte code:\n{}", byteCodeToString(result));
     }
 
     return result;
+  }
+
+  /**
+   * Byte code as its string representation.
+   */
+  private String byteCodeToString(byte[] result) {
+    StringWriter output = new StringWriter(4096);
+    new ClassReader(result).accept(new TraceClassVisitor(new PrintWriter(output)), SKIP_FRAMES + SKIP_DEBUG);
+    return output.toString();
   }
 
   /**
