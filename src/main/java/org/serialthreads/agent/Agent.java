@@ -102,7 +102,7 @@ public class Agent implements ClassFileTransformer {
   }
 
   /**
-   * Start of agent after main methods has been called.
+   * Start of agent after main method has been called.
    * Called by vm to start this agent.
    *
    * @param arguments arguments
