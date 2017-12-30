@@ -17,27 +17,36 @@ import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
- * Class to aid debugging of a method's byte code.
+ * Class to aid debugging of byte code.
  */
 public class Debugger {
+  /**
+   * Byte code of all methods of a class.
+   */
   public static String debug(ClassNode clazz) {
     StringBuilder result = new StringBuilder(65536);
     result.append("Class ").append(clazz.name).append("\n");
-    result.append(debug(clazz, (String) null));
+    clazz.methods.stream()
+      .map(method -> debug(clazz, method))
+      .forEach(result::append);
     return result.toString();
   }
 
+  /**
+   * Byte code of a method of a class.
+   */
   public static String debug(ClassNode clazz, String methodToDebug) {
     StringBuilder result = new StringBuilder(65536);
-    for (MethodNode method : clazz.methods) {
-      if (methodToDebug == null || method.name.startsWith(methodToDebug)) {
-        result.append(debug(clazz, method));
-      }
-    }
-
+    clazz.methods.stream()
+      .filter(method -> method.name.startsWith(methodToDebug))
+      .map(method -> debug(clazz, method))
+      .forEach(result::append);
     return result.toString();
   }
 
+  /**
+   * Byte code of a method of a class.
+   */
   public static String debug(ClassNode clazz, MethodNode method) {
     ExtendedAnalyzer analyzer = ExtendedAnalyzer.create(clazz, new ClassInfoCacheASM(Debugger.class.getClassLoader()));
     try {
@@ -52,19 +61,17 @@ public class Debugger {
 
     StringWriter result = new StringWriter(4096);
     result.append("Method ").append(methodName(clazz.name, method.name, method.desc)).append("\n");
-    PrintWriter writer = new PrintWriter(result);
-    printer.print(writer);
-    writer.flush();
+    printer.print(new PrintWriter(result));
 
     return result.toString();
   }
 
   /**
-   * Byte code as its string representation.
+   * Byte code.
    */
-  public static String debug(byte[] result) {
-    StringWriter output = new StringWriter(4096);
-    new ClassReader(result).accept(new TraceClassVisitor(new PrintWriter(output)), SKIP_FRAMES + SKIP_DEBUG);
-    return output.toString();
+  public static String debug(byte[] byteCode) {
+    StringWriter result = new StringWriter(4096);
+    new ClassReader(byteCode).accept(new TraceClassVisitor(new PrintWriter(result)), SKIP_FRAMES + SKIP_DEBUG);
+    return result.toString();
   }
 }
