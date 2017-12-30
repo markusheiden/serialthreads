@@ -3,7 +3,6 @@ package org.serialthreads.agent;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -12,11 +11,13 @@ import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
+import static org.serialthreads.transformer.debug.Debugger.debug;
 
 /**
  * ClassLoader which applies a transformer to the loaded classes.
@@ -152,25 +153,16 @@ public class TransformingClassLoader extends ClassLoader {
     try {
       reader.accept(visitor, SKIP_FRAMES);
     } catch (NotTransformableException e) {
-      logger.debug("Not transformable byte code:\n{}", byteCodeToString(byteCode));
+      logger.debug("Not transformable byte code:\n{}", debug(byteCode));
       throw e;
     }
 
     byte[] result = writer.toByteArray();
     if (logger.isDebugEnabled()) {
-      logger.debug("Byte code:\n{}", byteCodeToString(result));
+      logger.debug("Byte code:\n{}", debug(result));
     }
 
     return result;
-  }
-
-  /**
-   * Byte code as its string representation.
-   */
-  private String byteCodeToString(byte[] result) {
-    StringWriter output = new StringWriter(4096);
-    new ClassReader(result).accept(new TraceClassVisitor(new PrintWriter(output)), SKIP_FRAMES + SKIP_DEBUG);
-    return output.toString();
   }
 
   /**
