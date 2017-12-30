@@ -149,9 +149,14 @@ public class TransformingClassLoader extends ClassLoader {
     ClassWriter writer = new ClassWriter(COMPUTE_FRAMES);
     ClassVisitor visitor = new TransformingVisitor(createVisitor(writer), transformer);
 
-    reader.accept(visitor, SKIP_FRAMES);
-    byte[] result = writer.toByteArray();
+    try {
+      reader.accept(visitor, SKIP_FRAMES);
+    } catch (NotTransformableException e) {
+      logger.debug("Not transformable byte code:\n{}", byteCodeToString(byteCode));
+      throw e;
+    }
 
+    byte[] result = writer.toByteArray();
     if (logger.isDebugEnabled()) {
       logger.debug("Byte code:\n{}", byteCodeToString(result));
     }
