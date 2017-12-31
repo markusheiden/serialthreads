@@ -3,7 +3,6 @@ package org.serialthreads.transformer.debug;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.util.TraceClassVisitor;
 import org.objectweb.asm.util.TraceMethodVisitor;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
@@ -22,6 +21,19 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 public class Debugger {
   /**
    * Byte code of all methods of a class.
+   *
+   * @param byteCode Byte code of the class.
+   */
+  public static String debug(byte[] byteCode) {
+    ClassNode clazz = new ClassNode();
+    new ClassReader(byteCode).accept(clazz, SKIP_DEBUG + SKIP_FRAMES);
+    return debug(clazz);
+  }
+
+  /**
+   * Byte code of all methods of a class.
+   *
+   * @param clazz Class node.
    */
   public static String debug(ClassNode clazz) {
     StringBuilder result = new StringBuilder(65536);
@@ -34,6 +46,9 @@ public class Debugger {
 
   /**
    * Byte code of a method of a class.
+   *
+   * @param clazz Class node.
+   * @param methodToDebug Name of method to debug.
    */
   public static String debug(ClassNode clazz, String methodToDebug) {
     StringBuilder result = new StringBuilder(65536);
@@ -46,6 +61,9 @@ public class Debugger {
 
   /**
    * Byte code of a method of a class.
+   *
+   * @param clazz Class node.
+   * @param method Method node.
    */
   public static String debug(ClassNode clazz, MethodNode method) {
     ExtendedAnalyzer analyzer = ExtendedAnalyzer.create(clazz, new ClassInfoCacheASM(Debugger.class.getClassLoader()));
@@ -63,15 +81,6 @@ public class Debugger {
     result.append("Method ").append(methodName(clazz.name, method.name, method.desc)).append("\n");
     printer.print(new PrintWriter(result));
 
-    return result.toString();
-  }
-
-  /**
-   * Byte code.
-   */
-  public static String debug(byte[] byteCode) {
-    StringWriter result = new StringWriter(4096);
-    new ClassReader(byteCode).accept(new TraceClassVisitor(new PrintWriter(result)), SKIP_FRAMES + SKIP_DEBUG);
     return result.toString();
   }
 }
