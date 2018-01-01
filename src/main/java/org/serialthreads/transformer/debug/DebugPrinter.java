@@ -33,7 +33,6 @@ class DebugPrinter extends Textifier {
     }
 
     instruction++;
-
   }
 
   private void addByteCodeIndex(int lastSize) {
