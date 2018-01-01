@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Extended Textifier which adds frame infos after each byte code.
+ * Extended {@link Textifier} which adds frame infos after each byte code instruction.
  */
 class DebugPrinter extends Textifier {
   private int instruction;
