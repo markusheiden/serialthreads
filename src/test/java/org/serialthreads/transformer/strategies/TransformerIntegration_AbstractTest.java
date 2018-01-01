@@ -118,14 +118,14 @@ public abstract class TransformerIntegration_AbstractTest {
   /**
    * SAM interface for a number parser.
    */
-  private static interface Parser {
+  private interface Parser {
     /**
      * Parse a number from a string.
      *
      * @param value String representation of number
      * @return Number
      */
-    public Object parse(String value);
+    Object parse(String value);
   }
 
   /**
