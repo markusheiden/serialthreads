@@ -2,7 +2,6 @@ package org.serialthreads.transformer.strategies;
 
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;
-import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
 
 import java.util.function.Function;
@@ -21,7 +20,6 @@ public abstract class TransformerIntegration_AbstractTest {
     TestInterruptible test = new TestInterruptible(true);
 
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
-    SerialThreadManager.registerManager(manager);
     manager.execute();
 
     test.assertExpectedResult();

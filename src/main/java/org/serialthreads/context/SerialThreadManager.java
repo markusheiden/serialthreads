@@ -15,7 +15,7 @@ public abstract class SerialThreadManager {
    *
    * @param manager thread manager
    */
-  public static void registerManager(SerialThreadManager manager) {
+  protected static void registerManager(SerialThreadManager manager) {
     assert threadManagers.get() == null : "Precondition: no manager registered for this thread yet";
 
     threadManagers.set(manager);

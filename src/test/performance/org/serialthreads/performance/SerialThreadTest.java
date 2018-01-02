@@ -6,7 +6,6 @@ import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.agent.Transform;
 import org.serialthreads.agent.TransformingRunner;
-import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
 import org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3;
 
@@ -33,7 +32,6 @@ public class SerialThreadTest extends AbstractPerformanceTest {
     managerThread = new Thread(() -> {
       try {
         SimpleSerialThreadManager manager = new SimpleSerialThreadManager(counters);
-        SerialThreadManager.registerManager(manager);
         synchronized (lock) {
           ready = true;
           lock.wait();

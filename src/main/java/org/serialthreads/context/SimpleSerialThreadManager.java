@@ -19,6 +19,8 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
 
     chains = ChainedRunnable.chain(runnables);
     lastExecuted = chains[chains.length - 1];
+
+    registerManager(this);
   }
 
   /**
