@@ -1,6 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;
@@ -16,7 +15,6 @@ import static org.junit.Assert.assertEquals;
  */
 public abstract class TransformerIntegration_AbstractTest {
   @Before
-  @After
   public void setUp() {
     // Enable debug mode, to detect byte code transformation failures.
     SerialThreadManager.DEBUG = true;
