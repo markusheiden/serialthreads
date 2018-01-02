@@ -494,7 +494,7 @@ public abstract class AbstractMethodTransformer {
 
     InsnList instructions = new InsnList();
 
-    // store thread always in a new local variable
+    // Get thread.
     if (isMethodNotStatic) {
       instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
@@ -504,9 +504,10 @@ public abstract class AbstractMethodTransformer {
     }
     LabelNode retry = new LabelNode();
     instructions.add(retry);
-    // store frame always in a new local variable
+    // Store thread always in a new local variable.
     instructions.add(new VarInsnNode(ASTORE, localThread));
 
+    // Labels (for try block) around restore code.
     LabelNode beginTry = new LabelNode();
     instructions.add(beginTry);
     instructions.add(tryCode);
@@ -516,6 +517,7 @@ public abstract class AbstractMethodTransformer {
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
 
+    // try / catch (NullPointerException e).
     if (isMethodNotStatic) {
       InsnList handler = new InsnList();
 
