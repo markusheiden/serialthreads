@@ -27,9 +27,13 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testTransform() {
-    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(new TestInterruptible());
+    TestInterruptible test = new TestInterruptible();
+
+    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
     SerialThreadManager.registerManager(manager);
     manager.execute();
+
+    test.assertExpectedResult();
   }
 
   /**

@@ -15,6 +15,8 @@ public class TestInterruptibleTest {
     // Disable debug mode to not throw an exception in SerialThreadManager.interrupt().
     SerialThreadManager.DEBUG = false;
 
-    new TestInterruptible().run();
+    TestInterruptible test = new TestInterruptible();
+    test.run();
+    test.assertExpectedResult();
   }
 }

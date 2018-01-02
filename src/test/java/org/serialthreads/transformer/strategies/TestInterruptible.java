@@ -37,8 +37,6 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     test = i1 + l1 + (long) d1;
 
     notInterruptible();
-
-    checkResult();
   }
 
   /**
@@ -112,7 +110,7 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   /**
    * Check expected results of calling {@link TestInterruptible#run()} once.
    */
-  private void checkResult() {
+  public void assertExpectedResult() {
     assertEquals(false, z); // !true
     assertEquals((char) 2, c); // 1++
     assertEquals((byte) 4, b); // 3++
