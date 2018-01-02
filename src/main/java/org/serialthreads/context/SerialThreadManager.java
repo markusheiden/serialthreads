@@ -55,5 +55,6 @@ public abstract class SerialThreadManager {
    *
    * @param interrupts number interrupts to execute each serial thread
    */
+  @Executor
   public abstract void execute(int interrupts);
 }
