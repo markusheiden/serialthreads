@@ -1,16 +1,13 @@
 package org.serialthreads.transformer.strategies;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.util.TraceClassVisitor;
-import org.serialthreads.agent.TransformingClassLoader;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
-import org.serialthreads.transformer.IStrategy;
+import org.serialthreads.context.SimpleSerialThreadManager;
 
-import java.io.PrintWriter;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,84 +15,57 @@ import static org.junit.Assert.assertEquals;
  * Integration test for transformer.
  */
 public abstract class TransformerIntegration_AbstractTest {
-  /**
-   * Strategy under test.
-   */
-  protected IStrategy strategy;
-
-  /**
-   * Class loader executing the strategy.
-   */
-  private TransformingClassLoader classLoader;
-
   @Before
+  @After
   public void setUp() {
+    // Enable debug mode, to detect byte code transformation failures.
     SerialThreadManager.DEBUG = true;
-
-    classLoader = new TransformingClassLoader(strategy) {
-      @Override
-      protected ClassVisitor createVisitor(ClassWriter writer) {
-        return new TraceClassVisitor(writer, new PrintWriter(System.out));
-      }
-    };
   }
 
   /**
    * Check that transformation does not alter behaviour.
    */
   @Test
-  public void testTransform() throws Exception {
-    create(TestInterruptible.class);
-    invoke("runTransformed");
-  }
-
-  /**
-   * Check if the test assumptions are correct by executing without a transformer.
-   */
-  @Test
-  public void testNoTransform() throws Exception {
-    // disable debug mode to not throw an exception in SerialThreadManager.interrupt()
-    SerialThreadManager.DEBUG = false;
-
-    Class<?> clazz = getClass().getClassLoader().loadClass(TestInterruptible.class.getName());
-    clazz.getMethod("run").invoke(clazz.getDeclaredConstructor().newInstance());
+  public void testTransform() {
+    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(new TestInterruptible());
+    SerialThreadManager.registerManager(manager);
+    manager.execute();
   }
 
   @Test
   public void testLocalStorage_int() throws Exception {
-    testLocalStorage(TestInt.class, Integer::parseInt);
+    testLocalStorage(new TestInt(), Integer::parseInt);
   }
 
   @Test
   public void testLocalStorage_long() throws Exception {
-    testLocalStorage(TestLong.class, Long::parseLong);
+    testLocalStorage(new TestLong(), Long::parseLong);
   }
 
   @Test
   public void testLocalStorage_float() throws Exception {
-    testLocalStorage(TestFloat.class, Float::parseFloat);
+    testLocalStorage(new TestFloat(), Float::parseFloat);
   }
 
   @Test
   public void testLocalStorage_double() throws Exception {
-    testLocalStorage(TestDouble.class, Double::parseDouble);
+    testLocalStorage(new TestDouble(), Double::parseDouble);
   }
 
   /**
    * Test that locals are stored and restored correctly.
    *
-   * @param clazz Class of test object
-   * @param parser Parser for the primitive type which is tested
+   * @param test Test object.
+   * @param parser Parser for the primitive type which is tested.
    */
-  private void testLocalStorage(Class<? extends IRunnable> clazz, Parser parser) throws Exception {
-    create(clazz);
-    run();
+  private void testLocalStorage(IRunnable test, Function<String, Number> parser) throws Exception {
+    run(test);
     for (int i = 0; i < 9; i++) {
-      assertEquals(parser.parse("-1"), field("value" + i));
+      assertEquals(parser.apply("-1"), field(test, "value" + i));
     }
-    run();
+    run(test);
     for (int i = 0; i < 9; i++) {
-      assertEquals(parser.parse("" + i), field("value" + i));
+      assertEquals(parser.apply("" + i), field(test, "value" + i));
     }
   }
 
@@ -104,11 +74,11 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testTailCall() throws Exception {
-    create(TestTailCall.class);
-    run();
-    assertEquals(-1, field("value"));
-    run();
-    assertEquals(1, field("value"));
+    TestTailCall test = new TestTailCall();
+    run(test);
+    assertEquals(-1, test.value);
+    run(test);
+    assertEquals(1, test.value);
   }
 
   //
@@ -116,56 +86,21 @@ public abstract class TransformerIntegration_AbstractTest {
   //
 
   /**
-   * SAM interface for a number parser.
-   */
-  private interface Parser {
-    /**
-     * Parse a number from a string.
-     *
-     * @param value String representation of number
-     * @return Number
-     */
-    Object parse(String value);
-  }
-
-  /**
-   * Test object.
-   */
-  private Object test;
-
-  /**
-   * Create and transform test object.
-   *
-   * @param clazz Clazz of test object
-   */
-  private void create(Class<? extends IRunnable> clazz) throws Exception {
-    test = classLoader.loadClass(clazz.getName()).getDeclaredConstructor().newInstance();
-  }
-
-  /**
    * Run test object once (until the next interrupt).
    */
-  private void run() throws Exception {
+  private void run(IRunnable test) throws Exception {
+    // Do NOT call "run()" directly, to avoid transformation.
     test.getClass().getMethod("run").invoke(test);
   }
 
   /**
    * Get value of a field of the test object.
    *
-   * @param name Name of the field
-   * @return Value of the field
+   * @param test Test object.
+   * @param name Name of the field.
+   * @return Value of the field.
    */
-  private Object field(String name) throws Exception {
+  private Object field(IRunnable test, String name) throws Exception {
     return test.getClass().getField(name).get(test);
-  }
-
-  /**
-   * Invoke a method without parameters on the test object.
-   *
-   * @param name Name of the method
-   * @return Value of the field
-   */
-  private Object invoke(String name) throws Exception {
-    return test.getClass().getMethod(name).invoke(test);
   }
 }

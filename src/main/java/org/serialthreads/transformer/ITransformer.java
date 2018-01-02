@@ -11,5 +11,5 @@ public interface ITransformer {
    *
    * @param clazz class to be transformed
    */
-  public void transform(ClassNode clazz);
+  void transform(ClassNode clazz);
 }

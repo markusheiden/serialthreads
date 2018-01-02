@@ -46,6 +46,9 @@ public class TransformingRunner extends BlockJUnit4ClassRunner {
       Class<? extends ITransformer> transformer = annotation.transformer();
       String[] classPrefixes = annotation.classPrefixes();
       TransformingClassLoader classLoader = new TransformingClassLoader(new Strategy(transformer), classPrefixes);
+      if (annotation.trace()) {
+        classLoader.trace();
+      }
       return Class.forName(clazz.getName(), true, classLoader);
     } catch (Exception e) {
       throw new InitializationError(e);

@@ -3,12 +3,14 @@ package org.serialthreads.transformer.strategies;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
-import org.serialthreads.context.SimpleSerialThreadManager;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * Test runnable for transformer integration tests.
+ * <p />
+ * Extends base class to test base class transformation.
+ * Implements interface to test interface transformation.
  */
 public class TestInterruptible extends AbstractTestInterruptible implements ITestInterruptible, IRunnable {
   public boolean z;
@@ -21,15 +23,6 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   public double d;
 
   public long test;
-
-  /**
-   * Execute transformed runnable via serial thread manager.
-   */
-  public void runTransformed() {
-    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(this);
-    SerialThreadManager.registerManager(manager);
-    manager.execute();
-  }
 
   /**
    * Execute runnable.
