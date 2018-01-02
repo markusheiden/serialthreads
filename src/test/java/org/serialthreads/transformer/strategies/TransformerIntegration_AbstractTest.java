@@ -32,21 +32,33 @@ public abstract class TransformerIntegration_AbstractTest {
     manager.execute();
   }
 
+  /**
+   * Test capture and restore of locals of type {@link int}.
+   */
   @Test
   public void testLocalStorage_int() throws Exception {
     testLocalStorage(new TestInt(), Integer::parseInt);
   }
 
+  /**
+   * Test capture and restore of locals of type {@link long}.
+   */
   @Test
   public void testLocalStorage_long() throws Exception {
     testLocalStorage(new TestLong(), Long::parseLong);
   }
 
+  /**
+   * Test capture and restore of locals of type {@link float}.
+   */
   @Test
   public void testLocalStorage_float() throws Exception {
     testLocalStorage(new TestFloat(), Float::parseFloat);
   }
 
+  /**
+   * Test capture and restore of locals of type {@link double}.
+   */
   @Test
   public void testLocalStorage_double() throws Exception {
     testLocalStorage(new TestDouble(), Double::parseDouble);
