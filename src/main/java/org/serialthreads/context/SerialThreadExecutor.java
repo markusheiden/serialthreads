@@ -4,6 +4,7 @@ import org.serialthreads.Executor;
 
 /**
  * Thread executor for transformers that do not need a current thread holder.
+ * Other transformers need a {@link SerialThreadManager} for execution.
  */
 public class SerialThreadExecutor {
   private final ChainedRunnable[] chains;
