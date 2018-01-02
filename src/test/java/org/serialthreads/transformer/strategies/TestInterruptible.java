@@ -1,8 +1,8 @@
 package org.serialthreads.transformer.strategies;
 
+import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
-import org.serialthreads.context.SerialThreadManager;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,6 +13,11 @@ import static org.junit.Assert.assertEquals;
  * Implements interface to test interface transformation.
  */
 public class TestInterruptible extends AbstractTestInterruptible implements ITestInterruptible, IRunnable {
+  /**
+   * Check, if byte code transformation was successful?.
+   */
+  private static boolean checkTransformation = true;
+
   public boolean z;
   public char c;
   public byte b;
@@ -23,6 +28,15 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   public double d;
 
   public long test;
+
+  /**
+   * Constructor.
+   *
+   * @param checkTransformation Check, if byte code transformation was successful?.
+   */
+  public TestInterruptible(boolean checkTransformation) {
+    this.checkTransformation = checkTransformation;
+  }
 
   /**
    * Execute runnable.
@@ -46,22 +60,22 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   @Interruptible
   public long testLong(boolean z, char c, byte b, short s, int i, long j) {
     z = !z;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.z = z;
     c++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.c = c;
     b++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.b = b;
     s++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.s = s;
     i++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.i = i;
     j++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.j = j;
 
     return j;
@@ -74,10 +88,10 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   @Interruptible
   public double testDouble(float f, double d) {
     f++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.f = f;
     d++;
-    SerialThreadManager.interrupt();
+    interrupt();
     this.d = d;
 
     return d;
@@ -89,9 +103,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   @Interruptible
   public static int testStatic(int i) {
     i++;
-    SerialThreadManager.interrupt();
+    interrupt();
     i += 3;
-    SerialThreadManager.interrupt();
+    interrupt();
     return i;
   }
 
@@ -101,6 +115,17 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   @Interruptible
   public static void notInterruptible() {
     System.out.println("Not interruptible method has been called");
+  }
+
+  /**
+   * Interrupt current thread.
+   * This is a dummy method which calls will be eliminated by the byte code transformation!
+   */
+  @Interrupt
+  public static void interrupt() {
+    if (checkTransformation) {
+      throw new IllegalThreadStateException("Byte code transformation failed");
+    }
   }
 
   //

@@ -2,6 +2,7 @@ package org.serialthreads.performance;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.agent.Transform;
 import org.serialthreads.agent.TransformingRunner;
@@ -20,14 +21,14 @@ public class SerialThreadTest extends AbstractPerformanceTest {
   private final Object lock = new Object();
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new SerialCounter(i);
     }
   }
 
   @Override
-  protected void doStartThreads() throws Exception {
+  protected void doStartThreads() {
     ready = false;
     managerThread = new Thread(() -> {
       try {
@@ -51,7 +52,7 @@ public class SerialThreadTest extends AbstractPerformanceTest {
   }
 
   @Override
-  protected void doUnlockThreads() throws Exception {
+  protected void doUnlockThreads() {
     Counter.startAll();
     synchronized (lock) {
       lock.notifyAll();
@@ -59,7 +60,7 @@ public class SerialThreadTest extends AbstractPerformanceTest {
   }
 
   @Override
-  protected void doStopCounters() throws Exception {
+  protected void doStopCounters() {
     System.out.println("stopping all");
     Counter.stopAll();
   }
@@ -75,19 +76,24 @@ public class SerialThreadTest extends AbstractPerformanceTest {
   }
 
   public static class SerialCounter extends Counter {
-    public SerialCounter(int number) {
+    SerialCounter(int number) {
       super(number);
     }
 
     @Override
-    protected void waitForStart() throws InterruptedException {
+    protected void waitForStart() {
       // not needed
     }
 
     @Override
     @Interruptible
-    protected final void tick(long count) throws Exception {
-      SerialThreadManager.interrupt();
+    protected final void tick(long count) {
+      interrupt();
+    }
+
+    @Interrupt
+    private void interrupt() {
+      throw new IllegalThreadStateException("Byte code transformation failed");
     }
   }
 }

@@ -1,6 +1,5 @@
 package org.serialthreads.transformer.strategies;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
@@ -14,18 +13,12 @@ import static org.junit.Assert.assertEquals;
  * Integration test for transformer.
  */
 public abstract class TransformerIntegration_AbstractTest {
-  @Before
-  public void setUp() {
-    // Enable debug mode, to detect byte code transformation failures.
-    SerialThreadManager.DEBUG = true;
-  }
-
   /**
    * Check that transformation does not alter behaviour.
    */
   @Test
   public void testTransform() {
-    TestInterruptible test = new TestInterruptible();
+    TestInterruptible test = new TestInterruptible(true);
 
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
     SerialThreadManager.registerManager(manager);

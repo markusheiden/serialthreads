@@ -1,14 +1,11 @@
 package org.serialthreads.context;
 
 import org.serialthreads.Executor;
-import org.serialthreads.Interrupt;
 
 /**
  * Manages the access to serial threads for transformed classes.
  */
 public abstract class SerialThreadManager {
-  public static boolean DEBUG = true;
-
   private static final ThreadLocal<SerialThreadManager> threadManagers = new ThreadLocal<>();
 
   protected SerialThread currentThread;
@@ -31,17 +28,6 @@ public abstract class SerialThreadManager {
    */
   public static SerialThread getThread() {
     return threadManagers.get().currentThread;
-  }
-
-  /**
-   * Interrupt current thread.
-   * This is a dummy method which calls will be eliminated by the byte code transformation!
-   */
-  @Interrupt
-  public static void interrupt() {
-    if (DEBUG) {
-      throw new IllegalThreadStateException("Byte code transformation failed");
-    }
   }
 
   /**
