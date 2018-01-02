@@ -29,6 +29,6 @@ public class TestTailCall implements IRunnable {
 
   @Interrupt
   private void interrupt() {
-    // method call will be redirected to interrupt code
+    throw new UnsupportedOperationException("Method calls should be replaced by interrupt code");
   }
 }
