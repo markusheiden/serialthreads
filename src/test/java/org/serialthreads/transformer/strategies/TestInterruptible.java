@@ -41,6 +41,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     checkResult();
   }
 
+  /**
+   * Test interrupt of method and capture and restore of integer locals.
+   */
   @Override
   @Interruptible
   public long testLong(boolean z, char c, byte b, short s, int i, long j) {
@@ -66,6 +69,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     return j;
   }
 
+  /**
+   * Test interrupt of method and capture and restore of floating point locals.
+   */
   @Override
   @Interruptible
   public double testDouble(float f, double d) {
@@ -79,6 +85,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     return d;
   }
 
+  /**
+   * Test interrupt of static method.
+   */
   @Interruptible
   public static int testStatic(int i) {
     i++;
@@ -88,6 +97,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     return i;
   }
 
+  /**
+   * Test interruptible static method without interrupt.
+   */
   @Interruptible
   public static void notInterruptible() {
     System.out.println("Not interruptible method has been called");
@@ -97,6 +109,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
   // Check results of execution ("self test")
   //
 
+  /**
+   * Check expected results of calling {@link TestInterruptible#run()} once.
+   */
   private void checkResult() {
     assertEquals(false, z); // !true
     assertEquals((char) 2, c); // 1++
