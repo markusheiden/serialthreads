@@ -4,6 +4,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.serialthreads.context.SerialThreadExecutor;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
@@ -23,7 +24,7 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
  * Class adapter executing byte code enhancement of all methods.
  * For efficiency all interruptible methods will be copied with a reduced signature.
  * The signature of all interruptible methods will not be changed.
- * This transformation needs a static thread holder, so SimpleSerialThreadManager has to be used.
+ * This transformation needs no static thread holder, {@link SerialThreadExecutor} can be used.
  */
 public class FrequentInterruptsTransformer2 extends AbstractTransformer {
   /**
