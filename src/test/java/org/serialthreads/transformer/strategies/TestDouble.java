@@ -8,6 +8,7 @@ import org.serialthreads.context.IRunnable;
  * Test object for capture and restore locals of type {@link double}.
  */
 public class TestDouble implements IRunnable {
+  private final double init;
   public double value0 = -1;
   public double value1 = -1;
   public double value2 = -1;
@@ -19,9 +20,13 @@ public class TestDouble implements IRunnable {
   public double value8 = -1;
   public double value9 = -1;
 
+  public TestDouble(double init) {
+    this.init = init;
+  }
+
   @Interruptible
   public void run() {
-    double local0 = 0;
+    double local0 = init;
     double local1 = local0 + 1;
     double local2 = local1 + 1;
     double local3 = local2 + 1;

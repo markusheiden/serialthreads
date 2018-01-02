@@ -8,6 +8,7 @@ import org.serialthreads.context.IRunnable;
  * Test object for capture and restore locals of type {@link float}.
  */
 public class TestFloat implements IRunnable {
+  private final float init;
   public float value0 = -1;
   public float value1 = -1;
   public float value2 = -1;
@@ -18,6 +19,10 @@ public class TestFloat implements IRunnable {
   public float value7 = -1;
   public float value8 = -1;
   public float value9 = -1;
+
+  public TestFloat(float init) {
+    this.init = init;
+  }
 
   @Interruptible
   public void run() {

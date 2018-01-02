@@ -8,6 +8,7 @@ import org.serialthreads.context.IRunnable;
  * Test object for capture and restore locals of type {@link long}.
  */
 public class TestLong implements IRunnable {
+  private final long init;
   public long value0 = -1;
   public long value1 = -1;
   public long value2 = -1;
@@ -18,6 +19,10 @@ public class TestLong implements IRunnable {
   public long value7 = -1;
   public long value8 = -1;
   public long value9 = -1;
+
+  public TestLong(long init) {
+    this.init = init;
+  }
 
   @Interruptible
   public void run() {

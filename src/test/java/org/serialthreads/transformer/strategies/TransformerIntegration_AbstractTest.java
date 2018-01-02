@@ -41,7 +41,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testLocalStorage_int() throws Exception {
-    testLocalStorage(new TestInt(), Integer::parseInt);
+    testLocalStorage(new TestInt(0), Integer::parseInt);
   }
 
   /**
@@ -49,7 +49,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testLocalStorage_long() throws Exception {
-    testLocalStorage(new TestLong(), Long::parseLong);
+    testLocalStorage(new TestLong(0), Long::parseLong);
   }
 
   /**
@@ -57,7 +57,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testLocalStorage_float() throws Exception {
-    testLocalStorage(new TestFloat(), Float::parseFloat);
+    testLocalStorage(new TestFloat(0), Float::parseFloat);
   }
 
   /**
@@ -65,7 +65,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testLocalStorage_double() throws Exception {
-    testLocalStorage(new TestDouble(), Double::parseDouble);
+    testLocalStorage(new TestDouble(0), Double::parseDouble);
   }
 
   /**
