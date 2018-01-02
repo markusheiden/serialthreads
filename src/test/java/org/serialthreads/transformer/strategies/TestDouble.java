@@ -5,7 +5,7 @@ import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 
 /**
- * Object against which the tests run.
+ * Test object for capture and restore locals of type {@link double}.
  */
 public class TestDouble implements IRunnable {
   public double value0 = -1;

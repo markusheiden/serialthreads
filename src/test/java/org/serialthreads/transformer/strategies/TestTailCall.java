@@ -5,7 +5,7 @@ import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 
 /**
- * Object against which the tests run.
+ * Test object for tail call handling.
  */
 public class TestTailCall implements IRunnable {
   public int value = -1;
