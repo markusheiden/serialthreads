@@ -1,4 +1,4 @@
-package org.serialthreads.context;
+package org.serialthreads.transfomer.context.infrequent;
 
 /**
  * Support for dynamically resizing arrays.
