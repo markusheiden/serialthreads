@@ -231,7 +231,6 @@ public abstract class AbstractTransformer implements ITransformer {
 
     if (!classInfoCache.isInterruptible(clazz, method)) {
       logger.debug("    Not interruptible -> abort transformation of method");
-
       return null;
     }
 
