@@ -1,8 +1,6 @@
 package org.serialthreads.transformer;
 
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.util.ASMifier;
-import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
@@ -34,8 +32,7 @@ public class InvokeDynamicTest {
 
   private static void printClass(Class<?> clazz) throws IOException {
     ClassReader r = new ClassReader(clazz.getResourceAsStream(clazz.getSimpleName() + ".class"));
-    Printer printer = new ASMifier();
-    r.accept(new TraceClassVisitor(null, printer, new PrintWriter(System.out)), 0);
+    r.accept(new TraceClassVisitor(new PrintWriter(System.out)), 0);
   }
 
   public void run() {
