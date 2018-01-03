@@ -9,6 +9,6 @@ import org.serialthreads.transformer.strategies.TransformerIntegration_AbstractT
  * Integration-test for {@link org.serialthreads.transformer.strategies.frequent2.FrequentInterruptsTransformer2}.
  */
 @RunWith(TransformingRunner.class)
-@Transform(transformer = FrequentInterruptsTransformer2.class, trace = true)
+@Transform(transformer = FrequentInterruptsTransformer2.class)
 public class FrequentInterruptsTransformer2_IntegrationTest extends TransformerIntegration_AbstractTest {
 }
