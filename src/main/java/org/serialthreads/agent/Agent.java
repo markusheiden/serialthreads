@@ -1,8 +1,5 @@
 package org.serialthreads.agent;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
 import org.serialthreads.transformer.*;
 import org.serialthreads.transformer.classcache.ClassInfoCacheReflection;
 import org.slf4j.Logger;
@@ -12,9 +9,6 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-
-import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 
 /**
  * Byte code enhancement agent.
@@ -60,11 +54,7 @@ public class Agent implements ClassFileTransformer {
       logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
       classInfoCache.start(loader, className, classfileBuffer);
 
-      ClassReader reader = new ClassReader(classfileBuffer);
-      ClassWriter writer = new ClassWriter(COMPUTE_FRAMES);
-      ClassVisitor visitor = new TransformingVisitor(writer, transformer);
-      reader.accept(visitor, SKIP_FRAMES);
-      byte[] result = writer.toByteArray();
+      byte[] result = transformer.transform(classfileBuffer);
       failure = false;
 
       logger.info("Successfully transformed class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
