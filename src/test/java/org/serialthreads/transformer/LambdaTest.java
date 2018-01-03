@@ -32,8 +32,8 @@ public class LambdaTest {
     System.out.println("Opcode");
   }
 
-  private static interface Opcode {
-    public void execute();
+  private interface Opcode {
+    void execute();
   }
 
   /*
