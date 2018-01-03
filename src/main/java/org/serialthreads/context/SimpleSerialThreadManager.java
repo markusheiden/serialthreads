@@ -23,9 +23,6 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
     registerManager(this);
   }
 
-  /**
-   * Simple serial execution of all runnables.
-   */
   @Override
   @Executor
   public void execute() {
@@ -47,9 +44,6 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
     lastExecuted = chain;
   }
 
-  /**
-   * Simple serial execution of all runnables for a given number of interrupts.
-   */
   @Override
   @Executor
   public void execute(int interrupts) {
