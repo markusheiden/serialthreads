@@ -11,5 +11,5 @@ public interface IStrategy {
    *
    * @param classInfoCache ClassInfoCache
    */
-  public ITransformer getTransformer(IClassInfoCache classInfoCache);
+  ITransformer getTransformer(IClassInfoCache classInfoCache);
 }

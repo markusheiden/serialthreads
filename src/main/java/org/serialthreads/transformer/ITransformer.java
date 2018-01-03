@@ -12,7 +12,7 @@ public interface ITransformer {
   /**
    * Execute byte code transformation on a class.
    *
-   * @param byteCode byte code of class to be transformed
+   * @param byteCode Byte code of class to be transformed.
    */
   byte[] transform(byte[] byteCode) throws NotTransformableException;
 }
