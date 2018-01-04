@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SimpleSerialThreadManager;
@@ -80,6 +81,19 @@ public abstract class TransformerIntegration_AbstractTest {
   @Test
   public void testTailCall() throws Exception {
     TestTailCall test = new TestTailCall();
+    run(test);
+    assertEquals(-1, test.value);
+    run(test);
+    assertEquals(1, test.value);
+  }
+
+  /**
+   * Test exception handling.
+   */
+  @Ignore // TODO markus 2018-01-04: Implement exception handling.
+  @Test
+  public void testException() throws Exception {
+    TestException test = new TestException();
     run(test);
     assertEquals(-1, test.value);
     run(test);
