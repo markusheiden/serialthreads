@@ -22,7 +22,7 @@ public class TestException implements IRunnable {
   }
 
   @Interruptible
-  private int throwException() {
+  private void throwException() {
     interrupt();
     throw new RuntimeException();
   }
