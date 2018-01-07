@@ -56,9 +56,12 @@ class RunMethodTransformer extends MethodTransformer {
     final int localThread = localThread();
     final int localFrame = localFrame();
 
+    LabelNode startRestore = new LabelNode();
+    restores.add(0, startRestore);
     // dummy startup restore code to avoid to check thread.serializing.
     // empty frames are expected to have method = -1.
     InsnList startRestoreCode = new InsnList();
+    startRestoreCode.add(startRestore);
     // reset method to 0 for the case that there is just one normal restore code, because
     // if there is just one normal restore code, the method index will not be captured.
     // so we set the correct one (0) for this case.
@@ -68,7 +71,6 @@ class RunMethodTransformer extends MethodTransformer {
       startRestoreCode.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
     }
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
-    restores.add(0, startRestoreCode);
 
     // restore code dispatcher
     InsnList restore = new InsnList();
@@ -90,6 +92,7 @@ class RunMethodTransformer extends MethodTransformer {
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
     restore.add(restoreCodeDispatcher(getMethod, restores, -1));
+    restore.add(startRestoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), restore);
   }

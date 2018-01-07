@@ -1,16 +1,16 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.code.ValueCodeFactory.code;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
-
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.serialthreads.transformer.strategies.StackFrameCode;
+
+import static org.objectweb.asm.Opcodes.*;
+import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
@@ -145,6 +145,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         capture.add(pushMethodToFrame(position));
       }
       capture.add(new InsnNode(IRETURN));
+      // TODO markus 2018-01-07: Avoid this not needed restore. After a tail call there is just a return.
+      capture.add(restore);
+      capture.add(createRestoreCodeForMethod(methodCall, metaInfo));
       method.instructions.insert(methodCall, capture);
       return restore;
     }
