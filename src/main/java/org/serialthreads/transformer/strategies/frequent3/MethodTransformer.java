@@ -125,13 +125,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   @Override
-  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+  protected LabelNode createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
+    LabelNode restore = new LabelNode();
 
     InsnList capture = new InsnList();
 
@@ -145,7 +146,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       }
       capture.add(new InsnNode(IRETURN));
       method.instructions.insert(methodCall, capture);
-      return;
+      return restore;
     }
 
     // If not serializing "GOTO" normal.
@@ -157,6 +158,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // We are already serializing.
     capture.add(methodReturn(true));
 
+    capture.add(restore);
+    capture.add(createRestoreCodeForMethod(methodCall, metaInfo));
+
     // Normal execution.
     capture.add(normal);
     // Restore return value of call, if any.
@@ -166,6 +170,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
+
+    return restore;
   }
 
   @Override

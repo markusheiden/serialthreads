@@ -35,8 +35,8 @@ class RunMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceRunReturns();
-    List<InsnList> restoreCodes = insertCaptureCode(true);
-    createRestoreHandlerRun(restoreCodes);
+    List<LabelNode> restores = insertCaptureCode(true);
+    createRestoreHandlerRun(restores);
     fixMaxs();
 
     return method;
@@ -45,10 +45,10 @@ class RunMethodTransformer extends MethodTransformer {
   /**
    * Insert frame restoring code at the begin of the run() method.
    *
-   * @param restoreCodes restore codes for all method calls in the method
+   * @param restores Labels pointing to the generated restore codes for method calls.
    */
-  private void createRestoreHandlerRun(List<InsnList> restoreCodes) {
-    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+  private void createRestoreHandlerRun(List<LabelNode> restores) {
+    assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
     logger.debug("    Creating restore handler for run");
 
@@ -62,13 +62,13 @@ class RunMethodTransformer extends MethodTransformer {
     // reset method to 0 for the case that there is just one normal restore code, because
     // if there is just one normal restore code, the method index will not be captured.
     // so we set the correct one (0) for this case.
-    if (restoreCodes.size() <= 1) {
+    if (restores.size() <= 1) {
       startRestoreCode.add(new VarInsnNode(ALOAD, localFrame));
       startRestoreCode.add(new InsnNode(ICONST_0));
       startRestoreCode.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
     }
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
-    restoreCodes.add(0, startRestoreCode);
+    restores.add(0, startRestoreCode);
 
     InsnList restore = new InsnList();
 
@@ -94,7 +94,7 @@ class RunMethodTransformer extends MethodTransformer {
     InsnList getMethod = new InsnList();
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restore.add(restoreCodeDispatcher(getMethod, restoreCodes, -1));
+    restore.add(restoreCodeDispatcher(getMethod, restores, -1));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restore);
   }

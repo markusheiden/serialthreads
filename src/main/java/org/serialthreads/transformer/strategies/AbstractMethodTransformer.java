@@ -203,31 +203,27 @@ public abstract class AbstractMethodTransformer {
   /**
    * Create restore code dispatcher.
    *
-   * @param getMethod instruction to get method index onto the top of the stack
-   * @param restoreCodes restore codes
-   * @param startIndex first method index, should be -1 for run(), 0 otherwise
-   * @return generated restore code
+   * @param getMethod instruction to get method index onto the top of the stack.
+   * @return Labels pointing to the generated restore codes for method calls.
+   * @param startIndex first method index, should be -1 for run(), 0 otherwise.
+   * @return generated restore code.
    */
-  protected InsnList restoreCodeDispatcher(InsnList getMethod, List<InsnList> restoreCodes, int startIndex) {
-    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
-
-    if (restoreCodes.size() == 1) {
-      // just one method call -> nothing to dispatch -> execute directly
-      return restoreCodes.get(0);
-    }
+  protected InsnList restoreCodeDispatcher(InsnList getMethod, List<LabelNode> restores, int startIndex) {
+    assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
     InsnList result = new InsnList();
 
-    // Label to the specific restore code for every method call
-    LabelNode[] labels = new LabelNode[restoreCodes.size()];
-    for (int i = 0; i < labels.length; i++) {
-      labels[i] = new LabelNode();
+    if (restores.size() == 1) {
+      // just one method call -> nothing to dispatch -> execute directly
+      result.add(new JumpInsnNode(GOTO, restores.get(0)));
+      return result;
     }
+
     LabelNode defaultLabel = new LabelNode();
 
     // switch(currentFrame.method) // branch to specific restore code
     result.add(getMethod);
-    result.add(new TableSwitchInsnNode(startIndex, startIndex + restoreCodes.size() - 1, defaultLabel, labels));
+    result.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(new LabelNode[restores.size()])));
 
     // default case -> may not happen -> throw IllegalThreadStateException
     result.add(defaultLabel);
@@ -236,12 +232,6 @@ public abstract class AbstractMethodTransformer {
     result.add(new LdcInsnNode("Invalid method pointer"));
     result.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V", false));
     result.add(new InsnNode(ATHROW));
-
-    // reverse iteration to put first restore code at the end
-    for (int i = labels.length - 1; i >= 0; i--) {
-      result.add(labels[i]);
-      result.add(restoreCodes.get(i));
-    }
 
     return result;
   }
@@ -254,19 +244,18 @@ public abstract class AbstractMethodTransformer {
    * Inserts capture code after method calls.
    *
    * @param suppressOwner suppress capturing of owner?
-   * @return generated restore codes for method calls
+   * @return Labels pointing to the generated restore codes for method calls.
    */
-  protected List<InsnList> insertCaptureCode(boolean suppressOwner) {
-    List<InsnList> restoreCodes = new ArrayList<>(interruptibleMethodCalls.size());
+  protected List<LabelNode> insertCaptureCode(boolean suppressOwner) {
+    List<LabelNode> restores = new ArrayList<>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
 
-      restoreCodes.add(createRestoreCode(methodCall, metaInfo));
-      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner);
+      restores.add(createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner));
     }
 
-    return restoreCodes;
+    return restores;
   }
 
   /**
@@ -358,12 +347,13 @@ public abstract class AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param suppressOwner suppress capturing of owner?
+   * @return Label to restore code.
    */
-  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+  protected LabelNode createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner);
+      return createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner);
     } else {
-      createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner);
+      return createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner);
     }
   }
 
@@ -374,8 +364,9 @@ public abstract class AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param suppressOwner suppress capturing of owner?
+   * @return Label to restore code.
    */
-  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+  protected LabelNode createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
     logger.debug("      Creating capture code for interrupt");
 
     InsnList capture = new InsnList();
@@ -388,9 +379,15 @@ public abstract class AbstractMethodTransformer {
     // Start serializing and return early.
     capture.add(startSerializing());
 
+    LabelNode restore = new LabelNode();
+    capture.add(restore);
+    capture.add(createRestoreCodeForInterrupt(methodCall, metaInfo));
+
     // Replace dummy call of interrupt method by capture code.
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
+
+    return restore;
   }
 
   /**
@@ -453,8 +450,9 @@ public abstract class AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param suppressOwner suppress capturing of owner?
+   * @return Label to restore code.
    */
-  protected abstract void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner);
+  protected abstract LabelNode createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner);
 
   /**
    * Replace all return instructions by ThreadFinishedException.

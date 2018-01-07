@@ -40,8 +40,8 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceReturns();
-    List<InsnList> restoreCodes = insertCaptureCode(true);
-    createRestoreHandlerCopy(restoreCodes);
+    List<LabelNode> restores = insertCaptureCode(true);
+    createRestoreHandlerCopy(restores);
     addThreadAndFrame();
     fixMaxs();
 
@@ -57,10 +57,10 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
   /**
    * Insert frame restoring code at the begin of a copied method.
    *
-   * @param restoreCodes restore codes for all method calls in the method
+   * @param restores Labels pointing to the generated restore codes for method calls.
    */
-  private void createRestoreHandlerCopy(List<InsnList> restoreCodes) {
-    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+  private void createRestoreHandlerCopy(List<LabelNode> restores) {
+    assert !restores.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
     logger.debug("    Creating restore handler for copied method");
 
@@ -90,7 +90,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     InsnList getMethod = new InsnList();
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restore.add(restoreCodeDispatcher(getMethod, restoreCodes, 0));
+    restore.add(restoreCodeDispatcher(getMethod, restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restore);
   }

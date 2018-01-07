@@ -34,8 +34,8 @@ class ConcreteMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    List<InsnList> restoreCodes = insertCaptureCode(false);
-    createRestoreHandlerMethod(restoreCodes);
+    List<LabelNode> restores = insertCaptureCode(false);
+    createRestoreHandlerMethod(restores);
     fixMaxs();
 
     return method;
@@ -44,10 +44,10 @@ class ConcreteMethodTransformer extends MethodTransformer {
   /**
    * Insert frame restoring code at the begin of an interruptible method.
    *
-   * @param restoreCodes restore codes for all method calls in the method
+   * @param restores Labels pointing to the generated restore codes for method calls.
    */
-  private void createRestoreHandlerMethod(List<InsnList> restoreCodes) {
-    assert !restoreCodes.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+  private void createRestoreHandlerMethod(List<LabelNode> restores) {
+    assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
     logger.debug("    Creating restore handler for method");
 
@@ -96,7 +96,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     InsnList getMethod = new InsnList();
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restore.add(restoreCodeDispatcher(getMethod, restoreCodes, 0));
+    restore.add(restoreCodeDispatcher(getMethod, restores, 0));
 
     // insert label for normal body of method
     restore.add(getThread);
