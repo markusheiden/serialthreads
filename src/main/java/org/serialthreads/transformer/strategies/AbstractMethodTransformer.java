@@ -220,6 +220,7 @@ public abstract class AbstractMethodTransformer {
     }
 
     LabelNode defaultLabel = new LabelNode();
+    restores.replaceAll(label -> label != null? label : defaultLabel);
 
     // switch(currentFrame.method) // branch to specific restore code
     result.add(getMethod);
@@ -251,7 +252,10 @@ public abstract class AbstractMethodTransformer {
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
 
-      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, null);
+      // No restore code needed.
+      InsnList restoreCode = new InsnList();
+
+      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, restoreCode);
     }
   }
 
@@ -269,10 +273,9 @@ public abstract class AbstractMethodTransformer {
 
       LabelNode restore = new LabelNode();
       restores.add(restore);
+      InsnList restoreCode = createRestoreCode(methodCall, metaInfo);
+      restoreCode.insertBefore(restoreCode.getFirst(), restore);
 
-      InsnList restoreCode = new InsnList();
-      restoreCode.add(restore);
-      restoreCode.add(createRestoreCode(methodCall, metaInfo));
       createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, restoreCode);
     }
 
@@ -309,21 +312,21 @@ public abstract class AbstractMethodTransformer {
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
 
-    InsnList restore = new InsnList();
+    InsnList restoreCode = new InsnList();
 
     LabelNode normal = new LabelNode();
     method.instructions.insert(methodCall, normal);
 
     // Stop deserializing.
-    restore.add(stopDeserializing());
+    restoreCode.add(stopDeserializing());
 
     // restore frame
-    restore.add(popFromFrame(methodCall, metaInfo));
+    restoreCode.add(popFromFrame(methodCall, metaInfo));
 
     // resume
-    restore.add(new JumpInsnNode(GOTO, normal));
+    restoreCode.add(new JumpInsnNode(GOTO, normal));
 
-    return restore;
+    return restoreCode;
   }
 
   /**
@@ -400,9 +403,7 @@ public abstract class AbstractMethodTransformer {
     // Start serializing and return early.
     capture.add(startSerializing());
 
-    if (restoreCode != null) {
-      capture.add(restoreCode);
-    }
+    capture.add(restoreCode);
 
     // Replace dummy call of interrupt method by capture code.
     method.instructions.insert(methodCall, capture);

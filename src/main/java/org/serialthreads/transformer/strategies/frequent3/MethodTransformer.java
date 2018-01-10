@@ -144,6 +144,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         capture.add(pushMethodToFrame(position));
       }
       capture.add(new InsnNode(IRETURN));
+
+      // TODO markus 2018-01-07: How to avoid this not needed restore? After a tail call there is just a return.
+      capture.add(restoreCode);
+
+      // Insert capture code.
+      method.instructions.insert(methodCall, capture);
+
+      return;
     }
 
     // If not serializing "GOTO" normal.
@@ -155,9 +163,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // We are already serializing.
     capture.add(methodReturn(true));
 
-    if (restoreCode != null) {
-      capture.add(restoreCode);
-    }
+    capture.add(restoreCode);
 
     // Normal execution.
     capture.add(normal);
@@ -166,7 +172,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
-    // insert capture code
+    // Insert capture code.
     method.instructions.insert(methodCall, capture);
   }
 
@@ -201,43 +207,43 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     method.instructions.insert(methodCall, normal);
     LabelNode restoreFrame = new LabelNode();
 
-    InsnList restore = new InsnList();
+    InsnList restoreCode = new InsnList();
 
     // Call interrupted method.
-    restore.add(StackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
+    restoreCode.add(StackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
     // Jump to cloned method call with thread and frame as arguments.
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new VarInsnNode(ALOAD, localFrame));
-    restore.add(clonedCall);
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
+    restoreCode.add(clonedCall);
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
     if (isTailCall(metaInfo)) {
-      restore.add(new InsnNode(IRETURN));
+      restoreCode.add(new InsnNode(IRETURN));
       logger.debug("        Tail call optimized");
-      return restore;
+      return restoreCode;
     }
 
     // If not serializing "GOTO" normal, but restore the frame first.
-    restore.add(new JumpInsnNode(IFEQ, restoreFrame));
+    restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // Early return, the frame already has been captured.
     // We are already serializing.
-    restore.add(methodReturn(true));
+    restoreCode.add(methodReturn(true));
 
     // Restore frame to be able to resume normal execution of the method.
-    restore.add(restoreFrame);
+    restoreCode.add(restoreFrame);
 
     // Restore stack "under" the returned value, if any.
-    restore.add(popFromFrame(methodCall, metaInfo));
+    restoreCode.add(popFromFrame(methodCall, metaInfo));
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      restore.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      restoreCode.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
-    restore.add(new JumpInsnNode(GOTO, normal));
+    restoreCode.add(new JumpInsnNode(GOTO, normal));
 
-    return restore;
+    return restoreCode;
   }
 
   /**

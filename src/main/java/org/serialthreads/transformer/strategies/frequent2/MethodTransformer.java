@@ -83,9 +83,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
     capture.add(dummyReturnStatement(method));
 
-    if (restoreCode != null) {
-      capture.add(restoreCode);
-    }
+    capture.add(restoreCode);
 
     // normal execution
     capture.add(normal);
@@ -121,46 +119,46 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     method.instructions.insert(methodCall, normal);
     LabelNode restoreFrame = new LabelNode();
 
-    InsnList restore = new InsnList();
+    InsnList restoreCode = new InsnList();
 
     // call interrupted method
-    restore.add(StackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
+    restoreCode.add(StackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
     // jump to cloned method call with thread and frame as arguments
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new VarInsnNode(ALOAD, localFrame));
-    restore.add(clonedCall);
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
+    restoreCode.add(clonedCall);
 
     // if not serializing "GOTO" normal, but restore the frame first
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-    restore.add(new JumpInsnNode(IFEQ, restoreFrame));
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // early return, the frame already has been captured
-    restore.add(dummyReturnStatement(method));
+    restoreCode.add(dummyReturnStatement(method));
 
     // restore frame to be able to resume normal execution of method
-    restore.add(restoreFrame);
+    restoreCode.add(restoreFrame);
 
     // TODO 2009-11-26 mh: remove me?
     // set the current frame, because the next called method will need it
     // thread.frame = frame
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new VarInsnNode(ALOAD, localFrame));
-    restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
+    restoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
 
     // restore stack "under" the returned value, if any
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
     final boolean needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
     if (needToSaveReturnValue) {
-      restore.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
+      restoreCode.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
     }
-    restore.add(popFromFrame(clonedCall, metaInfo));
+    restoreCode.add(popFromFrame(clonedCall, metaInfo));
     if (needToSaveReturnValue) {
-      restore.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
+      restoreCode.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
     }
-    restore.add(new JumpInsnNode(GOTO, normal));
+    restoreCode.add(new JumpInsnNode(GOTO, normal));
 
-    return restore;
+    return restoreCode;
   }
 
   /**
