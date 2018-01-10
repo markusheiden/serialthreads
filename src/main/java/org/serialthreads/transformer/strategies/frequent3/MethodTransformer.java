@@ -129,7 +129,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     if (isTailCall(metaInfo)) {
-      createCaptureCodeForMethodTailCall(methodCall, position, restoreCode);
+      createCaptureCodeForMethodTail(methodCall, position, restoreCode);
       return;
     }
 
@@ -169,7 +169,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param position position of method call in method.
    * @param restoreCode Restore code. Null if none required.
    */
-  private void createCaptureCodeForMethodTailCall(MethodInsnNode methodCall, int position, InsnList restoreCode) {
+  private void createCaptureCodeForMethodTail(MethodInsnNode methodCall, int position, InsnList restoreCode) {
     InsnList capture = new InsnList();
 
     // Early exit for tail calls.
