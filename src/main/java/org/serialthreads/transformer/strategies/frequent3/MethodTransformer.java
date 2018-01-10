@@ -248,11 +248,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Restore stack "under" the returned value, if any.
     restoreCode.add(popFromFrame(methodCall, metaInfo));
+    // Due to insertion point of the restore code, the following code is already directly after the insertion point:
     // Restore return value of call, if any.
-    if (isNotVoid(methodCall)) {
-      restoreCode.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
-    }
-    restoreCode.add(new JumpInsnNode(GOTO, normal));
+    // if (isNotVoid(methodCall)) {
+    //  restoreCode.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+    // }
+    // restoreCode.add(new JumpInsnNode(GOTO, normal));
 
     return restoreCode;
   }
