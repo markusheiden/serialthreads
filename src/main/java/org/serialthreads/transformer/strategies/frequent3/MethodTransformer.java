@@ -181,7 +181,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     }
     capture.add(new InsnNode(IRETURN));
 
-    // TODO markus 2018-01-07: How to avoid this not needed restore? After a tail call there is just a return.
     capture.add(restoreCode);
 
     // Insert capture code.
