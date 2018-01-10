@@ -34,7 +34,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    List<LabelNode> restores = insertCaptureCode(false);
+    List<LabelNode> restores = insertCaptureAndRestoreCode(false);
     createRestoreHandlerMethod(restores);
     fixMaxs();
 

@@ -35,7 +35,7 @@ class RunMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceRunReturns();
-    List<LabelNode> restores = insertCaptureCode(true);
+    List<LabelNode> restores = insertCaptureAndRestoreCode(true);
     createRestoreHandlerRun(restores);
     fixMaxs();
 

@@ -246,13 +246,34 @@ public abstract class AbstractMethodTransformer {
    * @param suppressOwner suppress capturing of owner?
    * @return Labels pointing to the generated restore codes for method calls.
    */
-  protected List<LabelNode> insertCaptureCode(boolean suppressOwner) {
+  protected void insertCaptureCode(boolean suppressOwner) {
+    int methodCallIndex = 0;
+    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
+      MetaInfo metaInfo = metaInfos.get(methodCall);
+
+      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, null);
+    }
+  }
+
+  /**
+   * Inserts capture and restore code after method calls.
+   *
+   * @param suppressOwner suppress capturing of owner?
+   * @return Labels pointing to the generated restore codes for method calls.
+   */
+  protected List<LabelNode> insertCaptureAndRestoreCode(boolean suppressOwner) {
     List<LabelNode> restores = new ArrayList<>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
 
-      restores.add(createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner));
+      LabelNode restore = new LabelNode();
+      restores.add(restore);
+
+      InsnList restoreCode = new InsnList();
+      restoreCode.add(restore);
+      restoreCode.add(createRestoreCode(methodCall, metaInfo));
+      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, restoreCode);
     }
 
     return restores;
@@ -341,19 +362,19 @@ public abstract class AbstractMethodTransformer {
   protected abstract InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo);
 
   /**
-   * Insert frame capturing code after a given method call.
+   * Insert frame capturing and restore code after a given method call.
    *
    * @param methodCall method call to generate capturing code for
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param suppressOwner suppress capturing of owner?
-   * @return Label to restore code.
+   * @param restoreCode Restore code. Null if none required.
    */
-  protected LabelNode createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      return createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner);
+      createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restoreCode);
     } else {
-      return createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner);
+      createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restoreCode);
     }
   }
 
@@ -364,9 +385,9 @@ public abstract class AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param suppressOwner suppress capturing of owner?
-   * @return Label to restore code.
+   * @param restoreCode Restore code. Null if none required.
    */
-  protected LabelNode createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     logger.debug("      Creating capture code for interrupt");
 
     InsnList capture = new InsnList();
@@ -379,15 +400,13 @@ public abstract class AbstractMethodTransformer {
     // Start serializing and return early.
     capture.add(startSerializing());
 
-    LabelNode restore = new LabelNode();
-    capture.add(restore);
-    capture.add(createRestoreCodeForInterrupt(methodCall, metaInfo));
+    if (restoreCode != null) {
+      capture.add(restoreCode);
+    }
 
     // Replace dummy call of interrupt method by capture code.
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
-
-    return restore;
   }
 
   /**
@@ -450,9 +469,9 @@ public abstract class AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
    * @param suppressOwner suppress capturing of owner?
-   * @return Label to restore code.
+   * @param restoreCode Restore code. Null if none required.
    */
-  protected abstract LabelNode createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner);
+  protected abstract void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode);
 
   /**
    * Replace all return instructions by ThreadFinishedException.

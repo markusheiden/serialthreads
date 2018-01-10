@@ -40,7 +40,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceReturns();
-    List<LabelNode> restores = insertCaptureCode(true);
+    List<LabelNode> restores = insertCaptureAndRestoreCode(true);
     createRestoreHandlerCopy(restores);
     addThreadAndFrame();
     fixMaxs();

@@ -56,7 +56,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected LabelNode createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner) {
+  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
@@ -83,9 +83,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
     capture.add(dummyReturnStatement(method));
 
-    LabelNode restore = new LabelNode();
-    capture.add(restore);
-    capture.add(createRestoreCodeForMethod(methodCall, metaInfo));
+    if (restoreCode != null) {
+      capture.add(restoreCode);
+    }
 
     // normal execution
     capture.add(normal);
@@ -98,8 +98,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
-
-    return restore;
   }
 
   //
