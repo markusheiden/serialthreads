@@ -73,17 +73,17 @@ class RunMethodTransformer extends MethodTransformer {
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
 
     // restore code dispatcher
-    InsnList restore = new InsnList();
+    InsnList restoreCode = new InsnList();
 
     // thread = this.$$thread$$;
-    restore.add(new VarInsnNode(ALOAD, 0));
-    restore.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
-    restore.add(new VarInsnNode(ASTORE, localThread));
+    restoreCode.add(new VarInsnNode(ALOAD, 0));
+    restoreCode.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+    restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // frame = thread.first;
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
-    restore.add(new VarInsnNode(ASTORE, localFrame));
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
+    restoreCode.add(new VarInsnNode(ASTORE, localFrame));
 
     // no previous frame needed in run, because there may not be a previous frame
 
@@ -91,9 +91,9 @@ class RunMethodTransformer extends MethodTransformer {
     InsnList getMethod = new InsnList();
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restore.add(restoreCodeDispatcher(getMethod, restores, -1));
-    restore.add(startRestoreCode);
+    restoreCode.add(restoreCodeDispatcher(getMethod, restores, -1));
+    restoreCode.add(startRestoreCode);
 
-    method.instructions.insertBefore(method.instructions.getFirst(), restore);
+    method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
   }
 }

@@ -70,28 +70,28 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    InsnList restore = new InsnList();
+    InsnList restoreCode = new InsnList();
 
     // previousFrame
-    restore.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-    restore.add(new VarInsnNode(ASTORE, localPreviousFrame));
+    restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+    restoreCode.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
     // frame = previousFrame.next
-    restore.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    restore.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    restore.add(new VarInsnNode(ASTORE, localFrame));
+    restoreCode.add(new VarInsnNode(ALOAD, localPreviousFrame));
+    restoreCode.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+    restoreCode.add(new VarInsnNode(ASTORE, localFrame));
 
     // thread = currentThread;
     // TODO 2009-10-22 mh: rename locals to avoid this copy?
-    restore.add(new VarInsnNode(ALOAD, paramThread));
-    restore.add(new VarInsnNode(ASTORE, localThread));
+    restoreCode.add(new VarInsnNode(ALOAD, paramThread));
+    restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // restore code dispatcher
     InsnList getMethod = new InsnList();
     getMethod.add(new VarInsnNode(ALOAD, localFrame));
     getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restore.add(restoreCodeDispatcher(getMethod, restores, 0));
+    restoreCode.add(restoreCodeDispatcher(getMethod, restores, 0));
 
-    method.instructions.insertBefore(method.instructions.getFirst(), restore);
+    method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
   }
 }

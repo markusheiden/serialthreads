@@ -159,17 +159,17 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
     LabelNode normal = new LabelNode();
     method.instructions.insert(methodCall, normal);
 
-    InsnList restore = new InsnList();
+    InsnList restoreCode = new InsnList();
 
-    restore.add(popFromFrame(method, methodCall, frame, localThread));
+    restoreCode.add(popFromFrame(method, methodCall, frame, localThread));
 
     // stop restore
-    restore.add(new VarInsnNode(ALOAD, localThread));
-    restore.add(new InsnNode(ICONST_0));
-    restore.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-    restore.add(new JumpInsnNode(GOTO, normal));
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new InsnNode(ICONST_0));
+    restoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restoreCode.add(new JumpInsnNode(GOTO, normal));
 
-    return restore;
+    return restoreCode;
   }
 
   @Override
@@ -183,23 +183,23 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
     LabelNode normal = new LabelNode();
     method.instructions.insertBefore(methodCall, normal);
 
-    InsnList restore = popFromFrame(method, methodCall, frameAfter, localThread);
+    InsnList restoreCode = popFromFrame(method, methodCall, frameAfter, localThread);
 
     // call interrupted method
     if (isCallNotStatic) {
       // pop owner
-      restore.add(new VarInsnNode(ALOAD, localThread));
-      restore.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "popOwner", "()" + OBJECT_DESC));
-      restore.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
+      restoreCode.add(new VarInsnNode(ALOAD, localThread));
+      restoreCode.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "popOwner", "()" + OBJECT_DESC));
+      restoreCode.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 
     // push arguments on stack and jump to method call
     // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
-    restore.add(dummyArguments(methodCall));
+    restoreCode.add(dummyArguments(methodCall));
     // TODO 2009-11-21 mh: clone call, optimize
-    restore.add(new JumpInsnNode(GOTO, normal));
+    restoreCode.add(new JumpInsnNode(GOTO, normal));
 
-    return restore;
+    return restoreCode;
   }
 
   /**
