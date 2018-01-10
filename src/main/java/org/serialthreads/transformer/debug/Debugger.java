@@ -75,7 +75,11 @@ public class Debugger {
     ExtendedFrame[] frames = analyzer.getFrames();
 
     DebugPrinter printer = new DebugPrinter(frames);
-    method.accept(new TraceMethodVisitor(printer));
+    try {
+      method.accept(new TraceMethodVisitor(printer));
+    } catch (Exception e) {
+      // Ignore, to get at least the already generated output.
+    }
 
     StringWriter result = new StringWriter(4096);
     result.append("Method ").append(methodName(clazz.name, method.name, method.desc)).append("\n");
