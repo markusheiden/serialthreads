@@ -128,31 +128,17 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
+    if (isTailCall(metaInfo)) {
+      createCaptureCodeForMethodTailCall(methodCall, position, restoreCode);
+      return;
+    }
+
     final int localThread = localThread();
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
 
     InsnList capture = new InsnList();
-
-    if (isTailCall(metaInfo)) {
-      // Early exit for tail calls.
-      // The return value needs not to be restored, because it has already been stored by the cloned call.
-      // The serializing flag is already on the stack from the cloned call.
-      logger.debug("        Optimized tail call");
-      if (hasMoreThanOneMethodCall()) {
-        capture.add(pushMethodToFrame(position));
-      }
-      capture.add(new InsnNode(IRETURN));
-
-      // TODO markus 2018-01-07: How to avoid this not needed restore? After a tail call there is just a return.
-      capture.add(restoreCode);
-
-      // Insert capture code.
-      method.instructions.insert(methodCall, capture);
-
-      return;
-    }
 
     // If not serializing "GOTO" normal.
     capture.add(new JumpInsnNode(IFEQ, normal));
@@ -171,6 +157,32 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     if (isNotVoid(methodCall)) {
       capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
+
+    // Insert capture code.
+    method.instructions.insert(methodCall, capture);
+  }
+
+  /**
+   * Insert frame capturing code after returning from a method tail call.
+   *
+   * @param methodCall method call to generate capturing code for.
+   * @param position position of method call in method.
+   * @param restoreCode Restore code. Null if none required.
+   */
+  private void createCaptureCodeForMethodTailCall(MethodInsnNode methodCall, int position, InsnList restoreCode) {
+    InsnList capture = new InsnList();
+
+    // Early exit for tail calls.
+    // The return value needs not to be restored, because it has already been stored by the cloned call.
+    // The serializing flag is already on the stack from the cloned call.
+    logger.debug("        Optimized tail call");
+    if (hasMoreThanOneMethodCall()) {
+      capture.add(pushMethodToFrame(position));
+    }
+    capture.add(new InsnNode(IRETURN));
+
+    // TODO markus 2018-01-07: How to avoid this not needed restore? After a tail call there is just a return.
+    capture.add(restoreCode);
 
     // Insert capture code.
     method.instructions.insert(methodCall, capture);
