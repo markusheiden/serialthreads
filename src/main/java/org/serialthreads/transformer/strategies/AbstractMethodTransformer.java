@@ -566,12 +566,10 @@ public abstract class AbstractMethodTransformer {
   /**
    * Restore method from frame.
    *
-   * @param localFrame
-   *           number of local containing the current frame.
    * @return generated restore code.
    */
-  protected InsnList popMethodFromFrame(int localFrame) {
-    return stackFrameCode.popMethodFromFrame(localFrame);
+  protected InsnList popMethodFromFrame() {
+    return stackFrameCode.popMethodFromFrame(localFrame());
   }
 
   /**
