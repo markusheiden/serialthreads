@@ -5,7 +5,6 @@ import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
-import org.serialthreads.transformer.strategies.StackFrameCode;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
@@ -101,7 +100,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // call interrupted method
-    restoreCode.add(StackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
+    restoreCode.add(stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
     // push arguments on stack and jump to method call
     // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
     restoreCode.add(dummyArguments(methodCall));

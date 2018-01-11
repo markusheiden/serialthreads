@@ -49,6 +49,8 @@ public abstract class AbstractMethodTransformer {
   protected final MethodNode method;
   protected final IClassInfoCache classInfoCache;
 
+  protected final StackFrameCode stackFrameCode = new CompactingStackFrameCode();
+
   /**
    * Meta information about instructions.
    */
@@ -352,7 +354,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return StackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
+    return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -420,7 +422,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return StackFrameCode.pushToFrame(method, methodCall, metaInfo, localFrame());
+    return stackFrameCode.pushToFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -431,7 +433,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList pushMethodToFrame(int position) {
-      return StackFrameCode.pushMethodToFrame(position, hasMoreThanOneMethodCall(), localFrame());
+      return stackFrameCode.pushMethodToFrame(position, hasMoreThanOneMethodCall(), localFrame());
   }
 
   /**
@@ -446,7 +448,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
-    return StackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
+    return stackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
   }
 
   /**
