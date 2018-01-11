@@ -345,19 +345,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Restore current frame before resuming the method call
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated restore code.
-   */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
-  }
-
-  /**
    * Create method specific frame restore code.
    *
    * @param methodCall method call to generate restore code for
@@ -410,45 +397,6 @@ public abstract class AbstractMethodTransformer {
     // Replace dummy call of interrupt method by capture code.
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
-  }
-
-  /**
-   * Save current "frameAfter" after returning from a method call.
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated capture code.
-   */
-  protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.pushToFrame(method, methodCall, metaInfo, localFrame());
-  }
-
-  /**
-   * Push method onto frame.
-   *
-   * @param position
-   *           position of method call.
-   * @return generated capture code.
-   */
-  protected InsnList pushMethodToFrame(int position) {
-      return stackFrameCode.pushMethodToFrame(position, hasMoreThanOneMethodCall(), localFrame());
-  }
-
-  /**
-   * Push owner onto frame.
-   *
-   * @param methodCall
-   *           Method call to generate capturing code for
-   * @param metaInfo
-   *           Meta information about method call
-   * @param suppressOwner
-   *           Suppress saving the owner?.
-   * @return generated capture code.
-   */
-  public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
-    return stackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
   }
 
   /**
@@ -557,5 +505,61 @@ public abstract class AbstractMethodTransformer {
 
       method.instructions.add(handler);
     }
+  }
+
+  //
+  // Stack frame code.
+  //
+
+  /**
+   * Restore current frame before resuming the method call
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated restore code.
+   */
+  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
+  }
+
+  /**
+   * Save current "frameAfter" after returning from a method call.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated capture code.
+   */
+  protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackFrameCode.pushToFrame(method, methodCall, metaInfo, localFrame());
+  }
+
+  /**
+   * Push method onto frame.
+   *
+   * @param position
+   *           position of method call.
+   * @return generated capture code.
+   */
+  protected InsnList pushMethodToFrame(int position) {
+    return stackFrameCode.pushMethodToFrame(position, hasMoreThanOneMethodCall(), localFrame());
+  }
+
+  /**
+   * Push owner onto frame.
+   *
+   * @param methodCall
+   *           Method call to generate capturing code for
+   * @param metaInfo
+   *           Meta information about method call
+   * @param suppressOwner
+   *           Suppress saving the owner?.
+   * @return generated capture code.
+   */
+  public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+    return stackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
   }
 }
