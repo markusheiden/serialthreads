@@ -38,21 +38,6 @@ public interface StackFrameCode {
   InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, int localFrame);
 
   /**
-   * Push owner onto frame.
-   *
-   * @param method
-   *           Method to capture.
-   * @param suppressOwner
-   *           suppress saving the owner?.
-   * @param localPreviousFrame
-   *           number of local containing the previous frame or -1 for retrieving it via current frame.
-   * @param localFrame
-   *           number of local containing the current frame.
-   * @return generated capture code.
-   */
-  InsnList pushOwnerToFrame(MethodNode method, boolean suppressOwner, int localPreviousFrame, int localFrame);
-
-  /**
    * Push method and owner onto frame with a given method.
    *
    * Currently not used.
@@ -71,6 +56,21 @@ public interface StackFrameCode {
    * @return generated capture code
    */
   InsnList pushMethodToFrame(MethodNode method, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, String methodName, int localThread);
+
+  /**
+   * Push owner onto frame.
+   *
+   * @param method
+   *           Method to capture.
+   * @param suppressOwner
+   *           suppress saving the owner?.
+   * @param localPreviousFrame
+   *           number of local containing the previous frame or -1 for retrieving it via current frame.
+   * @param localFrame
+   *           number of local containing the current frame.
+   * @return generated capture code.
+   */
+  InsnList pushOwnerToFrame(MethodNode method, boolean suppressOwner, int localPreviousFrame, int localFrame);
 
   /**
    * Restore owner.
