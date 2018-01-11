@@ -121,7 +121,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // call interrupted method
-    restoreCode.add(stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
+    restoreCode.add(popOwnerFromFrame(methodCall, metaInfo, localFrame));
     // jump to cloned method call with thread and frame as arguments
     restoreCode.add(new VarInsnNode(ALOAD, localThread));
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));

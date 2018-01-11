@@ -49,7 +49,7 @@ public abstract class AbstractMethodTransformer {
   protected final MethodNode method;
   protected final IClassInfoCache classInfoCache;
 
-  protected final StackFrameCode stackFrameCode = new CompactingStackFrameCode();
+  private final StackFrameCode stackFrameCode = new CompactingStackFrameCode();
 
   /**
    * Meta information about instructions.
@@ -206,9 +206,8 @@ public abstract class AbstractMethodTransformer {
    * Create restore code dispatcher.
    *
    * @param getMethod instruction to get method index onto the top of the stack.
-   * @return Labels pointing to the generated restore codes for method calls.
    * @param startIndex first method index, should be -1 for run(), 0 otherwise.
-   * @return generated restore code.
+   * @return Generated restore code.
    */
   protected InsnList restoreCodeDispatcher(InsnList getMethod, List<LabelNode> restores, int startIndex) {
     assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
@@ -247,7 +246,6 @@ public abstract class AbstractMethodTransformer {
    * Inserts capture code after method calls.
    *
    * @param suppressOwner suppress capturing of owner?
-   * @return Labels pointing to the generated restore codes for method calls.
    */
   protected void insertCaptureCode(boolean suppressOwner) {
     int methodCallIndex = 0;
@@ -510,6 +508,21 @@ public abstract class AbstractMethodTransformer {
   //
   // Stack frame code.
   //
+
+  /**
+   * Restore owner.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @param localFrame
+   *           number of local containing the frame.
+   * @return generated restore code.
+   */
+  protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+    return stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame);
+  }
 
   /**
    * Restore current frame before resuming the method call

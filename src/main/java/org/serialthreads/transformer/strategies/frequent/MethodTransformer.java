@@ -100,7 +100,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // call interrupted method
-    restoreCode.add(stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame));
+    restoreCode.add(popOwnerFromFrame(methodCall, metaInfo, localFrame));
     // push arguments on stack and jump to method call
     // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
     restoreCode.add(dummyArguments(methodCall));
