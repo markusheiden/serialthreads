@@ -73,7 +73,7 @@ public interface StackFrameCode {
   InsnList pushOwnerToFrame(MethodNode method, boolean suppressOwner, int localPreviousFrame, int localFrame);
 
   /**
-   * Restore owner.
+   * Restore owner from frame.
    *
    * @param methodCall
    *           method call to process.
@@ -86,7 +86,16 @@ public interface StackFrameCode {
   InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
-   * Restore current frame before resuming the method call
+   * Restore method from frame.
+   *
+   * @param localFrame
+   *           number of local containing the current frame.
+   * @return generated restore code.
+   */
+  InsnList popMethodFromFrame(int localFrame);
+
+  /**
+   * Restore current frame before resuming the method call.
    *
    * @param method
    *           Method to restore.

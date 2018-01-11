@@ -510,34 +510,6 @@ public abstract class AbstractMethodTransformer {
   //
 
   /**
-   * Restore owner.
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @param localFrame
-   *           number of local containing the frame.
-   * @return generated restore code.
-   */
-  protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    return stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame);
-  }
-
-  /**
-   * Restore current frame before resuming the method call
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated restore code.
-   */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
-  }
-
-  /**
    * Save current "frameAfter" after returning from a method call.
    *
    * @param methodCall
@@ -575,4 +547,44 @@ public abstract class AbstractMethodTransformer {
   public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
     return stackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
   }
+
+  /**
+   * Restore owner.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @param localFrame
+   *           number of local containing the frame.
+   * @return generated restore code.
+   */
+  protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+    return stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame);
+  }
+
+  /**
+   * Restore method from frame.
+   *
+   * @param localFrame
+   *           number of local containing the current frame.
+   * @return generated restore code.
+   */
+  protected InsnList popMethodFromFrame(int localFrame) {
+    return stackFrameCode.popMethodFromFrame(localFrame);
+  }
+
+  /**
+   * Restore current frame before resuming the method call
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated restore code.
+   */
+  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
+  }
+
 }

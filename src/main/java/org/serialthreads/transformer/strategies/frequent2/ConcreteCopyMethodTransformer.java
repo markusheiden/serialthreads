@@ -87,10 +87,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // restore code dispatcher
-    InsnList getMethod = new InsnList();
-    getMethod.add(new VarInsnNode(ALOAD, localFrame));
-    getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restoreCode.add(restoreCodeDispatcher(getMethod, restores, 0));
+    restoreCode.add(restoreCodeDispatcher(popMethodFromFrame(localFrame), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
   }

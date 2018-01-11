@@ -93,10 +93,7 @@ class RunMethodTransformer extends MethodTransformer {
     // no previous frame needed in run, because there may not be a previous frame
 
     // restore code dispatcher
-    InsnList getMethod = new InsnList();
-    getMethod.add(new VarInsnNode(ALOAD, localFrame));
-    getMethod.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
-    restoreCode.add(restoreCodeDispatcher(getMethod, restores, -1));
+    restoreCode.add(restoreCodeDispatcher(popMethodFromFrame(localFrame), restores, -1));
     restoreCode.add(startRestoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);

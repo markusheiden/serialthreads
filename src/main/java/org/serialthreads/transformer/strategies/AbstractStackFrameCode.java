@@ -101,4 +101,12 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
 
       return result;
    }
+
+   @Override
+   public InsnList popMethodFromFrame(int localFrame) {
+      InsnList result = new InsnList();
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
+      return result;
+   }
 }
