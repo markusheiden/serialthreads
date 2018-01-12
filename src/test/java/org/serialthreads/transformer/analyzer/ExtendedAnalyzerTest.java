@@ -4,11 +4,12 @@ import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.objectweb.asm.Opcodes.*;
@@ -22,6 +23,9 @@ public class ExtendedAnalyzerTest {
    */
   private ExtendedAnalyzer analyzer = new ExtendedAnalyzer(new ExtendedVerifier(null, null, null, null, false));
 
+  /**
+   * Test for {@link ExtendedAnalyzer#newFrame(int, int)}.
+   */
   @Test
   public void testNewFrame_ii() {
     ExtendedFrame frame = analyzer.newFrame(2, 2);
@@ -46,6 +50,9 @@ public class ExtendedAnalyzerTest {
     }
   }
 
+  /**
+   * Test for {@link ExtendedAnalyzer#newFrame(Frame)}.
+   */
   @Test
   public void testNewFrame_frame() {
     ExtendedFrame src = new ExtendedFrame(2, 2);
@@ -72,6 +79,9 @@ public class ExtendedAnalyzerTest {
     }
   }
 
+  /**
+   * Test for backward flow analysis with simple byte code.
+   */
   @Test
   public void testBackflow_simple() throws Exception {
     MethodNode method = new MethodNode(0, "test", "()I", null, new String[0]);
@@ -112,16 +122,19 @@ public class ExtendedAnalyzerTest {
     ExtendedFrame[] frames = analyzer.analyze("Test", method);
 
     // Check that at instruction 15 just local 1 is declared as needed for the remaining code
-    assertEquals(setOf(1), frames[15].neededLocals);
+    assertEquals(set(1), frames[15].neededLocals);
     // Check that at instruction 8 just locals 1 & 2 are declared as needed for the remaining code
-    assertEquals(setOf(1, 2), frames[8].neededLocals);
+    assertEquals(set(1, 2), frames[8].neededLocals);
     // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code
-    assertEquals(setOf(1, 3), frames[12].neededLocals);
+    assertEquals(set(1, 3), frames[12].neededLocals);
 
     // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
-    assertEquals(setOf(1, 2, 3), frames[7].neededLocals);
+    assertEquals(set(1, 2, 3), frames[7].neededLocals);
   }
 
+  /**
+   * Test for backward flow analysis with an endless loop.
+   */
   @Test
   public void testBackflow_endless() throws Exception {
     MethodNode method = new MethodNode(0, "test", "()I", null, new String[0]);
@@ -146,7 +159,7 @@ public class ExtendedAnalyzerTest {
     ExtendedFrame[] frames = analyzer.analyze("Test", method);
 
     // Check that at instruction 5 locals 1 is declared as needed for the remaining code
-    assertEquals(setOf(1), frames[5].neededLocals);
+    assertEquals(set(1), frames[5].neededLocals);
   }
 
   /**
@@ -154,7 +167,7 @@ public class ExtendedAnalyzerTest {
    *
    * @param ints Integers
    */
-  private static Set<Integer> setOf(Integer... ints) {
-    return new HashSet<>(Arrays.asList(ints));
+  private static Set<Integer> set(Integer... ints) {
+    return new HashSet<>(asList(ints));
   }
 }
