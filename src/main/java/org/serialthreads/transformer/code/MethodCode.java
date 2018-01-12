@@ -14,10 +14,7 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.IRETURN;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 
 /**
  * Method related code.
@@ -283,6 +280,16 @@ public class MethodCode {
   public static boolean isLoad(AbstractInsnNode instruction) {
     int opcode = instruction.getOpcode();
     return opcode >= ILOAD && opcode <= ALOAD;
+  }
+
+  /**
+   * Is an instruction a store?.
+   *
+   * @param instruction Instruction
+   */
+  public static boolean isStore(AbstractInsnNode instruction) {
+    int opcode = instruction.getOpcode();
+    return opcode >= ISTORE && opcode <= ASTORE;
   }
 
   /**

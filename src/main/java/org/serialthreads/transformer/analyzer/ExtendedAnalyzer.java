@@ -11,6 +11,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import java.util.*;
 
 import static org.serialthreads.transformer.code.MethodCode.isLoad;
+import static org.serialthreads.transformer.code.MethodCode.isStore;
 
 /**
  * Extended analyzer.
@@ -134,6 +135,9 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
       if (isLoad(instruction)) {
         frameBefore.neededLocals.add(((VarInsnNode) instruction).var);
+      }
+      else if (isStore(instruction)) {
+//        frameBefore.neededLocals.remove(((VarInsnNode) instruction).var);
       }
 
       NavigableSet<Integer> froms = backflow.get(index);
