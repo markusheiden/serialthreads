@@ -182,4 +182,32 @@ public class ExtendedFrameTest {
       // expected
     }
   }
+
+  /**
+   * Test for {@link ExtendedFrame#getLowestNeededLocal(ExtendedValue)}.
+   */
+  @Test
+  public void getLowestNeededLocal() {
+    ExtendedFrame frame = new ExtendedFrame(5, 0);
+    frame.neededLocals.add(2);
+    frame.neededLocals.add(3);
+    frame.neededLocals.add(4);
+
+    // Local 1: Not needed. Holds the value.
+    ExtendedValue value1 = ExtendedValue.valueInLocal(Type.INT_TYPE, 1);
+    // Local 2: Needed. Does not hold the value.
+    // Local 3: Needed. Holds the value.
+    ExtendedValue value3 = ExtendedValue.valueInLocal(Type.INT_TYPE, 3).addLocal(1);
+    // Local 4: Needed. Holds the value.
+    ExtendedValue value4 = ExtendedValue.valueInLocal(Type.INT_TYPE, 4).addLocal(1).addLocal(3);
+
+    // Local 3 is the lowest local that is needed and holds the value.
+    assertEquals(3, frame.getLowestNeededLocal(value4));
+
+    // Local 3 is the lowest local that is needed and holds the value.
+    assertEquals(3, frame.getLowestNeededLocal(value3));
+
+    // Local 1 is not needed.
+    assertEquals(-1, frame.getLowestNeededLocal(value1));
+  }
 }

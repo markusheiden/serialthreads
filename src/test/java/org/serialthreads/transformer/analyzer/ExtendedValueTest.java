@@ -13,7 +13,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Test for ExtendedValue.
+ * Test for {@link ExtendedValue}.
  */
 public class ExtendedValueTest {
   @Test

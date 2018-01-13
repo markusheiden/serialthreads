@@ -3,7 +3,13 @@ package org.serialthreads.transformer.analyzer;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableSortedSet;
 
 /**
  * Extended value.
@@ -37,7 +43,7 @@ public class ExtendedValue extends BasicValue {
    * @param type type of value
    */
   public static ExtendedValue value(Type type) {
-    return new ExtendedValue(type, NOT_CONSTANT, Collections.<Integer>emptySet());
+    return new ExtendedValue(type, NOT_CONSTANT, emptySet());
   }
 
   /**
@@ -50,7 +56,7 @@ public class ExtendedValue extends BasicValue {
     assert type != null : "Precondition: type != null";
     assert local >= 0 : "Precondition: local >= 0";
 
-    return new ExtendedValue(type, NOT_CONSTANT, Collections.singleton(local));
+    return new ExtendedValue(type, NOT_CONSTANT, Set.of(local));
   }
 
   /**
@@ -75,7 +81,7 @@ public class ExtendedValue extends BasicValue {
   public static ExtendedValue constantValue(Type type, Object constant) {
     assert type != null : "Precondition: type != null";
 
-    return new ExtendedValue(type, constant, Collections.<Integer>emptySet());
+    return new ExtendedValue(type, constant, Set.of());
   }
 
   /**
@@ -105,7 +111,7 @@ public class ExtendedValue extends BasicValue {
     assert locals != null : "Precondition: locals != null";
 
     this.constant = constant;
-    this.locals = Collections.unmodifiableSortedSet(new TreeSet<>(locals));
+    this.locals = unmodifiableSortedSet(new TreeSet<>(locals));
   }
 
   /**
