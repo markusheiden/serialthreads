@@ -137,7 +137,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         frameBefore.neededLocals.add(((VarInsnNode) instruction).var);
       }
       else if (isStore(instruction)) {
-//        frameBefore.neededLocals.remove(((VarInsnNode) instruction).var);
+        frameBefore.neededLocals.remove(((VarInsnNode) instruction).var);
       }
 
       NavigableSet<Integer> froms = backflow.get(index);

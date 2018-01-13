@@ -52,7 +52,8 @@ public class CompactingStackFrameCode extends AbstractStackFrameCode {
       int[] stackIndexes = stackIndexes(frameAfter);
       for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
          ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
-         if (value.isConstant() || value.isHoldInLocal()) {
+         int lowestLocal = frameAfter.getLowestNeededLocal(value);
+         if (value.isConstant() || lowestLocal >= 0) {
             // just pop the value from stack, because the stack value is constant or stored in a local too.
             result.add(code(value).pop());
          } else {
@@ -68,7 +69,10 @@ public class CompactingStackFrameCode extends AbstractStackFrameCode {
          for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
             BasicValue value = frameAfter.getLocal(local);
             if (code.isResponsibleFor(value.getType())) {
-               if (frameAfter.neededLocals.contains(local) && !frameAfter.isHoldInLowerNeededLocal(local)) {
+               ExtendedValue extendedValue = (ExtendedValue) value;
+               int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+               if (local == lowestLocal) {
+                  // Only store value, if it is not stored in a lower needed local.
                   pushLocals.add(local);
                }
             }
@@ -112,28 +116,28 @@ public class CompactingStackFrameCode extends AbstractStackFrameCode {
       final boolean isMethodNotStatic = isNotStatic(method);
       final boolean isCallNotVoid = isNotVoid(methodCall);
 
-      // restore locals by type
+      // Restore locals by type.
       for (IValueCode code : ValueCodeFactory.CODES) {
          List<Integer> popLocals = new ArrayList<>();
          InsnList copyLocals = new InsnList();
 
-         // do not restore local 0 for non static methods, because it always contains "this"
+         // Do not restore local 0 for non static methods, because it always contains "this".
          for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
             BasicValue value = frameAfter.getLocal(local);
             if (code.isResponsibleFor(value.getType())) {
                ExtendedValue extendedValue = (ExtendedValue) value;
-               // Ignore not needed locals
-               if (frameAfter.neededLocals.contains(local)) {
-                  if (frameAfter.isHoldInLowerNeededLocal(local)) {
-                     // the value of the local is hold in a lower local too -> copy
-                     logger.debug("        Detected codes with the same value: {}/{}", extendedValue.getLowestLocal(), local);
-                     copyLocals.add(code(extendedValue).load(extendedValue.getLowestLocal()));
-                     copyLocals.add(code(extendedValue).store(local));
-                  } else {
-                     // normal case -> pop local from frameAfter
-                     popLocals.add(local);
-                  }
+               // Ignore not needed locals.
+               int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+               if (local == lowestLocal) {
+                  // Normal case -> Pop local from frameAfter.
+                  popLocals.add(local);
+               } else if (lowestLocal >= 0) {
+                  // The value of the local is hold in a lower local too -> copy.
+                  logger.debug("        Detected codes with the same value: {}/{}", lowestLocal, local);
+                  copyLocals.add(code(extendedValue).load(lowestLocal));
+                  copyLocals.add(code(extendedValue).store(local));
                }
+               // else: The local is not needed -> No restore needed.
             }
          }
 
@@ -169,14 +173,15 @@ public class CompactingStackFrameCode extends AbstractStackFrameCode {
       int[] stackIndexes = stackIndexes(frameAfter);
       for (int stack = 0, end = isCallNotVoid ? frameAfter.getStackSize() - 1 : frameAfter.getStackSize(); stack < end; stack++) {
          ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
+         int lowestLocal = frameAfter.getLowestNeededLocal(value);
          if (value.isConstant()) {
             // the stack value is constant -> push constant
             logger.debug("        Detected constant value on stack: {} / value {}", value, value.getConstant());
             result.add(code(value).push(value.getConstant()));
-         } else if (value.isHoldInLocal()) {
+         } else if (lowestLocal >= 0) {
             // the stack value was already stored in local variable -> load local
-            logger.debug("        Detected value of local on stack: {} / local {}", value, value.getLowestLocal());
-            result.add(code(value).load(value.getLowestLocal()));
+            logger.debug("        Detected value of local on stack: {} / local {}", value, lowestLocal);
+            result.add(code(value).load(lowestLocal));
          } else {
             // normal case -> pop stack from frameAfter
             result.add(code(value).popStack(stackIndexes[stack], localFrame));

@@ -7,7 +7,9 @@ import org.objectweb.asm.tree.analysis.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.serialthreads.transformer.analyzer.ExtendedValue.*;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;
 
 /**
  * Frame for extended analyzer.
@@ -179,17 +181,18 @@ public final class ExtendedFrame extends Frame<BasicValue> {
   //
 
   /**
-   * Is this value hold in a needed local that is lower than the given one?
+   * Get the lowest needed local holding the given value.
    *
-   * @param local Local
+   * @param value Value.
+   * @return local or -1.
    */
-  public boolean isHoldInLowerNeededLocal(int local) {
-    for (int lowerLocal : ((ExtendedValue) getLocal(local)).getLocals()) {
-      if (lowerLocal < local && neededLocals.contains(lowerLocal)) {
-        return true;
+  public int getLowestNeededLocal(ExtendedValue value) {
+    for (int lowerLocal : value.getLocals()) {
+      if (neededLocals.contains(lowerLocal)) {
+        return lowerLocal;
       }
     }
 
-    return false;
+    return -1;
   }
 }

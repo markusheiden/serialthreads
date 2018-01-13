@@ -4,11 +4,13 @@ import org.junit.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Value;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for ExtendedValue.
@@ -19,31 +21,23 @@ public class ExtendedValueTest {
     ExtendedValue value = ExtendedValue.value(Type.INT_TYPE);
     assertEquals(Type.INT_TYPE, value.getType());
     assertFalse(value.isConstant());
-    assertFalse(value.isHoldInLocal());
+    assertThat(value.getLocals()).isEmpty();
   }
 
   @Test
   public void testValueInLocal() {
-    Set<Integer> locals1 = new HashSet<>(Arrays.asList(1));
-
     ExtendedValue value = ExtendedValue.valueInLocal(Type.INT_TYPE, 1);
     assertEquals(Type.INT_TYPE, value.getType());
     assertFalse(value.isConstant());
-    assertTrue(value.isHoldInLocal());
-    assertEquals(1, value.getLowestLocal());
-    assertEquals(locals1, value.getLocals());
+    assertThat(value.getLocals()).containsExactly(1);
   }
 
   @Test
   public void testValueInLocals() {
-    Set<Integer> locals12 = new HashSet<>(Arrays.asList(1, 2));
-
     ExtendedValue value = ExtendedValue.valueInLocal(Type.INT_TYPE, 1).addLocal(2);
     assertEquals(Type.INT_TYPE, value.getType());
     assertFalse(value.isConstant());
-    assertTrue(value.isHoldInLocal());
-    assertTrue(locals12.contains(value.getLowestLocal()));
-    assertEquals(locals12, value.getLocals());
+    assertThat(value.getLocals()).containsExactly(1, 2);
   }
 
   @Test
@@ -52,20 +46,16 @@ public class ExtendedValueTest {
     assertEquals(Type.INT_TYPE, value.getType());
     assertTrue(value.isConstant());
     assertEquals(1, value.getConstant());
-    assertFalse(value.isHoldInLocal());
+    assertThat(value.getLocals()).isEmpty();
   }
 
   @Test
   public void testConstantInLocals() {
-    Set<Integer> locals12 = new HashSet<>(Arrays.asList(1, 2));
-
-    ExtendedValue value = ExtendedValue.constantInLocals(Type.INT_TYPE, 1, locals12);
+    ExtendedValue value = ExtendedValue.constantInLocals(Type.INT_TYPE, 1, Set.of(1, 2));
     assertEquals(Type.INT_TYPE, value.getType());
     assertTrue(value.isConstant());
     assertEquals(1, value.getConstant());
-    assertTrue(value.isHoldInLocal());
-    assertTrue(locals12.contains(value.getLowestLocal()));
-    assertEquals(locals12, value.getLocals());
+    assertThat(value.getLocals()).containsExactly(1, 2);
   }
 
   @Test
@@ -119,13 +109,8 @@ public class ExtendedValueTest {
     } else {
       assertFalse("expected no constant value", ev.isConstant());
     }
-    if (expected.isHoldInLocal()) {
-      assertTrue("expected value which is hold in a local", ev.isHoldInLocal());
-      assertEquals("expected locals: <" + expected.getLocals() + "> but was: <" + ev.getLocals() + ">",
-        expected.getLocals(), ev.getLocals());
-    } else {
-      assertFalse("expected value which is not hold in any local", ev.isHoldInLocal());
-    }
+    assertEquals("expected locals: <" + expected.getLocals() + "> but was: <" + ev.getLocals() + ">",
+      expected.getLocals(), ev.getLocals());
     assertTrue(expected.equalsValue((ExtendedValue) value));
   }
 }

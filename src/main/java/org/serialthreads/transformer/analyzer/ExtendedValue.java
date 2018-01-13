@@ -126,34 +126,9 @@ public class ExtendedValue extends BasicValue {
   }
 
   /**
-   * Does this value is hold in a local too?
-   */
-  public boolean isHoldInLocal() {
-    return !locals.isEmpty();
-  }
-
-  /**
-   * Is this value hold in a local that is lower than the given one?
-   *
-   * @param local number of local
-   */
-  public boolean isHoldInLowerLocal(int local) {
-    return !locals.isEmpty() && locals.first() < local;
-  }
-
-  /**
-   * The lowest local this value is hold in too, if any.
-   */
-  public int getLowestLocal() {
-    assert isHoldInLocal() : "Precondition: isHoldInLocal()";
-
-    return locals.first();
-  }
-
-  /**
    * All locals this value is hold in too, if any.
    */
-  public Set<Integer> getLocals() {
+  public SortedSet<Integer> getLocals() {
     return locals;
   }
 

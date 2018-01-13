@@ -5,15 +5,20 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.analysis.Frame;
+import org.objectweb.asm.tree.analysis.Interpreter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqualsValue;
 
 /**
- * Test for ExtendedFrame.
+ * Test for {@link ExtendedFrame}.
  */
 public class ExtendedFrameTest {
+  /**
+   * Test for {@link ExtendedFrame#ExtendedFrame(int, int)}.
+   */
   @Test
   public void testConstructor_ii() {
     ExtendedFrame frame = new ExtendedFrame(2, 2);
@@ -38,6 +43,9 @@ public class ExtendedFrameTest {
     }
   }
 
+  /**
+   * Test for {@link ExtendedFrame#ExtendedFrame(Frame)}.
+   */
   @Test
   public void testConstructor_frame() {
     ExtendedFrame src = new ExtendedFrame(2, 2);
@@ -64,6 +72,9 @@ public class ExtendedFrameTest {
     }
   }
 
+  /**
+   * Test for {@link ExtendedFrame#execute(AbstractInsnNode, Interpreter)} handling constant values.
+   */
   @Test
   public void testExecute_const() throws Exception {
     testExecute_const(new InsnNode(Opcodes.ACONST_NULL), Type.getObjectType("null"), null);
@@ -98,6 +109,9 @@ public class ExtendedFrameTest {
     assertEqualsValue(ExtendedValue.constantValue(type, constant), frame.getStack(0));
   }
 
+  /**
+   * Test for {@link ExtendedFrame#execute(AbstractInsnNode, Interpreter)} handling stores to locals.
+   */
   @Test
   public void testExecute_store() throws Exception {
     testExecute_store(new VarInsnNode(Opcodes.ISTORE, 0), Type.INT_TYPE);
@@ -127,6 +141,9 @@ public class ExtendedFrameTest {
     assertEqualsValue(ExtendedValue.value(type).addLocal(type.getSize()), frame.getStack(0));
   }
 
+  /**
+   * Test for {@link ExtendedFrame#setLocal(int, BasicValue)}.
+   */
   @Test
   public void testSetLocal() {
     ExtendedFrame frame = new ExtendedFrame(1, 0);
@@ -141,6 +158,9 @@ public class ExtendedFrameTest {
     assertEqualsValue(ExtendedValue.valueInLocal(Type.INT_TYPE, 0), frame.getLocal(0));
   }
 
+  /**
+   * Test for {@link ExtendedFrame#push(BasicValue)}.
+   */
   @Test
   public void testPush() {
     ExtendedFrame frame = new ExtendedFrame(0, 1);
