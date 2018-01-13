@@ -8,6 +8,7 @@ import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -22,11 +23,33 @@ public class Debugger {
   /**
    * Byte code of all methods of a class.
    *
+   * @param className Fully qualified class name.
+   */
+  public static String debug(String className) {
+    try {
+      return debug(new ClassReader(className));
+    } catch (IOException e) {
+      return "Class " + className + " not found.";
+    }
+  }
+
+  /**
+   * Byte code of all methods of a class.
+   *
    * @param byteCode Byte code of the class.
    */
   public static String debug(byte[] byteCode) {
+    return debug(new ClassReader(byteCode));
+  }
+
+  /**
+   * Byte code of all methods of a class.
+   *
+   * @param classReader Class reader with the class.
+   */
+  private static String debug(ClassReader classReader) {
     ClassNode clazz = new ClassNode();
-    new ClassReader(byteCode).accept(clazz, SKIP_DEBUG + SKIP_FRAMES);
+    classReader.accept(clazz, SKIP_DEBUG + SKIP_FRAMES);
     return debug(clazz);
   }
 
