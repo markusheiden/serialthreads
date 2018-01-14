@@ -23,6 +23,7 @@ public final class StackFrame implements Serializable {
 
   public static MethodType METHOD_TYPE = MethodType.methodType(void.class, Stack.class, StackFrame.class);
 
+  public final Stack stack;
   // double linked list of stack frames
   public final StackFrame previous;
   public StackFrame next;
@@ -150,7 +151,9 @@ public final class StackFrame implements Serializable {
    * @param previous previous stack frame for a linked list
    * @param size maximum size of the frame
    */
-  public StackFrame(StackFrame previous, int size) {
+  public StackFrame(Stack stack, StackFrame previous, int size) {
+    this.stack = stack;
+
     if (previous != null) {
       previous.next = this;
     }
@@ -194,7 +197,7 @@ public final class StackFrame implements Serializable {
    * @return Added frame
    */
   public StackFrame addFrame() {
-    return new StackFrame(this, size);
+    return new StackFrame(stack, this, size);
   }
 
   //

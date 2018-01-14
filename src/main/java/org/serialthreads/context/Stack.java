@@ -61,7 +61,7 @@ public final class Stack extends SerialThread implements Serializable {
     super(name);
 
     this.frameSize = frameSize;
-    first = new StackFrame(null, frameSize);
+    first = new StackFrame(this, null, frameSize);
     frame = first;
 
     returnObject = null;
@@ -74,7 +74,7 @@ public final class Stack extends SerialThread implements Serializable {
    * @return Added frame
    */
   public StackFrame addFrame(StackFrame lastFrame) {
-    return new StackFrame(lastFrame, frameSize);
+    return new StackFrame(this, lastFrame, frameSize);
   }
 
   /**
