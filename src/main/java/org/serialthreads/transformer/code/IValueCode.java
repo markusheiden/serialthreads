@@ -74,10 +74,10 @@ public interface IValueCode {
    /**
     * Generate code to restore the return value from a frame.
     *
-    * @param localFrame
-    *           frame to pop from.
+    * @param localThread
+    *           Thread to push to.
     */
-   InsnList popReturnValue(int localFrame);
+   InsnList popReturnValue(int localThread);
 
    /**
     * Generate code to get the array for stack elements of the frame.
