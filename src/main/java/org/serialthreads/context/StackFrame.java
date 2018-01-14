@@ -189,6 +189,19 @@ public final class StackFrame implements Serializable {
   }
 
   /**
+   * Increase the stack by one frame.
+   *
+   * @return Added frame
+   */
+  public StackFrame addFrame() {
+    return new StackFrame(this, size);
+  }
+
+  //
+  //
+  //
+
+  /**
    * Get owner.
    * Mainly for debugging purposes to be able to do a "not null" check.
    */
