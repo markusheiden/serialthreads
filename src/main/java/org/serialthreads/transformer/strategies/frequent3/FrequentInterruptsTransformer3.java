@@ -1,5 +1,5 @@
 
-package org.serialthreads.transformer.strategies.frequent4;
+package org.serialthreads.transformer.strategies.frequent3;
 
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;

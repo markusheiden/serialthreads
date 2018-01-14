@@ -12,7 +12,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
- * Base class for method transformers of {@link FrequentInterruptsTransformer4}.
+ * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
  */
 @SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 abstract class MethodTransformer extends AbstractMethodTransformer {
