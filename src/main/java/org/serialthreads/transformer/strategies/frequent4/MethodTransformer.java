@@ -99,7 +99,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       } else {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
-          // Save return value into the thread
+          // Save return value into the thread.
+          // FIXME markus 2018-01-14: Get thread!
+          int localThread = -1;
           replacement.add(code(returnType).pushReturnValue(localThread));
         }
         replacement.add(methodReturn(false));
@@ -150,6 +152,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
+      // FIXME markus 2018-01-14: Get thread!
+      int localThread = -1;
       capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
