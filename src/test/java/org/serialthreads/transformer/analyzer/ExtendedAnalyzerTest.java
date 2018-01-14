@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.objectweb.asm.Opcodes.*;
@@ -160,6 +161,33 @@ public class ExtendedAnalyzerTest {
 
     // Check that at instruction 5 locals 1 is declared as needed for the remaining code
     assertEquals(set(1), frames[5].neededLocals);
+  }
+
+  /**
+   * Test for backward flow analysis that ensures that locals are just considered as needed the shortest possible range.
+   */
+  @Test
+  public void testBackflow_minimumNeededLocals() throws Exception {
+    MethodNode method = new MethodNode(0, "test", "()I", null, new String[0]);
+    method.maxLocals = 2;
+    method.maxStack = 1;
+    InsnList instructions = method.instructions;
+
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new VarInsnNode(ISTORE, 1));
+    instructions.add(new VarInsnNode(ILOAD, 1));
+    instructions.add(new InsnNode(IRETURN));
+
+    ExtendedFrame[] frames = analyzer.analyze("Test", method);
+
+    // Before ICONST_1.
+    assertThat(frames[0].neededLocals).isEmpty();
+    // Before ISTORE 1: Local 1 is overwritten -> Local 1 is not needed here and before.
+    assertThat(frames[1].neededLocals).isEmpty();
+    // Before ILOAD 1: Local 1 is used -> Local 1 is needed.
+    assertThat(frames[2].neededLocals).containsExactly(1);
+    // Before IRETURN.
+    assertThat(frames[3].neededLocals).isEmpty();
   }
 
   /**
