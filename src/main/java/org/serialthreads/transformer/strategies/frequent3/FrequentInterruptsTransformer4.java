@@ -22,7 +22,7 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
  * The thread and frame will be added to the signature of all interruptible methods.
  * This transformation needs no static thread holder, {@link SerialThreadExecutor} can be used.
  */
-public class FrequentInterruptsTransformer3 extends AbstractTransformer {
+public class FrequentInterruptsTransformer4 extends AbstractTransformer {
   /**
    * Strategy name.
    */
@@ -33,7 +33,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer {
    *
    * @param classInfoCache class cache to use
    */
-  public FrequentInterruptsTransformer3(IClassInfoCache classInfoCache) {
+  public FrequentInterruptsTransformer4(IClassInfoCache classInfoCache) {
     super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
   }
 

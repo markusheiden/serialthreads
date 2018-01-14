@@ -14,7 +14,7 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 
 /**
- * Base class for method transformers of {@link org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3}.
+ * Base class for method transformers of {@link FrequentInterruptsTransformer2}.
  */
 @SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 abstract class MethodTransformer extends AbstractMethodTransformer {
