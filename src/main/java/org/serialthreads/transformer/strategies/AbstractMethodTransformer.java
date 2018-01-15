@@ -373,7 +373,6 @@ public abstract class AbstractMethodTransformer {
     capture.add(pushToFrame(methodCall, metaInfo));
     capture.add(pushMethodToFrame(position));
     capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
-
     // Start serializing and return early.
     capture.add(startSerializing());
 
