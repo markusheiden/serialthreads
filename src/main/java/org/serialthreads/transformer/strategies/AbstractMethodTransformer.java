@@ -525,7 +525,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackFrameCode.pushOwnerToFrame(method, methodCall, metaInfo, localPreviousFrame(), localFrame());
+    return stackFrameCode.pushOwnerToFrame(method, methodCall, metaInfo, localPreviousFrame());
   }
 
   /**

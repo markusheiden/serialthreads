@@ -36,7 +36,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame, int localFrame) {
+   public InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame) {
       InsnList result = new InsnList();
 
       // Save owner of method call one level above.
