@@ -21,17 +21,12 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
    @Override
-   public InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, int localFrame) {
+   public InsnList pushMethodToFrame(int position, int localFrame) {
       InsnList result = new InsnList();
-
-      // save method index of this method
-      if (containsMoreThanOneMethodCall) {
-         // frame.method = position;
-         result.add(new VarInsnNode(ALOAD, localFrame));
-         result.add(push(position));
-         result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
-      }
-
+      // frame.method = position;
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(push(position));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
       return result;
    }
 

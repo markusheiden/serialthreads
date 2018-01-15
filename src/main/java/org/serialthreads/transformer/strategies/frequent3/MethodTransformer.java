@@ -175,9 +175,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
     logger.debug("        Optimized tail call");
-    if (hasMoreThanOneMethodCall()) {
-      capture.add(pushMethodToFrame(position));
-    }
+    capture.add(pushMethodToFrame(position));
     capture.add(new InsnNode(IRETURN));
 
     capture.add(restoreCode);

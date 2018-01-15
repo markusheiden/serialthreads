@@ -288,13 +288,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Has the method more than one interruptible method call?.
-   */
-  protected boolean hasMoreThanOneMethodCall() {
-    return interruptibleMethodCalls.size() > 1;
-  }
-
-  /**
    * Create method specific frame restore code.
    *
    * @param methodCall method call to generate restore code for
@@ -506,7 +499,11 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList pushMethodToFrame(int position) {
-    return stackFrameCode.pushMethodToFrame(position, hasMoreThanOneMethodCall(), localFrame());
+    if (interruptibleMethodCalls.size() <= 1) {
+      return new InsnList();
+    }
+
+    return stackFrameCode.pushMethodToFrame(position, localFrame());
   }
 
   /**

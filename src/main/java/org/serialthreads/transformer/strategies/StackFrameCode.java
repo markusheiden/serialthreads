@@ -24,17 +24,15 @@ public interface StackFrameCode {
   InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
-   * Push method and owner onto frame.
+   * Push method (index) onto frame.
    *
    * @param position
    *           position of method call.
-   * @param containsMoreThanOneMethodCall
-   *           contains the method more than one method call?.
    * @param localFrame
    *           number of local containing the current frame.
    * @return generated capture code.
    */
-  InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, int localFrame);
+  InsnList pushMethodToFrame(int position, int localFrame);
 
   /**
    * Push owner onto frame.
@@ -75,7 +73,7 @@ public interface StackFrameCode {
   InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
-   * Restore method from frame.
+   * Restore method (index) from frame.
    *
    * @param localFrame
    *           number of local containing the current frame.
