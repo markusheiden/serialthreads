@@ -86,6 +86,24 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
+   public InsnList startSerializing(int localThread) {
+      InsnList instructions = new InsnList();
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(new InsnNode(ICONST_1));
+      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+      return instructions;
+   }
+
+   @Override
+   public InsnList stopDeserializing(int localThread) {
+      InsnList instructions = new InsnList();
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(new InsnNode(ICONST_0));
+      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+      return instructions;
+   }
+
+   @Override
    public InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       InsnList result = new InsnList();
 

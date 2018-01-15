@@ -73,6 +73,16 @@ public interface StackFrameCode {
   InsnList pushOwnerToFrame(MethodNode method, boolean suppressOwner, int localPreviousFrame, int localFrame);
 
   /**
+   * Start serializing at interrupt.
+   */
+  InsnList startSerializing(int localThread);
+
+  /**
+   * Stop de-serializing when interrupt location has been reached.
+   */
+  InsnList stopDeserializing(int localThread);
+
+  /**
    * Restore owner from frame.
    *
    * @param methodCall

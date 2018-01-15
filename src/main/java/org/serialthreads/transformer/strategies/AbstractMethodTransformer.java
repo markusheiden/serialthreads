@@ -330,19 +330,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Stop de-serializing when interrupt location has been reached.
-   */
-  protected InsnList stopDeserializing() {
-    final int localThread = localThread();
-
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new InsnNode(ICONST_0));
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-    return instructions;
-  }
-
-  /**
    * Create method specific frame restore code.
    *
    * @param methodCall method call to generate restore code for
@@ -395,20 +382,6 @@ public abstract class AbstractMethodTransformer {
     // Replace dummy call of interrupt method by capture code.
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
-  }
-
-  /**
-   * Start serializing at interrupt.
-   */
-  protected InsnList startSerializing() {
-    final int localThread = localThread();
-
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new InsnNode(ICONST_1));
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-    instructions.add(dummyReturnStatement(method));
-    return instructions;
   }
 
   /**
@@ -544,9 +517,27 @@ public abstract class AbstractMethodTransformer {
    *           Suppress saving the owner?.
    * @return generated capture code.
    */
-  public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+  protected InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
     return stackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
   }
+
+  /**
+   * Start serializing at interrupt.
+   */
+  protected InsnList startSerializing() {
+    InsnList result = new InsnList();
+    result.add(stackFrameCode.startSerializing(localThread()));
+    result.add(dummyReturnStatement(method));
+    return result;
+  }
+
+  /**
+   * Stop de-serializing when interrupt location has been reached.
+   */
+  protected InsnList stopDeserializing() {
+    return stackFrameCode.stopDeserializing(localThread());
+  }
+
 
   /**
    * Restore owner.
