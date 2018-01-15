@@ -40,7 +40,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
       InsnList result = new InsnList();
 
       // Save owner of method call one level above.
-      if (isNotStatic(method)) {
+      if (!isSelfCall(methodCall, metaInfo) && isNotStatic(method)) {
          // previousFrame.owner = this;
          result.add(new VarInsnNode(ALOAD, localPreviousFrame));
          result.add(new VarInsnNode(ALOAD, 0));
