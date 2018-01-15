@@ -521,7 +521,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
-    return stackFrameCode.pushOwnerToFrame(method, suppressOwner || isSelfCall(methodCall, metaInfo), localPreviousFrame(), localFrame());
+    return stackFrameCode.pushOwnerToFrame(method, methodCall, metaInfo, suppressOwner, localPreviousFrame(), localFrame());
   }
 
   /**

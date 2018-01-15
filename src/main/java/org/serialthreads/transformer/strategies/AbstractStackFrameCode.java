@@ -66,11 +66,11 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList pushOwnerToFrame(MethodNode method, boolean suppressOwner, int localPreviousFrame, int localFrame) {
+   public InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner, int localPreviousFrame, int localFrame) {
       InsnList result = new InsnList();
 
       // Save owner of method call one level above.
-      if (isNotStatic(method) && !suppressOwner) {
+      if (!isSelfCall(methodCall, metaInfo) && isNotStatic(method) && !suppressOwner) {
          // previousFrame.owner = this;
          result.add(new VarInsnNode(ALOAD, localPreviousFrame));
          result.add(new VarInsnNode(ALOAD, 0));
