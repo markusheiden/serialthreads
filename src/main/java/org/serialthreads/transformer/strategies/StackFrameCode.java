@@ -45,15 +45,13 @@ public interface StackFrameCode {
    *           method call to process.
    * @param metaInfo
    *           Meta information about method call.
-   * @param suppressOwner
-   *           suppress saving the owner?.
    * @param localPreviousFrame
    *           number of local containing the previous frame or -1 for retrieving it via current frame.
    * @param localFrame
    *           number of local containing the current frame.
    * @return generated capture code.
    */
-  InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner, int localPreviousFrame, int localFrame);
+  InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame, int localFrame);
 
   /**
    * Start serializing at interrupt.
