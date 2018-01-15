@@ -538,7 +538,6 @@ public abstract class AbstractMethodTransformer {
     return stackFrameCode.stopDeserializing(localThread());
   }
 
-
   /**
    * Restore owner.
    *
