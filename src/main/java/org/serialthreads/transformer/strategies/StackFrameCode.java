@@ -63,7 +63,9 @@ public interface StackFrameCode {
    * @param method
    *           Method to capture.
    * @param methodCall
+   *           method call to process.
    * @param metaInfo
+   *           Meta information about method call.
    * @param suppressOwner
    *           suppress saving the owner?.
    * @param localPreviousFrame
