@@ -319,8 +319,7 @@ public abstract class AbstractMethodTransformer {
 
     // Stop deserializing.
     restoreCode.add(stopDeserializing());
-
-    // restore frame
+    // Restore frame.
     restoreCode.add(popFromFrame(methodCall, metaInfo));
 
     // resume
