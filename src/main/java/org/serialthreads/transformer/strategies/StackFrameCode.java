@@ -3,7 +3,6 @@ package org.serialthreads.transformer.strategies;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.serialthreads.context.Stack;
 
 /**
  * Capture and restore of stack frames.
@@ -36,26 +35,6 @@ public interface StackFrameCode {
    * @return generated capture code.
    */
   InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, int localFrame);
-
-  /**
-   * Push method and owner onto frame with a given method.
-   *
-   * Currently not used.
-   * @see Stack#leaveMethod(Object, int) etc.
-   *
-   * @param method
-   *           Method to capture.
-   * @param position
-   *           position of method call
-   * @param containsMoreThanOneMethodCall
-   *           contains the method more than one method call?
-   * @param methodName
-   *           name of method to store owner and method
-   * @param localThread
-   *           number of local containing the thread
-   * @return generated capture code
-   */
-  InsnList pushMethodToFrame(MethodNode method, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, String methodName, int localThread);
 
   /**
    * Push owner onto frame.

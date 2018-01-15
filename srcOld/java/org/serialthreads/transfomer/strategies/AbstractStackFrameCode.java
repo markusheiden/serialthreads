@@ -21,15 +21,30 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
    @Override
-   public InsnList pushMethodToFrame(int position, boolean containsMoreThanOneMethodCall, int localFrame) {
+   public InsnList pushMethodToFrame(MethodNode method, int position, boolean containsMoreThanOneMethodCall, boolean suppressOwner, String methodName, int localThread) {
       InsnList result = new InsnList();
 
-      // save method index of this method
-      if (containsMoreThanOneMethodCall) {
-         // frame.method = position;
-         result.add(new VarInsnNode(ALOAD, localFrame));
+      final boolean isMethodNotStatic = isNotStatic(method);
+
+      // save method index of this method and owner of method call one level above
+      boolean pushOwner = isMethodNotStatic && !suppressOwner;
+      boolean pushMethod = containsMoreThanOneMethodCall;
+      if (pushOwner && pushMethod) {
+         // save owner of this method for calling method and index of interrupted method
+         result.add(new VarInsnNode(ALOAD, localThread));
+         result.add(new VarInsnNode(ALOAD, 0));
          result.add(push(position));
-         result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
+         result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V", false));
+      } else if (pushOwner) {
+         // save owner of this method for calling method
+         result.add(new VarInsnNode(ALOAD, localThread));
+         result.add(new VarInsnNode(ALOAD, 0));
+         result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V", false));
+      } else if (pushMethod) {
+         // save index of interrupted method
+         result.add(new VarInsnNode(ALOAD, localThread));
+         result.add(push(position));
+         result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V", false));
       }
 
       return result;
@@ -40,7 +55,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
       InsnList result = new InsnList();
 
       // Save owner of method call one level above.
-      if (isNotStatic(method) && !suppressOwner) {
+      if (!isSelfCall(methodCall, metaInfo) && isNotStatic(method) && !suppressOwner) {
          // previousFrame.owner = this;
          result.add(new VarInsnNode(ALOAD, localPreviousFrame));
          result.add(new VarInsnNode(ALOAD, 0));
