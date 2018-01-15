@@ -101,7 +101,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
           // Default case:
           // Save return value into the thread.
           // FIXME markus 2018-01-14: Get thread!
-          int localThread = -1;
+          int localThread = localThread();
+          replacement.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+          replacement.add(new VarInsnNode(ASTORE, localThread));
           replacement.add(code(returnType).pushReturnValue(localThread));
         }
         replacement.add(methodReturn(false));
@@ -153,7 +155,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
       // FIXME markus 2018-01-14: Get thread!
-      int localThread = -1;
+      int localThread = localThread();
+      capture.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+      capture.add(new VarInsnNode(ASTORE, localThread));
       capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
