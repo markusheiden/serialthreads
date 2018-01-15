@@ -72,12 +72,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
       // Save owner of method call one level above.
       if (isNotStatic(method) && !suppressOwner) {
          // previousFrame.owner = this;
-         if (localPreviousFrame < 0) {
-            result.add(new VarInsnNode(ALOAD, localFrame));
-            result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "previous", FRAME_IMPL_DESC));
-         } else {
-            result.add(new VarInsnNode(ALOAD, localPreviousFrame));
-         }
+         result.add(new VarInsnNode(ALOAD, localPreviousFrame));
          result.add(new VarInsnNode(ALOAD, 0));
          result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
       }
