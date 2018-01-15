@@ -33,7 +33,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     nameAddedLocals();
     analyze();
 
-    insertCaptureCode(false);
+    insertCaptureCode();
     createRestoreHandlerMethod();
     fixMaxs();
 

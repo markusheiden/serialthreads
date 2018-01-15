@@ -35,7 +35,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceReturns();
-    insertCaptureCode(false);
+    insertCaptureCode();
     createRestoreHandlerMethod();
     addFrame();
     fixMaxs();

@@ -249,10 +249,9 @@ public abstract class AbstractMethodTransformer {
 
   /**
    * Inserts capture code after method calls.
-   *
-   * @param suppressOwner suppress capturing of owner?
+   * Mainly used for concrete methods.
    */
-  protected void insertCaptureCode(boolean suppressOwner) {
+  protected void insertCaptureCode() {
     int methodCallIndex = 0;
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
@@ -260,12 +259,13 @@ public abstract class AbstractMethodTransformer {
       // No restore code needed.
       InsnList restoreCode = new InsnList();
 
-      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, restoreCode);
+      createCaptureCode(methodCall, metaInfo, methodCallIndex++, false, restoreCode);
     }
   }
 
   /**
    * Inserts capture and restore code after method calls.
+   * Mainly used for copied concrete methods.
    *
    * @param suppressOwner suppress capturing of owner?
    * @return Labels pointing to the generated restore codes for method calls.
