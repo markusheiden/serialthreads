@@ -30,6 +30,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
+    nameAddedLocals();
     analyze();
 
     insertCaptureCode(false);

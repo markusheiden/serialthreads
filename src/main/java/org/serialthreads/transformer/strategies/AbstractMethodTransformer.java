@@ -80,7 +80,12 @@ public abstract class AbstractMethodTransformer {
    */
   protected void shiftLocals() {
     LocalVariablesShifter.shift(firstLocal(method), 3, method);
+  }
 
+  /**
+   * Add names for added locals.
+   */
+  protected void nameAddedLocals() {
     InsnList instructions = method.instructions;
     LabelNode first = new LabelNode();
     instructions.insertBefore(instructions.getFirst(), first);

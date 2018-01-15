@@ -32,6 +32,7 @@ class RunMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
+    nameAddedLocals();
     analyze();
 
     replaceRunReturns();

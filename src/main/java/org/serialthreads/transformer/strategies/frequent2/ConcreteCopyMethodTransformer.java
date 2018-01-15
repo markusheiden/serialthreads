@@ -37,6 +37,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
+    nameAddedLocals();
     analyze();
 
     // create copy of method with shortened signature
