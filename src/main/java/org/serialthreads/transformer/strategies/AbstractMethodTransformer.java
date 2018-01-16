@@ -549,12 +549,10 @@ public abstract class AbstractMethodTransformer {
    *           method call to process.
    * @param metaInfo
    *           Meta information about method call.
-   * @param localFrame
-   *           number of local containing the frame.
    * @return generated restore code.
    */
-  protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    return stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame);
+  protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame());
   }
 
   /**
