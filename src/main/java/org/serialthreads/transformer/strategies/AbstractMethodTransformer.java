@@ -578,5 +578,4 @@ public abstract class AbstractMethodTransformer {
   protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
     return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
   }
-
 }
