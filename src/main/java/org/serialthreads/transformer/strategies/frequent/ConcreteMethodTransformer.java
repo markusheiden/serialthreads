@@ -56,7 +56,6 @@ class ConcreteMethodTransformer extends MethodTransformer {
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    LabelNode normal = new LabelNode();
     LabelNode getThread = new LabelNode();
 
     // previousFrame = thread.frame;
@@ -65,17 +64,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     getFrame.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
     getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
-    // frame = previousFrame.next;
-    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    getFrame.add(new InsnNode(DUP));
-    getFrame.add(new JumpInsnNode(IFNONNULL, normal));
-
-    getFrame.add(new InsnNode(POP));
-    // frame = thread.addFrame(previousFrame);
-    getFrame.add(stackFrameCode.addFrame(localPreviousFrame));
-
-    getFrame.add(normal);
+    getFrame.add(stackFrameCode.getNextFrame(localPreviousFrame));
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     // TODO 2009-11-26 mh: remove me?

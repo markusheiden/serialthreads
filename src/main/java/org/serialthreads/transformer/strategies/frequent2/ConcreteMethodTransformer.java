@@ -4,7 +4,10 @@ import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 /**
  * Method transformer for concrete methods.
@@ -50,25 +53,13 @@ class ConcreteMethodTransformer extends MethodTransformer {
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    LabelNode normal = new LabelNode();
-
     // previousFrame = thread.frame;
     InsnList getFrame = new InsnList();
     getFrame.add(new VarInsnNode(ALOAD, localThread));
     getFrame.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
     getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
-    // frame = previousFrame.next;
-    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    getFrame.add(new InsnNode(DUP));
-    getFrame.add(new JumpInsnNode(IFNONNULL, normal));
-
-    getFrame.add(new InsnNode(POP));
-    // frame = previousFrame.addFrame();
-    getFrame.add(stackFrameCode.addFrame(localPreviousFrame));
-
-    getFrame.add(normal);
+    getFrame.add(stackFrameCode.getNextFrame(localPreviousFrame));
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
