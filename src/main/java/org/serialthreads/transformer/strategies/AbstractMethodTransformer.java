@@ -49,7 +49,7 @@ public abstract class AbstractMethodTransformer {
   protected final MethodNode method;
   protected final IClassInfoCache classInfoCache;
 
-  private final StackFrameCode stackFrameCode = new CompactingStackFrameCode();
+  protected final StackFrameCode stackFrameCode = new CompactingStackFrameCode();
 
   /**
    * Meta information about instructions.

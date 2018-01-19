@@ -21,6 +21,14 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
    @Override
+   public InsnList addFrame(int localPreviousFrame) {
+      InsnList result = new InsnList();
+      result.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, FRAME_IMPL_NAME, "addFrame", "()" + FRAME_IMPL_DESC, false));
+      return result;
+   }
+
+   @Override
    public InsnList pushMethodToFrame(int position, int localFrame) {
       InsnList result = new InsnList();
       // frame.method = position;

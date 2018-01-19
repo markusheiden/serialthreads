@@ -73,9 +73,8 @@ class ConcreteMethodTransformer extends MethodTransformer {
       getFrame.add(new JumpInsnNode(IFNONNULL, normal));
 
       getFrame.add(new InsnNode(POP));
-      // frame = thread.addFrame(previousFrame);
-      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      getFrame.add(new MethodInsnNode(INVOKEVIRTUAL, FRAME_IMPL_NAME, "addFrame", "()" + FRAME_IMPL_DESC, false));
+      // frame = previousFrame.addFrame();
+      getFrame.add(stackFrameCode.addFrame(localPreviousFrame));
 
       getFrame.add(normal);
     }

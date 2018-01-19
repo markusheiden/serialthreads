@@ -3,11 +3,21 @@ package org.serialthreads.transformer.strategies;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.serialthreads.context.StackFrame;
 
 /**
  * Capture and restore of stack frames.
  */
 public interface StackFrameCode {
+  /**
+   * Call {@link StackFrame#addFrame()}.
+   *
+   * @param localPreviousFrame
+   *           Number of local containing the previous frame .
+   * @return generated capture code.
+   */
+  InsnList addFrame(int localPreviousFrame);
+
   /**
    * Save current frameAfter after returning from a method call.
    *
