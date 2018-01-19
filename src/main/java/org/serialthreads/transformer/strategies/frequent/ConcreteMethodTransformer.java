@@ -65,8 +65,6 @@ class ConcreteMethodTransformer extends MethodTransformer {
     getFrame.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
     getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
-    InsnList restoreCode = new InsnList();
-
     // frame = previousFrame.next;
     getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
@@ -83,6 +81,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
+    InsnList restoreCode = new InsnList();
     // thread.frame = frame;
     restoreCode.add(new VarInsnNode(ALOAD, localThread));
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
