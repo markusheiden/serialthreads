@@ -6,7 +6,10 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 /**
  * Method transformer for run methods.
@@ -67,9 +70,7 @@ class RunMethodTransformer extends MethodTransformer {
     // if there is just one normal restore code, the method index will not be captured.
     // so we set the correct one (0) for this case.
     if (restores.size() <= 1) {
-      startRestoreCode.add(new VarInsnNode(ALOAD, localFrame));
-      startRestoreCode.add(new InsnNode(ICONST_0));
-      startRestoreCode.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
+      startRestoreCode.add(stackFrameCode.resetMethod(localFrame));
     }
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
 

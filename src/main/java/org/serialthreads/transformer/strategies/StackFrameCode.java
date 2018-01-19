@@ -44,6 +44,15 @@ public interface StackFrameCode {
   InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
+   * Reset method in frame.
+   *
+   * @param localFrame
+   *           number of local containing the current frame.
+   * @return generated code.
+   */
+  InsnList resetMethod(int localFrame);
+
+  /**
    * Push method (index) onto frame.
    *
    * @param position
