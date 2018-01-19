@@ -10,6 +10,15 @@ import org.serialthreads.context.StackFrame;
  */
 public interface StackFrameCode {
   /**
+   * Push "this" as owner to the previous frame.
+   *
+   * @param localPreviousFrame
+   *           Number of local containing the previous frame .
+   * @return generated capture code.
+   */
+  InsnList pushOwnerToFrame(int localPreviousFrame);
+
+  /**
    * Get next frame from the current frame.
    * Use {@link StackFrame#addFrame()} to add a new one, if no next frame is present.
    *
