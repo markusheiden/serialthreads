@@ -21,7 +21,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
    @Override
-   public InsnList pushOwnerToFrame(int localPreviousFrame) {
+   public InsnList pushOwner(int localPreviousFrame) {
       InsnList result = new InsnList();
       result.add(new VarInsnNode(ALOAD, localPreviousFrame));
       result.add(new VarInsnNode(ALOAD, 0));
@@ -30,7 +30,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList getNextFrame(int localPreviousFrame) {
+   public InsnList nextFrame(int localPreviousFrame) {
       InsnList result = new InsnList();
 
       LabelNode normal = new LabelNode();
@@ -60,7 +60,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList pushMethodToFrame(int position, int localFrame) {
+   public InsnList pushMethod(int position, int localFrame) {
       InsnList result = new InsnList();
       // frame.method = position;
       result.add(new VarInsnNode(ALOAD, localFrame));
@@ -70,7 +70,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame) {
+   public InsnList pushOwner(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame) {
       InsnList result = new InsnList();
 
       // Save owner of method call one level above.
@@ -106,7 +106,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       InsnList result = new InsnList();
 
       if (isSelfCall(methodCall, metaInfo)) {
@@ -123,7 +123,7 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
    }
 
    @Override
-   public InsnList popMethodFromFrame(int localFrame) {
+   public InsnList popMethod(int localFrame) {
       InsnList result = new InsnList();
       result.add(new VarInsnNode(ALOAD, localFrame));
       result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));

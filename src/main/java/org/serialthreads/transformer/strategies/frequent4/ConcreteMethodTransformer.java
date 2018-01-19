@@ -74,7 +74,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
 
       getFrame.add(new InsnNode(POP));
       // frame = previousFrame.addFrame();
-      getFrame.add(stackFrameCode.getNextFrame(localPreviousFrame));
+      getFrame.add(stackFrameCode.nextFrame(localPreviousFrame));
 
       getFrame.add(normal);
     }

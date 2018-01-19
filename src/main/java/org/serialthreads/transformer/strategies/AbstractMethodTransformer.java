@@ -504,7 +504,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackFrameCode.pushMethodToFrame(position, localFrame());
+    return stackFrameCode.pushMethod(position, localFrame());
   }
 
   /**
@@ -523,7 +523,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackFrameCode.pushOwnerToFrame(method, methodCall, metaInfo, localPreviousFrame());
+    return stackFrameCode.pushOwner(method, methodCall, metaInfo, localPreviousFrame());
   }
 
   /**
@@ -553,7 +553,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.popOwnerFromFrame(methodCall, metaInfo, localFrame());
+    return stackFrameCode.popOwner(methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -562,7 +562,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popMethodFromFrame() {
-    return stackFrameCode.popMethodFromFrame(localFrame());
+    return stackFrameCode.popMethod(localFrame());
   }
 
   /**

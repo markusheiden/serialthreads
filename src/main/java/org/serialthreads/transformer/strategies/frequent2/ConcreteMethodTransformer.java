@@ -59,7 +59,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     getFrame.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
     getFrame.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
-    getFrame.add(stackFrameCode.getNextFrame(localPreviousFrame));
+    getFrame.add(stackFrameCode.nextFrame(localPreviousFrame));
     getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     // TODO 2009-11-26 mh: remove me?

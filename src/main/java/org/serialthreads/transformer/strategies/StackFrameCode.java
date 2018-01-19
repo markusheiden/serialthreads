@@ -16,7 +16,7 @@ public interface StackFrameCode {
    *           Number of local containing the previous frame .
    * @return generated capture code.
    */
-  InsnList pushOwnerToFrame(int localPreviousFrame);
+  InsnList pushOwner(int localPreviousFrame);
 
   /**
    * Get next frame from the current frame.
@@ -26,7 +26,7 @@ public interface StackFrameCode {
    *           Number of local containing the previous frame .
    * @return generated capture code.
    */
-  InsnList getNextFrame(int localPreviousFrame);
+  InsnList nextFrame(int localPreviousFrame);
 
   /**
    * Save current frameAfter after returning from a method call.
@@ -61,7 +61,7 @@ public interface StackFrameCode {
    *           number of local containing the current frame.
    * @return generated capture code.
    */
-  InsnList pushMethodToFrame(int position, int localFrame);
+  InsnList pushMethod(int position, int localFrame);
 
   /**
    * Push owner onto frame.
@@ -76,7 +76,7 @@ public interface StackFrameCode {
    *           number of local containing the previous frame or -1 for retrieving it via current frame.
    * @return generated capture code.
    */
-  InsnList pushOwnerToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame);
+  InsnList pushOwner(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame);
 
   /**
    * Start serializing at interrupt.
@@ -99,7 +99,7 @@ public interface StackFrameCode {
    *           number of local containing the frame.
    * @return generated restore code.
    */
-  InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+  InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
    * Restore method (index) from frame.
@@ -108,7 +108,7 @@ public interface StackFrameCode {
    *           number of local containing the current frame.
    * @return generated restore code.
    */
-  InsnList popMethodFromFrame(int localFrame);
+  InsnList popMethod(int localFrame);
 
   /**
    * Restore current frame before resuming the method call.
