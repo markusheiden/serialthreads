@@ -8,7 +8,7 @@ import org.serialthreads.context.StackFrame;
 /**
  * Capture and restore of stack frames.
  */
-public interface StackFrameCode {
+public interface StackCode {
   /**
    * Push "this" as owner to the previous frame.
    *

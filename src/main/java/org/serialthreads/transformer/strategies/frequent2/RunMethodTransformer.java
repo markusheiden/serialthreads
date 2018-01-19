@@ -70,7 +70,7 @@ class RunMethodTransformer extends MethodTransformer {
     // if there is just one normal restore code, the method index will not be captured.
     // so we set the correct one (0) for this case.
     if (restores.size() <= 1) {
-      startRestoreCode.add(stackFrameCode.resetMethod(localFrame));
+      startRestoreCode.add(stackCode.resetMethod(localFrame));
     }
 
     // TODO 2009-11-26 mh: remove me?

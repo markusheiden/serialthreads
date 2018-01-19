@@ -11,10 +11,10 @@ import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 
 /**
- * {@link StackFrameCode} using compact storage of stack frames.
+ * {@link StackCode} using compact storage of stack frames.
  * Locals are grouped per type and get "renumbered".
  */
-public abstract class AbstractStackFrameCode implements StackFrameCode {
+public abstract class AbstractStackCode implements StackCode {
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
    private static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();

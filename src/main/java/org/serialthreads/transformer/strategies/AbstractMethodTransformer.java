@@ -49,7 +49,7 @@ public abstract class AbstractMethodTransformer {
   protected final MethodNode method;
   protected final IClassInfoCache classInfoCache;
 
-  protected final StackFrameCode stackFrameCode = new CompactingStackFrameCode();
+  protected final StackCode stackCode = new CompactingStackCode();
 
   /**
    * Meta information about instructions.
@@ -489,7 +489,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.pushToFrame(method, methodCall, metaInfo, localFrame());
+    return stackCode.pushToFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -504,7 +504,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackFrameCode.pushMethod(position, localFrame());
+    return stackCode.pushMethod(position, localFrame());
   }
 
   /**
@@ -523,7 +523,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackFrameCode.pushOwner(method, methodCall, metaInfo, localPreviousFrame());
+    return stackCode.pushOwner(method, methodCall, metaInfo, localPreviousFrame());
   }
 
   /**
@@ -531,7 +531,7 @@ public abstract class AbstractMethodTransformer {
    */
   protected InsnList startSerializing() {
     InsnList result = new InsnList();
-    result.add(stackFrameCode.startSerializing(localThread()));
+    result.add(stackCode.startSerializing(localThread()));
     result.add(dummyReturnStatement(method));
     return result;
   }
@@ -540,7 +540,7 @@ public abstract class AbstractMethodTransformer {
    * Stop de-serializing when interrupt location has been reached.
    */
   protected InsnList stopDeserializing() {
-    return stackFrameCode.stopDeserializing(localThread());
+    return stackCode.stopDeserializing(localThread());
   }
 
   /**
@@ -553,7 +553,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.popOwner(methodCall, metaInfo, localFrame());
+    return stackCode.popOwner(methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -562,7 +562,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popMethodFromFrame() {
-    return stackFrameCode.popMethod(localFrame());
+    return stackCode.popMethod(localFrame());
   }
 
   /**
@@ -575,6 +575,6 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackFrameCode.popFromFrame(method, methodCall, metaInfo, localFrame());
+    return stackCode.popFromFrame(method, methodCall, metaInfo, localFrame());
   }
 }

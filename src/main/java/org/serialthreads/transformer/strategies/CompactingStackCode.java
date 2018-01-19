@@ -26,14 +26,14 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
- * {@link StackFrameCode} using compact storage of stack frames.
+ * {@link StackCode} using compact storage of stack frames.
  * Locals are grouped per type and get "renumbered".
  */
-public class CompactingStackFrameCode extends AbstractStackFrameCode {
+public class CompactingStackCode extends AbstractStackCode {
    /**
     * Logger.
     */
-   private static final Logger logger = LoggerFactory.getLogger(CompactingStackFrameCode.class);
+   private static final Logger logger = LoggerFactory.getLogger(CompactingStackCode.class);
 
    @Override
    public InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
