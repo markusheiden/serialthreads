@@ -82,9 +82,7 @@ class RunMethodTransformer extends MethodTransformer {
     restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // frame = thread.first;
-    restoreCode.add(new VarInsnNode(ALOAD, localThread));
-    restoreCode.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
-    restoreCode.add(new VarInsnNode(ASTORE, localFrame));
+    restoreCode.add(stackCode.firstFrame(localThread, localFrame));
 
     // no previous frame needed in run, because there may not be a previous frame
 

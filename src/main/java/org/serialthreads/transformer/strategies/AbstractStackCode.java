@@ -17,15 +17,17 @@ import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 public abstract class AbstractStackCode implements StackCode {
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
+   private static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
    private static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
    @Override
-   public InsnList pushOwner(int localPreviousFrame) {
+   public InsnList firstFrame(int localThread, int localFrame) {
       InsnList result = new InsnList();
-      result.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      result.add(new VarInsnNode(ALOAD, 0));
-      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+      // frame = thread.first;
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
+      result.add(new VarInsnNode(ASTORE, localFrame));
       return result;
    }
 
@@ -47,6 +49,15 @@ public abstract class AbstractStackCode implements StackCode {
 
       result.add(normal);
 
+      return result;
+   }
+
+   @Override
+   public InsnList pushOwner(int localPreviousFrame) {
+      InsnList result = new InsnList();
+      result.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
       return result;
    }
 

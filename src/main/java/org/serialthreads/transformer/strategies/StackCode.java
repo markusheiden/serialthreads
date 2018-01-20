@@ -10,13 +10,15 @@ import org.serialthreads.context.StackFrame;
  */
 public interface StackCode {
   /**
-   * Push "this" as owner to the previous frame.
+   * Get first frame of the stack and store in a local.
    *
-   * @param localPreviousFrame
-   *           Number of local containing the previous frame .
-   * @return generated capture code.
+   * @param localThread
+   *           Number of local containing the thread.
+   * @param localFrame
+   *           Number of local that will hold the current frame.
+   * @return generated code.
    */
-  InsnList pushOwner(int localPreviousFrame);
+  InsnList firstFrame(int localThread, int localFrame);
 
   /**
    * Get next frame from the current frame.
@@ -24,9 +26,18 @@ public interface StackCode {
    *
    * @param localPreviousFrame
    *           Number of local containing the previous frame .
-   * @return generated capture code.
+   * @return generated code.
    */
   InsnList nextFrame(int localPreviousFrame);
+
+  /**
+   * Push "this" as owner to the previous frame.
+   *
+   * @param localPreviousFrame
+   *           Number of local containing the previous frame .
+   * @return generated capture code.
+   */
+  InsnList pushOwner(int localPreviousFrame);
 
   /**
    * Save current frameAfter after returning from a method call.
