@@ -544,11 +544,11 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
-    if (suppressOwner) {
+    if (suppressOwner || isSelfCall(methodCall, metaInfo) || isStatic(method)) {
       return new InsnList();
     }
 
-    return stackCode.pushOwner(method, methodCall, metaInfo, localPreviousFrame());
+    return stackCode.pushOwner(localPreviousFrame());
   }
 
   /**
@@ -561,7 +561,18 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.popOwner(methodCall, metaInfo, localFrame());
+    InsnList result = new InsnList();
+
+    if (isSelfCall(methodCall, metaInfo)) {
+      // self call: owner == this
+      result.add(new VarInsnNode(ALOAD, 0));
+    } else if (isNotStatic(methodCall)) {
+      // get owner
+      result.add(stackCode.popOwner(localFrame()));
+      result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
+    }
+
+    return result;
   }
 
   /**

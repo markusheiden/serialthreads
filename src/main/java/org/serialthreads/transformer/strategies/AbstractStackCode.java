@@ -7,12 +7,9 @@ import org.serialthreads.context.StackFrame;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
-import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
-import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 
 /**
- * {@link StackCode} using compact storage of stack frames.
- * Locals are grouped per type and get "renumbered".
+ * Base code that is independent from stack frame storage algorithm.
  */
 public abstract class AbstractStackCode implements StackCode {
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
@@ -55,6 +52,7 @@ public abstract class AbstractStackCode implements StackCode {
    @Override
    public InsnList pushOwner(int localPreviousFrame) {
       InsnList result = new InsnList();
+      // previousFrame.owner = this;
       result.add(new VarInsnNode(ALOAD, localPreviousFrame));
       result.add(new VarInsnNode(ALOAD, 0));
       result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
@@ -81,21 +79,6 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList pushOwner(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame) {
-      InsnList result = new InsnList();
-
-      // Save owner of method call one level above.
-      if (!isSelfCall(methodCall, metaInfo) && isNotStatic(method)) {
-         // previousFrame.owner = this;
-         result.add(new VarInsnNode(ALOAD, localPreviousFrame));
-         result.add(new VarInsnNode(ALOAD, 0));
-         result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
-      }
-
-      return result;
-   }
-
-   @Override
    public InsnList startSerializing(int localThread) {
       return setSerializing(localThread, true);
    }
@@ -117,19 +100,10 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList popOwner(int localFrame) {
       InsnList result = new InsnList();
-
-      if (isSelfCall(methodCall, metaInfo)) {
-         // self call: owner == this
-         result.add(new VarInsnNode(ALOAD, 0));
-      } else if (isNotStatic(methodCall)) {
-         // get owner
-         result.add(new VarInsnNode(ALOAD, localFrame));
-         result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
-         result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
-      }
-
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
       return result;
    }
 

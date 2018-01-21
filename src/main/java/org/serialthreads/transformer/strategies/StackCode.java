@@ -35,7 +35,7 @@ public interface StackCode {
    *
    * @param localPreviousFrame
    *           Number of local containing the previous frame .
-   * @return generated capture code.
+   * @return Generated capture code.
    */
   InsnList pushOwner(int localPreviousFrame);
 
@@ -50,7 +50,7 @@ public interface StackCode {
    *           Meta information about method call.
    * @param localFrame
    *           number of local containing the frameAfter.
-   * @return generated capture code.
+   * @return Generated capture code.
    */
   InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
@@ -75,21 +75,6 @@ public interface StackCode {
   InsnList pushMethod(int position, int localFrame);
 
   /**
-   * Push owner onto frame.
-   *
-   * @param method
-   *           Method to capture.
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @param localPreviousFrame
-   *           number of local containing the previous frame or -1 for retrieving it via current frame.
-   * @return generated capture code.
-   */
-  InsnList pushOwner(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame);
-
-  /**
    * Start serializing at interrupt.
    */
   InsnList startSerializing(int localThread);
@@ -102,15 +87,11 @@ public interface StackCode {
   /**
    * Restore owner from frame.
    *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
    * @param localFrame
    *           number of local containing the frame.
    * @return generated restore code.
    */
-  InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+  InsnList popOwner(int localFrame);
 
   /**
    * Restore method (index) from frame.
