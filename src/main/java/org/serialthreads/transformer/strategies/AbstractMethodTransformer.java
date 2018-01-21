@@ -370,6 +370,7 @@ public abstract class AbstractMethodTransformer {
     capture.add(captureFrame(methodCall, metaInfo));
     capture.add(setMethod(position));
     // TODO 2018-01-17 markus: Remove (at least for frequent 3+) because method owner is already stored in frame.
+    // previousFrame.owner = this;
     capture.add(setOwner(methodCall, metaInfo, suppressOwner));
     // Start serializing and return early.
     capture.add(startSerializing());
