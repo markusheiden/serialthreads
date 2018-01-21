@@ -1,12 +1,14 @@
 package org.serialthreads.transformer.strategies.frequent4;
 
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 
 /**
@@ -59,16 +61,15 @@ class ConcreteMethodTransformer extends MethodTransformer {
     InsnList getFrame = new InsnList();
 
     if (isNotStatic(method)) {
-      // previousFrame.owner = this
-      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      getFrame.add(new VarInsnNode(ALOAD, 0));
-      getFrame.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
+      // previousFrame.owner = this;
+      getFrame.add(stackCode.setOwner(localPreviousFrame));
     }
 
     if (needsFrame()) {
       // frame = previousFrame.next; // etc.
       getFrame.add(stackCode.getNextFrame(localPreviousFrame, localFrame));
     } else {
+      // localFrame = localPreviousFrame;
       getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
       getFrame.add(new VarInsnNode(ASTORE, localFrame));
     }
