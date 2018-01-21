@@ -17,7 +17,9 @@ import java.util.*;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.strategies.MetaInfo.*;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Base class for all method transformers.
@@ -431,6 +433,7 @@ public abstract class AbstractMethodTransformer {
       instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
       instructions.add(new VarInsnNode(ASTORE, localThread));
       instructions.add(tryCode);
+      instructions.add(restoreCode);
 
       method.instructions.insertBefore(method.instructions.getFirst(), instructions);
       return;
