@@ -17,9 +17,7 @@ import java.util.*;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
-import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
+import static org.serialthreads.transformer.strategies.MetaInfo.*;
 
 /**
  * Base class for all method transformers.
@@ -426,18 +424,22 @@ public abstract class AbstractMethodTransformer {
    * @param restoreCode remaining restore code, executed directly after tryCode
    */
   protected void insertMethodGetThreadStartCode(int localThread, InsnList tryCode, InsnList restoreCode) {
-    final boolean isMethodNotStatic = isNotStatic(method);
-
     InsnList instructions = new InsnList();
 
-    // Get thread.
-    if (isMethodNotStatic) {
-      instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
-    } else {
+    if (isStatic(method)) {
       instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
       instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
+      instructions.add(new VarInsnNode(ASTORE, localThread));
+      instructions.add(tryCode);
+
+      method.instructions.insertBefore(method.instructions.getFirst(), instructions);
+      return;
     }
+
+    // Get thread.
+    instructions.add(new VarInsnNode(ALOAD, 0));
+    instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+
     LabelNode retry = new LabelNode();
     instructions.add(retry);
     // Store thread always in a new local variable.
@@ -454,25 +456,23 @@ public abstract class AbstractMethodTransformer {
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
 
     // try / catch (NullPointerException e).
-    if (isMethodNotStatic) {
-      InsnList handler = new InsnList();
+    InsnList handler = new InsnList();
 
-      // try / catch (NullPointerException) for thread access
-      LabelNode catchNPE = new LabelNode();
-      handler.add(catchNPE);
-      // Pop NPE from stack
-      handler.add(new InsnNode(POP));
-      handler.add(new VarInsnNode(ALOAD, 0));
-      handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
-      handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
-      handler.add(new InsnNode(DUP_X1));
-      handler.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
-      handler.add(new JumpInsnNode(GOTO, retry));
-      //noinspection unchecked
-      method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
+    // try / catch (NullPointerException) for thread access
+    LabelNode catchNPE = new LabelNode();
+    handler.add(catchNPE);
+    // Pop NPE from stack
+    handler.add(new InsnNode(POP));
+    handler.add(new VarInsnNode(ALOAD, 0));
+    handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
+    handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
+    handler.add(new InsnNode(DUP_X1));
+    handler.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+    handler.add(new JumpInsnNode(GOTO, retry));
+    //noinspection unchecked
+    method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
 
-      method.instructions.add(handler);
-    }
+    method.instructions.add(handler);
   }
 
   //
