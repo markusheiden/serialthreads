@@ -95,6 +95,26 @@ public abstract class AbstractStackCode implements StackCode {
    //
 
    @Override
+   public InsnList getPreviousFrame(int localThread, int localPreviousFrame) {
+      InsnList result = new InsnList();
+      // localPreviousFrame = thread.frame;
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+      result.add(new VarInsnNode(ASTORE, localPreviousFrame));
+      return result;
+   }
+
+   @Override
+   public InsnList setFrame(int localThread, int localFrame) {
+      InsnList result = new InsnList();
+      // thread.frame = frame;
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+      return result;
+   }
+
+   @Override
    public InsnList stopDeserializing(int localThread) {
       return setSerializing(localThread, false);
    }
@@ -104,6 +124,7 @@ public abstract class AbstractStackCode implements StackCode {
     */
    private InsnList setSerializing(int localThread, boolean serializing) {
       InsnList instructions = new InsnList();
+      // thread.serializing = serializing;
       instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
       instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));

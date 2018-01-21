@@ -9,7 +9,6 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 /**
  * Method transformer for run methods.
@@ -86,9 +85,7 @@ class RunMethodTransformer extends MethodTransformer {
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
-    restoreCode.add(new VarInsnNode(ALOAD, localThread));
-    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
-    restoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+    restoreCode.add(stackCode.setFrame(localThread, localFrame));
 
     // no previous frame needed in run, because there may not be a previous frame
 

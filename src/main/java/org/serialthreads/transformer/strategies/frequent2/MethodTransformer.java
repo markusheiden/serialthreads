@@ -6,7 +6,10 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
 import static org.serialthreads.transformer.code.MethodCode.escapeForMethodName;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
@@ -89,9 +92,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
-    capture.add(new VarInsnNode(ALOAD, localThread));
-    capture.add(new VarInsnNode(ALOAD, localFrame));
-    capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+    capture.add(stackCode.setFrame(localThread, localFrame));
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
@@ -140,10 +141,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // TODO 2009-11-26 mh: remove me?
     // set the current frame, because the next called method will need it
-    // thread.frame = frame
-    restoreCode.add(new VarInsnNode(ALOAD, localThread));
-    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
-    restoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+    // thread.frame = frame;
+    restoreCode.add(stackCode.setFrame(localThread, localFrame));
 
     // restore stack "under" the returned value, if any
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???

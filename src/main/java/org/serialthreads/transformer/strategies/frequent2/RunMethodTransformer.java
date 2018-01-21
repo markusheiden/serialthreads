@@ -9,7 +9,6 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.GETFIELD;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
 
 /**
  * Method transformer for run methods.
@@ -75,9 +74,7 @@ class RunMethodTransformer extends MethodTransformer {
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
-    startRestoreCode.add(new VarInsnNode(ALOAD, localThread));
-    startRestoreCode.add(new VarInsnNode(ALOAD, localFrame));
-    startRestoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
+    startRestoreCode.add(stackCode.setFrame(localThread, localFrame));
 
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
 

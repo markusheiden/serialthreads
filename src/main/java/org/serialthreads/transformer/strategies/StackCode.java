@@ -3,6 +3,7 @@ package org.serialthreads.transformer.strategies;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 
 /**
@@ -20,7 +21,7 @@ public interface StackCode {
    *           Number of local containing the thread.
    * @param localFrame
    *           Number of local that will hold the current frame.
-   * @return generated code.
+   * @return Generated code.
    */
   InsnList firstFrame(int localThread, int localFrame);
 
@@ -29,7 +30,7 @@ public interface StackCode {
    *
    * @param localFrame
    *           number of local containing the current frame.
-   * @return generated code.
+   * @return Generated code.
    */
   InsnList resetMethod(int localFrame);
 
@@ -42,8 +43,8 @@ public interface StackCode {
    * Uses {@link StackFrame#addFrame()} to add a new frame, if no next frame is present.
    *
    * @param localPreviousFrame
-   *           Number of local containing the previous frame .
-   * @return generated code.
+   *           Number of local containing the previous frame.
+   * @return Generated code.
    */
   InsnList nextFrame(int localPreviousFrame);
 
@@ -52,7 +53,7 @@ public interface StackCode {
    *
    * @param localPreviousFrame
    *           Number of local containing the previous frame .
-   * @return Generated capture code.
+   * @return Generated code.
    */
   InsnList pushOwner(int localPreviousFrame);
 
@@ -67,7 +68,7 @@ public interface StackCode {
    *           Meta information about method call.
    * @param localFrame
    *           number of local containing the frameAfter.
-   * @return Generated capture code.
+   * @return Generated code.
    */
   InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
@@ -78,12 +79,16 @@ public interface StackCode {
    *           number of local containing the current frame.
    * @param position
    *           position of method call.
-   * @return generated capture code.
+   * @return Generated code.
    */
   InsnList pushMethod(int localFrame, int position);
 
   /**
    * Start serializing at interrupt.
+   *
+   * @param localThread
+   *           Number of local containing the thread.
+   * @return Generated code.
    */
   InsnList startSerializing(int localThread);
 
@@ -92,7 +97,33 @@ public interface StackCode {
   //
 
   /**
+   * Get (previous) frame from {@link Stack#frame} and store it to local #localPreviousFrame.
+   *
+   * @param localThread
+   *           Number of local containing the thread.
+   * @param localPreviousFrame
+   *           Number of local containing the previous frame.
+   * @return Generated code.
+   */
+  InsnList getPreviousFrame(int localThread, int localPreviousFrame);
+
+  /**
+   * Set frame to {@link Stack#frame}.
+   *
+   * @param localThread
+   *           Number of local containing the thread.
+   * @param localFrame
+   *           number of local containing the frame.
+   * @return Generated code.
+   */
+  InsnList setFrame(int localThread, int localFrame);
+
+  /**
    * Stop de-serializing when interrupt location has been reached.
+   *
+   * @param localThread
+   *           Number of local containing the thread.
+   * @return Generated code.
    */
   InsnList stopDeserializing(int localThread);
 
@@ -101,7 +132,7 @@ public interface StackCode {
    *
    * @param localFrame
    *           number of local containing the frame.
-   * @return generated restore code.
+   * @return Generated code.
    */
   InsnList popOwner(int localFrame);
 
@@ -110,7 +141,7 @@ public interface StackCode {
    *
    * @param localFrame
    *           number of local containing the current frame.
-   * @return generated restore code.
+   * @return Generated code.
    */
   InsnList popMethod(int localFrame);
 
@@ -125,7 +156,7 @@ public interface StackCode {
    *           Meta information about method call.
    * @param localFrame
    *           number of local containing the frame.
-   * @return generated restore code.
+   * @return Generated code.
    */
   InsnList popFromFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 }
