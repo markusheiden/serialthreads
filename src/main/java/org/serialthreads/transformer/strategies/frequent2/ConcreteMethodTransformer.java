@@ -3,11 +3,8 @@ package org.serialthreads.transformer.strategies.frequent2;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
-
-import static org.objectweb.asm.Opcodes.ASTORE;
 
 /**
  * Method transformer for concrete methods.
@@ -56,8 +53,8 @@ class ConcreteMethodTransformer extends MethodTransformer {
     InsnList getFrame = new InsnList();
     // previousFrame = thread.frame;
     getFrame.add(stackCode.getPreviousFrame(localThread, localPreviousFrame));
-    getFrame.add(stackCode.nextFrame(localPreviousFrame));
-    getFrame.add(new VarInsnNode(ASTORE, localFrame));
+    // frame = previousFrame.next; // etc.
+    getFrame.add(stackCode.nextFrame(localPreviousFrame, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
     InsnList restoreCode = new InsnList();

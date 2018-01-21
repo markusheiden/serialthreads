@@ -4,7 +4,9 @@ import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 
 /**
@@ -63,22 +65,13 @@ class ConcreteMethodTransformer extends MethodTransformer {
       getFrame.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
     }
 
-    getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
     if (needsFrame()) {
-      LabelNode normal = new LabelNode();
-
-      // frame = previousFrame.next
-      getFrame.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-      getFrame.add(new InsnNode(DUP));
-      getFrame.add(new JumpInsnNode(IFNONNULL, normal));
-
-      getFrame.add(new InsnNode(POP));
-      // frame = previousFrame.addFrame();
-      getFrame.add(stackCode.nextFrame(localPreviousFrame));
-
-      getFrame.add(normal);
+      // frame = previousFrame.next; // etc.
+      getFrame.add(stackCode.nextFrame(localPreviousFrame, localFrame));
+    } else {
+      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      getFrame.add(new VarInsnNode(ASTORE, localFrame));
     }
-    getFrame.add(new VarInsnNode(ASTORE, localFrame));
 
     method.instructions.insertBefore(method.instructions.getFirst(), getFrame);
   }

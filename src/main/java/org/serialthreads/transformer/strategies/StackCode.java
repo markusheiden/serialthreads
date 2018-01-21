@@ -44,9 +44,11 @@ public interface StackCode {
    *
    * @param localPreviousFrame
    *           Number of local containing the previous frame.
+   * @param localFrame
+   *           Number of local that will hold the current frame.
    * @return Generated code.
    */
-  InsnList nextFrame(int localPreviousFrame);
+  InsnList nextFrame(int localPreviousFrame, int localFrame);
 
   /**
    * Push "this" as owner to the previous frame.

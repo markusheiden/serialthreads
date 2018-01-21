@@ -7,7 +7,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.IFEQ;
 
@@ -65,8 +64,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     // previousFrame = thread.frame;
     getFrame.add(stackCode.getPreviousFrame(localThread, localPreviousFrame));
     // frame = previousFrame.next; // etc.
-    getFrame.add(stackCode.nextFrame(localPreviousFrame));
-    getFrame.add(new VarInsnNode(ASTORE, localFrame));
+    getFrame.add(stackCode.nextFrame(localPreviousFrame, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
     InsnList restoreCode = new InsnList();

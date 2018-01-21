@@ -46,7 +46,7 @@ public abstract class AbstractStackCode implements StackCode {
    //
 
    @Override
-   public InsnList nextFrame(int localPreviousFrame) {
+   public InsnList nextFrame(int localPreviousFrame, int localFrame) {
       InsnList result = new InsnList();
 
       LabelNode normal = new LabelNode();
@@ -61,6 +61,7 @@ public abstract class AbstractStackCode implements StackCode {
       result.add(new VarInsnNode(ALOAD, localPreviousFrame));
       result.add(new MethodInsnNode(INVOKEVIRTUAL, FRAME_IMPL_NAME, "addFrame", "()" + FRAME_IMPL_DESC, false));
       result.add(normal);
+      result.add(new VarInsnNode(ASTORE, localFrame));
 
       return result;
    }
