@@ -36,7 +36,7 @@ public class CompactingStackCode extends AbstractStackCode {
    private static final Logger logger = LoggerFactory.getLogger(CompactingStackCode.class);
 
    @Override
-   public InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       InsnList result = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
@@ -105,7 +105,7 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    @Override
-   public InsnList popFromFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       InsnList result = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {

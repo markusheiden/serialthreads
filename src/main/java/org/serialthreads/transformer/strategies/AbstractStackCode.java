@@ -23,7 +23,7 @@ public abstract class AbstractStackCode implements StackCode {
    //
 
    @Override
-   public InsnList firstFrame(int localThread, int localFrame) {
+   public InsnList getFirstFrame(int localThread, int localFrame) {
       InsnList result = new InsnList();
       // frame = thread.first;
       result.add(new VarInsnNode(ALOAD, localThread));
@@ -46,7 +46,7 @@ public abstract class AbstractStackCode implements StackCode {
    //
 
    @Override
-   public InsnList nextFrame(int localPreviousFrame, int localFrame) {
+   public InsnList getNextFrame(int localPreviousFrame, int localFrame) {
       InsnList result = new InsnList();
 
       LabelNode normal = new LabelNode();
@@ -67,7 +67,7 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList pushOwner(int localPreviousFrame) {
+   public InsnList setOwner(int localPreviousFrame) {
       InsnList result = new InsnList();
       // previousFrame.owner = this;
       result.add(new VarInsnNode(ALOAD, localPreviousFrame));
@@ -77,7 +77,7 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList pushMethod(int localFrame, int position) {
+   public InsnList setMethod(int localFrame, int position) {
       InsnList result = new InsnList();
       // frame.method = position;
       result.add(new VarInsnNode(ALOAD, localFrame));
@@ -87,13 +87,26 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList startSerializing(int localThread) {
-      return setSerializing(localThread, true);
+   public InsnList setSerializing(int localThread, boolean serializing) {
+      InsnList instructions = new InsnList();
+      // thread.serializing = serializing;
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
+      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+      return instructions;
    }
 
    //
    // Restore.
    //
+
+   @Override
+   public InsnList pushSerializing(int localThread) {
+      InsnList result = new InsnList();
+      result.add(new VarInsnNode(ALOAD, localThread));
+      result.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+      return result;
+   }
 
    @Override
    public InsnList getPreviousFrame(int localThread, int localPreviousFrame) {
@@ -116,24 +129,7 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList stopDeserializing(int localThread) {
-      return setSerializing(localThread, false);
-   }
-
-   /**
-    * Set {@link Stack#serializing}.
-    */
-   private InsnList setSerializing(int localThread, boolean serializing) {
-      InsnList instructions = new InsnList();
-      // thread.serializing = serializing;
-      instructions.add(new VarInsnNode(ALOAD, localThread));
-      instructions.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
-      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
-      return instructions;
-   }
-
-   @Override
-   public InsnList popOwner(int localFrame) {
+   public InsnList pushOwner(int localFrame) {
       InsnList result = new InsnList();
       result.add(new VarInsnNode(ALOAD, localFrame));
       result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
@@ -141,7 +137,7 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList popMethod(int localFrame) {
+   public InsnList pushMethod(int localFrame) {
       InsnList result = new InsnList();
       result.add(new VarInsnNode(ALOAD, localFrame));
       result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));

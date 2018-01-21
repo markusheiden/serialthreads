@@ -23,10 +23,10 @@ public interface StackCode {
    *           Number of local that will hold the current frame.
    * @return Generated code.
    */
-  InsnList firstFrame(int localThread, int localFrame);
+  InsnList getFirstFrame(int localThread, int localFrame);
 
   /**
-   * Reset method in frame.
+   * Reset {@link StackFrame#method}.
    *
    * @param localFrame
    *           number of local containing the current frame.
@@ -39,7 +39,7 @@ public interface StackCode {
   //
 
   /**
-   * Get next frame from the current frame.
+   * Get {@link StackFrame#next} from the current frame and store it in a local.
    * Uses {@link StackFrame#addFrame()} to add a new frame, if no next frame is present.
    *
    * @param localPreviousFrame
@@ -48,16 +48,16 @@ public interface StackCode {
    *           Number of local that will hold the current frame.
    * @return Generated code.
    */
-  InsnList nextFrame(int localPreviousFrame, int localFrame);
+  InsnList getNextFrame(int localPreviousFrame, int localFrame);
 
   /**
-   * Push "this" as owner to the previous frame.
+   * Set "this" as {@link StackFrame#owner} into the previous frame.
    *
    * @param localPreviousFrame
    *           Number of local containing the previous frame .
    * @return Generated code.
    */
-  InsnList pushOwner(int localPreviousFrame);
+  InsnList setOwner(int localPreviousFrame);
 
   /**
    * Save current frameAfter after returning from a method call.
@@ -72,10 +72,10 @@ public interface StackCode {
    *           number of local containing the frameAfter.
    * @return Generated code.
    */
-  InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+  InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
-   * Push method (index) onto frame.
+   * Set position as {@link StackFrame#method}.
    *
    * @param localFrame
    *           number of local containing the current frame.
@@ -83,20 +83,32 @@ public interface StackCode {
    *           position of method call.
    * @return Generated code.
    */
-  InsnList pushMethod(int localFrame, int position);
+  InsnList setMethod(int localFrame, int position);
 
   /**
-   * Start serializing at interrupt.
+   * Set {@link Stack#serializing}.
+   *
+   * @param localThread
+   *           Number of local containing the thread.
+   * @param serializing
+   *           Start serializing at interrupt (true) or
+   *           Stop de-serializing when interrupt location has been reached (false).
+   * @return Generated code.
+   */
+  InsnList setSerializing(int localThread, boolean serializing);
+
+  //
+  // Restore.
+  //
+
+  /**
+   * Push {@link Stack#serializing} onto stack.
    *
    * @param localThread
    *           Number of local containing the thread.
    * @return Generated code.
    */
-  InsnList startSerializing(int localThread);
-
-  //
-  // Restore.
-  //
+  InsnList pushSerializing(int localThread);
 
   /**
    * Get (previous) frame from {@link Stack#frame} and store it to local #localPreviousFrame.
@@ -125,31 +137,22 @@ public interface StackCode {
   InsnList setFrame(int localThread, int localFrame);
 
   /**
-   * Stop de-serializing when interrupt location has been reached.
-   *
-   * @param localThread
-   *           Number of local containing the thread.
-   * @return Generated code.
-   */
-  InsnList stopDeserializing(int localThread);
-
-  /**
-   * Restore owner from frame.
+   * Push {@link StackFrame#owner} onto stack.
    *
    * @param localFrame
    *           number of local containing the frame.
    * @return Generated code.
    */
-  InsnList popOwner(int localFrame);
+  InsnList pushOwner(int localFrame);
 
   /**
-   * Restore method (index) from frame.
+   * Push {@link StackFrame#method} onto stack.
    *
    * @param localFrame
    *           number of local containing the current frame.
    * @return Generated code.
    */
-  InsnList popMethod(int localFrame);
+  InsnList pushMethod(int localFrame);
 
   /**
    * Restore current frame before resuming the method call.
@@ -164,5 +167,5 @@ public interface StackCode {
    *           number of local containing the frame.
    * @return Generated code.
    */
-  InsnList popFromFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+  InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 }

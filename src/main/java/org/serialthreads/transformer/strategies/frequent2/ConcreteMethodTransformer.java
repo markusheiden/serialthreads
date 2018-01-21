@@ -54,7 +54,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     // previousFrame = thread.frame;
     getFrame.add(stackCode.getPreviousFrame(localThread, localPreviousFrame));
     // frame = previousFrame.next; // etc.
-    getFrame.add(stackCode.nextFrame(localPreviousFrame, localFrame));
+    getFrame.add(stackCode.getNextFrame(localPreviousFrame, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
     InsnList restoreCode = new InsnList();

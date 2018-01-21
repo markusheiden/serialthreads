@@ -81,7 +81,7 @@ class RunMethodTransformer extends MethodTransformer {
     restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // frame = thread.first;
-    restoreCode.add(stackCode.firstFrame(localThread, localFrame));
+    restoreCode.add(stackCode.getFirstFrame(localThread, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
@@ -90,7 +90,7 @@ class RunMethodTransformer extends MethodTransformer {
     // no previous frame needed in run, because there may not be a previous frame
 
     // restore code dispatcher
-    restoreCode.add(restoreCodeDispatcher(popMethod(), restores, -1));
+    restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, -1));
     restoreCode.add(startRestoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);

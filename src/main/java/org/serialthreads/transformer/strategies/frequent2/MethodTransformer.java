@@ -7,7 +7,6 @@ import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
@@ -70,8 +69,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList capture = new InsnList();
 
     // if not serializing "GOTO" normal
-    capture.add(new VarInsnNode(ALOAD, localThread));
-    capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    capture.add(stackCode.pushSerializing(localThread));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // get rid of dummy return value of called method first
@@ -80,9 +78,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     }
 
     // capture frame and return early
-    capture.add(pushToFrame(methodCall, metaInfo));
-    capture.add(pushMethod(position));
-    capture.add(pushOwner(methodCall, metaInfo, suppressOwner));
+    capture.add(captureFrame(methodCall, metaInfo));
+    capture.add(setMethod(position));
+    capture.add(setOwner(methodCall, metaInfo, suppressOwner));
     capture.add(dummyReturnStatement(method));
 
     capture.add(restoreCode);
@@ -122,15 +120,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // call interrupted method
-    restoreCode.add(popOwner(methodCall, metaInfo));
+    restoreCode.add(pushOwner(methodCall, metaInfo));
     // jump to cloned method call with thread and frame as arguments
     restoreCode.add(new VarInsnNode(ALOAD, localThread));
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
     restoreCode.add(clonedCall);
 
     // if not serializing "GOTO" normal, but restore the frame first
-    restoreCode.add(new VarInsnNode(ALOAD, localThread));
-    restoreCode.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restoreCode.add(stackCode.pushSerializing(localThread));
     restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // early return, the frame already has been captured
@@ -150,7 +147,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     if (needToSaveReturnValue) {
       restoreCode.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
     }
-    restoreCode.add(popFromFrame(clonedCall, metaInfo));
+    restoreCode.add(restoreFrame(clonedCall, metaInfo));
     if (needToSaveReturnValue) {
       restoreCode.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
     }

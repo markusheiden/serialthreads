@@ -6,8 +6,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.IFEQ;
 
 /**
@@ -64,7 +62,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     // previousFrame = thread.frame;
     getFrame.add(stackCode.getPreviousFrame(localThread, localPreviousFrame));
     // frame = previousFrame.next; // etc.
-    getFrame.add(stackCode.nextFrame(localPreviousFrame, localFrame));
+    getFrame.add(stackCode.getNextFrame(localPreviousFrame, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
     InsnList restoreCode = new InsnList();
@@ -72,12 +70,11 @@ class ConcreteMethodTransformer extends MethodTransformer {
     restoreCode.add(stackCode.setFrame(localThread, localFrame));
 
     // if not serializing "GOTO" normal
-    restoreCode.add(new VarInsnNode(ALOAD, localThread));
-    restoreCode.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
+    restoreCode.add(stackCode.pushSerializing(localThread));
     restoreCode.add(new JumpInsnNode(IFEQ, getThread));
 
     // else restore code dispatcher
-    restoreCode.add(restoreCodeDispatcher(popMethod(), restores, 0));
+    restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
     // insert label for normal body of method
     restoreCode.add(getThread);

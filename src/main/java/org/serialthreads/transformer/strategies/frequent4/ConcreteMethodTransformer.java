@@ -67,7 +67,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
 
     if (needsFrame()) {
       // frame = previousFrame.next; // etc.
-      getFrame.add(stackCode.nextFrame(localPreviousFrame, localFrame));
+      getFrame.add(stackCode.getNextFrame(localPreviousFrame, localFrame));
     } else {
       getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
       getFrame.add(new VarInsnNode(ASTORE, localFrame));

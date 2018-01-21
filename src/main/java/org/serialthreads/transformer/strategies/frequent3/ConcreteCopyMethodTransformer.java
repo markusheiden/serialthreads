@@ -88,7 +88,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     }
 
     // restore code dispatcher
-    restoreCode.add(restoreCodeDispatcher(popMethod(), restores, 0));
+    restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
   }

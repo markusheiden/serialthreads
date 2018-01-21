@@ -318,7 +318,7 @@ public abstract class AbstractMethodTransformer {
     // Stop deserializing.
     restoreCode.add(stopDeserializing());
     // Restore frame.
-    restoreCode.add(popFromFrame(methodCall, metaInfo));
+    restoreCode.add(restoreFrame(methodCall, metaInfo));
 
     // resume
     restoreCode.add(new JumpInsnNode(GOTO, normal));
@@ -367,10 +367,10 @@ public abstract class AbstractMethodTransformer {
     InsnList capture = new InsnList();
 
     // Capture frame.
-    capture.add(pushToFrame(methodCall, metaInfo));
-    capture.add(pushMethod(position));
+    capture.add(captureFrame(methodCall, metaInfo));
+    capture.add(setMethod(position));
     // TODO 2018-01-17 markus: Remove (at least for frequent 3+) because method owner is already stored in frame.
-    capture.add(pushOwner(methodCall, metaInfo, suppressOwner));
+    capture.add(setOwner(methodCall, metaInfo, suppressOwner));
     // Start serializing and return early.
     capture.add(startSerializing());
 
@@ -491,8 +491,8 @@ public abstract class AbstractMethodTransformer {
    *           Meta information about method call.
    * @return generated capture code.
    */
-  protected InsnList pushToFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.pushToFrame(method, methodCall, metaInfo, localFrame());
+  protected InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackCode.captureFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -504,8 +504,8 @@ public abstract class AbstractMethodTransformer {
    *           Meta information about method call.
    * @return generated restore code.
    */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.popFromFrame(method, methodCall, metaInfo, localFrame());
+  protected InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackCode.restoreFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -515,12 +515,12 @@ public abstract class AbstractMethodTransformer {
    *           position of method call.
    * @return generated capture code.
    */
-  protected InsnList pushMethod(int position) {
+  protected InsnList setMethod(int position) {
     if (interruptibleMethodCalls.size() <= 1) {
       return new InsnList();
     }
 
-    return stackCode.pushMethod(localFrame(), position);
+    return stackCode.setMethod(localFrame(), position);
   }
 
   /**
@@ -528,8 +528,8 @@ public abstract class AbstractMethodTransformer {
    *
    * @return generated restore code.
    */
-  protected InsnList popMethod() {
-    return stackCode.popMethod(localFrame());
+  protected InsnList pushMethod() {
+    return stackCode.pushMethod(localFrame());
   }
 
   /**
@@ -543,12 +543,12 @@ public abstract class AbstractMethodTransformer {
    *           Suppress saving the owner?.
    * @return generated capture code.
    */
-  protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+  protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
     if (suppressOwner || isSelfCall(methodCall, metaInfo) || isStatic(method)) {
       return new InsnList();
     }
 
-    return stackCode.pushOwner(localPreviousFrame());
+    return stackCode.setOwner(localPreviousFrame());
   }
 
   /**
@@ -560,7 +560,7 @@ public abstract class AbstractMethodTransformer {
    *           Meta information about method call.
    * @return generated restore code.
    */
-  protected InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo) {
+  protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo) {
     InsnList result = new InsnList();
 
     if (isSelfCall(methodCall, metaInfo)) {
@@ -568,7 +568,7 @@ public abstract class AbstractMethodTransformer {
       result.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(methodCall)) {
       // get owner
-      result.add(stackCode.popOwner(localFrame()));
+      result.add(stackCode.pushOwner(localFrame()));
       result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 
@@ -580,7 +580,7 @@ public abstract class AbstractMethodTransformer {
    */
   protected InsnList startSerializing() {
     InsnList result = new InsnList();
-    result.add(stackCode.startSerializing(localThread()));
+    result.add(stackCode.setSerializing(localThread(), true));
     result.add(dummyReturnStatement(method));
     return result;
   }
@@ -589,6 +589,6 @@ public abstract class AbstractMethodTransformer {
    * Stop de-serializing when interrupt location has been reached.
    */
   protected InsnList stopDeserializing() {
-    return stackCode.stopDeserializing(localThread());
+    return stackCode.setSerializing(localThread(), false);
   }
 }

@@ -143,8 +143,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // Capture frame and return early.
-    capture.add(pushToFrame(methodCall, metaInfo));
-    capture.add(pushMethod(position));
+    capture.add(captureFrame(methodCall, metaInfo));
+    capture.add(setMethod(position));
     // We are already serializing.
     capture.add(methodReturn(true));
 
@@ -179,7 +179,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
     logger.debug("        Optimized tail call");
-    capture.add(pushMethod(position));
+    capture.add(setMethod(position));
     capture.add(new InsnNode(IRETURN));
 
     capture.add(restoreCode);
@@ -189,7 +189,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   @Override
-  public InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+  public InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
     return new InsnList();
   }
 
@@ -221,7 +221,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // Call interrupted method.
-    restoreCode.add(popOwner(methodCall, metaInfo));
+    restoreCode.add(pushOwner(methodCall, metaInfo));
     // Jump to cloned method call with thread and frame as arguments.
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
     restoreCode.add(clonedCall);
@@ -246,7 +246,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restoreCode.add(restoreFrame);
 
     // Restore stack "under" the returned value, if any.
-    restoreCode.add(popFromFrame(methodCall, metaInfo));
+    restoreCode.add(restoreFrame(methodCall, metaInfo));
     // Due to insertion point of the restore code, the following code is already directly after the insertion point:
     // Restore return value of call, if any.
     // if (isNotVoid(methodCall)) {
