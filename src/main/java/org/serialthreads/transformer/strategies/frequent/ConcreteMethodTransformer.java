@@ -80,7 +80,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     restoreCode.add(new JumpInsnNode(IFEQ, getThread));
 
     // else restore code dispatcher
-    restoreCode.add(restoreCodeDispatcher(popMethodFromFrame(), restores, 0));
+    restoreCode.add(restoreCodeDispatcher(popMethod(), restores, 0));
 
     // insert label for normal body of method
     restoreCode.add(getThread);

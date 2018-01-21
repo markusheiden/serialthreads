@@ -144,7 +144,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Capture frame and return early.
     capture.add(pushToFrame(methodCall, metaInfo));
-    capture.add(pushMethodToFrame(position));
+    capture.add(pushMethod(position));
     // We are already serializing.
     capture.add(methodReturn(true));
 
@@ -179,7 +179,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
     logger.debug("        Optimized tail call");
-    capture.add(pushMethodToFrame(position));
+    capture.add(pushMethod(position));
     capture.add(new InsnNode(IRETURN));
 
     capture.add(restoreCode);
@@ -189,7 +189,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   @Override
-  public InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+  public InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
     return new InsnList();
   }
 
@@ -221,7 +221,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // Call interrupted method.
-    restoreCode.add(popOwnerFromFrame(methodCall, metaInfo));
+    restoreCode.add(popOwner(methodCall, metaInfo));
     // Jump to cloned method call with thread and frame as arguments.
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
     restoreCode.add(clonedCall);

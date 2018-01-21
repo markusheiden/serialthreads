@@ -368,9 +368,9 @@ public abstract class AbstractMethodTransformer {
 
     // Capture frame.
     capture.add(pushToFrame(methodCall, metaInfo));
-    capture.add(pushMethodToFrame(position));
+    capture.add(pushMethod(position));
     // TODO 2018-01-17 markus: Remove (at least for frequent 3+) because method owner is already stored in frame.
-    capture.add(pushOwnerToFrame(methodCall, metaInfo, suppressOwner));
+    capture.add(pushOwner(methodCall, metaInfo, suppressOwner));
     // Start serializing and return early.
     capture.add(startSerializing());
 
@@ -496,18 +496,40 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
+   * Restore current frame before resuming the method call
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated restore code.
+   */
+  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackCode.popFromFrame(method, methodCall, metaInfo, localFrame());
+  }
+
+  /**
    * Push method onto frame.
    *
    * @param position
    *           position of method call.
    * @return generated capture code.
    */
-  protected InsnList pushMethodToFrame(int position) {
+  protected InsnList pushMethod(int position) {
     if (interruptibleMethodCalls.size() <= 1) {
       return new InsnList();
     }
 
     return stackCode.pushMethod(position, localFrame());
+  }
+
+  /**
+   * Restore method from frame.
+   *
+   * @return generated restore code.
+   */
+  protected InsnList popMethod() {
+    return stackCode.popMethod(localFrame());
   }
 
   /**
@@ -521,12 +543,25 @@ public abstract class AbstractMethodTransformer {
    *           Suppress saving the owner?.
    * @return generated capture code.
    */
-  protected InsnList pushOwnerToFrame(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+  protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
     if (suppressOwner) {
       return new InsnList();
     }
 
     return stackCode.pushOwner(method, methodCall, metaInfo, localPreviousFrame());
+  }
+
+  /**
+   * Restore owner.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return generated restore code.
+   */
+  protected InsnList popOwner(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return stackCode.popOwner(methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -544,40 +579,5 @@ public abstract class AbstractMethodTransformer {
    */
   protected InsnList stopDeserializing() {
     return stackCode.stopDeserializing(localThread());
-  }
-
-  /**
-   * Restore owner.
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated restore code.
-   */
-  protected InsnList popOwnerFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.popOwner(methodCall, metaInfo, localFrame());
-  }
-
-  /**
-   * Restore method from frame.
-   *
-   * @return generated restore code.
-   */
-  protected InsnList popMethodFromFrame() {
-    return stackCode.popMethod(localFrame());
-  }
-
-  /**
-   * Restore current frame before resuming the method call
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated restore code.
-   */
-  protected InsnList popFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.popFromFrame(method, methodCall, metaInfo, localFrame());
   }
 }

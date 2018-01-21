@@ -79,7 +79,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     restoreCode.add(new VarInsnNode(ASTORE, localFrame));
 
     // restore code dispatcher
-    restoreCode.add(restoreCodeDispatcher(popMethodFromFrame(), restores, 0));
+    restoreCode.add(restoreCodeDispatcher(popMethod(), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
   }
