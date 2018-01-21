@@ -520,7 +520,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackCode.pushMethod(position, localFrame());
+    return stackCode.pushMethod(localFrame(), position);
   }
 
   /**

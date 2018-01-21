@@ -9,6 +9,10 @@ import org.serialthreads.context.StackFrame;
  * Capture and restore of stack frames.
  */
 public interface StackCode {
+  //
+  // run() methods.
+  //
+
   /**
    * Get first frame of the stack and store in a local.
    *
@@ -21,8 +25,21 @@ public interface StackCode {
   InsnList firstFrame(int localThread, int localFrame);
 
   /**
+   * Reset method in frame.
+   *
+   * @param localFrame
+   *           number of local containing the current frame.
+   * @return generated code.
+   */
+  InsnList resetMethod(int localFrame);
+
+  //
+  // Capture.
+  //
+
+  /**
    * Get next frame from the current frame.
-   * Use {@link StackFrame#addFrame()} to add a new one, if no next frame is present.
+   * Uses {@link StackFrame#addFrame()} to add a new frame, if no next frame is present.
    *
    * @param localPreviousFrame
    *           Number of local containing the previous frame .
@@ -55,29 +72,24 @@ public interface StackCode {
   InsnList pushToFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
-   * Reset method in frame.
-   *
-   * @param localFrame
-   *           number of local containing the current frame.
-   * @return generated code.
-   */
-  InsnList resetMethod(int localFrame);
-
-  /**
    * Push method (index) onto frame.
    *
-   * @param position
-   *           position of method call.
    * @param localFrame
    *           number of local containing the current frame.
+   * @param position
+   *           position of method call.
    * @return generated capture code.
    */
-  InsnList pushMethod(int position, int localFrame);
+  InsnList pushMethod(int localFrame, int position);
 
   /**
    * Start serializing at interrupt.
    */
   InsnList startSerializing(int localThread);
+
+  //
+  // Restore.
+  //
 
   /**
    * Stop de-serializing when interrupt location has been reached.

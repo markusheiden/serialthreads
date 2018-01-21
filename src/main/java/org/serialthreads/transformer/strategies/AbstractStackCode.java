@@ -18,6 +18,10 @@ public abstract class AbstractStackCode implements StackCode {
    private static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
+   //
+   // run() methods.
+   //
+
    @Override
    public InsnList firstFrame(int localThread, int localFrame) {
       InsnList result = new InsnList();
@@ -27,6 +31,19 @@ public abstract class AbstractStackCode implements StackCode {
       result.add(new VarInsnNode(ASTORE, localFrame));
       return result;
    }
+
+   @Override
+   public InsnList resetMethod(int localFrame) {
+      InsnList result = new InsnList();
+      result.add(new VarInsnNode(ALOAD, localFrame));
+      result.add(new InsnNode(ICONST_0));
+      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
+      return result;
+   }
+
+   //
+   // Capture.
+   //
 
    @Override
    public InsnList nextFrame(int localPreviousFrame) {
@@ -43,7 +60,6 @@ public abstract class AbstractStackCode implements StackCode {
       // frame = previousFrame.addFrame();
       result.add(new VarInsnNode(ALOAD, localPreviousFrame));
       result.add(new MethodInsnNode(INVOKEVIRTUAL, FRAME_IMPL_NAME, "addFrame", "()" + FRAME_IMPL_DESC, false));
-
       result.add(normal);
 
       return result;
@@ -60,16 +76,7 @@ public abstract class AbstractStackCode implements StackCode {
    }
 
    @Override
-   public InsnList resetMethod(int localFrame) {
-      InsnList result = new InsnList();
-      result.add(new VarInsnNode(ALOAD, localFrame));
-      result.add(new InsnNode(ICONST_0));
-      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
-      return result;
-   }
-
-   @Override
-   public InsnList pushMethod(int position, int localFrame) {
+   public InsnList pushMethod(int localFrame, int position) {
       InsnList result = new InsnList();
       // frame.method = position;
       result.add(new VarInsnNode(ALOAD, localFrame));
@@ -82,6 +89,10 @@ public abstract class AbstractStackCode implements StackCode {
    public InsnList startSerializing(int localThread) {
       return setSerializing(localThread, true);
    }
+
+   //
+   // Restore.
+   //
 
    @Override
    public InsnList stopDeserializing(int localThread) {
