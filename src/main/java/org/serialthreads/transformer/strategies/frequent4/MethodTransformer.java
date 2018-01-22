@@ -144,6 +144,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Capture frame and return early.
     capture.add(captureFrame(methodCall, metaInfo));
+    // frame.method = position;
     capture.add(setMethod(position));
     // We are already serializing.
     capture.add(methodReturn(true));

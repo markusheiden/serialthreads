@@ -406,6 +406,7 @@ public abstract class AbstractMethodTransformer {
 
     InsnList instructions = new InsnList();
     instructions.add(exception);
+    // throw new ThreadFinishedException(this.toString());
     instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
     instructions.add(new InsnNode(DUP));
     // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
