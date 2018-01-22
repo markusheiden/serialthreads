@@ -46,7 +46,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     InsnList capture = new InsnList();
 
-    // if not serializing "GOTO" normal
+    // if (!thread.serializing) "GOTO" normal.
     capture.add(stackCode.pushSerializing(localThread));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
@@ -105,7 +105,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restoreCode.add(dummyArguments(methodCall));
     restoreCode.add(clonedCall);
 
-    // if not serializing "GOTO" normal, but restore the frame first
+    // if (!thread.serializing) "GOTO" normal, but restore the frame first.
     restoreCode.add(stackCode.pushSerializing(localThread));
     restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
 

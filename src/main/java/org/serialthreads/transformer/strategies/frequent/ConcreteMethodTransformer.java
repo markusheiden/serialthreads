@@ -69,7 +69,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
     // thread.frame = frame;
     restoreCode.add(stackCode.setFrame(localThread, localFrame));
 
-    // if not serializing "GOTO" normal
+    // if (!thread.serializing) "GOTO" normal.
     restoreCode.add(stackCode.pushSerializing(localThread));
     restoreCode.add(new JumpInsnNode(IFEQ, getThread));
 
