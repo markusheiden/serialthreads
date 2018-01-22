@@ -429,6 +429,7 @@ public abstract class AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     if (isStatic(method)) {
+      // thread = SerialThreadManager.getThread();
       instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
       instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
       instructions.add(new VarInsnNode(ASTORE, localThread));
@@ -439,7 +440,7 @@ public abstract class AbstractMethodTransformer {
       return;
     }
 
-    // Get thread.
+    // thread = this.$$thread$$;
     instructions.add(threadCode.pushThread(clazz.name));
 
     LabelNode retry = new LabelNode();
