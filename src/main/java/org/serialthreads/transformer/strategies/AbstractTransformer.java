@@ -333,6 +333,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
       // init $$thread$$ field before returning from constructor
       InsnList instructions = new InsnList();
+      // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
       instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
       instructions.add(new InsnNode(DUP));
@@ -359,6 +360,7 @@ public abstract class AbstractTransformer implements ITransformer {
     getThread.maxStack = 1;
 
     InsnList instructions = getThread.instructions;
+    // return this.$$thread$$;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
     instructions.add(new InsnNode(ARETURN));
