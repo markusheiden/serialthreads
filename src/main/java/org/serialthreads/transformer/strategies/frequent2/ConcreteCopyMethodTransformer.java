@@ -77,7 +77,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     restoreCode.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
     // frame = previousFrame.next;
-    restoreCode.add(stackCode.getNextFrame(localPreviousFrame, localFrame, false));
+    restoreCode.add(threadCode.getNextFrame(localPreviousFrame, localFrame, false));
 
     // thread = currentThread;
     // TODO 2009-10-22 mh: rename locals to avoid this copy?

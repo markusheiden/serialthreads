@@ -10,7 +10,7 @@ import org.serialthreads.context.StackFrame;
 /**
  * Capture and restore of stack frames.
  */
-public interface StackCode {
+public interface ThreadCode {
   //
   // Constructors.
   //

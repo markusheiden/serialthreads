@@ -12,7 +12,7 @@ import static org.serialthreads.transformer.code.IntValueCode.push;
 /**
  * Base code that is independent from stack frame storage algorithm.
  */
-public abstract class AbstractStackCode implements StackCode {
+public abstract class AbstractStackCode implements ThreadCode {
    private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
    private static final String CLASS_NAME = Type.getType(Class.class).getInternalName();

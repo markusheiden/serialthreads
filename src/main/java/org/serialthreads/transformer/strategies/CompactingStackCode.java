@@ -26,7 +26,7 @@ import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
- * {@link StackCode} using compact storage of stack frames.
+ * {@link ThreadCode} using compact storage of stack frames.
  * Locals are grouped per type and get "renumbered".
  */
 public class CompactingStackCode extends AbstractStackCode {

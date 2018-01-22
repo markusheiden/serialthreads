@@ -48,7 +48,7 @@ public abstract class AbstractMethodTransformer {
   protected final MethodNode method;
   protected final IClassInfoCache classInfoCache;
 
-  protected final StackCode stackCode = new CompactingStackCode();
+  protected final ThreadCode threadCode = new CompactingStackCode();
 
   /**
    * Meta information about instructions.
@@ -440,7 +440,7 @@ public abstract class AbstractMethodTransformer {
     }
 
     // Get thread.
-    instructions.add(stackCode.pushThread(clazz.name));
+    instructions.add(threadCode.pushThread(clazz.name));
 
     LabelNode retry = new LabelNode();
     instructions.add(retry);
@@ -469,7 +469,7 @@ public abstract class AbstractMethodTransformer {
     handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
     handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     handler.add(new InsnNode(DUP_X1));
-    handler.add(stackCode.setThread(clazz.name));
+    handler.add(threadCode.setThread(clazz.name));
     handler.add(new JumpInsnNode(GOTO, retry));
     //noinspection unchecked
     method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
@@ -491,7 +491,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.captureFrame(method, methodCall, metaInfo, localFrame());
+    return threadCode.captureFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -504,7 +504,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return stackCode.restoreFrame(method, methodCall, metaInfo, localFrame());
+    return threadCode.restoreFrame(method, methodCall, metaInfo, localFrame());
   }
 
   /**
@@ -519,7 +519,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackCode.setMethod(localFrame(), position);
+    return threadCode.setMethod(localFrame(), position);
   }
 
   /**
@@ -528,7 +528,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList pushMethod() {
-    return stackCode.pushMethod(localFrame());
+    return threadCode.pushMethod(localFrame());
   }
 
   /**
@@ -547,7 +547,7 @@ public abstract class AbstractMethodTransformer {
       return new InsnList();
     }
 
-    return stackCode.setOwner(localPreviousFrame());
+    return threadCode.setOwner(localPreviousFrame());
   }
 
   /**
@@ -567,7 +567,7 @@ public abstract class AbstractMethodTransformer {
       result.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(methodCall)) {
       // get owner
-      result.add(stackCode.pushOwner(localFrame()));
+      result.add(threadCode.pushOwner(localFrame()));
       result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 
@@ -579,7 +579,7 @@ public abstract class AbstractMethodTransformer {
    */
   protected InsnList startSerializing() {
     InsnList result = new InsnList();
-    result.add(stackCode.setSerializing(localThread(), true));
+    result.add(threadCode.setSerializing(localThread(), true));
     result.add(dummyReturnStatement(method));
     return result;
   }
@@ -588,6 +588,6 @@ public abstract class AbstractMethodTransformer {
    * Stop de-serializing when interrupt location has been reached.
    */
   protected InsnList stopDeserializing() {
-    return stackCode.setSerializing(localThread(), false);
+    return threadCode.setSerializing(localThread(), false);
   }
 }

@@ -60,17 +60,17 @@ class ConcreteMethodTransformer extends MethodTransformer {
 
     InsnList getFrame = new InsnList();
     // previousFrame = thread.frame;
-    getFrame.add(stackCode.getPreviousFrame(localThread, localPreviousFrame));
+    getFrame.add(threadCode.getPreviousFrame(localThread, localPreviousFrame));
     // frame = previousFrame.next; // etc.
-    getFrame.add(stackCode.getNextFrame(localPreviousFrame, localFrame, true));
+    getFrame.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
 
     // TODO 2009-11-26 mh: remove me?
     InsnList restoreCode = new InsnList();
     // thread.frame = frame;
-    restoreCode.add(stackCode.setFrame(localThread, localFrame));
+    restoreCode.add(threadCode.setFrame(localThread, localFrame));
 
     // if (!thread.serializing) "GOTO" normal.
-    restoreCode.add(stackCode.pushSerializing(localThread));
+    restoreCode.add(threadCode.pushSerializing(localThread));
     restoreCode.add(new JumpInsnNode(IFEQ, getThread));
 
     // else restore code dispatcher

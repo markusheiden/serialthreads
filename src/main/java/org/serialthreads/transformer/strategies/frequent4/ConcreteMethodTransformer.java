@@ -62,12 +62,12 @@ class ConcreteMethodTransformer extends MethodTransformer {
 
     if (isNotStatic(method)) {
       // previousFrame.owner = this;
-      getFrame.add(stackCode.setOwner(localPreviousFrame));
+      getFrame.add(threadCode.setOwner(localPreviousFrame));
     }
 
     if (needsFrame()) {
       // frame = previousFrame.next; // etc.
-      getFrame.add(stackCode.getNextFrame(localPreviousFrame, localFrame, true));
+      getFrame.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
     } else {
       // localFrame = localPreviousFrame;
       getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));

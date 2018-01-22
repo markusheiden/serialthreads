@@ -72,7 +72,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
 
     // frame = previousFrame.next;
     if (needsFrame()) {
-      restoreCode.add(stackCode.getNextFrame(paramPreviousFrame, localFrame, false));
+      restoreCode.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
     } else {
       restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       restoreCode.add(new VarInsnNode(ASTORE, localFrame));

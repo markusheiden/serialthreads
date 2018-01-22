@@ -67,23 +67,23 @@ class RunMethodTransformer extends MethodTransformer {
     // if there is just one normal restore code, the method index will not be captured.
     // so we set the correct one (0) for this case.
     if (restores.size() <= 1) {
-      startRestoreCode.add(stackCode.resetMethod(localFrame));
+      startRestoreCode.add(threadCode.resetMethod(localFrame));
     }
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
-    startRestoreCode.add(stackCode.setFrame(localThread, localFrame));
+    startRestoreCode.add(threadCode.setFrame(localThread, localFrame));
 
     // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
 
     InsnList restoreCode = new InsnList();
 
     // thread = this.$$thread$$;
-    restoreCode.add(stackCode.pushThread(clazz.name));
+    restoreCode.add(threadCode.pushThread(clazz.name));
     restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // frame = thread.first;
-    restoreCode.add(stackCode.getFirstFrame(localThread, localFrame));
+    restoreCode.add(threadCode.getFirstFrame(localThread, localFrame));
 
     // no previous frame needed in run, because there may not be a previous frame
 

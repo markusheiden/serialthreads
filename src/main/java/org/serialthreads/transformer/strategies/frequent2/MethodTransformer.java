@@ -69,7 +69,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList capture = new InsnList();
 
     // if (!thread.serializing) "GOTO" normal.
-    capture.add(stackCode.pushSerializing(localThread));
+    capture.add(threadCode.pushSerializing(localThread));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
     // get rid of dummy return value of called method first
@@ -91,7 +91,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
-    capture.add(stackCode.setFrame(localThread, localFrame));
+    capture.add(threadCode.setFrame(localThread, localFrame));
 
     // insert capture code
     method.instructions.insert(methodCall, capture);
@@ -128,7 +128,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restoreCode.add(clonedCall);
 
     // if (!thread.serializing) "GOTO" normal, but restore the frame first.
-    restoreCode.add(stackCode.pushSerializing(localThread));
+    restoreCode.add(threadCode.pushSerializing(localThread));
     restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
 
     // early return, the frame already has been captured
@@ -140,7 +140,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // TODO 2009-11-26 mh: remove me?
     // set the current frame, because the next called method will need it
     // thread.frame = frame;
-    restoreCode.add(stackCode.setFrame(localThread, localFrame));
+    restoreCode.add(threadCode.setFrame(localThread, localFrame));
 
     // restore stack "under" the returned value, if any
     // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
