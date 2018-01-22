@@ -46,9 +46,11 @@ public interface StackCode {
    *           Number of local containing the previous frame.
    * @param localFrame
    *           Number of local that will hold the current frame.
+   * @param addIfNotPresent
+   *           Check if next frame is present and add a new one if not?.
    * @return Generated code.
    */
-  InsnList getNextFrame(int localPreviousFrame, int localFrame);
+  InsnList getNextFrame(int localPreviousFrame, int localFrame, boolean addIfNotPresent);
 
   /**
    * Set "this" as {@link StackFrame#owner} into the previous frame.

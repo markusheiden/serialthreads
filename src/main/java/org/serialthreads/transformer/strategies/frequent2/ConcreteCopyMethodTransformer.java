@@ -9,7 +9,6 @@ import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -77,10 +76,8 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
     restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
     restoreCode.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
-    // frame = previousFrame.next
-    restoreCode.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    restoreCode.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-    restoreCode.add(new VarInsnNode(ASTORE, localFrame));
+    // frame = previousFrame.next;
+    restoreCode.add(stackCode.getNextFrame(localPreviousFrame, localFrame, false));
 
     // thread = currentThread;
     // TODO 2009-10-22 mh: rename locals to avoid this copy?

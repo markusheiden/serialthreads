@@ -46,21 +46,24 @@ public abstract class AbstractStackCode implements StackCode {
    //
 
    @Override
-   public InsnList getNextFrame(int localPreviousFrame, int localFrame) {
+   public InsnList getNextFrame(int localPreviousFrame, int localFrame, boolean addIfNotPresent) {
       InsnList result = new InsnList();
 
-      LabelNode normal = new LabelNode();
 
       // frame = previousFrame.next
       result.add(new VarInsnNode(ALOAD, localPreviousFrame));
       result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
-      result.add(new InsnNode(DUP));
-      result.add(new JumpInsnNode(IFNONNULL, normal));
-      result.add(new InsnNode(POP));
-      // frame = previousFrame.addFrame();
-      result.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      result.add(new MethodInsnNode(INVOKEVIRTUAL, FRAME_IMPL_NAME, "addFrame", "()" + FRAME_IMPL_DESC, false));
-      result.add(normal);
+      if (addIfNotPresent) {
+         LabelNode normal = new LabelNode();
+
+         result.add(new InsnNode(DUP));
+         result.add(new JumpInsnNode(IFNONNULL, normal));
+         result.add(new InsnNode(POP));
+         // frame = previousFrame.addFrame();
+         result.add(new VarInsnNode(ALOAD, localPreviousFrame));
+         result.add(new MethodInsnNode(INVOKEVIRTUAL, FRAME_IMPL_NAME, "addFrame", "()" + FRAME_IMPL_DESC, false));
+         result.add(normal);
+      }
       result.add(new VarInsnNode(ASTORE, localFrame));
 
       return result;

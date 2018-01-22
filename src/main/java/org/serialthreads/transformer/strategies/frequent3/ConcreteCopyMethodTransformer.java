@@ -9,7 +9,6 @@ import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -73,12 +72,13 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
 
     InsnList restoreCode = new InsnList();
 
-    // frame = previousFrame.next
-    restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+    // frame = previousFrame.next;
     if (needsFrame()) {
-      restoreCode.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
+      restoreCode.add(stackCode.getNextFrame(paramPreviousFrame, localFrame, false));
+    } else {
+      restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+      restoreCode.add(new VarInsnNode(ASTORE, localFrame));
     }
-    restoreCode.add(new VarInsnNode(ASTORE, localFrame));
 
     if (paramThread != localThread) {
       // thread = currentThread;
