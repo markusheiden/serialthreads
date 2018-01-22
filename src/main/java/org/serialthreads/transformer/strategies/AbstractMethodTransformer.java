@@ -441,8 +441,7 @@ public abstract class AbstractMethodTransformer {
     }
 
     // Get thread.
-    instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+    instructions.add(stackCode.pushThread(clazz.name));
 
     LabelNode retry = new LabelNode();
     instructions.add(retry);

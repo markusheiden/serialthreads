@@ -19,8 +19,18 @@ public interface StackCode {
    *
    * @param defaultFrameSize
    *           Default size of frames.
+   * @return Generated code.
    */
   InsnList pushNewStack(int defaultFrameSize);
+
+  /**
+   * Push this.$$thread$$ onto stack.
+   *
+   * @param className
+   *           Class of this.
+   * @return Generated code.
+   */
+  InsnList pushThread(String className);
 
   //
   // run() methods.

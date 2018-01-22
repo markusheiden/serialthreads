@@ -8,7 +8,10 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.CheckClassAdapter;
-import org.serialthreads.context.*;
+import org.serialthreads.context.IRunnable;
+import org.serialthreads.context.ITransformedRunnable;
+import org.serialthreads.context.SerialThread;
+import org.serialthreads.context.Stack;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
@@ -39,20 +42,12 @@ public abstract class AbstractTransformer implements ITransformer {
    */
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-  protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
-  protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
-  protected static final String CLASS_NAME = Type.getType(Class.class).getInternalName();
-  protected static final String CLASS_DESC = Type.getType(Class.class).getDescriptor();
-  protected static final String STRING_DESC = Type.getType(String.class).getDescriptor();
   protected static final String IRUNNABLE_NAME = Type.getType(IRunnable.class).getInternalName();
   protected static final String ITRANSFORMED_RUNNABLE_NAME = Type.getType(ITransformedRunnable.class).getInternalName();
   protected static final String THREAD_DESC = Type.getType(SerialThread.class).getDescriptor();
   protected static final String THREAD = "$$thread$$";
 
-  protected final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
   protected final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
-  protected final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
-  protected final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
   protected final int defaultFrameSize;
   protected final IClassInfoCache classInfoCache;
@@ -355,8 +350,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
     InsnList instructions = getThread.instructions;
     // return this.$$thread$$;
-    instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+    instructions.add(stackCode.pushThread(clazz.name));
     instructions.add(new InsnNode(ARETURN));
 
     clazz.methods.add(getThread);

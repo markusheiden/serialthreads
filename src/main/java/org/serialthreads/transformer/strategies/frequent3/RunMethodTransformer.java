@@ -6,9 +6,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GETFIELD;
 
 /**
  * Method transformer for run methods.
@@ -77,8 +75,7 @@ class RunMethodTransformer extends MethodTransformer {
     InsnList restoreCode = new InsnList();
 
     // thread = this.$$thread$$;
-    restoreCode.add(new VarInsnNode(ALOAD, 0));
-    restoreCode.add(new FieldInsnNode(GETFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+    restoreCode.add(stackCode.pushThread(clazz.name));
     restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
     // frame = thread.first;

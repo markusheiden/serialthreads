@@ -20,6 +20,7 @@ public abstract class AbstractStackCode implements StackCode {
    private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
    private static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
+   private static final String THREAD = "$$thread$$";
    private static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
@@ -40,6 +41,14 @@ public abstract class AbstractStackCode implements StackCode {
       result.add(IntValueCode.push(defaultFrameSize));
       result.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
       return result;
+   }
+
+   @Override
+   public InsnList pushThread(String className) {
+     InsnList result = new InsnList();
+     result.add(new VarInsnNode(ALOAD, 0));
+     result.add(new FieldInsnNode(GETFIELD, className, THREAD, THREAD_IMPL_DESC));
+     return result;
    }
 
    //
