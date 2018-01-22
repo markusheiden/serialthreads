@@ -37,7 +37,6 @@ public abstract class AbstractMethodTransformer {
   protected static final String NPE_NAME = Type.getType(NullPointerException.class).getInternalName();
   protected static final String MANAGER_NAME = Type.getType(SerialThreadManager.class).getInternalName();
   protected static final String THREAD_DESC = Type.getType(SerialThread.class).getDescriptor();
-  protected static final String THREAD = "$$thread$$";
   protected static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
 
   protected static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
@@ -470,7 +469,7 @@ public abstract class AbstractMethodTransformer {
     handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
     handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     handler.add(new InsnNode(DUP_X1));
-    handler.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+    handler.add(stackCode.setThread(clazz.name));
     handler.add(new JumpInsnNode(GOTO, retry));
     //noinspection unchecked
     method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
