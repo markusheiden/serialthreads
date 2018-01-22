@@ -4,6 +4,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
+import org.serialthreads.transformer.code.IntValueCode;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
@@ -12,11 +13,34 @@ import static org.serialthreads.transformer.code.IntValueCode.push;
  * Base code that is independent from stack frame storage algorithm.
  */
 public abstract class AbstractStackCode implements StackCode {
+   private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
+   private static final String CLASS_NAME = Type.getType(Class.class).getInternalName();
+   private static final String CLASS_DESC = Type.getType(Class.class).getDescriptor();
+   private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
    private static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
    private static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
    private static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
+
+   //
+   // Constructors.
+   //
+
+   @Override
+   public InsnList pushNewStack(int defaultFrameSize) {
+      InsnList result = new InsnList();
+      // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
+      result.add(new InsnNode(DUP));
+      result.add(new VarInsnNode(ALOAD, 0));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC, false));
+      result.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC, false));
+      result.add(IntValueCode.push(defaultFrameSize));
+      result.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
+      return result;
+   }
 
    //
    // run() methods.

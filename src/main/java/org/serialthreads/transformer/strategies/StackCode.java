@@ -11,6 +11,18 @@ import org.serialthreads.context.StackFrame;
  */
 public interface StackCode {
   //
+  // Constructors.
+  //
+
+  /**
+   * Push new {@link Stack} and onto stack.
+   *
+   * @param defaultFrameSize
+   *           Default size of frames.
+   */
+  InsnList pushNewStack(int defaultFrameSize);
+
+  //
   // run() methods.
   //
 
