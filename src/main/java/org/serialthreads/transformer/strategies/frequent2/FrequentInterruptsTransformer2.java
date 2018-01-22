@@ -1,7 +1,6 @@
 package org.serialthreads.transformer.strategies.frequent2;
 
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.context.SimpleSerialThreadManager;
@@ -12,10 +11,6 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
-import static org.objectweb.asm.Opcodes.ACC_TRANSIENT;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -81,6 +76,6 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
 
     // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptible method?
     // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
-    clazz.fields.add(new FieldNode(ACC_PRIVATE + ACC_TRANSIENT + ACC_FINAL + ACC_SYNTHETIC, THREAD, THREAD_IMPL_DESC, THREAD_IMPL_DESC, null));
+    clazz.fields.add(stackCode.threadField());
   }
 }

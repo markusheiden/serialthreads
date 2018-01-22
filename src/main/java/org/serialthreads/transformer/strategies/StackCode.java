@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -15,6 +16,11 @@ public interface StackCode {
   //
 
   /**
+   * Create field for holding the associated thread.
+   */
+  FieldNode threadField();
+
+  /**
    * Push new {@link Stack} and onto stack.
    *
    * @param defaultFrameSize
@@ -22,6 +28,15 @@ public interface StackCode {
    * @return Generated code.
    */
   InsnList pushNewStack(int defaultFrameSize);
+
+  /**
+   * Set this.$$thread$$.
+   *
+   * @param className
+   *           Class of this.
+   * @return Generated code.
+   */
+  InsnList setThread(String className);
 
   /**
    * Push this.$$thread$$ onto stack.

@@ -29,10 +29,14 @@ public abstract class AbstractStackCode implements StackCode {
    //
 
    @Override
+   public FieldNode threadField() {
+      return new FieldNode(ACC_PRIVATE + ACC_FINAL + ACC_SYNTHETIC, THREAD, THREAD_IMPL_DESC, THREAD_IMPL_DESC, null);
+   }
+
+   @Override
    public InsnList pushNewStack(int defaultFrameSize) {
       InsnList result = new InsnList();
       // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
-      result.add(new VarInsnNode(ALOAD, 0));
       result.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
       result.add(new InsnNode(DUP));
       result.add(new VarInsnNode(ALOAD, 0));
@@ -41,6 +45,13 @@ public abstract class AbstractStackCode implements StackCode {
       result.add(IntValueCode.push(defaultFrameSize));
       result.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
       return result;
+   }
+
+   @Override
+   public InsnList setThread(String className) {
+     InsnList result = new InsnList();
+     result.add(new FieldInsnNode(PUTFIELD, className, THREAD, THREAD_IMPL_DESC));
+     return result;
    }
 
    @Override

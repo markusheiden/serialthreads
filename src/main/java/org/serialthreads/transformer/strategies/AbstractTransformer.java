@@ -11,7 +11,6 @@ import org.objectweb.asm.util.CheckClassAdapter;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.ITransformedRunnable;
 import org.serialthreads.context.SerialThread;
-import org.serialthreads.context.Stack;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
@@ -27,7 +26,10 @@ import java.util.List;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
@@ -45,9 +47,6 @@ public abstract class AbstractTransformer implements ITransformer {
   protected static final String IRUNNABLE_NAME = Type.getType(IRunnable.class).getInternalName();
   protected static final String ITRANSFORMED_RUNNABLE_NAME = Type.getType(ITransformedRunnable.class).getInternalName();
   protected static final String THREAD_DESC = Type.getType(SerialThread.class).getDescriptor();
-  protected static final String THREAD = "$$thread$$";
-
-  protected final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
 
   protected final int defaultFrameSize;
   protected final IClassInfoCache classInfoCache;
@@ -296,7 +295,7 @@ public abstract class AbstractTransformer implements ITransformer {
     clazz.interfaces.add(ITRANSFORMED_RUNNABLE_NAME);
 
     // add $$thread$$ field
-    clazz.fields.add(new FieldNode(ACC_PRIVATE + ACC_FINAL + ACC_SYNTHETIC, THREAD, THREAD_IMPL_DESC, null, null));
+    clazz.fields.add(stackCode.threadField());
 
     // init $$thread$$ fields in constructors
     for (MethodNode constructor : constructors) {
@@ -330,8 +329,9 @@ public abstract class AbstractTransformer implements ITransformer {
       // init $$thread$$ field before returning from constructor
       InsnList instructions = new InsnList();
       // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
+      instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(stackCode.pushNewStack(defaultFrameSize));
-      instructions.add(new FieldInsnNode(PUTFIELD, clazz.name, THREAD, THREAD_IMPL_DESC));
+      instructions.add(stackCode.setThread(clazz.name));
 
       constructor.instructions.insertBefore(returnInstruction, instructions);
     }
