@@ -343,54 +343,7 @@ public abstract class AbstractMethodTransformer {
    * @param suppressOwner suppress capturing of owner?
    * @param restoreCode Restore code. Null if none required.
    */
-  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
-    if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restoreCode);
-    } else {
-      createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restoreCode);
-    }
-  }
-
-  /**
-   * Insert frame capturing code when starting an interrupt.
-   *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
-   * @param restoreCode Restore code. Null if none required.
-   */
-  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
-    logger.debug("      Creating capture code for interrupt");
-
-    InsnList capture = new InsnList();
-
-    // Capture frame.
-    capture.add(captureFrame(methodCall, metaInfo));
-    capture.add(setMethod(position));
-    // TODO 2018-01-17 markus: Remove (at least for frequent 3+) because method owner is already stored in frame.
-    // previousFrame.owner = this;
-    capture.add(setOwner(methodCall, metaInfo, suppressOwner));
-    // Start serializing and return early.
-    capture.add(startSerializing());
-
-    capture.add(restoreCode);
-
-    // Replace dummy call of interrupt method by capture code.
-    method.instructions.insert(methodCall, capture);
-    method.instructions.remove(methodCall);
-  }
-
-  /**
-   * Insert frame capturing code after returning from a method call.
-   *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
-   * @param restoreCode Restore code. Null if none required.
-   */
-  protected abstract void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode);
+  protected abstract void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode);
 
   /**
    * Replace all return instructions by ThreadFinishedException.
@@ -573,16 +526,6 @@ public abstract class AbstractMethodTransformer {
       result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 
-    return result;
-  }
-
-  /**
-   * Start serializing at interrupt.
-   */
-  protected InsnList startSerializing() {
-    InsnList result = new InsnList();
-    result.add(threadCode.setSerializing(localThread(), true));
-    result.add(dummyReturnStatement(method));
     return result;
   }
 

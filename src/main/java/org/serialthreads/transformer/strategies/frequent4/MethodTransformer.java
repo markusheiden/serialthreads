@@ -9,6 +9,7 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
@@ -119,12 +120,52 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected InsnList startSerializing() {
-    // Interrupt starts serializing.
-    return methodReturn(true);
+  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
+    if (metaInfo.tags.contains(TAG_INTERRUPT)) {
+      createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restoreCode);
+    } else {
+      createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restoreCode);
+    }
   }
 
-  @Override
+  /**
+   * Insert frame capturing code when starting an interrupt.
+   *
+   * @param methodCall method call to generate capturing code for
+   * @param metaInfo Meta information about method call
+   * @param position position of method call in method
+   * @param suppressOwner suppress capturing of owner?
+   * @param restoreCode Restore code. Null if none required.
+   */
+  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
+    logger.debug("      Creating capture code for interrupt");
+
+    InsnList capture = new InsnList();
+
+    // Capture frame and return early.
+    capture.add(captureFrame(methodCall, metaInfo));
+    // frame.method = position;
+    capture.add(setMethod(position));
+    // We are serializing.
+    capture.add(methodReturn(true));
+
+    // Restore code to continue.
+    capture.add(restoreCode);
+
+    // Replace dummy call of interrupt method by capture code.
+    method.instructions.insert(methodCall, capture);
+    method.instructions.remove(methodCall);
+  }
+
+  /**
+   * Insert frame capturing code after returning from a method call.
+   *
+   * @param methodCall method call to generate capturing code for
+   * @param metaInfo Meta information about method call
+   * @param position position of method call in method
+   * @param suppressOwner suppress capturing of owner?
+   * @param restoreCode Restore code. Null if none required.
+   */
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
@@ -149,6 +190,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // We are already serializing.
     capture.add(methodReturn(true));
 
+    // Restore code to continue.
     capture.add(restoreCode);
 
     // Normal execution.
