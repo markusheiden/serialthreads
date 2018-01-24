@@ -287,54 +287,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Create method specific frame restore code.
-   *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
-   */
-  protected InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return metaInfo.tags.contains(TAG_INTERRUPT) ?
-      createRestoreCodeForInterrupt(methodCall, metaInfo) :
-      createRestoreCodeForMethod(methodCall, metaInfo);
-  }
-
-  /**
-   * Create restore code for ending an interrupt.
-   *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
-   */
-  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    logger.debug("      Creating restore code for interrupt");
-
-    InsnList restoreCode = new InsnList();
-
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
-
-    // Stop deserializing.
-    restoreCode.add(stopDeserializing());
-    // Restore frame.
-    restoreCode.add(restoreFrame(methodCall, metaInfo));
-
-    // resume
-    restoreCode.add(new JumpInsnNode(GOTO, normal));
-
-    return restoreCode;
-  }
-
-  /**
-   * Create method specific frame restore code.
-   *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
-   */
-  protected abstract InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo);
-
-  /**
    * Insert frame capturing and restore code after a given method call.
    *
    * @param methodCall method call to generate capturing code for
@@ -344,6 +296,15 @@ public abstract class AbstractMethodTransformer {
    * @param restoreCode Restore code. Null if none required.
    */
   protected abstract void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode);
+
+  /**
+   * Create method specific frame restore code.
+   *
+   * @param methodCall method call to generate restore code for
+   * @param metaInfo Meta information about method call
+   * @return restore code
+   */
+  protected abstract InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo);
 
   /**
    * Replace all return instructions by ThreadFinishedException.
@@ -527,12 +488,5 @@ public abstract class AbstractMethodTransformer {
     }
 
     return result;
-  }
-
-  /**
-   * Stop de-serializing when interrupt location has been reached.
-   */
-  protected InsnList stopDeserializing() {
-    return threadCode.setSerializing(localThread(), false);
   }
 }

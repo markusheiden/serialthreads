@@ -237,12 +237,43 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected InsnList stopDeserializing() {
-    // Nothing to do, because the serializing flag is not used anymore.
-    return new InsnList();
+  protected InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    return metaInfo.tags.contains(TAG_INTERRUPT) ?
+      createRestoreCodeForInterrupt(methodCall, metaInfo) :
+      createRestoreCodeForMethod(methodCall, metaInfo);
   }
 
-  @Override
+  /**
+   * Create restore code for ending an interrupt.
+   *
+   * @param methodCall method call to generate capturing code for
+   * @param metaInfo Meta information about method call
+   * @return restore code
+   */
+  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    logger.debug("      Creating restore code for interrupt");
+
+    InsnList restoreCode = new InsnList();
+
+    LabelNode normal = new LabelNode();
+    method.instructions.insert(methodCall, normal);
+
+    // Restore frame.
+    restoreCode.add(restoreFrame(methodCall, metaInfo));
+
+    // resume
+    restoreCode.add(new JumpInsnNode(GOTO, normal));
+
+    return restoreCode;
+  }
+
+  /**
+   * Create method specific frame restore code.
+   *
+   * @param methodCall method call to generate restore code for
+   * @param metaInfo Meta information about method call
+   * @return restore code
+   */
   protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
 
