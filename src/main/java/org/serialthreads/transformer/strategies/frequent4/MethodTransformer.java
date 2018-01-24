@@ -231,11 +231,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     method.instructions.insert(methodCall, capture);
   }
 
-  @Override
-  public InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
-    return new InsnList();
-  }
-
   //
   // Restore code to be able to resume a method call
   //

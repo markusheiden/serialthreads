@@ -134,6 +134,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     capture.add(setMethod(position));
     // previousFrame.owner = this;
     capture.add(setOwner(methodCall, metaInfo, suppressOwner));
+    // return;
     capture.add(dummyReturnStatement(method));
 
     // Restore code to continue.
