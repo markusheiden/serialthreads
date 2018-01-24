@@ -123,6 +123,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
       createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restoreCode);
+    } else if (isTailCall(metaInfo)) {
+      createCaptureCodeForMethodTail(methodCall, position, restoreCode);;
     } else {
       createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restoreCode);
     }
@@ -169,11 +171,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
-    if (isTailCall(metaInfo)) {
-      createCaptureCodeForMethodTail(methodCall, position, restoreCode);
-      return;
-    }
-
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
@@ -216,13 +213,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param restoreCode Restore code. Null if none required.
    */
   private void createCaptureCodeForMethodTail(MethodInsnNode methodCall, int position, InsnList restoreCode) {
+    logger.debug("      Creating capture code for method tail call to {}", methodName(methodCall));
+
     InsnList capture = new InsnList();
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
-    logger.debug("        Optimized tail call");
+    // thread.method = position;
     capture.add(setMethod(position));
+    // return serializing;
     capture.add(new InsnNode(IRETURN));
 
     capture.add(restoreCode);
