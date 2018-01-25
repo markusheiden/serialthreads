@@ -132,10 +132,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Insert frame capturing code when starting an interrupt.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @param position Position of method call in method.
+   * @param suppressOwner Suppress capturing of owner?
    * @param restoreCode Restore code. Null if none required.
    */
   protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
@@ -161,19 +161,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Insert frame capturing code after returning from a method call.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @param position Position of method call in method.
+   * @param suppressOwner Suppress capturing of owner?
    * @param restoreCode Restore code. Null if none required.
    */
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
-
-    if (isTailCall(metaInfo)) {
-      createCaptureCodeForMethodTail(methodCall, position, restoreCode);
-      return;
-    }
 
     final int localThread = localThread();
     final int localFrame = localFrame();
@@ -209,8 +204,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Insert frame capturing code after returning from a method tail call.
    *
-   * @param methodCall method call to generate capturing code for.
-   * @param position position of method call in method.
+   * @param methodCall Method call to generate capturing code for.
+   * @param position Position of method call in method.
    * @param restoreCode Restore code. Null if none required.
    */
   private void createCaptureCodeForMethodTail(MethodInsnNode methodCall, int position, InsnList restoreCode) {
@@ -250,9 +245,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Create restore code for ending an interrupt.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @return Generated code.
    */
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
@@ -271,9 +266,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Create method specific frame restore code.
    *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
+   * @param methodCall Method call to generate restore code for.
+   * @param metaInfo Meta information about method call.
+   * @return Generated code.
    */
   protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
@@ -321,9 +316,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Create method tail specific frame restore code.
    *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
+   * @param methodCall Method call to generate restore code for.
+   * @param metaInfo Meta information about method call.
+   * @return Generated code.
    */
   protected InsnList createRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method tail call to {}", methodName(methodCall));
