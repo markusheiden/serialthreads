@@ -220,7 +220,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
-    // thread.method = position;
+    // frame.method = position;
     capture.add(setMethod(position));
     // return serializing;
     capture.add(new InsnNode(IRETURN));
