@@ -285,8 +285,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localFrame = localFrame();
 
     // Label "normal" points the code directly after the method call.
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
+    // LabelNode normal = new LabelNode();
+    // method.instructions.insert(methodCall, normal);
     LabelNode restoreFrame = new LabelNode();
 
     InsnList restoreCode = new InsnList();
@@ -335,20 +335,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localThread = localThread();
     final int localFrame = localFrame();
 
-    // Label "normal" points the code directly after the method call.
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
-    LabelNode restoreFrame = new LabelNode();
-
     InsnList restoreCode = new InsnList();
-
     // Call interrupted method.
     restoreCode.add(pushOwner(methodCall, metaInfo));
     // Jump to cloned method call with thread and frame as arguments.
     restoreCode.add(new VarInsnNode(ALOAD, localThread));
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
     restoreCode.add(clonedCall);
-
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
