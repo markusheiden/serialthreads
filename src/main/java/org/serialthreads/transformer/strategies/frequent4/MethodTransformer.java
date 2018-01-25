@@ -124,7 +124,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
       createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restoreCode);
     } else if (isTailCall(metaInfo)) {
-      createCaptureCodeForMethodTail(methodCall, position, restoreCode);;
+      createCaptureCodeForMethodTail(methodCall, position, restoreCode);
     } else {
       createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restoreCode);
     }
@@ -133,10 +133,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Insert frame capturing code when starting an interrupt.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @param position Position of method call in method.
+   * @param suppressOwner Suppress capturing of owner?
    * @param restoreCode Restore code. Null if none required.
    */
   protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
@@ -162,10 +162,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Insert frame capturing code after returning from a method call.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @param position Position of method call in method.
+   * @param suppressOwner Suppress capturing of owner?
    * @param restoreCode Restore code. Null if none required.
    */
   protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
@@ -208,8 +208,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Insert frame capturing code after returning from a method tail call.
    *
-   * @param methodCall method call to generate capturing code for.
-   * @param position position of method call in method.
+   * @param methodCall Method call to generate capturing code for.
+   * @param position Position of method call in method.
    * @param restoreCode Restore code. Null if none required.
    */
   private void createCaptureCodeForMethodTail(MethodInsnNode methodCall, int position, InsnList restoreCode) {
@@ -249,9 +249,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Create restore code for ending an interrupt.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @return Generated code.
    */
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
@@ -270,9 +270,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Create method specific frame restore code.
    *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
+   * @param methodCall Method call to generate restore code for.
+   * @param metaInfo Meta information about method call.
+   * @return Generated code.
    */
   protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
@@ -292,15 +292,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Jump to cloned method call with thread and frame as arguments.
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
     restoreCode.add(clonedCall);
-
-    // Early exit for tail calls.
-    // The return value needs not to be restored, because it has already been stored by the cloned call.
-    // The serializing flag is already on the stack from the cloned call.
-    if (isTailCall(metaInfo)) {
-      restoreCode.add(new InsnNode(IRETURN));
-      logger.debug("        Tail call optimized");
-      return restoreCode;
-    }
 
     // If not serializing "GOTO" normal, but restore the frame first.
     restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
@@ -327,9 +318,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Create method tail specific frame restore code.
    *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
+   * @param methodCall Method call to generate restore code for.
+   * @param metaInfo Meta information about method call.
+   * @return Generated code.
    */
   protected InsnList createRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for method tail call to {}", methodName(methodCall));
@@ -376,6 +367,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * but for now the easiest way to implement the detection, that neither the locals nor the stack is needed / used.
    */
   protected final boolean needsFrame() {
+    // TODO 2018-01-21 markus: Why not "> 1"?
     if (interruptibleMethodCalls.size() != 1) {
       return true;
     }

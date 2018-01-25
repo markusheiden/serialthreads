@@ -103,7 +103,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       } else {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
-          // Save return value into the thread
+          // Save return value into the thread.
           replacement.add(code(returnType).pushReturnValue(localThread));
         }
         replacement.add(methodReturn(false));
