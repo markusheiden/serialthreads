@@ -156,8 +156,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
     final int localThread = method.maxLocals;
 
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
+    LabelNode normal = insertLabelAfter(method.instructions, methodCall);
 
     InsnList restoreCode = new InsnList();
 
@@ -180,8 +179,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
     final int localThread = method.maxLocals;
 
-    LabelNode normal = new LabelNode();
-    method.instructions.insertBefore(methodCall, normal);
+    LabelNode normal = insertLabelAfter(method.instructions, methodCall);
 
     InsnList restoreCode = popFromFrame(method, methodCall, frameAfter, localThread);
 

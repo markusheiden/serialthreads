@@ -86,10 +86,8 @@ public abstract class AbstractMethodTransformer {
    */
   protected void nameAddedLocals() {
     InsnList instructions = method.instructions;
-    LabelNode first = new LabelNode();
-    instructions.insertBefore(instructions.getFirst(), first);
-    LabelNode last = new LabelNode();
-    instructions.insert(instructions.getLast(), last);
+    LabelNode first = insertLabelBefore(instructions, instructions.getFirst());
+    LabelNode last = insertLabelAfter(instructions, instructions.getLast());
 
     List<LocalVariableNode> locals = method.localVariables;
     locals.add(new LocalVariableNode("thread", THREAD_DESC, null, first, last, localThread()));

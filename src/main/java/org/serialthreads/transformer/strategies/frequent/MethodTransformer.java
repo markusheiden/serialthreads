@@ -8,10 +8,7 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
-import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 
@@ -158,8 +155,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
 
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
+    LabelNode normal = insertLabelAfter(method.instructions, methodCall);
 
     InsnList restoreCode = new InsnList();
     // Stop deserializing.
@@ -191,8 +187,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localReturnValue = method.maxLocals;
 
     // label "normal" points the code directly after the method call
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
+    LabelNode normal = insertLabelAfter(method.instructions, methodCall);
     LabelNode restoreFrame = new LabelNode();
 
     InsnList restoreCode = new InsnList();

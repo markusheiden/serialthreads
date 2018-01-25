@@ -257,8 +257,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
     logger.debug("      Creating restore code for interrupt");
 
-    LabelNode normal = new LabelNode();
-    method.instructions.insert(methodCall, normal);
+    LabelNode normal = insertLabelAfter(method.instructions, methodCall);
 
     InsnList restoreCode = new InsnList();
     // Restore frame.
@@ -285,8 +284,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localFrame = localFrame();
 
     // Label "normal" points the code directly after the method call.
-    // LabelNode normal = new LabelNode();
-    // method.instructions.insert(methodCall, normal);
+    // LabelNode normal = insertLabelAfter(method.instructions, methodCall);
     LabelNode restoreFrame = new LabelNode();
 
     InsnList restoreCode = new InsnList();
