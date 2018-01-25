@@ -238,9 +238,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   @Override
   protected InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return metaInfo.tags.contains(TAG_INTERRUPT) ?
-      createRestoreCodeForInterrupt(methodCall, metaInfo) :
-      createRestoreCodeForMethod(methodCall, metaInfo);
+    if (metaInfo.tags.contains(TAG_INTERRUPT)) {
+      return createRestoreCodeForInterrupt(methodCall, metaInfo);
+    } else if (isTailCall(metaInfo)) {
+      return createRestoreCodeForMethodTail(methodCall, metaInfo);
+    } else {
+      return createRestoreCodeForMethod(methodCall, metaInfo);
+    }
   }
 
   /**
@@ -279,8 +283,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     final int localThread = localThread();
     final int localFrame = localFrame();
-    // Introduce new local holding the return value.
-    final int localReturnValue = method.maxLocals;
 
     // Label "normal" points the code directly after the method call.
     LabelNode normal = new LabelNode();
@@ -295,15 +297,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     restoreCode.add(new VarInsnNode(ALOAD, localThread));
     restoreCode.add(new VarInsnNode(ALOAD, localFrame));
     restoreCode.add(clonedCall);
-
-    // Early exit for tail calls.
-    // The return value needs not to be restored, because it has already been stored by the cloned call.
-    // The serializing flag is already on the stack from the cloned call.
-    if (isTailCall(metaInfo)) {
-      restoreCode.add(new InsnNode(IRETURN));
-      logger.debug("        Tail call optimized");
-      return restoreCode;
-    }
 
     // If not serializing "GOTO" normal, but restore the frame first.
     restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
@@ -323,6 +316,43 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     //  restoreCode.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     // }
     // restoreCode.add(new JumpInsnNode(GOTO, normal));
+
+    return restoreCode;
+  }
+
+  /**
+   * Create method tail specific frame restore code.
+   *
+   * @param methodCall method call to generate restore code for
+   * @param metaInfo Meta information about method call
+   * @return restore code
+   */
+  protected InsnList createRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    logger.debug("      Creating restore code for method tail call to {}", methodName(methodCall));
+
+    MethodInsnNode clonedCall = copyMethodCall(methodCall);
+
+    final int localThread = localThread();
+    final int localFrame = localFrame();
+
+    // Label "normal" points the code directly after the method call.
+    LabelNode normal = new LabelNode();
+    method.instructions.insert(methodCall, normal);
+    LabelNode restoreFrame = new LabelNode();
+
+    InsnList restoreCode = new InsnList();
+
+    // Call interrupted method.
+    restoreCode.add(pushOwner(methodCall, metaInfo));
+    // Jump to cloned method call with thread and frame as arguments.
+    restoreCode.add(new VarInsnNode(ALOAD, localThread));
+    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
+    restoreCode.add(clonedCall);
+
+    // Early exit for tail calls.
+    // The return value needs not to be restored, because it has already been stored by the cloned call.
+    // The serializing flag is already on the stack from the cloned call.
+    restoreCode.add(new InsnNode(IRETURN));
 
     return restoreCode;
   }
