@@ -180,21 +180,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Next (real) instruction. Skips label nodes.
-   */
-  protected AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
-    AbstractInsnNode next = instruction;
-    do {
-      next = next.getNext();
-      if (next == null) {
-        return null;
-      }
-    } while (next instanceof LabelNode);
-
-    return next;
-  }
-
-  /**
    * Tag an instruction.
    *
    * @param instruction Instruction

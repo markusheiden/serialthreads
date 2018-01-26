@@ -389,11 +389,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   /**
    * Check if the given instruction is a tail call.
+   * Ignores run() methods, because they have a special return value handling.
    *
    * @param metaInfo Meta information about method call
    */
   protected final boolean isTailCall(MetaInfo metaInfo) {
-    return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL);
+    return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL) &&
+      !isRun(clazz, method, classInfoCache);
   }
 
   //
