@@ -215,11 +215,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
-    // The serializing flag is already on the stack from the cloned call.
     // frame.method = position;
     capture.add(setMethod(position));
+    // The serializing flag is already on the stack from the cloned call.
     // return serializing;
-    capture.add(new InsnNode(IRETURN));
+    capture.add(methodReturn(null));
 
     capture.add(restoreCode);
 
@@ -338,7 +338,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // The serializing flag is already on the stack from the cloned call.
-    restoreCode.add(new InsnNode(IRETURN));
+    restoreCode.add(methodReturn(null));
 
     return restoreCode;
   }
@@ -404,16 +404,18 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   /**
    * Create return instruction for method.
-   * Returns the given serializing flag, or in case of the run method uses a void return.
    *
-   * @param serializing Serializing flag.
+   * @param serializing Serializing flag. Null means the serializing flag is already on the stack.
    */
-  private InsnList methodReturn(boolean serializing) {
+  private InsnList methodReturn(Boolean serializing) {
     InsnList result = new InsnList();
     if (isRun(clazz, method, classInfoCache)) {
       result.add(new InsnNode(RETURN));
-    } else {
+    } else if (serializing != null) {
       result.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
+      result.add(new InsnNode(IRETURN));
+    } else {
+      // serializing flag is already on the stack.
       result.add(new InsnNode(IRETURN));
     }
     return result;
