@@ -9,10 +9,11 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 
 /**
- * Method transformer for concrete methods.
+ * Method transformer for original methods.
  */
 @SuppressWarnings({"UnusedAssignment"})
 class ConcreteMethodTransformer extends MethodTransformer {
@@ -34,15 +35,18 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
-    shiftLocals();
-    nameAddedLocals();
-    analyze();
+    boolean concrete = !isAbstract(method);
+    if (concrete) {
+      shiftLocals();
+      nameAddedLocals();
+      analyze();
 
-    replaceReturns();
-    insertCaptureCode();
-    createRestoreHandlerMethod();
-    addThreadAndFrame();
-    fixMaxs();
+      replaceReturns();
+      insertCaptureCode();
+      createRestoreHandlerMethod();
+      addThreadAndFrame();
+      fixMaxs();
+    }
 
     method.desc = changeDesc(method.desc);
 

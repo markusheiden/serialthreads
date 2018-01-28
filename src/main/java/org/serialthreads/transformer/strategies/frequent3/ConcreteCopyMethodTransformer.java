@@ -9,10 +9,11 @@ import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
- * Method transformer for copies of concrete methods.
+ * Method transformer for copied methods.
  */
 @SuppressWarnings({"UnusedAssignment"})
 class ConcreteCopyMethodTransformer extends MethodTransformer {
@@ -24,7 +25,6 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
    * @param classInfoCache class cache to use
    */
   protected ConcreteCopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-    // create copy of method with shortened signature
     super(clazz, MethodNodeCopier.copy(method), classInfoCache);
   }
 
@@ -35,21 +35,24 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
    * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
-    shiftLocals();
-    nameAddedLocals();
-    analyze();
+    boolean concrete = !isAbstract(method);
+    if (concrete) {
+      shiftLocals();
+      nameAddedLocals();
+      analyze();
 
-    replaceReturns();
-    List<LabelNode> restores = insertCaptureAndRestoreCode(true);
-    createRestoreHandlerCopy(restores);
-    addThreadAndFrame();
-    fixMaxs();
+      replaceReturns();
+      List<LabelNode> restores = insertCaptureAndRestoreCode(true);
+      createRestoreHandlerCopy(restores);
+      addThreadAndFrame();
+      fixMaxs();
+    }
 
     method.name = changeCopyName(method.name, method.desc);
     method.desc = changeCopyDesc(method.desc);
     clazz.methods.add(method);
 
-    logger.debug("      Copied concrete method {}", methodName(clazz, method));
+    logger.debug("      Copied {} method {}", concrete? "concrete" : "abstract", methodName(clazz, method));
 
     return method;
   }

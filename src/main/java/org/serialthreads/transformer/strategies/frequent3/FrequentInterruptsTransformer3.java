@@ -44,32 +44,24 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer {
 
   @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
-    if ((isInterface(clazz) || isAbstract(method)) && isRun(clazz, method, classInfoCache)) {
-      // do not transform IRunnable.run() itself
-      return null;
-    }
-
-    if (isAbstract(method)) {
-      // change signature of abstract methods
-      return asList(
-        new AbstractCopyMethodTransformer(clazz, method, classInfoCache).transform(),
-        new AbstractMethodTransformer(clazz, method, classInfoCache).transform());
-    }
-
-    if (hasNoInterruptibleMethodCalls(method)) {
-      // copied method not needed, because it will be called never
-      // TODO 2013-03-11 mh: Simplify method transformer?
-      return asList(
-        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
-    }
-
     if (isRun(clazz, method, classInfoCache)) {
-      // take special care of run method
+      if (isInterface(clazz) || isAbstract(method)) {
+        // Do not transform IRunnable.run() itself.
+        return null;
+      }
+
+      // Take special care of run method.
       return asList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
-    // "standard" transformation of interruptible methods
+    if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
+      // Copied method not needed, because it will be called never.
+      return asList(
+        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
+    }
+
+    // "Standard" transformation of interruptible methods.
     return asList(
       new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
       new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
