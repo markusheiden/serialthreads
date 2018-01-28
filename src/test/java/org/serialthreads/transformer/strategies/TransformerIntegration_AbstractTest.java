@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Integration test for transformer.
  */
+@Ignore
 public abstract class TransformerIntegration_AbstractTest {
   /**
    * Check that transformation does not alter behaviour.
