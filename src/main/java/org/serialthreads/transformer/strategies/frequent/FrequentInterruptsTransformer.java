@@ -8,9 +8,9 @@ import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
 
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -54,12 +54,12 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
 
     if (isRun(clazz, method, classInfoCache)) {
       // take special care of run method
-      return Arrays.asList(
+      return asList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     // "standard" transformation of interruptible methods
-    return Arrays.asList(
+    return asList(
       new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
   }
 
