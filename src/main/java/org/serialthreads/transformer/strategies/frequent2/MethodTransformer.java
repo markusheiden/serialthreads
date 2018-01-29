@@ -103,9 +103,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // Continue.
     }
 
-    // Replace dummy call of interrupt method by capture code.
-    method.instructions.insert(methodCall, instructions);
-    method.instructions.remove(methodCall);
+    // Replace dummy call of interrupt method by capture and restore code.
+    replace(methodCall, instructions);
 
     return restoreLabel;
   }

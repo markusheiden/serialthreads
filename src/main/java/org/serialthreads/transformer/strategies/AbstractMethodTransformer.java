@@ -85,9 +85,8 @@ public abstract class AbstractMethodTransformer {
    * Add names for added locals.
    */
   protected void nameAddedLocals() {
-    InsnList instructions = method.instructions;
-    LabelNode first = insertLabelBefore(instructions, instructions.getFirst());
-    LabelNode last = insertLabelAfter(instructions, instructions.getLast());
+    LabelNode first = insertLabelBefore(method.instructions.getFirst());
+    LabelNode last = insertLabelAfter(method.instructions.getLast());
 
     List<LocalVariableNode> locals = method.localVariables;
     locals.add(new LocalVariableNode("thread", THREAD_DESC, null, first, last, localThread()));
@@ -453,5 +452,56 @@ public abstract class AbstractMethodTransformer {
     }
 
     return result;
+  }
+
+  //
+  // Instructions helper.
+  //
+
+  /**
+   * Replace instruction.
+   *
+   * @param instruction Instruction to replace.
+   * @param replacement Replacement.
+   */
+  protected void replace(AbstractInsnNode instruction, InsnList replacement) {
+    method.instructions.insert(instruction, replacement);
+    method.instructions.remove(instruction);
+  }
+
+  /**
+   * Insert label before instruction.
+   *
+   * @param instruction Instruction to insert label before.
+   * @return Existing label, if there is already a label before the instruction, new label otherwise.
+   */
+  protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
+    AbstractInsnNode next = instruction.getNext();
+    if (next instanceof LabelNode) {
+      return (LabelNode) next;
+    }
+
+    LabelNode label = new LabelNode();
+    method.instructions.insertBefore(instruction, label);
+
+    return label;
+  }
+
+  /**
+   * Insert label after instruction.
+   *
+   * @param instruction Instruction to insert label after.
+   * @return Existing label, if there is already a label after the instruction, new label otherwise.
+   */
+  protected LabelNode insertLabelAfter(AbstractInsnNode instruction) {
+    AbstractInsnNode next = instruction.getNext();
+    if (next instanceof LabelNode) {
+      return (LabelNode) next;
+    }
+
+    LabelNode label = new LabelNode();
+    method.instructions.insert(instruction, label);
+
+    return label;
   }
 }

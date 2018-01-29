@@ -322,44 +322,6 @@ public class MethodCode {
     return null;
   }
 
-  /**
-   * Insert label before instruction.
-   *
-   * @param instructions Instructions.
-   * @param instruction Instruction to insert label before.
-   * @return Existing label, if there is already a label before the instruction, new label otherwise.
-   */
-  public static LabelNode insertLabelBefore(InsnList instructions, AbstractInsnNode instruction) {
-    AbstractInsnNode next = instruction.getNext();
-    if (next instanceof LabelNode) {
-      return (LabelNode) next;
-    }
-
-    LabelNode label = new LabelNode();
-    instructions.insertBefore(instruction, label);
-
-    return label;
-  }
-
-  /**
-   * Insert label after instruction.
-   *
-   * @param instructions Instructions.
-   * @param instruction Instruction to insert label after.
-   * @return Existing label, if there is already a label after the instruction, new label otherwise.
-   */
-  public static LabelNode insertLabelAfter(InsnList instructions, AbstractInsnNode instruction) {
-    AbstractInsnNode next = instruction.getNext();
-    if (next instanceof LabelNode) {
-      return (LabelNode) next;
-    }
-
-    LabelNode label = new LabelNode();
-    instructions.insert(instruction, label);
-
-    return label;
-  }
-
   //
   // Log / debug code
   //
