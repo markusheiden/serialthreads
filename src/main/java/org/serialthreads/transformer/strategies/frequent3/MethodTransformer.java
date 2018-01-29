@@ -260,7 +260,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // The return value needs not to be restored, because it has already been stored by the method call.
     // frame.method = position;
     instructions.add(setMethod(position));
-    // The serializing flag is already on the stack from the cloned call.
+    // The serializing flag is already on the stack from the method call.
     // return serializing;
     instructions.add(methodReturn(null));
 
