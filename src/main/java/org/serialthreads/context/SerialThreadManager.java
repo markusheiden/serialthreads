@@ -16,11 +16,24 @@ public abstract class SerialThreadManager {
    * @param manager thread manager
    */
   protected static void registerManager(SerialThreadManager manager) {
-    assert threadManagers.get() == null : "Precondition: no manager registered for this thread yet";
+    assert threadManagers.get() == null : "Precondition: no manager registered for this thread yet.";
 
     threadManagers.set(manager);
 
-    assert manager == threadManagers.get() : "Precondition: manager registered successfully";
+    assert manager == threadManagers.get() : "Precondition: manager registered successfully.";
+  }
+
+  /**
+   * Deregister a thread manager from the current thread.
+   *
+   * @param manager thread manager
+   */
+  protected static void deregisterManager(SerialThreadManager manager) {
+    assert threadManagers.get() == manager : "Precondition: manager registered for this thread yet.";
+
+    threadManagers.remove();
+
+    assert threadManagers.get() == null : "Precondition: manager deregistered successfully.";
   }
 
   /**

@@ -39,6 +39,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.runnable.getThread()).reset();
+      deregisterManager(this);
     }
 
     lastExecuted = chain;
@@ -65,6 +66,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.runnable.getThread()).reset();
+      deregisterManager(this);
     }
 
     lastExecuted = chain;
