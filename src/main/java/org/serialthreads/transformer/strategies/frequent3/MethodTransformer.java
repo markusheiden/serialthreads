@@ -185,6 +185,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
+    LabelNode serializing = new LabelNode();
 
     InsnList instructions = new InsnList();
 
@@ -195,15 +196,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(captureFrame(methodCall, metaInfo));
     // frame.method = position;
     instructions.add(setMethod(position));
+
     // We are already serializing.
+    instructions.add(serializing);
     instructions.add(methodReturn(true));
 
     // Restore code to continue.
     LabelNode restoreLabel = new LabelNode();
     if (restore) {
       instructions.add(restoreLabel);
-
-      LabelNode restoreFrame = new LabelNode();
 
       // Call interrupted method.
       instructions.add(pushOwner(methodCall, metaInfo));
@@ -212,18 +213,12 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(new VarInsnNode(ALOAD, localFrame));
       instructions.add(copyMethodCall(methodCall));
 
-      // If not serializing "GOTO" normal, but restore the frame first.
-      instructions.add(new JumpInsnNode(IFEQ, restoreFrame));
-
-      // Early return, the frame already has been captured.
-      // We are already serializing.
-      instructions.add(methodReturn(true));
-
-      // Restore frame to be able to resume normal execution of the method.
-      instructions.add(restoreFrame);
+      // If serializing, return early, the frame already has been captured.
+      instructions.add(new JumpInsnNode(IFNE, serializing));
 
       // Restore stack "under" the returned value, if any.
       instructions.add(restoreFrame(methodCall, metaInfo));
+      // Continue.
     }
 
     // Normal execution.
