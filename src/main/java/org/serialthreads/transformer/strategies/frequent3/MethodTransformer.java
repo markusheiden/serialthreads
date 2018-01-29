@@ -257,7 +257,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // Early exit for tail calls.
-    // The return value needs not to be restored, because it has already been stored by the cloned call.
+    // The return value needs not to be restored, because it has already been stored by the method call.
     // frame.method = position;
     instructions.add(setMethod(position));
     // The serializing flag is already on the stack from the cloned call.
