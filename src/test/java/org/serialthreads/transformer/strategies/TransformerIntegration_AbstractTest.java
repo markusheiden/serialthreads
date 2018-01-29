@@ -27,6 +27,35 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Check that transformation does not alter behaviour.
+   * Tests, that {@link IRunnable#run()} is transformed correctly, if not containing any interruptible method call.
+   */
+  @Ignore // TODO 2018-01-29 markus: Fix handling of this case.
+  @Test
+  public void testNoRun() {
+    TestNoRunInterruptible test = new TestNoRunInterruptible();
+
+    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager.execute();
+
+    test.assertExpectedResult();
+  }
+
+  /**
+   * Check that transformation does not alter behaviour.
+   * Tests, that {@link IRunnable#run()} is transformed correctly, if just containing one interruptible method call.
+   */
+  @Test
+  public void testSingleRun() {
+    TestSingleRunInterruptible test = new TestSingleRunInterruptible();
+
+    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager.execute();
+
+    test.assertExpectedResult();
+  }
+
+  /**
    * Test capture and restore of locals of type {@link int}.
    */
   @Test
