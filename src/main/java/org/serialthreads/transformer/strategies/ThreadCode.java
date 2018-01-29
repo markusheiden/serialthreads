@@ -62,15 +62,6 @@ public interface ThreadCode {
    */
   InsnList getFirstFrame(int localThread, int localFrame);
 
-  /**
-   * Reset {@link StackFrame#method}.
-   *
-   * @param localFrame
-   *           number of local containing the current frame.
-   * @return Generated code.
-   */
-  InsnList resetMethod(int localFrame);
-
   //
   // Capture.
   //

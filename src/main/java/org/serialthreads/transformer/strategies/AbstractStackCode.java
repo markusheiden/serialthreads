@@ -76,15 +76,6 @@ public abstract class AbstractStackCode implements ThreadCode {
       return result;
    }
 
-   @Override
-   public InsnList resetMethod(int localFrame) {
-      InsnList result = new InsnList();
-      result.add(new VarInsnNode(ALOAD, localFrame));
-      result.add(new InsnNode(ICONST_0));
-      result.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "method", "I"));
-      return result;
-   }
-
    //
    // Capture.
    //
