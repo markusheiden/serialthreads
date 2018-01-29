@@ -260,7 +260,7 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Insert frame capturing and restore code after a given method call.
+   * Insert frame capturing and restore code after the given method call.
    *
    * @param methodCall Method call to generate capturing code for.
    * @param metaInfo Meta information about method call.

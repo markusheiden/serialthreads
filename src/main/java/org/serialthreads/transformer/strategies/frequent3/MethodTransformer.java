@@ -115,22 +115,22 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   //
-  // Capture code inserted after method calls
+  // Capture and restore code inserted after method calls.
   //
 
   @Override
   protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      return createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restore);
+      return createCaptureAndRestoreCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restore);
     } else if (isTailCall(metaInfo)) {
-      return createCaptureCodeForMethodTail(methodCall, metaInfo, position, restore);
+      return createCaptureAndRestoreCodeForMethodTail(methodCall, metaInfo, position, restore);
     } else {
-      return createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restore);
+      return createCaptureRestoreCodeForMethod(methodCall, metaInfo, position, suppressOwner, restore);
     }
   }
 
   /**
-   * Insert frame capturing code when starting an interrupt.
+   * Insert frame capturing and restore code for interrupts.
    *
    * @param methodCall Method call to generate capturing code for.
    * @param metaInfo Meta information about method call.
@@ -139,7 +139,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected LabelNode createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureAndRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for interrupt");
 
     InsnList instructions = new InsnList();
@@ -169,7 +169,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
-   * Insert frame capturing code after returning from a method call.
+   * Insert frame capturing and restore code after method calls.
    *
    * @param methodCall Method call to generate capturing code for.
    * @param metaInfo Meta information about method call.
@@ -178,7 +178,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected LabelNode createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
@@ -240,7 +240,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
-   * Insert frame capturing code after returning from a method tail call.
+   * Insert frame capturing and restore code after method tail calls.
    *
    * @param methodCall Method call to generate capturing code for.
    * @param metaInfo Meta information about method call.
@@ -248,7 +248,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  private LabelNode createCaptureCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
+  private LabelNode createCaptureAndRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method tail call to {}", methodName(methodCall));
 
     final int localThread = localThread();
