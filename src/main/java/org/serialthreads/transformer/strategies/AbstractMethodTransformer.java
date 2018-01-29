@@ -476,9 +476,10 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label before the instruction, new label otherwise.
    */
   protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
-    AbstractInsnNode previous = instruction.getPrevious();
-    if (previous instanceof LabelNode) {
-      return (LabelNode) previous;
+    for (AbstractInsnNode p = instruction.getPrevious(); p != null && p.getOpcode() < 0; p = p.getPrevious()) {
+      if (p instanceof LabelNode) {
+        return (LabelNode) p;
+      }
     }
 
     LabelNode label = new LabelNode();
@@ -494,9 +495,10 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label after the instruction, new label otherwise.
    */
   protected LabelNode insertLabelAfter(AbstractInsnNode instruction) {
-    AbstractInsnNode next = instruction.getNext();
-    if (next instanceof LabelNode) {
-      return (LabelNode) next;
+    for (AbstractInsnNode n = instruction.getNext(); n != null && n.getOpcode() < 0; n = n.getNext()) {
+      if (n instanceof LabelNode) {
+        return (LabelNode) n;
+      }
     }
 
     LabelNode label = new LabelNode();
