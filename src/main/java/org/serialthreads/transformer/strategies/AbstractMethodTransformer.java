@@ -476,9 +476,9 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label before the instruction, new label otherwise.
    */
   protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
-    AbstractInsnNode next = instruction.getNext();
-    if (next instanceof LabelNode) {
-      return (LabelNode) next;
+    AbstractInsnNode previous = instruction.getPrevious();
+    if (previous instanceof LabelNode) {
+      return (LabelNode) previous;
     }
 
     LabelNode label = new LabelNode();
