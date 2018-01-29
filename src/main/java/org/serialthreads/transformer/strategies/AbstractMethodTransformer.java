@@ -237,11 +237,7 @@ public abstract class AbstractMethodTransformer {
     int methodCallIndex = 0;
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
-
-      // No restore code needed.
-      InsnList restoreCode = new InsnList();
-
-      createCaptureCode(methodCall, metaInfo, methodCallIndex++, false, restoreCode);
+      createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false, false);
     }
   }
 
@@ -257,13 +253,7 @@ public abstract class AbstractMethodTransformer {
     int methodCallIndex = 0;
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       MetaInfo metaInfo = metaInfos.get(methodCall);
-
-      LabelNode restore = new LabelNode();
-      restores.add(restore);
-      InsnList restoreCode = createRestoreCode(methodCall, metaInfo);
-      restoreCode.insertBefore(restoreCode.getFirst(), restore);
-
-      createCaptureCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, restoreCode);
+      restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, true));
     }
 
     return restores;
@@ -272,22 +262,14 @@ public abstract class AbstractMethodTransformer {
   /**
    * Insert frame capturing and restore code after a given method call.
    *
-   * @param methodCall method call to generate capturing code for
-   * @param metaInfo Meta information about method call
-   * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
-   * @param restoreCode Restore code. Null if none required.
+   * @param methodCall Method call to generate capturing code for.
+   * @param metaInfo Meta information about method call.
+   * @param position Position of method call in method.
+   * @param suppressOwner Suppress capturing of owner?.
+   * @param restore Generate restore code too?.
+   * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected abstract void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode);
-
-  /**
-   * Create method specific frame restore code.
-   *
-   * @param methodCall method call to generate restore code for
-   * @param metaInfo Meta information about method call
-   * @return restore code
-   */
-  protected abstract InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo);
+  protected abstract LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore);
 
   /**
    * Replace all return instructions by ThreadFinishedException.

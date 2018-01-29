@@ -120,13 +120,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected void createCaptureCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
+  protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restoreCode);
+      return createCaptureCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restore);
     } else if (isTailCall(metaInfo)) {
-      createCaptureCodeForMethodTail(methodCall, position, restoreCode);
+      return createCaptureCodeForMethodTail(methodCall, metaInfo, position, restore);
     } else {
-      createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restoreCode);
+      return createCaptureCodeForMethod(methodCall, metaInfo, position, suppressOwner, restore);
     }
   }
 
@@ -137,26 +137,36 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param metaInfo Meta information about method call.
    * @param position Position of method call in method.
    * @param suppressOwner Suppress capturing of owner?
-   * @param restoreCode Restore code. Null if none required.
+   * @param restore Generate restore code too?.
+   * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected void createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
+  protected LabelNode createCaptureCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for interrupt");
 
-    InsnList capture = new InsnList();
+    InsnList instructions = new InsnList();
 
     // Capture frame and return early.
-    capture.add(captureFrame(methodCall, metaInfo));
+    instructions.add(captureFrame(methodCall, metaInfo));
     // frame.method = position;
-    capture.add(setMethod(position));
+    instructions.add(setMethod(position));
     // We are serializing.
-    capture.add(methodReturn(true));
+    instructions.add(methodReturn(true));
 
     // Restore code to continue.
-    capture.add(restoreCode);
+    LabelNode restoreLabel = new LabelNode();
+    if (restore) {
+      instructions.add(restoreLabel);
 
-    // Replace dummy call of interrupt method by capture code.
-    method.instructions.insert(methodCall, capture);
+      // Restore frame.
+      instructions.add(restoreFrame(methodCall, metaInfo));
+      // Continue.
+    }
+
+    // Replace dummy call of interrupt method by capture and restore code.
+    method.instructions.insert(methodCall, instructions);
     method.instructions.remove(methodCall);
+
+    return restoreLabel;
   }
 
   /**
@@ -166,43 +176,70 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param metaInfo Meta information about method call.
    * @param position Position of method call in method.
    * @param suppressOwner Suppress capturing of owner?
-   * @param restoreCode Restore code. Null if none required.
+   * @param restore Generate restore code too?.
+   * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected void createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, InsnList restoreCode) {
+  protected LabelNode createCaptureCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
 
-    InsnList capture = new InsnList();
+    InsnList instructions = new InsnList();
 
     // If not serializing "GOTO" normal.
-    capture.add(new JumpInsnNode(IFEQ, normal));
+    instructions.add(new JumpInsnNode(IFEQ, normal));
 
     // Capture frame and return early.
-    capture.add(captureFrame(methodCall, metaInfo));
+    instructions.add(captureFrame(methodCall, metaInfo));
     // frame.method = position;
-    capture.add(setMethod(position));
+    instructions.add(setMethod(position));
     // We are already serializing.
-    capture.add(methodReturn(true));
+    instructions.add(methodReturn(true));
 
     // Restore code to continue.
-    capture.add(restoreCode);
+    LabelNode restoreLabel = new LabelNode();
+    if (restore) {
+      instructions.add(restoreLabel);
+
+      LabelNode restoreFrame = new LabelNode();
+
+      // Call interrupted method.
+      instructions.add(pushOwner(methodCall, metaInfo));
+      // Jump to cloned method call with thread and frame as arguments.
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(copyMethodCall(methodCall));
+
+      // If not serializing "GOTO" normal, but restore the frame first.
+      instructions.add(new JumpInsnNode(IFEQ, restoreFrame));
+
+      // Early return, the frame already has been captured.
+      // We are already serializing.
+      instructions.add(methodReturn(true));
+
+      // Restore frame to be able to resume normal execution of the method.
+      instructions.add(restoreFrame);
+
+      // Restore stack "under" the returned value, if any.
+      instructions.add(restoreFrame(methodCall, metaInfo));
+    }
 
     // Normal execution.
-    capture.add(normal);
+    instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
       // FIXME markus 2018-01-14: Get thread!
       int localThread = localThread();
-      capture.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
-      capture.add(new VarInsnNode(ASTORE, localThread));
-      capture.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+      instructions.add(new VarInsnNode(ASTORE, localThread));
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
     // Insert capture code.
-    method.instructions.insert(methodCall, capture);
+    method.instructions.insert(methodCall, instructions);
+
+    return restoreLabel;
   }
 
   /**
@@ -210,137 +247,44 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    *
    * @param methodCall Method call to generate capturing code for.
    * @param position Position of method call in method.
-   * @param restoreCode Restore code. Null if none required.
+   * @param restore Generate restore code too?.
+   * @return Label to restore code, or null, if no restore code has been generated.
    */
-  private void createCaptureCodeForMethodTail(MethodInsnNode methodCall, int position, InsnList restoreCode) {
+  private LabelNode createCaptureCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method tail call to {}", methodName(methodCall));
 
-    InsnList capture = new InsnList();
+    final int localFrame = localFrame();
+
+    InsnList instructions = new InsnList();
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the cloned call.
     // frame.method = position;
-    capture.add(setMethod(position));
+    instructions.add(setMethod(position));
     // The serializing flag is already on the stack from the cloned call.
     // return serializing;
-    capture.add(methodReturn(null));
+    instructions.add(methodReturn(null));
 
-    capture.add(restoreCode);
+    // Restore code to continue.
+    LabelNode restoreLabel = new LabelNode();
+    if (restore) {
+      instructions.add(restoreLabel);
+
+      // Call interrupted method.
+      instructions.add(pushOwner(methodCall, metaInfo));
+      // Jump to cloned method call with thread and frame as arguments.
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(copyMethodCall(methodCall));
+      // Early exit for tail calls.
+      // The return value needs not to be restored, because it has already been stored by the cloned call.
+      // The serializing flag is already on the stack from the cloned call.
+      instructions.add(methodReturn(null));
+    }
 
     // Insert capture code.
-    method.instructions.insert(methodCall, capture);
-  }
+    method.instructions.insert(methodCall, instructions);
 
-  //
-  // Restore code to be able to resume a method call
-  //
-
-  @Override
-  protected InsnList createRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      return createRestoreCodeForInterrupt(methodCall, metaInfo);
-    } else if (isTailCall(metaInfo)) {
-      return createRestoreCodeForMethodTail(methodCall, metaInfo);
-    } else {
-      return createRestoreCodeForMethod(methodCall, metaInfo);
-    }
-  }
-
-  /**
-   * Create restore code for ending an interrupt.
-   *
-   * @param methodCall Method call to generate capturing code for.
-   * @param metaInfo Meta information about method call.
-   * @return Generated code.
-   */
-  protected InsnList createRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    logger.debug("      Creating restore code for interrupt");
-
-    LabelNode normal = insertLabelAfter(method.instructions, methodCall);
-
-    InsnList restoreCode = new InsnList();
-    // Restore frame.
-    restoreCode.add(restoreFrame(methodCall, metaInfo));
-    // Resume.
-    restoreCode.add(new JumpInsnNode(GOTO, normal));
-
-    return restoreCode;
-  }
-
-  /**
-   * Create method specific frame restore code.
-   *
-   * @param methodCall Method call to generate restore code for.
-   * @param metaInfo Meta information about method call.
-   * @return Generated code.
-   */
-  protected InsnList createRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    logger.debug("      Creating restore code for method call to {}", methodName(methodCall));
-
-    MethodInsnNode clonedCall = copyMethodCall(methodCall);
-
-    final int localFrame = localFrame();
-
-    // Label "normal" points the code directly after the method call.
-    // LabelNode normal = insertLabelAfter(method.instructions, methodCall);
-    LabelNode restoreFrame = new LabelNode();
-
-    InsnList restoreCode = new InsnList();
-
-    // Call interrupted method.
-    restoreCode.add(pushOwner(methodCall, metaInfo));
-    // Jump to cloned method call with thread and frame as arguments.
-    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
-    restoreCode.add(clonedCall);
-
-    // If not serializing "GOTO" normal, but restore the frame first.
-    restoreCode.add(new JumpInsnNode(IFEQ, restoreFrame));
-
-    // Early return, the frame already has been captured.
-    // We are already serializing.
-    restoreCode.add(methodReturn(true));
-
-    // Restore frame to be able to resume normal execution of the method.
-    restoreCode.add(restoreFrame);
-
-    // Restore stack "under" the returned value, if any.
-    restoreCode.add(restoreFrame(methodCall, metaInfo));
-    // Due to insertion point of the restore code, the following code is already directly after the insertion point:
-    // Restore return value of call, if any.
-    // if (isNotVoid(methodCall)) {
-    //  restoreCode.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
-    // }
-    // restoreCode.add(new JumpInsnNode(GOTO, normal));
-
-    return restoreCode;
-  }
-
-  /**
-   * Create method tail specific frame restore code.
-   *
-   * @param methodCall Method call to generate restore code for.
-   * @param metaInfo Meta information about method call.
-   * @return Generated code.
-   */
-  protected InsnList createRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    logger.debug("      Creating restore code for method tail call to {}", methodName(methodCall));
-
-    MethodInsnNode clonedCall = copyMethodCall(methodCall);
-
-    final int localFrame = localFrame();
-
-    InsnList restoreCode = new InsnList();
-    // Call interrupted method.
-    restoreCode.add(pushOwner(methodCall, metaInfo));
-    // Jump to cloned method call with thread and frame as arguments.
-    restoreCode.add(new VarInsnNode(ALOAD, localFrame));
-    restoreCode.add(clonedCall);
-    // Early exit for tail calls.
-    // The return value needs not to be restored, because it has already been stored by the cloned call.
-    // The serializing flag is already on the stack from the cloned call.
-    restoreCode.add(methodReturn(null));
-
-    return restoreCode;
+    return restoreLabel;
   }
 
   /**
