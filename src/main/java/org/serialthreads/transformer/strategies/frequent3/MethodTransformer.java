@@ -125,7 +125,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     } else if (isTailCall(metaInfo)) {
       return createCaptureAndRestoreCodeForMethodTail(methodCall, metaInfo, position, restore);
     } else {
-      return createCaptureRestoreCodeForMethod(methodCall, metaInfo, position, suppressOwner, restore);
+      return createCaptureAndRestoreCodeForMethod(methodCall, metaInfo, position, suppressOwner, restore);
     }
   }
 
@@ -178,7 +178,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected LabelNode createCaptureRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     final int localThread = localThread();
@@ -207,12 +207,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Call interrupted method.
-      instructions.add(pushOwner(methodCall, metaInfo));
-      // Jump to cloned method call with thread and frame as arguments.
-      instructions.add(new VarInsnNode(ALOAD, localThread));
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(copyMethodCall(methodCall));
-
+      instructions.add(callCopyMethod(methodCall, metaInfo));
       // If serializing, return early, the frame already has been captured.
       instructions.add(new JumpInsnNode(IFNE, serializing));
 
@@ -246,9 +241,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   private LabelNode createCaptureAndRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method tail call to {}", methodName(methodCall));
 
-    final int localThread = localThread();
-    final int localFrame = localFrame();
-
     InsnList instructions = new InsnList();
 
     // Early exit for tail calls.
@@ -265,11 +257,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Call interrupted method.
-      instructions.add(pushOwner(methodCall, metaInfo));
-      // Jump to cloned method call with thread and frame as arguments.
-      instructions.add(new VarInsnNode(ALOAD, localThread));
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(copyMethodCall(methodCall));
+      instructions.add(callCopyMethod(methodCall, metaInfo));
       // Early exit for tail calls.
       // The return value needs not to be restored, because it has already been stored by the cloned call.
       // The serializing flag is already on the stack from the cloned call.
@@ -283,16 +271,30 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
-   * Copies method call and changes the signature.
+   * Call copy method.
    *
-   * @param methodCall method call
+   * @param methodCall Method call to call copy of.
+   * @param metaInfo Meta information about method call.
    */
-  private MethodInsnNode copyMethodCall(MethodInsnNode methodCall) {
-    MethodInsnNode result = (MethodInsnNode) methodCall.clone(null);
-    result.name = changeCopyName(methodCall.name, methodCall.desc);
-    result.desc = changeCopyDesc(methodCall.desc);
+  private InsnList callCopyMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    final int localThread = localThread();
+    final int localFrame = localFrame();
 
-    return result;
+    MethodInsnNode callCopyMethod = (MethodInsnNode) methodCall.clone(null);
+    callCopyMethod.name = changeCopyName(methodCall.name, methodCall.desc);
+    callCopyMethod.desc = changeCopyDesc(methodCall.desc);
+
+    InsnList instructions = new InsnList();
+
+    // Push owner onto stack.
+    instructions.add(pushOwner(methodCall, metaInfo));
+    // Push thread and frame (as arguments) onto stack.
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    // Call interrupted method.
+    instructions.add(callCopyMethod);
+
+    return instructions;
   }
 
   /**

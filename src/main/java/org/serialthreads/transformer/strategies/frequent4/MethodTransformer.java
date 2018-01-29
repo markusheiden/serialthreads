@@ -207,16 +207,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Call interrupted method.
-      instructions.add(pushOwner(methodCall, metaInfo));
-      // Jump to cloned method call with thread and frame as arguments.
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(copyMethodCall(methodCall));
-
+      instructions.add(callCopyMethod(methodCall, metaInfo));
       // If serializing, return early, the frame already has been captured.
       instructions.add(new JumpInsnNode(IFNE, serializing));
 
       // Restore stack "under" the returned value, if any.
       instructions.add(restoreFrame(methodCall, metaInfo));
+      // Continue.
     }
 
     // Normal execution.
@@ -247,8 +244,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   private LabelNode createCaptureAndRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method tail call to {}", methodName(methodCall));
 
-    final int localFrame = localFrame();
-
     InsnList instructions = new InsnList();
 
     // Early exit for tail calls.
@@ -265,10 +260,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Call interrupted method.
-      instructions.add(pushOwner(methodCall, metaInfo));
-      // Jump to cloned method call with thread and frame as arguments.
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(copyMethodCall(methodCall));
+      instructions.add(callCopyMethod(methodCall, metaInfo));
       // Early exit for tail calls.
       // The return value needs not to be restored, because it has already been stored by the cloned call.
       // The serializing flag is already on the stack from the cloned call.
@@ -281,17 +273,30 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     return restoreLabel;
   }
 
-  /**
-   * Copies method call and changes the signature.
-   *
-   * @param methodCall method call
-   */
-  private MethodInsnNode copyMethodCall(MethodInsnNode methodCall) {
-    MethodInsnNode result = (MethodInsnNode) methodCall.clone(null);
-    result.name = changeCopyName(methodCall.name, methodCall.desc);
-    result.desc = changeCopyDesc(methodCall.desc);
 
-    return result;
+  /**
+   * Call copy method.
+   *
+   * @param methodCall Method call to call copy of.
+   * @param metaInfo Meta information about method call.
+   */
+  private InsnList callCopyMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
+    final int localFrame = localFrame();
+
+    MethodInsnNode callCopyMethod = (MethodInsnNode) methodCall.clone(null);
+    callCopyMethod.name = changeCopyName(methodCall.name, methodCall.desc);
+    callCopyMethod.desc = changeCopyDesc(methodCall.desc);
+
+    InsnList instructions = new InsnList();
+
+    // Push owner onto stack.
+    instructions.add(pushOwner(methodCall, metaInfo));
+    // Push frame (as argument) onto stack.
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    // Call interrupted method.
+    instructions.add(callCopyMethod);
+
+    return instructions;
   }
 
   /**
