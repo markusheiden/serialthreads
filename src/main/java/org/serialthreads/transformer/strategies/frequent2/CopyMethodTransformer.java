@@ -80,7 +80,7 @@ class CopyMethodTransformer extends MethodTransformer {
     instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
     instructions.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
-    // frame = previousFrame.next;
+    // frame = previousFrame.next; // etc.
     instructions.add(threadCode.getNextFrame(localPreviousFrame, localFrame, false));
 
     // Move thread to the correct local.

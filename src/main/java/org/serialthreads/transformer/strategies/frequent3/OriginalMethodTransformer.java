@@ -73,7 +73,8 @@ class OriginalMethodTransformer extends MethodTransformer {
       // frame = previousFrame.next; // etc.
       instructions.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
     } else {
-      // localFrame = localPreviousFrame;
+      // Reuse previousFrame for return value.
+      // frame = previousFrame;
       instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
       instructions.add(new VarInsnNode(ASTORE, localFrame));
     }
