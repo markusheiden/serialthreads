@@ -76,7 +76,7 @@ class CopyMethodTransformer extends MethodTransformer {
     if (needsFrame()) {
       // frame = previousFrame.next; // etc.
       instructions.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
-    } else {
+    } else if (paramPreviousFrame != localFrame) {
       // Reuse previousFrame for return value.
       // frame = previousFrame;
       instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
