@@ -54,43 +54,41 @@ class RunMethodTransformer extends MethodTransformer {
     logger.debug("    Creating restore handler for run");
 
     final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    LabelNode startRestore = new LabelNode();
-    restores.add(0, startRestore);
-    // dummy startup restore code to avoid to check thread.serializing.
-    // empty frames are expected to have method = -1.
-    InsnList startRestoreCode = new InsnList();
-    startRestoreCode.add(startRestore);
-    // reset method to 0 for the case that there is just one normal restore code, because
-    // if there is just one normal restore code, the method index will not be captured.
-    // so we set the correct one (0) for this case.
-    if (restores.size() <= 1) {
-      startRestoreCode.add(threadCode.setMethod(localFrame, 0));
-    }
+    InsnList instructions = new InsnList();
+
+    // thread = this.$$thread$$;
+    instructions.add(threadCode.pushThread(clazz.name));
+    instructions.add(new VarInsnNode(ASTORE, localThread));
+
+    // frame = thread.first;
+    instructions.add(threadCode.getFirstFrame(localThread, localFrame));
 
     // TODO 2009-11-26 mh: remove me?
     // thread.frame = frame;
-    startRestoreCode.add(threadCode.setFrame(localThread, localFrame));
+    instructions.add(threadCode.setFrame(localThread, localFrame));
 
-    // implicit goto to normal code, because this restore code will be put at the end of the restore code dispatcher
+    // No previous frame needed in run, because there may not be a previous frame.
 
-    InsnList restoreCode = new InsnList();
+    // Add label for first call of run() at index -1, see "startIndex" below.
+    // Empty frames are expected to have method == -1.
+    LabelNode startRun = new LabelNode();
+    restores.add(0, startRun);
 
-    // thread = this.$$thread$$;
-    restoreCode.add(threadCode.pushThread(clazz.name));
-    restoreCode.add(new VarInsnNode(ASTORE, localThread));
+    instructions.add(restoreCodeDispatcher(pushMethod(), restores, -1));
 
-    // frame = thread.first;
-    restoreCode.add(threadCode.getFirstFrame(localThread, localFrame));
+    // Dummy startup code to avoid to check of thread.serializing.
+    instructions.add(startRun);
 
-    // no previous frame needed in run, because there may not be a previous frame
+    // Reset method to 0 for the case that there is just one normal restore code,
+    // because if there is just one normal restore code, the method index will not be captured.
+    // So we set the correct one (0) for this case.
+    if (restores.size() == 1) {
+      instructions.add(threadCode.setMethod(localFrame, 0));
+    }
+    // Continue with normal code.
 
-    // restore code dispatcher
-    restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, -1));
-    restoreCode.add(startRestoreCode);
-
-    method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
+    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
   }
 }
