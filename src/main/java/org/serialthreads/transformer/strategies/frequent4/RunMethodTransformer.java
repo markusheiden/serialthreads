@@ -81,10 +81,10 @@ class RunMethodTransformer extends MethodTransformer {
     // Dummy startup code to avoid check of thread.serializing.
     instructions.add(startRun);
 
-    // Reset method to 0 for the case that there is just one normal restore code,
+    // Reset method to 0 for the case that there is just one normal restore code (except startRun),
     // because if there is just one normal restore code, the method index will not be captured.
     // So we set the correct one (0) for this case.
-    if (restores.size() == 1) {
+    if (restores.size() == 2) {
       instructions.add(threadCode.setMethod(localFrame, 0));
     }
     // Continue with normal code.
