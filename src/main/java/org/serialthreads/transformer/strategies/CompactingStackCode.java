@@ -37,10 +37,10 @@ public class CompactingStackCode extends AbstractStackCode {
 
    @Override
    public InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-      InsnList result = new InsnList();
+      InsnList instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
-         return result;
+         return instructions;
       }
 
       ExtendedFrame frameAfter = metaInfo.frameAfter;
@@ -55,9 +55,9 @@ public class CompactingStackCode extends AbstractStackCode {
          int lowestLocal = frameAfter.getLowestNeededLocal(value);
          if (value.isConstant() || lowestLocal >= 0) {
             // just pop the value from stack, because the stack value is constant or stored in a local too.
-            result.add(code(value).pop());
+            instructions.add(code(value).pop());
          } else {
-            result.add(code(value).pushStack(stackIndexes[stack], localFrame));
+            instructions.add(code(value).pushStack(stackIndexes[stack], localFrame));
          }
       }
 
@@ -84,32 +84,32 @@ public class CompactingStackCode extends AbstractStackCode {
          for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
             int local = iter.next();
             IValueCode localCode = code(frameAfter.getLocal(local));
-            result.add(localCode.pushLocalVariableFast(local, i, localFrame));
+            instructions.add(localCode.pushLocalVariableFast(local, i, localFrame));
          }
 
          // for too high locals use "slow" storage in (dynamic) array
          if (iter.hasNext()) {
-            result.add(code.getLocals(localFrame));
+            instructions.add(code.getLocals(localFrame));
             for (int i = 0; iter.hasNext(); i++) {
                int local = iter.next();
                IValueCode localCode = code(frameAfter.getLocal(local));
                if (iter.hasNext()) {
-                  result.add(new InsnNode(DUP));
+                  instructions.add(new InsnNode(DUP));
                }
-               result.add(localCode.pushLocalVariable(local, i));
+               instructions.add(localCode.pushLocalVariable(local, i));
             }
          }
       }
 
-      return result;
+      return instructions;
    }
 
    @Override
    public InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-      InsnList result = new InsnList();
+      InsnList instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
-         return result;
+         return instructions;
       }
 
       ExtendedFrame frameAfter = metaInfo.frameAfter;
@@ -148,24 +148,24 @@ public class CompactingStackCode extends AbstractStackCode {
          for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
             int local = iter.next();
             IValueCode localCode = code(frameAfter.getLocal(local));
-            result.add(localCode.popLocalVariableFast(local, i, localFrame));
+            instructions.add(localCode.popLocalVariableFast(local, i, localFrame));
          }
 
          // for too high locals use "slow" storage in (dynamic) array
          if (iter.hasNext()) {
-            result.add(code.getLocals(localFrame));
+            instructions.add(code.getLocals(localFrame));
             for (int i = 0; iter.hasNext(); i++) {
                int local = iter.next();
                IValueCode localCode = code(frameAfter.getLocal(local));
                if (iter.hasNext()) {
-                  result.add(new InsnNode(DUP));
+                  instructions.add(new InsnNode(DUP));
                }
-               result.add(localCode.popLocalVariable(local, i));
+               instructions.add(localCode.popLocalVariable(local, i));
             }
          }
 
          // then restore duplicated locals
-         result.add(copyLocals);
+         instructions.add(copyLocals);
       }
 
       // restore stack
@@ -177,18 +177,18 @@ public class CompactingStackCode extends AbstractStackCode {
          if (value.isConstant()) {
             // the stack value is constant -> push constant
             logger.debug("        Detected constant value on stack: {} / value {}", value, value.getConstant());
-            result.add(code(value).push(value.getConstant()));
+            instructions.add(code(value).push(value.getConstant()));
          } else if (lowestLocal >= 0) {
             // the stack value was already stored in local variable -> load local
             logger.debug("        Detected value of local on stack: {} / local {}", value, lowestLocal);
-            result.add(code(value).load(lowestLocal));
+            instructions.add(code(value).load(lowestLocal));
          } else {
             // normal case -> pop stack from frameAfter
-            result.add(code(value).popStack(stackIndexes[stack], localFrame));
+            instructions.add(code(value).popStack(stackIndexes[stack], localFrame));
          }
       }
 
-      return result;
+      return instructions;
    }
 
    /**

@@ -198,30 +198,30 @@ public abstract class AbstractMethodTransformer {
   protected InsnList restoreCodeDispatcher(InsnList getMethod, List<LabelNode> restores, int startIndex) {
     assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
-    InsnList result = new InsnList();
+    InsnList instructions = new InsnList();
 
     if (restores.size() == 1) {
       // just one method call -> nothing to dispatch -> execute directly
-      result.add(new JumpInsnNode(GOTO, restores.get(0)));
-      return result;
+      instructions.add(new JumpInsnNode(GOTO, restores.get(0)));
+      return instructions;
     }
 
     LabelNode defaultLabel = new LabelNode();
     restores.replaceAll(label -> label != null? label : defaultLabel);
 
     // switch(currentFrame.method) // branch to specific restore code
-    result.add(getMethod);
-    result.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(new LabelNode[restores.size()])));
+    instructions.add(getMethod);
+    instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(new LabelNode[restores.size()])));
 
     // default case -> may not happen -> throw IllegalThreadStateException
-    result.add(defaultLabel);
-    result.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
-    result.add(new InsnNode(DUP));
-    result.add(new LdcInsnNode("Invalid method pointer"));
-    result.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V", false));
-    result.add(new InsnNode(ATHROW));
+    instructions.add(defaultLabel);
+    instructions.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
+    instructions.add(new InsnNode(DUP));
+    instructions.add(new LdcInsnNode("Invalid method pointer"));
+    instructions.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V", false));
+    instructions.add(new InsnNode(ATHROW));
 
-    return result;
+    return instructions;
   }
 
   //
@@ -469,18 +469,18 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    InsnList result = new InsnList();
+    InsnList instructions = new InsnList();
 
     if (isSelfCall(methodCall, metaInfo)) {
       // self call: owner == this
-      result.add(new VarInsnNode(ALOAD, 0));
+      instructions.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(methodCall)) {
       // get owner
-      result.add(threadCode.pushOwner(localFrame()));
-      result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
+      instructions.add(threadCode.pushOwner(localFrame()));
+      instructions.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 
-    return result;
+    return instructions;
   }
 
   //

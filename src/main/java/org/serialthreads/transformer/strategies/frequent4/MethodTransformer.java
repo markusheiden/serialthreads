@@ -350,17 +350,17 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param serializing Serializing flag. Null means the serializing flag is already on the stack.
    */
   private InsnList methodReturn(Boolean serializing) {
-    InsnList result = new InsnList();
+    InsnList instructions = new InsnList();
     if (isRun(clazz, method, classInfoCache)) {
-      result.add(new InsnNode(RETURN));
+      instructions.add(new InsnNode(RETURN));
     } else if (serializing != null) {
-      result.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
-      result.add(new InsnNode(IRETURN));
+      instructions.add(new InsnNode(serializing? ICONST_1 : ICONST_0));
+      instructions.add(new InsnNode(IRETURN));
     } else {
       // serializing flag is already on the stack.
-      result.add(new InsnNode(IRETURN));
+      instructions.add(new InsnNode(IRETURN));
     }
-    return result;
+    return instructions;
   }
 
   /**
