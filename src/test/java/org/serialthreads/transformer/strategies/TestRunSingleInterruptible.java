@@ -17,9 +17,10 @@ public class TestRunSingleInterruptible implements IRunnable {
   @Override
   @Interruptible
   public void run() {
-    i = 2;
+    int i = 2;
     i = interruptible(i);
     i = i * 5;
+    this.i = i;
   }
 
   /**

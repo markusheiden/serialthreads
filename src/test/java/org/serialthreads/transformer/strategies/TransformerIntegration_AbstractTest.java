@@ -28,12 +28,12 @@ public abstract class TransformerIntegration_AbstractTest {
 
   /**
    * Check that transformation does not alter behaviour.
-   * Tests, that {@link IRunnable#run()} is transformed correctly, if not containing any interruptible method call.
+   * Tests, that {@link IRunnable#run()} is transformed correctly,
+   * if not containing any interruptible method call.
    */
-  @Ignore // TODO 2018-01-29 markus: Fix handling of this case.
   @Test
-  public void testNoRun() {
-    TestNoRunInterruptible test = new TestNoRunInterruptible();
+  public void testRunNo() {
+    TestRunNoInterruptible test = new TestRunNoInterruptible();
 
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
     manager.execute();
@@ -43,11 +43,27 @@ public abstract class TransformerIntegration_AbstractTest {
 
   /**
    * Check that transformation does not alter behaviour.
-   * Tests, that {@link IRunnable#run()} is transformed correctly, if just containing one interruptible method call.
+   * Tests, that {@link IRunnable#run()} is transformed correctly,
+   * if just containing one interruptible method call.
    */
   @Test
-  public void testSingleRun() {
-    TestSingleRunInterruptible test = new TestSingleRunInterruptible();
+  public void testRunSingle() {
+    TestRunSingleInterruptible test = new TestRunSingleInterruptible();
+
+    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager.execute();
+
+    test.assertExpectedResult();
+  }
+
+  /**
+   * Check that transformation does not alter behaviour.
+   * Tests, that {@link IRunnable#run()} is transformed correctly,
+   * if just containing multiple interruptible method calls.
+   */
+  @Test
+  public void testRunMulti() {
+    TestRunMultiInterruptible test = new TestRunMultiInterruptible();
 
     SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
     manager.execute();

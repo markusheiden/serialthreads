@@ -17,11 +17,12 @@ public class TestRunMultiInterruptible implements IRunnable {
   @Override
   @Interruptible
   public void run() {
-    i = 2;
+    int i = 2;
     i = interruptible1(i);
     i = i * 7;
     i = interruptible2(i);
     i = i * 11;
+    this.i = i;
   }
 
   /**

@@ -17,16 +17,17 @@ public class TestRunNoInterruptible implements IRunnable {
   @Override
   @Interruptible
   public void run() {
-    i = 1;
-    i = interruptible(i);
-    i = i + 1;
+    int i = 2;
+    i = notInterruptible(i);
+    i = i * 5;
+    this.i = i;
   }
 
   /**
-   * Test interrupt of method and capture and restore of integer locals.
+   * Just a normal method.
    */
-  public int interruptible(int i) {
-    return i + 1;
+  public int notInterruptible(int i) {
+    return i * 3;
   }
 
 
@@ -38,7 +39,7 @@ public class TestRunNoInterruptible implements IRunnable {
    * Check expected results of calling {@link TestInterruptible#run()} once.
    */
   public void assertExpectedResult() {
-    // 1 + 1 + 1.
-    assertEquals(3, i);
+    // 2 * 3 * 5.
+    assertEquals(30, i);
   }
 }
