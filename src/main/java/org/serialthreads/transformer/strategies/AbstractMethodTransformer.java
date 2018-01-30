@@ -305,19 +305,47 @@ public abstract class AbstractMethodTransformer {
    * @param restoreCode remaining restore code, executed directly after tryCode
    */
   protected void insertMethodGetThreadStartCode(int localThread, InsnList tryCode, InsnList restoreCode) {
+    if (isStatic(method)) {
+      insertStaticMethodGetThreadStartCode(localThread, tryCode, restoreCode);
+    } else {
+      insertNonStaticMethodGetThreadStartCode(localThread, tryCode, restoreCode);
+    }
+  }
+
+  /**
+   * Create "get thread" code for static methods including exception handling.
+   * Inserts generated code directly into method.
+   * Required stack size: 3.
+   *
+   * @param localThread number of local containing the thread
+   * @param tryCode restore code which can cause a NullPointerException during access of this.$$thread$$
+   * @param restoreCode remaining restore code, executed directly after tryCode
+   */
+  protected void insertStaticMethodGetThreadStartCode(int localThread, InsnList tryCode, InsnList restoreCode) {
     InsnList instructions = new InsnList();
 
-    if (isStatic(method)) {
-      // thread = SerialThreadManager.getThread();
-      instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
-      instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
-      instructions.add(new VarInsnNode(ASTORE, localThread));
-      instructions.add(tryCode);
-      instructions.add(restoreCode);
+    // thread = SerialThreadManager.getThread();
+    instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
+    instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
+    instructions.add(new VarInsnNode(ASTORE, localThread));
+    instructions.add(tryCode);
+    instructions.add(restoreCode);
 
-      method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-      return;
-    }
+    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
+    return;
+  }
+
+  /**
+   * Create "get thread" code for non-static methods including exception handling.
+   * Inserts generated code directly into method.
+   * Required stack size: 3.
+   *
+   * @param localThread number of local containing the thread
+   * @param tryCode restore code which can cause a NullPointerException during access of this.$$thread$$
+   * @param restoreCode remaining restore code, executed directly after tryCode
+   */
+  protected void insertNonStaticMethodGetThreadStartCode(int localThread, InsnList tryCode, InsnList restoreCode) {
+    InsnList instructions = new InsnList();
 
     // thread = this.$$thread$$;
     instructions.add(threadCode.pushThread(clazz.name));
