@@ -50,7 +50,10 @@ class RunMethodTransformer extends MethodTransformer {
    * @param restores Labels pointing to the generated restore codes for method calls.
    */
   private void createRestoreHandlerRun(List<LabelNode> restores) {
-    assert !restores.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+    if (restores.isEmpty()) {
+      logger.debug("    No restore handler needed for run");
+      return;
+    }
 
     logger.debug("    Creating restore handler for run");
 

@@ -31,7 +31,6 @@ public abstract class TransformerIntegration_AbstractTest {
    * Tests, that {@link IRunnable#run()} is transformed correctly,
    * if not containing any interruptible method call.
    */
-  @Ignore
   @Test
   public void testRunNo() {
     TestRunNoInterruptible test = new TestRunNoInterruptible();
