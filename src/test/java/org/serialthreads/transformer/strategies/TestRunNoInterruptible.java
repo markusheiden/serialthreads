@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test runnable for transformer integration tests.
  */
-public class TestSingleRunInterruptible implements IRunnable {
+public class TestRunNoInterruptible implements IRunnable {
   private int i;
 
   /**
@@ -25,7 +25,6 @@ public class TestSingleRunInterruptible implements IRunnable {
   /**
    * Test interrupt of method and capture and restore of integer locals.
    */
-  @Interruptible
   public int interruptible(int i) {
     return i + 1;
   }

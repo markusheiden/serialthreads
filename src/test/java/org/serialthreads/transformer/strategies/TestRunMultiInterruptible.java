@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Test runnable for transformer integration tests.
  */
-public class TestNoRunInterruptible implements IRunnable {
+public class TestRunMultiInterruptible implements IRunnable {
   private int i;
 
   /**
@@ -17,18 +17,28 @@ public class TestNoRunInterruptible implements IRunnable {
   @Override
   @Interruptible
   public void run() {
-    i = 1;
-    i = interruptible(i);
-    i = i + 1;
+    i = 2;
+    i = interruptible1(i);
+    i = i * 7;
+    i = interruptible2(i);
+    i = i * 11;
   }
 
   /**
    * Test interrupt of method and capture and restore of integer locals.
    */
-  public int interruptible(int i) {
-    return i + 1;
+  @Interruptible
+  public int interruptible1(int i) {
+    return i * 3;
   }
 
+  /**
+   * Test interrupt of method and capture and restore of integer locals.
+   */
+  @Interruptible
+  public int interruptible2(int i) {
+    return i * 5;
+  }
 
   //
   // Check results of execution ("self test")
@@ -38,7 +48,7 @@ public class TestNoRunInterruptible implements IRunnable {
    * Check expected results of calling {@link TestInterruptible#run()} once.
    */
   public void assertExpectedResult() {
-    // 1 + 1 + 1.
-    assertEquals(3, i);
+    // 2 * 3 * 5 * 7 * 11.
+    assertEquals(2310, i);
   }
 }
