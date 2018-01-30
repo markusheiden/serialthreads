@@ -46,7 +46,7 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
     if (isAbstract(method)) {
       // change signature of abstract methods
       return asList(
-        new AbstractCopyMethodTransformer(clazz, method, classInfoCache).transform());
+        new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     if (isRun(clazz, method, classInfoCache)) {

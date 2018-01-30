@@ -9,6 +9,7 @@ import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -35,20 +36,23 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
    * @throws AnalyzerException In case of incorrect byte code of the original method
    */
   public MethodNode transform() throws AnalyzerException {
-    shiftLocals();
-    nameAddedLocals();
-    analyze();
+    boolean concrete = !isAbstract(method);
+    if (concrete) {
+      shiftLocals();
+      nameAddedLocals();
+      analyze();
 
-    // create copy of method with shortened signature
-    List<LabelNode> restores = insertCaptureAndRestoreCode(true);
-    createRestoreHandlerCopy(restores);
-    fixMaxs();
+      // create copy of method with shortened signature
+      List<LabelNode> restores = insertCaptureAndRestoreCode(true);
+      createRestoreHandlerCopy(restores);
+      fixMaxs();
+    }
 
     method.name = changeCopyName(method.name, method.desc);
     method.desc = changeCopyDesc(method.desc);
     clazz.methods.add(method);
 
-    logger.debug("      Copied concrete method {}", methodName(clazz, method));
+    logger.debug("      Copied {} method {}", concrete? "concrete" : "abstract", methodName(clazz, method));
 
     return method;
   }
