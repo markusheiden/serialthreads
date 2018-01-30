@@ -328,7 +328,9 @@ public abstract class AbstractMethodTransformer {
     instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
     instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     instructions.add(new VarInsnNode(ASTORE, localThread));
+    // thread is always not null, so new exception handling needed here.
     instructions.add(tryCode);
+    // Remaining restore code.
     instructions.add(restoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
@@ -358,17 +360,17 @@ public abstract class AbstractMethodTransformer {
     // Labels (for try block) around restore code.
     LabelNode beginTry = new LabelNode();
     instructions.add(beginTry);
+    // Code relying on thread to be not null.
     instructions.add(tryCode);
     LabelNode endTry = new LabelNode();
     instructions.add(endTry);
+    // Remaining restore code.
     instructions.add(restoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
 
-    // try / catch (NullPointerException e).
-    InsnList handler = new InsnList();
-
     // try / catch (NullPointerException) for thread access
+    InsnList handler = new InsnList();
     LabelNode catchNPE = new LabelNode();
     handler.add(catchNPE);
     // Pop NPE from stack
@@ -379,10 +381,9 @@ public abstract class AbstractMethodTransformer {
     handler.add(new InsnNode(DUP_X1));
     handler.add(threadCode.setThread(clazz.name));
     handler.add(new JumpInsnNode(GOTO, retry));
+    method.instructions.add(handler);
     //noinspection unchecked
     method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
-
-    method.instructions.add(handler);
   }
 
   //

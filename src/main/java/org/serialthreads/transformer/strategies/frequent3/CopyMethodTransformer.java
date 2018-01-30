@@ -79,18 +79,19 @@ class CopyMethodTransformer extends MethodTransformer {
     if (needsFrame()) {
       restoreCode.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
     } else {
+      // Reuse previousFrame for return value.
+      // frame = previousFrame;
       restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       restoreCode.add(new VarInsnNode(ASTORE, localFrame));
     }
 
     if (paramThread != localThread) {
-      // thread = currentThread;
-      // TODO 2009-10-22 mh: How to avoid this copy???
+      // Move thread to the correct local.
       restoreCode.add(new VarInsnNode(ALOAD, paramThread));
       restoreCode.add(new VarInsnNode(ASTORE, localThread));
     }
 
-    // restore code dispatcher
+    // Restore code dispatcher.
     restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);

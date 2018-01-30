@@ -76,19 +76,18 @@ class CopyMethodTransformer extends MethodTransformer {
 
     InsnList restoreCode = new InsnList();
 
-    // previousFrame
+    // Move previousFrame to the correct local.
     restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
     restoreCode.add(new VarInsnNode(ASTORE, localPreviousFrame));
 
     // frame = previousFrame.next;
     restoreCode.add(threadCode.getNextFrame(localPreviousFrame, localFrame, false));
 
-    // thread = currentThread;
-    // TODO 2009-10-22 mh: rename locals to avoid this copy?
+    // Move thread to the correct local.
     restoreCode.add(new VarInsnNode(ALOAD, paramThread));
     restoreCode.add(new VarInsnNode(ASTORE, localThread));
 
-    // restore code dispatcher
+    // Restore code dispatcher.
     restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);

@@ -74,15 +74,17 @@ class CopyMethodTransformer extends MethodTransformer {
 
     InsnList restoreCode = new InsnList();
 
-    // frame = previousFrame.next;
     if (needsFrame()) {
+      // frame = previousFrame.next;
       restoreCode.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
     } else {
+      // Reuse previousFrame for return value.
+      // frame = previousFrame;
       restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       restoreCode.add(new VarInsnNode(ASTORE, localFrame));
     }
 
-    // restore code dispatcher
+    // Restore code dispatcher.
     restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
