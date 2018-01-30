@@ -47,15 +47,15 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
       return null;
     }
 
-    if (hasNoInterruptibleMethodCalls(method)) {
-      // no transformation needed
-      return null;
-    }
-
     if (isRun(clazz, method, classInfoCache)) {
       // take special care of run method
       return asList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());
+    }
+
+    if (hasNoInterruptibleMethodCalls(method)) {
+      // no transformation needed
+      return null;
     }
 
     // "standard" transformation of interruptible methods
