@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 
@@ -30,6 +31,7 @@ public class TestRunMultiInterruptible implements IRunnable {
    */
   @Interruptible
   public int interruptible1(int i) {
+    interrupt();
     return i * 3;
   }
 
@@ -38,7 +40,13 @@ public class TestRunMultiInterruptible implements IRunnable {
    */
   @Interruptible
   public int interruptible2(int i) {
+    interrupt();
     return i * 5;
+  }
+
+  @Interrupt
+  private void interrupt() {
+    throw new IllegalThreadStateException("Byte code transformation failed");
   }
 
   //
