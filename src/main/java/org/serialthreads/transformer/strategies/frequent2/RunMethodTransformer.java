@@ -68,10 +68,6 @@ class RunMethodTransformer extends MethodTransformer {
     // frame = thread.first;
     instructions.add(threadCode.getFirstFrame(localThread, localFrame));
 
-    // TODO 2009-11-26 mh: remove me?
-    // thread.frame = frame;
-    instructions.add(threadCode.setFrame(localThread, localFrame));
-
     // No previous frame needed in run, because there may not be a previous frame.
 
     // Add label for first call of run() at index -1, see "startIndex" below.
@@ -83,6 +79,10 @@ class RunMethodTransformer extends MethodTransformer {
 
     // Dummy startup code to avoid check of thread.serializing.
     instructions.add(startRun);
+
+    // Not needed, because thread.frame is initialized with thread.firstFrame.
+    // thread.frame = frame; // frame == thread.firstFrame, see above.
+    // instructions.add(threadCode.setFrame(localThread, localFrame));
 
     // Reset method to 0 for the case that there is just one normal restore code (except startRun),
     // because if there is just one normal restore code, the method index will not be captured.

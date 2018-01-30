@@ -56,8 +56,9 @@ class OriginalMethodTransformer extends MethodTransformer {
     // frame = previousFrame.next; // etc.
     getFrame.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
 
-    // TODO 2009-11-26 mh: remove me?
     InsnList restoreCode = new InsnList();
+
+    // Store current frame, so next method can fetch is as previous frame.
     // thread.frame = frame;
     restoreCode.add(threadCode.setFrame(localThread, localFrame));
 

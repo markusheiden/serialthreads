@@ -68,7 +68,7 @@ class RunMethodTransformer extends MethodTransformer {
     // frame = thread.first;
     instructions.add(threadCode.getFirstFrame(localThread, localFrame));
 
-    // TODO 2009-11-26 mh: remove me?
+    // Store current frame, so next method can fetch is as previous frame.
     // thread.frame = frame;
     instructions.add(threadCode.setFrame(localThread, localFrame));
 
