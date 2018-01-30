@@ -78,7 +78,7 @@ class RunMethodTransformer extends MethodTransformer {
 
     instructions.add(restoreCodeDispatcher(pushMethod(), restores, -1));
 
-    // Dummy startup code to avoid to check of thread.serializing.
+    // Dummy startup code to avoid check of thread.serializing.
     instructions.add(startRun);
 
     // Reset method to 0 for the case that there is just one normal restore code,
