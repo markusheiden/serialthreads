@@ -75,8 +75,8 @@ class CopyMethodTransformer extends MethodTransformer {
 
     InsnList restoreCode = new InsnList();
 
-    // frame = previousFrame.next;
     if (needsFrame()) {
+      // frame = previousFrame.next;
       restoreCode.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
     } else {
       // Reuse previousFrame for return value.
