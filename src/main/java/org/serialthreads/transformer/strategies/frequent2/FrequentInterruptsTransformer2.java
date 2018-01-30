@@ -46,7 +46,7 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
     if (isAbstract(method)) {
       // change signature of abstract methods
       return asList(
-        new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform());
+        new CopyMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     if (isRun(clazz, method, classInfoCache)) {
@@ -62,8 +62,8 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
 
     // "standard" transformation of interruptible methods
     return asList(
-      new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
-      new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
+      new CopyMethodTransformer(clazz, method, classInfoCache).transform(),
+      new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
   }
 
   @Override

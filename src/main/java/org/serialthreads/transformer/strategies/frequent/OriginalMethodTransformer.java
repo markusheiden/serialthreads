@@ -12,7 +12,7 @@ import static org.objectweb.asm.Opcodes.IFEQ;
  * Method transformer for concrete methods.
  */
 @SuppressWarnings({"UnusedAssignment"})
-class ConcreteMethodTransformer extends MethodTransformer {
+class OriginalMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
    *
@@ -20,7 +20,7 @@ class ConcreteMethodTransformer extends MethodTransformer {
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected ConcreteMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
+  protected OriginalMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, method, classInfoCache);
   }
 

@@ -58,12 +58,12 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
     if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
       // Copied method not needed, because it will be called never.
       return asList(
-        new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
+        new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     // "Standard" transformation of interruptible methods.
     return asList(
-      new ConcreteCopyMethodTransformer(clazz, method, classInfoCache).transform(),
-      new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
+      new CopyMethodTransformer(clazz, method, classInfoCache).transform(),
+      new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
   }
 }

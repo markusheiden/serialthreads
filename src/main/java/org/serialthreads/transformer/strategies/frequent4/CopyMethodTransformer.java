@@ -16,7 +16,7 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
  * Method transformer for copied methods.
  */
 @SuppressWarnings({"UnusedAssignment"})
-class ConcreteCopyMethodTransformer extends MethodTransformer {
+class CopyMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
    *
@@ -24,7 +24,7 @@ class ConcreteCopyMethodTransformer extends MethodTransformer {
    * @param method method to transform
    * @param classInfoCache class cache to use
    */
-  protected ConcreteCopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
+  protected CopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     // create copy of method with shortened signature
     super(clazz, MethodNodeCopier.copy(method), classInfoCache);
   }

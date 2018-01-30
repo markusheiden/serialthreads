@@ -60,7 +60,7 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
 
     // "standard" transformation of interruptible methods
     return asList(
-      new ConcreteMethodTransformer(clazz, method, classInfoCache).transform());
+      new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
   }
 
   @Override
