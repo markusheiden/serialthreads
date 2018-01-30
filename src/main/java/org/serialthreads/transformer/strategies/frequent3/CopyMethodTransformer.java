@@ -73,27 +73,27 @@ class CopyMethodTransformer extends MethodTransformer {
     final int localThread = localThread();
     final int localFrame = localFrame();
 
-    InsnList restoreCode = new InsnList();
+    InsnList instructions = new InsnList();
 
     if (needsFrame()) {
       // frame = previousFrame.next;
-      restoreCode.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
+      instructions.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
     } else {
       // Reuse previousFrame for return value.
       // frame = previousFrame;
-      restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-      restoreCode.add(new VarInsnNode(ASTORE, localFrame));
+      instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+      instructions.add(new VarInsnNode(ASTORE, localFrame));
     }
 
     if (paramThread != localThread) {
       // Move thread to the correct local.
-      restoreCode.add(new VarInsnNode(ALOAD, paramThread));
-      restoreCode.add(new VarInsnNode(ASTORE, localThread));
+      instructions.add(new VarInsnNode(ALOAD, paramThread));
+      instructions.add(new VarInsnNode(ASTORE, localThread));
     }
 
     // Restore code dispatcher.
-    restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
+    instructions.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
-    method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
+    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
   }
 }

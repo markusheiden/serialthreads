@@ -25,7 +25,6 @@ class CopyMethodTransformer extends MethodTransformer {
    * @param classInfoCache class cache to use
    */
   protected CopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-    // create copy of method with shortened signature
     super(clazz, MethodNodeCopier.copy(method), classInfoCache);
   }
 
@@ -72,21 +71,21 @@ class CopyMethodTransformer extends MethodTransformer {
 
     final int localFrame = localFrame();
 
-    InsnList restoreCode = new InsnList();
+    InsnList instructions = new InsnList();
 
     if (needsFrame()) {
       // frame = previousFrame.next;
-      restoreCode.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
+      instructions.add(threadCode.getNextFrame(paramPreviousFrame, localFrame, false));
     } else {
       // Reuse previousFrame for return value.
       // frame = previousFrame;
-      restoreCode.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-      restoreCode.add(new VarInsnNode(ASTORE, localFrame));
+      instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+      instructions.add(new VarInsnNode(ASTORE, localFrame));
     }
 
     // Restore code dispatcher.
-    restoreCode.add(restoreCodeDispatcher(pushMethod(), restores, 0));
+    instructions.add(restoreCodeDispatcher(pushMethod(), restores, 0));
 
-    method.instructions.insertBefore(method.instructions.getFirst(), restoreCode);
+    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
   }
 }

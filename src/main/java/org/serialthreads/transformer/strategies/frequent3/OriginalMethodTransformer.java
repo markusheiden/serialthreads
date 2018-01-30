@@ -62,22 +62,22 @@ class OriginalMethodTransformer extends MethodTransformer {
     final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
-    InsnList getFrame = new InsnList();
+    InsnList instructions = new InsnList();
 
     if (isNotStatic(method)) {
       // previousFrame.owner = this;
-      getFrame.add(threadCode.setOwner(localPreviousFrame));
+      instructions.add(threadCode.setOwner(localPreviousFrame));
     }
 
     if (needsFrame()) {
       // frame = previousFrame.next; // etc.
-      getFrame.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
+      instructions.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
     } else {
       // localFrame = localPreviousFrame;
-      getFrame.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      getFrame.add(new VarInsnNode(ASTORE, localFrame));
+      instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      instructions.add(new VarInsnNode(ASTORE, localFrame));
     }
 
-    method.instructions.insertBefore(method.instructions.getFirst(), getFrame);
+    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
   }
 }
