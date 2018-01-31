@@ -119,6 +119,37 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   // Capture and restore code inserted after method calls.
   //
 
+
+  @Override
+  protected int paramThread() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  protected int paramPreviousFrame() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    return super.param(0);
+  }
+
+  @Override
+  protected int localThread() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  protected int localPreviousFrame() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    return super.local(0);
+  }
+
+  @Override
+  protected int localFrame() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    return super.local(1);
+  }
+
   @Override
   protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
