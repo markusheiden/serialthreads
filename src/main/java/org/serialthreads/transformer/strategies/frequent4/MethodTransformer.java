@@ -86,6 +86,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void replaceReturns() {
     logger.debug("      Replacing returns");
 
+    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     Type returnType = Type.getReturnType(method.desc);
@@ -101,11 +102,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
           // Save return value into the thread.
-          // FIXME markus 2018-01-14: Get thread!
-          int localThread = localThread();
-          replacement.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
-          replacement.add(new VarInsnNode(ASTORE, localThread));
-          replacement.add(code(returnType).pushReturnValue(localThread));
+          // FIXME markus 2018-01-14: Push return value to frame instead of stack!
+          replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
         }
         replacement.add(methodReturn(false));
       }
@@ -212,6 +210,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
+    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
@@ -250,11 +249,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      // FIXME markus 2018-01-14: Get thread!
-      int localThread = localThread();
-      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
-      instructions.add(new VarInsnNode(ASTORE, localThread));
-      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      // FIXME markus 2018-01-14: Pop return value from frame instead of stack!
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localPreviousFrame));
     }
 
     // Insert capture code.
