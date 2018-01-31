@@ -16,7 +16,7 @@ public final class StackFrame implements Serializable {
   /**
    * Logger.
    */
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private static final Logger logger = LoggerFactory.getLogger(StackFrame.class);
 
   public static int DEFAULT_FRAME_SIZE = 64;
   public static final int FAST_FRAME_SIZE = 8;
