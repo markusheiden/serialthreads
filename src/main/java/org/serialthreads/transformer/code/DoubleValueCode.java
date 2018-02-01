@@ -29,8 +29,10 @@ public class DoubleValueCode extends AbstractValueCode {
   @Override
   public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
+    // Put previousFrame before return value (2 words) onto stack.
     instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
     instructions.add(new InsnNode(DUP_X2));
+    // Remove duplicated previousFrame from top of stack.
     instructions.add(new InsnNode(POP));
     doPushReturnValueImpl(instructions);
     return instructions;

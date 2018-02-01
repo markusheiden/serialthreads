@@ -125,6 +125,7 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
+    // Put previousFrame before return value onto stack.
     instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
     instructions.add(new InsnNode(SWAP));
     doPushReturnValueImpl(instructions);
