@@ -71,6 +71,14 @@ public abstract class AbstractStackCode implements ThreadCode {
       InsnList instructions = new InsnList();
       // frame = thread.first;
       instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(getFirstFrame(localFrame));
+      return instructions;
+   }
+
+   @Override
+   public InsnList getFirstFrame(int localFrame) {
+      InsnList instructions = new InsnList();
+      // frame = thread.first;
       instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "first", FRAME_IMPL_DESC));
       instructions.add(new VarInsnNode(ASTORE, localFrame));
       return instructions;

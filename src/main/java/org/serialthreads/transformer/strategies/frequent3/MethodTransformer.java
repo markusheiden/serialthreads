@@ -89,6 +89,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     logger.debug("      Replacing returns");
 
     final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     Type returnType = Type.getReturnType(method.desc);
@@ -104,7 +105,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
           // Save return value into the thread.
-          replacement.add(code(returnType).pushReturnValue(localThread));
+          replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
         }
         replacement.add(methodReturn(false));
       }
@@ -219,7 +220,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
     }
 
     // Insert capture code.

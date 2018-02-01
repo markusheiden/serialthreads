@@ -210,7 +210,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
@@ -249,8 +248,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      // FIXME markus 2018-01-14: Pop return value from frame instead of stack!
-      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localPreviousFrame));
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
     }
 
     // Insert capture code.

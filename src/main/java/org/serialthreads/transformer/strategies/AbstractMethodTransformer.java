@@ -89,7 +89,7 @@ public abstract class AbstractMethodTransformer {
     LabelNode last = insertLabelAfter(method.instructions.getLast());
 
     List<LocalVariableNode> locals = method.localVariables;
-    locals.add(new LocalVariableNode("thread", THREAD_DESC, null, first, last, localThread()));
+//    locals.add(new LocalVariableNode("thread", THREAD_DESC, null, first, last, localThread()));
     locals.add(new LocalVariableNode("previousFrame", FRAME_IMPL_DESC, null, first, last, localPreviousFrame()));
     locals.add(new LocalVariableNode("frame", FRAME_IMPL_DESC, null, first, last, localFrame()));
   }
@@ -111,7 +111,7 @@ public abstract class AbstractMethodTransformer {
   /**
    * Parameter p used by this transformer.
    */
-  private int param(int p) {
+  protected final int param(int p) {
     return firstParam(method) + p;
   }
 
@@ -141,7 +141,7 @@ public abstract class AbstractMethodTransformer {
   /**
    * Local l used by this transformer.
    */
-  private int local(int l) {
+  protected final int local(int l) {
     return firstLocal(method) + l;
   }
 

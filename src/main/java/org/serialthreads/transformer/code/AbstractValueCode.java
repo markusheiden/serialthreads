@@ -123,9 +123,9 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList pushReturnValue(int localThread) {
+  public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
     instructions.add(new InsnNode(SWAP));
     doPushReturnValueImpl(instructions);
     return instructions;
@@ -138,7 +138,7 @@ public abstract class AbstractValueCode implements IValueCode {
    * @param instructions Instructions.
    */
   protected final void doPushReturnValueImpl(InsnList instructions) {
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
   }
 
   @Override
@@ -168,10 +168,10 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList popReturnValue(int localThread) {
+  public InsnList popReturnValue(int localFrame) {
     InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     return instructions;
   }

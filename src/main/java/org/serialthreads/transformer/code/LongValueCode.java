@@ -27,9 +27,9 @@ public class LongValueCode extends AbstractValueCode {
   }
 
   @Override
-  public InsnList pushReturnValue(int localThread) {
+  public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
     instructions.add(new InsnNode(DUP_X2));
     instructions.add(new InsnNode(POP));
     doPushReturnValueImpl(instructions);

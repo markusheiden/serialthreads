@@ -42,10 +42,10 @@ public interface IValueCode {
    /**
     * Generate code to capture the current stack as a return value into the thread.
     *
-    * @param localThread
-    *           Thread to push to.
+    * @param localPreviousFrame
+    *           Local with previous frame.
     */
-   InsnList pushReturnValue(int localThread);
+   InsnList pushReturnValue(int localPreviousFrame);
 
    /**
     * Generate code to restore a local variable from a frame. The frame is expected to be already on the top of the
@@ -74,10 +74,10 @@ public interface IValueCode {
    /**
     * Generate code to restore the return value from a frame.
     *
-    * @param localThread
-    *           Thread to push to.
+    * @param localFrame
+    *           Local with frame.
     */
-   InsnList popReturnValue(int localThread);
+   InsnList popReturnValue(int localFrame);
 
    /**
     * Generate code to get the array for stack elements of the frame.

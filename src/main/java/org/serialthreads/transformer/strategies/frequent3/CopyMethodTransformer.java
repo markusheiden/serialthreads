@@ -71,6 +71,7 @@ class CopyMethodTransformer extends MethodTransformer {
     final int paramPreviousFrame = paramPreviousFrame();
 
     final int localThread = localThread();
+    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     InsnList instructions = new InsnList();
@@ -83,6 +84,13 @@ class CopyMethodTransformer extends MethodTransformer {
       // frame = previousFrame;
       instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       instructions.add(new VarInsnNode(ASTORE, localFrame));
+    }
+
+    // TODO 2018-02-01 markus: Just needed, because the return value will now be stored in the previous frame.
+    if (paramPreviousFrame != localPreviousFrame) {
+      // previousFrame = previousFrame;
+      instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
+      instructions.add(new VarInsnNode(ASTORE, localPreviousFrame));
     }
 
     if (paramThread != localThread) {

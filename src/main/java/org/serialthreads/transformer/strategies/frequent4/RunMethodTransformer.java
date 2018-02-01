@@ -1,12 +1,13 @@
 package org.serialthreads.transformer.strategies.frequent4;
 
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
-
-import static org.objectweb.asm.Opcodes.ASTORE;
 
 /**
  * Method transformer for run methods.
@@ -57,17 +58,13 @@ class RunMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for run");
 
-    final int localThread = localThread();
     final int localFrame = localFrame();
 
     InsnList instructions = new InsnList();
 
-    // thread = this.$$thread$$;
     instructions.add(threadCode.pushThread(clazz.name));
-    instructions.add(new VarInsnNode(ASTORE, localThread));
-
-    // frame = thread.first;
-    instructions.add(threadCode.getFirstFrame(localThread, localFrame));
+    // frame = this.$$thread$$.first;
+    instructions.add(threadCode.getFirstFrame(localFrame));
 
     // No previous frame needed in run, because there may not be a previous frame.
 
