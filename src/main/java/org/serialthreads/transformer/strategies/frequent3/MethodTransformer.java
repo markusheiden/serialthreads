@@ -104,14 +104,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       } else {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
-          // Save return value into the thread.
+          // Save return value into the previous frame.
           replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
         }
         replacement.add(methodReturn(false));
       }
 
-      method.instructions.insert(returnInstruction, replacement);
-      method.instructions.remove(returnInstruction);
+      replace(returnInstruction, replacement);
     }
   }
 
