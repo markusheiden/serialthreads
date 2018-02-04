@@ -165,11 +165,18 @@ public abstract class AbstractValueCode implements IValueCode {
     } else {
       // for too deep stack use "slow" storage in array
       instructions.add(getStacks(localFrame));
-      instructions.add(beforePop());
+      if (clear) {
+        instructions.add(new InsnNode(DUP));
+      }
       instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
       instructions.add(new InsnNode(aload));
       instructions.add(cast());
-      instructions.add(afterPop(index - StackFrame.FAST_FRAME_SIZE));
+      if (clear) {
+        instructions.add(new InsnNode(SWAP));
+        instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+        instructions.add(pushNull());
+        instructions.add(new InsnNode(astore));
+      }
     }
 
     return instructions;
@@ -237,11 +244,18 @@ public abstract class AbstractValueCode implements IValueCode {
       if (more) {
         instructions.add(new InsnNode(DUP));
       }
-      instructions.add(beforePop());
-      instructions.add(IntValueCode.push(index- StackFrame.FAST_FRAME_SIZE));
+      if (clear) {
+        instructions.add(new InsnNode(DUP));
+      }
+      instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
       instructions.add(new InsnNode(aload));
       instructions.add(cast());
-      instructions.add(afterPop(local));
+      if (clear) {
+        instructions.add(new InsnNode(SWAP));
+        instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+        instructions.add(pushNull());
+        instructions.add(new InsnNode(astore));
+      }
       instructions.add(new VarInsnNode(store, local));
     }
     return instructions;
@@ -327,27 +341,6 @@ public abstract class AbstractValueCode implements IValueCode {
    * @return Instructions
    */
   protected InsnList cast() {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
-  /**
-   * Add code directly before restoring a local or a stack element from a frame.
-   *
-   * @return Instructions
-   */
-  protected InsnList beforePop() {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
-  /**
-   * Add code directly after restoring a local or a stack element from a frame.
-   *
-   * @param i Index
-   * @return Instructions
-   */
-  protected InsnList afterPop(int i) {
     // overwrite, if needed
     return new InsnList();
   }

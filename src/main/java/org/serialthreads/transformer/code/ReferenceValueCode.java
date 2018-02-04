@@ -26,25 +26,6 @@ public class ReferenceValueCode extends AbstractValueCode {
   }
 
   @Override
-  protected InsnList beforePop() {
-    InsnList instructions = new InsnList();
-    instructions.add(new InsnNode(DUP));
-
-    return instructions;
-  }
-
-  @Override
-  protected InsnList afterPop(int i) {
-    InsnList instructions = new InsnList();
-    instructions.add(new InsnNode(SWAP));
-    instructions.add(IntValueCode.push(i));
-    instructions.add(pushNull());
-    instructions.add(new InsnNode(astore));
-
-    return instructions;
-  }
-
-  @Override
   public AbstractInsnNode push(Object value) {
     if (value == null) {
       return new InsnNode(ACONST_NULL);
