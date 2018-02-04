@@ -36,6 +36,16 @@ public abstract class AbstractValueCode implements IValueCode {
   protected final Type baseType;
 
   /**
+   * Number of words of an element.
+   */
+  protected final int size;
+
+  /**
+   * Clear restore elements from stack frame?
+   */
+  protected final boolean clear;
+
+  /**
    * Base name of value specific load/store methods at stack.
    */
   protected final String methodName;
@@ -84,7 +94,15 @@ public abstract class AbstractValueCode implements IValueCode {
    */
   public AbstractValueCode(Type type, String methodName, int load, int store, int aload, int astore, int pushNull, int returnValue) {
     this.type = type;
-    this.baseType = type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY ? Type.getType(Object.class) : type;
+    if (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY) {
+      this.baseType = Type.getType(Object.class);
+      this.size = 1;
+      this.clear = true;
+    } else {
+      this.baseType = type;
+      this.size = type.getSize();
+      this.clear = false;
+    }
     this.methodName = methodName;
     this.load = load;
     this.store = store;
@@ -231,6 +249,11 @@ public abstract class AbstractValueCode implements IValueCode {
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
+    if (clear) {
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(pushNull());
+      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, type.getDescriptor()));
+    }
     return instructions;
   }
 
@@ -241,49 +264,49 @@ public abstract class AbstractValueCode implements IValueCode {
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
+    if (clear) {
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(pushNull());
+      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
+    }
     return instructions;
   }
 
   @Override
   public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
-    // Put previousFrame before return value onto stack.
-    instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    instructions.add(new InsnNode(SWAP));
-    doPushReturnValueImpl(instructions);
-    return instructions;
-  }
-
-  /**
-   * Generate code to capture the return value into the thread.
-   * Required objects on the stack: Thread, Value.
-   *
-   * @param instructions Instructions.
-   */
-  protected final void doPushReturnValueImpl(InsnList instructions) {
+    if (size == 1) {
+      // Put previousFrame before return value onto stack.
+      instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      instructions.add(new InsnNode(SWAP));
+    } else {
+      // Put previousFrame before return value (2 words) onto stack.
+      instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      instructions.add(new InsnNode(DUP_X2));
+      // Remove duplicated previousFrame from top of stack.
+      instructions.add(new InsnNode(POP));
+    }
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    return instructions;
   }
 
   @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
   @Override
   public InsnList pushReturnValueStack(int localThread) {
     InsnList instructions = new InsnList();
-    // Put previousFrame before return value onto stack.
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new InsnNode(SWAP));
-    doPushReturnValueStackImpl(instructions);
-    return instructions;
-  }
-
-  /**
-   * Generate code to capture the return value into the thread.
-   * Required objects on the stack: Thread, Value.
-   *
-   * @param instructions Instructions.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  protected final void doPushReturnValueStackImpl(InsnList instructions) {
+    if (size == 1) {
+      // Put previousFrame before return value onto stack.
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(new InsnNode(SWAP));
+    } else {
+      // Put previousFrame before return value (2 words) onto stack.
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(new InsnNode(DUP_X2));
+      // Remove duplicated previousFrame from top of stack.
+      instructions.add(new InsnNode(POP));
+    }
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    return instructions;
   }
 
   //
