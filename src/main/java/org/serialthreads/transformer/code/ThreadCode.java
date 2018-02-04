@@ -1,4 +1,4 @@
-package org.serialthreads.transformer.strategies;
+package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
+import org.serialthreads.transformer.strategies.MetaInfo;
 
 /**
  * Capture and restore of stack frames.

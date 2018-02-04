@@ -1,4 +1,4 @@
-package org.serialthreads.transformer.strategies;
+package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -7,8 +7,7 @@ import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
-import org.serialthreads.transformer.code.IValueCode;
-import org.serialthreads.transformer.code.ValueCodeFactory;
+import org.serialthreads.transformer.strategies.MetaInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,7 +9,9 @@ import org.serialthreads.context.Stack;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.CompactingStackCode;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
+import org.serialthreads.transformer.code.ThreadCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,9 @@
-package org.serialthreads.transformer.strategies;
+package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
-import org.serialthreads.transformer.code.IntValueCode;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;

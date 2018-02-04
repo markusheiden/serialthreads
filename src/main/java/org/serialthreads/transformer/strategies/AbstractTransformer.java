@@ -16,6 +16,8 @@ import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.CompactingStackCode;
+import org.serialthreads.transformer.code.ThreadCode;
 import org.serialthreads.transformer.debug.Debugger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
