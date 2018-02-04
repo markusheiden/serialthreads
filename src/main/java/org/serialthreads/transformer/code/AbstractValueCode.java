@@ -157,7 +157,11 @@ public abstract class AbstractValueCode implements IValueCode {
       instructions.add(new VarInsnNode(ALOAD, localFrame));
       instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
       instructions.add(cast());
-      instructions.add(clear("stack" + methodName + index, localFrame));
+      if (clear) {
+        instructions.add(new VarInsnNode(ALOAD, localFrame));
+        instructions.add(pushNull());
+        instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
+      }
     } else {
       // for too deep stack use "slow" storage in array
       instructions.add(getStacks(localFrame));
@@ -220,7 +224,11 @@ public abstract class AbstractValueCode implements IValueCode {
       instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
       instructions.add(cast());
       instructions.add(new VarInsnNode(store, local));
-      instructions.add(clear("local" + methodName + index, localFrame));
+      if (clear) {
+        instructions.add(new VarInsnNode(ALOAD, localFrame));
+        instructions.add(pushNull());
+        instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+      }
     } else {
       // for too high locals use "slow" storage in (dynamic) array
       if (index == StackFrame.FAST_FRAME_SIZE) {
@@ -319,18 +327,6 @@ public abstract class AbstractValueCode implements IValueCode {
    * @return Instructions
    */
   protected InsnList cast() {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
-  /**
-   * Generate code to clear a saved value from the stack frame to avoid memory leaks.
-   *
-   * @param name Name of stack frame field to clear
-   * @param localFrame Local containing the frame
-   * @return Instructions
-   */
-  protected InsnList clear(String name, int localFrame) {
     // overwrite, if needed
     return new InsnList();
   }
