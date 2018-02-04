@@ -250,13 +250,12 @@ public abstract class AbstractValueCode implements IValueCode {
       instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
       instructions.add(new InsnNode(aload));
       instructions.add(cast());
+      instructions.add(new VarInsnNode(store, local));
       if (clear) {
-        instructions.add(new InsnNode(SWAP));
         instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
         instructions.add(pushNull());
         instructions.add(new InsnNode(astore));
       }
-      instructions.add(new VarInsnNode(store, local));
     }
     return instructions;
   }
