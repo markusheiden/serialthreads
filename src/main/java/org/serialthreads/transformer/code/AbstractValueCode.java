@@ -266,35 +266,6 @@ public abstract class AbstractValueCode implements IValueCode {
   //
 
   @Override
-  public InsnList popReturnValue(int localFrame) {
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-    instructions.add(cast());
-    if (clear) {
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(pushNull());
-      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, type.getDescriptor()));
-    }
-    return instructions;
-  }
-
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  @Override
-  public InsnList popReturnValueStack(int localThread) {
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-    instructions.add(cast());
-    if (clear) {
-      instructions.add(new VarInsnNode(ALOAD, localThread));
-      instructions.add(pushNull());
-      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
-    }
-    return instructions;
-  }
-
-  @Override
   public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
     if (size == 1) {
@@ -328,6 +299,35 @@ public abstract class AbstractValueCode implements IValueCode {
       instructions.add(new InsnNode(POP));
     }
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    return instructions;
+  }
+
+  @Override
+  public InsnList popReturnValue(int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(cast());
+    if (clear) {
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(pushNull());
+      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, type.getDescriptor()));
+    }
+    return instructions;
+  }
+
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList popReturnValueStack(int localThread) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(cast());
+    if (clear) {
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(pushNull());
+      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
+    }
     return instructions;
   }
 
