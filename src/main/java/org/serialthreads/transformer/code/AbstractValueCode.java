@@ -152,50 +152,6 @@ public abstract class AbstractValueCode implements IValueCode {
 
     return instructions;
   }
-
-  /**
-   * Generate code to cast the topmost element on the stack to this type.
-   *
-   * @return Instructions
-   */
-  protected InsnList cast() {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
-  /**
-   * Generate code to clear a saved value from the stack frame to avoid memory leaks.
-   *
-   * @param name Name of stack frame field to clear
-   * @param localFrame Local containing the frame
-   * @return Instructions
-   */
-  protected InsnList clear(String name, int localFrame) {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
-  /**
-   * Add code directly before restoring a local or a stack element from a frame.
-   *
-   * @return Instructions
-   */
-  protected InsnList beforePop() {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
-  /**
-   * Add code directly after restoring a local or a stack element from a frame.
-   *
-   * @param i Index
-   * @return Instructions
-   */
-  protected InsnList afterPop(int i) {
-    // overwrite, if needed
-    return new InsnList();
-  }
-
   //
   // Locals.
   //
@@ -334,6 +290,53 @@ public abstract class AbstractValueCode implements IValueCode {
   @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
   protected final void doPushReturnValueStackImpl(InsnList instructions) {
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+  }
+
+  //
+  // Restore support.
+  //
+
+  /**
+   * Generate code to cast the topmost element on the stack to this type.
+   *
+   * @return Instructions
+   */
+  protected InsnList cast() {
+    // overwrite, if needed
+    return new InsnList();
+  }
+
+  /**
+   * Generate code to clear a saved value from the stack frame to avoid memory leaks.
+   *
+   * @param name Name of stack frame field to clear
+   * @param localFrame Local containing the frame
+   * @return Instructions
+   */
+  protected InsnList clear(String name, int localFrame) {
+    // overwrite, if needed
+    return new InsnList();
+  }
+
+  /**
+   * Add code directly before restoring a local or a stack element from a frame.
+   *
+   * @return Instructions
+   */
+  protected InsnList beforePop() {
+    // overwrite, if needed
+    return new InsnList();
+  }
+
+  /**
+   * Add code directly after restoring a local or a stack element from a frame.
+   *
+   * @param i Index
+   * @return Instructions
+   */
+  protected InsnList afterPop(int i) {
+    // overwrite, if needed
+    return new InsnList();
   }
 
   //
