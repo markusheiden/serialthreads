@@ -179,14 +179,13 @@ public abstract class AbstractValueCode implements IValueCode {
       instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
     } else {
       // for too high locals use "slow" storage in (dynamic) array
-      index = index - StackFrame.FAST_FRAME_SIZE;
-      if (index == 0) {
+      if (index == StackFrame.FAST_FRAME_SIZE) {
         instructions.add(getLocals(localFrame));
       }
       if (more) {
         instructions.add(new InsnNode(DUP));
       }
-      instructions.add(IntValueCode.push(index));
+      instructions.add(IntValueCode.push(index- StackFrame.FAST_FRAME_SIZE));
       instructions.add(new VarInsnNode(load, local));
       instructions.add(new InsnNode(astore));
     }
@@ -206,15 +205,14 @@ public abstract class AbstractValueCode implements IValueCode {
       instructions.add(clear("local" + methodName + index, localFrame));
     } else {
       // for too high locals use "slow" storage in (dynamic) array
-      index = index - StackFrame.FAST_FRAME_SIZE;
-      if (index == 0) {
+      if (index == StackFrame.FAST_FRAME_SIZE) {
         instructions.add(getLocals(localFrame));
       }
       if (more) {
         instructions.add(new InsnNode(DUP));
       }
       instructions.add(beforePop());
-      instructions.add(IntValueCode.push(index));
+      instructions.add(IntValueCode.push(index- StackFrame.FAST_FRAME_SIZE));
       instructions.add(new InsnNode(aload));
       instructions.add(cast());
       instructions.add(afterPop(local));
