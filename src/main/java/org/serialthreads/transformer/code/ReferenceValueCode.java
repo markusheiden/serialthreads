@@ -87,7 +87,7 @@ public class ReferenceValueCode extends AbstractValueCode {
 
   @Override
   public boolean isCompatibleWith(Type type) {
-    assert type != null : "Precondition: type != null2";
+    assert type != null : "Precondition: type != null.";
 
     return super.isCompatibleWith(type) && type.getInternalName().equals(type.getInternalName());
   }
