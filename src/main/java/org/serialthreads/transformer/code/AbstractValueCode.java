@@ -181,6 +181,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
     return instructions;
   }
+
   //
   // Locals.
   //
