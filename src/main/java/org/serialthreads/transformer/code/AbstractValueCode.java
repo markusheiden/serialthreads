@@ -371,7 +371,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnNode pop() {
-    return new InsnNode(type.getSize() == 1 ? POP : POP2);
+    return new InsnNode(size == 1 ? POP : POP2);
   }
 
   @Override
