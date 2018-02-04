@@ -215,8 +215,14 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList pushLocal(int local, int index) {
+  public InsnList pushLocal(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
+    if (index == 0) {
+      instructions.add(getLocals(localFrame));
+    }
+    if (more) {
+      instructions.add(new InsnNode(DUP));
+    }
     instructions.add(IntValueCode.push(index));
     instructions.add(new VarInsnNode(load, local));
     instructions.add(new InsnNode(astore));
@@ -238,8 +244,14 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList popLocal(int local, int index) {
+  public InsnList popLocal(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
+    if (index == 0) {
+      instructions.add(getLocals(localFrame));
+    }
+    if (more) {
+      instructions.add(new InsnNode(DUP));
+    }
     instructions.add(beforePop());
     instructions.add(IntValueCode.push(index));
     instructions.add(new InsnNode(aload));

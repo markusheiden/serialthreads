@@ -1,7 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -19,7 +18,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
@@ -89,14 +87,10 @@ public class CompactingStackCode extends AbstractStackCode {
 
          // for too high locals use "slow" storage in (dynamic) array
          if (iter.hasNext()) {
-            instructions.add(code.getLocals(localFrame));
             for (int i = 0; iter.hasNext(); i++) {
                int local = iter.next();
                IValueCode localCode = code(frameAfter.getLocal(local));
-               if (iter.hasNext()) {
-                  instructions.add(new InsnNode(DUP));
-               }
-               instructions.add(localCode.pushLocal(local, i));
+               instructions.add(localCode.pushLocal(local, i, iter.hasNext(), localFrame));
             }
          }
       }
@@ -153,14 +147,10 @@ public class CompactingStackCode extends AbstractStackCode {
 
          // for too high locals use "slow" storage in (dynamic) array
          if (iter.hasNext()) {
-            instructions.add(code.getLocals(localFrame));
             for (int i = 0; iter.hasNext(); i++) {
                int local = iter.next();
                IValueCode localCode = code(frameAfter.getLocal(local));
-               if (iter.hasNext()) {
-                  instructions.add(new InsnNode(DUP));
-               }
-               instructions.add(localCode.popLocal(local, i));
+               instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
             }
          }
 
