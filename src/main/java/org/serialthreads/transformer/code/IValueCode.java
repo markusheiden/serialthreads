@@ -40,52 +40,30 @@ public interface IValueCode {
    //
 
    /**
-    * Generate code to capture a local to a frame. The frame is expected to be already on the top of the stack.
+    * Generate code to capture a local to a frame.
     *
     * @param local
     *           number of local.
     * @param index
     *           index of local among locals of the same type.
-    * @param localFrame
-    *           frame to push to.
-    */
-   InsnList pushLocalFast(int local, int index, int localFrame);
-
-   /**
-    * Generate code to capture a local to a frame. The frame is expected to be already on the top of the stack.
-    *
-    * @param local
-    *           number of local.
-    * @param index
-    *           index of local among locals of the same type.
-    * @param last
+    * @param more
     *           Are there any more values to capture?
     * @param localFrame
     *           frame to push to.
     */
-   InsnList pushLocal(int local, int index, boolean last, int localFrame);
+   InsnList pushLocal(int local, int index, boolean more, int localFrame);
 
    /**
-    * Generate code to restore a local from a frame. The frame is expected to be already on the top of the
-    * stack.
+    * Generate code to restore a local from a frame.
     *
     * @param local
     *           number of local.
     * @param index
     *           index of local among locals of the same type.
-    * @param localFrame
-    *           frame to push to.
-    */
-   InsnList popLocalFast(int local, int index, int localFrame);
-
-   /**
-    * Generate code to restore a local from a frame. The frame is expected to be already on the top of the
-    * stack.
-    *  @param local
-    *           number of local.
-    * @param index
     * @param more
+    *           Are there any more values to capture?
     * @param localFrame
+    *           frame to pop from.
     */
    InsnList popLocal(int local, int index, boolean more, int localFrame);
 

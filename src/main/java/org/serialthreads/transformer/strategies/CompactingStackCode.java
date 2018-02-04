@@ -5,7 +5,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.code.IValueCode;
@@ -77,21 +76,10 @@ public class CompactingStackCode extends AbstractStackCode {
          }
 
          Iterator<Integer> iter = pushLocals.iterator();
-
-         // for first locals use fast stack
-         for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
+         for (int i = 0; iter.hasNext(); i++) {
             int local = iter.next();
             IValueCode localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.pushLocalFast(local, i, localFrame));
-         }
-
-         // for too high locals use "slow" storage in (dynamic) array
-         if (iter.hasNext()) {
-            for (int i = 0; iter.hasNext(); i++) {
-               int local = iter.next();
-               IValueCode localCode = code(frameAfter.getLocal(local));
-               instructions.add(localCode.pushLocal(local, i, iter.hasNext(), localFrame));
-            }
+            instructions.add(localCode.pushLocal(local, i, iter.hasNext(), localFrame));
          }
       }
 
@@ -137,21 +125,10 @@ public class CompactingStackCode extends AbstractStackCode {
 
          // first restore not duplicated locals, if any
          Iterator<Integer> iter = popLocals.iterator();
-
-         // for first locals use fast stack
-         for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
+         for (int i = 0; iter.hasNext(); i++) {
             int local = iter.next();
             IValueCode localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.popLocalFast(local, i, localFrame));
-         }
-
-         // for too high locals use "slow" storage in (dynamic) array
-         if (iter.hasNext()) {
-            for (int i = 0; iter.hasNext(); i++) {
-               int local = iter.next();
-               IValueCode localCode = code(frameAfter.getLocal(local));
-               instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
-            }
+            instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
          }
 
          // then restore duplicated locals

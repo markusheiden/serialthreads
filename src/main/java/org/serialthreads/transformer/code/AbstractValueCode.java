@@ -170,60 +170,56 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList pushLocalFast(int local, int index, int localFrame) {
-    assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
-
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new VarInsnNode(load, local));
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
-    return instructions;
-  }
-
-  @Override
   public InsnList pushLocal(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
-    if (index == 0) {
-      instructions.add(getLocals(localFrame));
+    if (index < StackFrame.FAST_FRAME_SIZE) {
+      // for first locals use fast stack
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(new VarInsnNode(load, local));
+      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+    } else {
+      // for too high locals use "slow" storage in (dynamic) array
+      index = index - StackFrame.FAST_FRAME_SIZE;
+      if (index == 0) {
+        instructions.add(getLocals(localFrame));
+      }
+      if (more) {
+        instructions.add(new InsnNode(DUP));
+      }
+      instructions.add(IntValueCode.push(index));
+      instructions.add(new VarInsnNode(load, local));
+      instructions.add(new InsnNode(astore));
     }
-    if (more) {
-      instructions.add(new InsnNode(DUP));
-    }
-    instructions.add(IntValueCode.push(index));
-    instructions.add(new VarInsnNode(load, local));
-    instructions.add(new InsnNode(astore));
-    return instructions;
-  }
-
-  @Override
-  public InsnList popLocalFast(int local, int index, int localFrame) {
-    assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
-
-    // TODO 2010-03-18 mh: clear reference in stack frame?
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
-    instructions.add(cast());
-    instructions.add(new VarInsnNode(store, local));
-    instructions.add(clear("local" + methodName + index, localFrame));
     return instructions;
   }
 
   @Override
   public InsnList popLocal(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
-    if (index == 0) {
-      instructions.add(getLocals(localFrame));
+    if (index < StackFrame.FAST_FRAME_SIZE) {
+      // for first locals use fast stack
+      // TODO 2010-03-18 mh: clear reference in stack frame?
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+      instructions.add(cast());
+      instructions.add(new VarInsnNode(store, local));
+      instructions.add(clear("local" + methodName + index, localFrame));
+    } else {
+      // for too high locals use "slow" storage in (dynamic) array
+      index = index - StackFrame.FAST_FRAME_SIZE;
+      if (index == 0) {
+        instructions.add(getLocals(localFrame));
+      }
+      if (more) {
+        instructions.add(new InsnNode(DUP));
+      }
+      instructions.add(beforePop());
+      instructions.add(IntValueCode.push(index));
+      instructions.add(new InsnNode(aload));
+      instructions.add(cast());
+      instructions.add(afterPop(local));
+      instructions.add(new VarInsnNode(store, local));
     }
-    if (more) {
-      instructions.add(new InsnNode(DUP));
-    }
-    instructions.add(beforePop());
-    instructions.add(IntValueCode.push(index));
-    instructions.add(new InsnNode(aload));
-    instructions.add(cast());
-    instructions.add(afterPop(local));
-    instructions.add(new VarInsnNode(store, local));
     return instructions;
   }
 
