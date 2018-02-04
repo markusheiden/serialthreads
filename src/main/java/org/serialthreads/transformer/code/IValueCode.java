@@ -10,14 +10,6 @@ import org.objectweb.asm.tree.VarInsnNode;
  */
 public interface IValueCode {
    /**
-    * Generate code to get the array for locals of the frame.
-    *
-    * @param localFrame
-    *           local with frame.
-    */
-   InsnList getLocals(int localFrame);
-
-   /**
     * Generate code to capture a local to a frame. The frame is expected to be already on the top of the stack.
     *
     * @param local

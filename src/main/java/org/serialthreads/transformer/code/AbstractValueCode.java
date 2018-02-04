@@ -195,8 +195,13 @@ public abstract class AbstractValueCode implements IValueCode {
   // Locals
   //
 
-  @Override
-  public InsnList getLocals(int localFrame) {
+  /**
+   * Generate code to get the array for locals of the frame.
+   *
+   * @param localFrame
+   *           local with frame.
+   */
+  protected InsnList getLocals(int localFrame) {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + "s", "[" + type.getDescriptor()));
