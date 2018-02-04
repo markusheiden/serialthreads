@@ -94,14 +94,6 @@ public interface IValueCode {
    InsnList popReturnValueStack(int localThread);
 
    /**
-    * Generate code to get the array for stack elements of the frame.
-    *
-    * @param localFrame
-    *           local with frame.
-    */
-   InsnList getStacks(int localFrame);
-
-   /**
     * Generate code to capture the top stack element to a frame. The frame is expected to be already on the top of the
     * stack. The stack element to push is expected to be the element under the frame.
     *

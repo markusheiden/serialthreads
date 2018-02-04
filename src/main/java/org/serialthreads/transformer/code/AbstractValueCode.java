@@ -98,8 +98,13 @@ public abstract class AbstractValueCode implements IValueCode {
   // Stack.
   //
 
-  @Override
-  public InsnList getStacks(int localFrame) {
+  /**
+   * Generate code to get the array for stack elements of the frame.
+   *
+   * @param localFrame
+   *           local with frame.
+   */
+  protected InsnList getStacks(int localFrame) {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + "s", "[" + type.getDescriptor()));
