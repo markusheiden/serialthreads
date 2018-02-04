@@ -9,6 +9,36 @@ import org.objectweb.asm.tree.VarInsnNode;
  * Value specific code generation.
  */
 public interface IValueCode {
+   //
+   // Stack.
+   //
+
+   /**
+    * Generate code to capture the top stack element to a frame. The frame is expected to be already on the top of the
+    * stack. The stack element to push is expected to be the element under the frame.
+    *
+    * @param index
+    *           index of stack element among stack elements of the same type.
+    * @param localFrame
+    *           frame to push to.
+    */
+   InsnList pushStack(int index, int localFrame);
+
+   /**
+    * Generate code to restore a stack element from a frame. The frame is expected to be already on the top of the
+    * stack.
+    *
+    * @param index
+    *           index of stack element among stack elements of the same type.
+    * @param localFrame
+    *           frame to pop from.
+    */
+   InsnList popStack(int index, int localFrame);
+
+   //
+   // Locals.
+   //
+
    /**
     * Generate code to capture a local to a frame. The frame is expected to be already on the top of the stack.
     *
@@ -36,23 +66,6 @@ public interface IValueCode {
    InsnList pushLocal(int local, int index, boolean last, int localFrame);
 
    /**
-    * Generate code to capture the current stack as a return value into the thread.
-    *
-    * @param localPreviousFrame
-    *           Local with previous frame.
-    */
-   InsnList pushReturnValue(int localPreviousFrame);
-
-   /**
-    * Generate code to capture the current stack as a return value into the thread.
-    *
-    * @param localThread
-    *           Local with stack.
-    */
-   @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-   InsnList pushReturnValueStack(int localThread);
-
-   /**
     * Generate code to restore a local from a frame. The frame is expected to be already on the top of the
     * stack.
     *
@@ -76,6 +89,27 @@ public interface IValueCode {
     */
    InsnList popLocal(int local, int index, boolean more, int localFrame);
 
+   //
+   // Return value.
+   //
+
+   /**
+    * Generate code to capture the current stack as a return value into the thread.
+    *
+    * @param localPreviousFrame
+    *           Local with previous frame.
+    */
+   InsnList pushReturnValue(int localPreviousFrame);
+
+   /**
+    * Generate code to capture the current stack as a return value into the thread.
+    *
+    * @param localThread
+    *           Local with stack.
+    */
+   @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+   InsnList pushReturnValueStack(int localThread);
+
    /**
     * Generate code to restore the return value from a frame.
     *
@@ -93,27 +127,9 @@ public interface IValueCode {
    @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
    InsnList popReturnValueStack(int localThread);
 
-   /**
-    * Generate code to capture the top stack element to a frame. The frame is expected to be already on the top of the
-    * stack. The stack element to push is expected to be the element under the frame.
-    *
-    * @param index
-    *           index of stack element among stack elements of the same type.
-    * @param localFrame
-    *           frame to push to.
-    */
-   InsnList pushStack(int index, int localFrame);
-
-   /**
-    * Generate code to restore a stack element from a frame. The frame is expected to be already on the top of the
-    * stack.
-    *
-    * @param index
-    *           index of stack element among stack elements of the same type.
-    * @param localFrame
-    *           frame to pop from.
-    */
-   InsnList popStack(int index, int localFrame);
+   //
+   // Instructions.
+   //
 
    /**
     * Push value from local onto stack.
