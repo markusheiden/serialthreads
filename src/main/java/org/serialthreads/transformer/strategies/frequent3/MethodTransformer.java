@@ -105,7 +105,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
           // Save return value into the previous frame.
-          replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
+          // TODO 2018-02-04 markus: Use storing of return values in frames as soon as it has been fixed.
+          //replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
+          replacement.add(code(returnType).pushReturnValueStack(localThread()));
         }
         replacement.add(methodReturn(false));
       }
@@ -219,7 +221,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+      // TODO 2018-02-04 markus: Use storing of return values in frames as soon as it has been fixed.
+      // instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValueStack(localThread));
     }
 
     // Insert capture code.
@@ -309,8 +313,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected final boolean needsFrame() {
     // TODO 2018-01-21 markus: Why not "> 1"?
     if (interruptibleMethodCalls.size() != 1) {
-      return true;
-    }
+    return true;
+  }
 
     MethodInsnNode methodCall = interruptibleMethodCalls.iterator().next();
     MetaInfo metaInfo = metaInfos.get(methodCall);

@@ -27,6 +27,17 @@ public class ReferenceValueCode extends AbstractValueCode {
     return instructions;
   }
 
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList popReturnValueStack(int localThread) {
+    InsnList instructions = super.popReturnValue(localThread);
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(pushNull());
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "returnObject", type.getDescriptor()));
+
+    return instructions;
+  }
+
   @Override
   protected InsnList cast() {
     InsnList instructions = new InsnList();

@@ -139,7 +139,29 @@ public abstract class AbstractValueCode implements IValueCode {
    * @param instructions Instructions.
    */
   protected final void doPushReturnValueImpl(InsnList instructions) {
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+  }
+
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList pushReturnValueStack(int localThread) {
+    InsnList instructions = new InsnList();
+    // Put previousFrame before return value onto stack.
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(SWAP));
+    doPushReturnValueStackImpl(instructions);
+    return instructions;
+  }
+
+  /**
+   * Generate code to capture the return value into the thread.
+   * Required objects on the stack: Thread, Value.
+   *
+   * @param instructions Instructions.
+   */
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  protected final void doPushReturnValueStackImpl(InsnList instructions) {
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
   }
 
   @Override
@@ -173,6 +195,16 @@ public abstract class AbstractValueCode implements IValueCode {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(cast());
+    return instructions;
+  }
+
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList popReturnValueStack(int localThread) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     return instructions;
   }
