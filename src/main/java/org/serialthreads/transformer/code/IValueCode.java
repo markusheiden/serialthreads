@@ -18,26 +18,26 @@ public interface IValueCode {
    InsnList getLocals(int localFrame);
 
    /**
-    * Generate code to capture a local variable to a frame. The frame is expected to be already on the top of the stack.
+    * Generate code to capture a local to a frame. The frame is expected to be already on the top of the stack.
     *
     * @param local
-    *           number of local variable.
+    *           number of local.
     * @param index
     *           index of local among locals of the same type.
     * @param localFrame
     *           frame to push to.
     */
-   InsnList pushLocalVariableFast(int local, int index, int localFrame);
+   InsnList pushLocalFast(int local, int index, int localFrame);
 
    /**
-    * Generate code to capture a local variable to a frame. The frame is expected to be already on the top of the stack.
+    * Generate code to capture a local to a frame. The frame is expected to be already on the top of the stack.
     *
     * @param local
-    *           number of local variable.
+    *           number of local.
     * @param index
     *           index of local among locals of the same type.
     */
-   InsnList pushLocalVariable(int local, int index);
+   InsnList pushLocal(int local, int index);
 
    /**
     * Generate code to capture the current stack as a return value into the thread.
@@ -57,28 +57,28 @@ public interface IValueCode {
    InsnList pushReturnValueStack(int localThread);
 
    /**
-    * Generate code to restore a local variable from a frame. The frame is expected to be already on the top of the
+    * Generate code to restore a local from a frame. The frame is expected to be already on the top of the
     * stack.
     *
     * @param local
-    *           number of local variable.
+    *           number of local.
     * @param index
     *           index of local among locals of the same type.
     * @param localFrame
     *           frame to push to.
     */
-   InsnList popLocalVariableFast(int local, int index, int localFrame);
+   InsnList popLocalFast(int local, int index, int localFrame);
 
    /**
-    * Generate code to restore a local variable from a frame. The frame is expected to be already on the top of the
+    * Generate code to restore a local from a frame. The frame is expected to be already on the top of the
     * stack.
     *
     * @param local
-    *           number of local variable.
+    *           number of local.
     * @param index
     *           index of local among locals of the same type.
     */
-   InsnList popLocalVariable(int local, int index);
+   InsnList popLocal(int local, int index);
 
    /**
     * Generate code to restore the return value from a frame.

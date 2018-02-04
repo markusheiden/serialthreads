@@ -84,7 +84,7 @@ public class CompactingStackCode extends AbstractStackCode {
          for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
             int local = iter.next();
             IValueCode localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.pushLocalVariableFast(local, i, localFrame));
+            instructions.add(localCode.pushLocalFast(local, i, localFrame));
          }
 
          // for too high locals use "slow" storage in (dynamic) array
@@ -96,7 +96,7 @@ public class CompactingStackCode extends AbstractStackCode {
                if (iter.hasNext()) {
                   instructions.add(new InsnNode(DUP));
                }
-               instructions.add(localCode.pushLocalVariable(local, i));
+               instructions.add(localCode.pushLocal(local, i));
             }
          }
       }
@@ -148,7 +148,7 @@ public class CompactingStackCode extends AbstractStackCode {
          for (int i = 0; iter.hasNext() && i < StackFrame.FAST_FRAME_SIZE; i++) {
             int local = iter.next();
             IValueCode localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.popLocalVariableFast(local, i, localFrame));
+            instructions.add(localCode.popLocalFast(local, i, localFrame));
          }
 
          // for too high locals use "slow" storage in (dynamic) array
@@ -160,7 +160,7 @@ public class CompactingStackCode extends AbstractStackCode {
                if (iter.hasNext()) {
                   instructions.add(new InsnNode(DUP));
                }
-               instructions.add(localCode.popLocalVariable(local, i));
+               instructions.add(localCode.popLocal(local, i));
             }
          }
 

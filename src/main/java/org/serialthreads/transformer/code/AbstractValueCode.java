@@ -103,7 +103,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList pushLocalVariableFast(int local, int index, int localFrame) {
+  public InsnList pushLocalFast(int local, int index, int localFrame) {
     assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
 
     InsnList instructions = new InsnList();
@@ -114,7 +114,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList pushLocalVariable(int local, int index) {
+  public InsnList pushLocal(int local, int index) {
     InsnList instructions = new InsnList();
     instructions.add(IntValueCode.push(index));
     instructions.add(new VarInsnNode(load, local));
@@ -165,7 +165,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList popLocalVariableFast(int local, int index, int localFrame) {
+  public InsnList popLocalFast(int local, int index, int localFrame) {
     assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
 
     // TODO 2010-03-18 mh: clear reference in stack frame?
@@ -179,7 +179,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   @Override
-  public InsnList popLocalVariable(int local, int index) {
+  public InsnList popLocal(int local, int index) {
     InsnList instructions = new InsnList();
     instructions.add(beforePop());
     instructions.add(IntValueCode.push(index));
