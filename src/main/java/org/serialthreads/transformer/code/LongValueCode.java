@@ -38,6 +38,19 @@ public class LongValueCode extends AbstractValueCode {
     return instructions;
   }
 
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList pushReturnValueStack(int localThread) {
+    InsnList instructions = new InsnList();
+    // Put previousFrame before return value (2 words) onto stack.
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(DUP_X2));
+    // Remove duplicated previousFrame from top of stack.
+    instructions.add(new InsnNode(POP));
+    doPushReturnValueImpl(instructions);
+    return instructions;
+  }
+
   @Override
   public boolean isResponsibleFor(Type type) {
     return type != null && Type.LONG == type.getSort();
