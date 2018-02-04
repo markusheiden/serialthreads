@@ -94,120 +94,9 @@ public abstract class AbstractValueCode implements IValueCode {
     this.returnValue = returnValue;
   }
 
-  @Override
-  public InsnList getLocals(int localFrame) {
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + "s", "[" + type.getDescriptor()));
-    return instructions;
-  }
-
-  @Override
-  public InsnList pushLocalFast(int local, int index, int localFrame) {
-    assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
-
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new VarInsnNode(load, local));
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
-    return instructions;
-  }
-
-  @Override
-  public InsnList pushLocal(int local, int index) {
-    InsnList instructions = new InsnList();
-    instructions.add(IntValueCode.push(index));
-    instructions.add(new VarInsnNode(load, local));
-    instructions.add(new InsnNode(astore));
-    return instructions;
-  }
-
-  @Override
-  public InsnList pushReturnValue(int localPreviousFrame) {
-    InsnList instructions = new InsnList();
-    // Put previousFrame before return value onto stack.
-    instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
-    instructions.add(new InsnNode(SWAP));
-    doPushReturnValueImpl(instructions);
-    return instructions;
-  }
-
-  /**
-   * Generate code to capture the return value into the thread.
-   * Required objects on the stack: Thread, Value.
-   *
-   * @param instructions Instructions.
-   */
-  protected final void doPushReturnValueImpl(InsnList instructions) {
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-  }
-
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  @Override
-  public InsnList pushReturnValueStack(int localThread) {
-    InsnList instructions = new InsnList();
-    // Put previousFrame before return value onto stack.
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new InsnNode(SWAP));
-    doPushReturnValueStackImpl(instructions);
-    return instructions;
-  }
-
-  /**
-   * Generate code to capture the return value into the thread.
-   * Required objects on the stack: Thread, Value.
-   *
-   * @param instructions Instructions.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  protected final void doPushReturnValueStackImpl(InsnList instructions) {
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-  }
-
-  @Override
-  public InsnList popLocalFast(int local, int index, int localFrame) {
-    assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
-
-    // TODO 2010-03-18 mh: clear reference in stack frame?
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
-    instructions.add(cast());
-    instructions.add(new VarInsnNode(store, local));
-    instructions.add(clear("local" + methodName + index, localFrame));
-    return instructions;
-  }
-
-  @Override
-  public InsnList popLocal(int local, int index) {
-    InsnList instructions = new InsnList();
-    instructions.add(beforePop());
-    instructions.add(IntValueCode.push(index));
-    instructions.add(new InsnNode(aload));
-    instructions.add(cast());
-    instructions.add(afterPop(local));
-    instructions.add(new VarInsnNode(store, local));
-    return instructions;
-  }
-
-  @Override
-  public InsnList popReturnValue(int localFrame) {
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-    instructions.add(cast());
-    return instructions;
-  }
-
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  @Override
-  public InsnList popReturnValueStack(int localThread) {
-    InsnList instructions = new InsnList();
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
-    instructions.add(cast());
-    return instructions;
-  }
+  //
+  // Stack.
+  //
 
   @Override
   public InsnList getStacks(int localFrame) {
@@ -301,6 +190,133 @@ public abstract class AbstractValueCode implements IValueCode {
     // overwrite, if needed
     return new InsnList();
   }
+
+  //
+  // Locals
+  //
+
+  @Override
+  public InsnList getLocals(int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + "s", "[" + type.getDescriptor()));
+    return instructions;
+  }
+
+  @Override
+  public InsnList pushLocalFast(int local, int index, int localFrame) {
+    assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
+
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new VarInsnNode(load, local));
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+    return instructions;
+  }
+
+  @Override
+  public InsnList pushLocal(int local, int index) {
+    InsnList instructions = new InsnList();
+    instructions.add(IntValueCode.push(index));
+    instructions.add(new VarInsnNode(load, local));
+    instructions.add(new InsnNode(astore));
+    return instructions;
+  }
+
+  @Override
+  public InsnList popLocalFast(int local, int index, int localFrame) {
+    assert index < StackFrame.FAST_FRAME_SIZE : "Precondition: index < StackFrame.FAST_FRAME_SIZE";
+
+    // TODO 2010-03-18 mh: clear reference in stack frame?
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+    instructions.add(cast());
+    instructions.add(new VarInsnNode(store, local));
+    instructions.add(clear("local" + methodName + index, localFrame));
+    return instructions;
+  }
+
+  @Override
+  public InsnList popLocal(int local, int index) {
+    InsnList instructions = new InsnList();
+    instructions.add(beforePop());
+    instructions.add(IntValueCode.push(index));
+    instructions.add(new InsnNode(aload));
+    instructions.add(cast());
+    instructions.add(afterPop(local));
+    instructions.add(new VarInsnNode(store, local));
+    return instructions;
+  }
+
+  //
+  // Return values.
+  //
+
+  @Override
+  public InsnList popReturnValue(int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(cast());
+    return instructions;
+  }
+
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList popReturnValueStack(int localThread) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(cast());
+    return instructions;
+  }
+
+  @Override
+  public InsnList pushReturnValue(int localPreviousFrame) {
+    InsnList instructions = new InsnList();
+    // Put previousFrame before return value onto stack.
+    instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+    instructions.add(new InsnNode(SWAP));
+    doPushReturnValueImpl(instructions);
+    return instructions;
+  }
+
+  /**
+   * Generate code to capture the return value into the thread.
+   * Required objects on the stack: Thread, Value.
+   *
+   * @param instructions Instructions.
+   */
+  protected final void doPushReturnValueImpl(InsnList instructions) {
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+  }
+
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  @Override
+  public InsnList pushReturnValueStack(int localThread) {
+    InsnList instructions = new InsnList();
+    // Put previousFrame before return value onto stack.
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new InsnNode(SWAP));
+    doPushReturnValueStackImpl(instructions);
+    return instructions;
+  }
+
+  /**
+   * Generate code to capture the return value into the thread.
+   * Required objects on the stack: Thread, Value.
+   *
+   * @param instructions Instructions.
+   */
+  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
+  protected final void doPushReturnValueStackImpl(InsnList instructions) {
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+  }
+
+  //
+  // Instructions.
+  //
 
   @Override
   public VarInsnNode load(int i) {
