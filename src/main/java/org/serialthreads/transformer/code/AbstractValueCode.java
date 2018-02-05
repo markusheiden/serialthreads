@@ -129,7 +129,7 @@ public abstract class AbstractValueCode implements IValueCode {
    * @param localFrame
    *           local with frame.
    */
-  protected InsnList getStacks(int localFrame) {
+  private InsnList getStacks(int localFrame) {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + "s", "[" + type.getDescriptor()));
@@ -158,7 +158,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList pushStackSlow(int index, int localFrame) {
     InsnList instructions = new InsnList();
-    // frame.stacks[index] = stack;
+    // frame.stackXXXs[index] = stack;
     instructions.add(getStacks(localFrame));
     instructions.add(new InsnNode(SWAP));
     instructions.add(IntValueCode.push(index));
@@ -194,7 +194,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList popStackSlow(int index, int localFrame) {
     InsnList instructions = new InsnList();
-    // stack = frame.stacks[index];
+    // stack = frame.stackXXXs[index];
     instructions.add(getStacks(localFrame));
     if (clear) {
       instructions.add(new InsnNode(DUP));
@@ -221,7 +221,7 @@ public abstract class AbstractValueCode implements IValueCode {
    * @param localFrame
    *           local with frame.
    */
-  protected InsnList getLocals(int localFrame) {
+  private InsnList getLocals(int localFrame) {
     InsnList instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + "s", "[" + type.getDescriptor()));
@@ -241,6 +241,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList pushLocalFast(int local, int index, int localFrame) {
     InsnList instructions = new InsnList();
+    // frame.localXXX0 = local0;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new VarInsnNode(load, local));
     instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
@@ -249,6 +250,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList pushLocalSlow(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
+    // frame.localXXXs[index] = local0;
     if (index == 0) {
       instructions.add(getLocals(localFrame));
     }
@@ -274,11 +276,13 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList popLocalFast(int local, int index, int localFrame) {
     InsnList instructions = new InsnList();
+    // local0 = frame.localXXX0;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
     instructions.add(cast());
     instructions.add(new VarInsnNode(store, local));
     if (clear) {
+      // frame.localXXX0 = null;
       instructions.add(new VarInsnNode(ALOAD, localFrame));
       instructions.add(pushNull());
       instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
@@ -288,6 +292,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList popLocalSlow(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
+    // local0 = frame.localXXXs[index];
     if (index == 0) {
       instructions.add(getLocals(localFrame));
     }
@@ -302,6 +307,7 @@ public abstract class AbstractValueCode implements IValueCode {
     instructions.add(cast());
     instructions.add(new VarInsnNode(store, local));
     if (clear) {
+      // frame.localXXXs[index] = null;
       instructions.add(IntValueCode.push(index));
       instructions.add(pushNull());
       instructions.add(new InsnNode(astore));
@@ -316,6 +322,7 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList pushReturnValue(int localPreviousFrame) {
     InsnList instructions = new InsnList();
+    // previousFrame.returnXXX = stack;
     if (size == 1) {
       // Put previousFrame before return value onto stack.
       instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
@@ -335,6 +342,7 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList pushReturnValueStack(int localThread) {
     InsnList instructions = new InsnList();
+    // thread.returnXXX = stack;
     if (size == 1) {
       // Put thread before return value onto stack.
       instructions.add(new VarInsnNode(ALOAD, localThread));
@@ -353,10 +361,12 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList popReturnValue(int localFrame) {
     InsnList instructions = new InsnList();
+    // stack = frame.returnXXX;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     if (clear) {
+      // frame.returnXXX = null;
       instructions.add(new VarInsnNode(ALOAD, localFrame));
       instructions.add(pushNull());
       instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, type.getDescriptor()));
@@ -368,10 +378,12 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList popReturnValueStack(int localThread) {
     InsnList instructions = new InsnList();
+    // stack = thread.returnXXX;
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     if (clear) {
+      // thread.returnXXX = null;
       instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(pushNull());
       instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
