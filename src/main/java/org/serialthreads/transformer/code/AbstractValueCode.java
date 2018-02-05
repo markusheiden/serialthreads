@@ -334,7 +334,7 @@ public abstract class AbstractValueCode implements IValueCode {
       // Remove duplicated previousFrame from top of stack.
       instructions.add(new InsnNode(POP));
     }
-    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     return instructions;
   }
 
