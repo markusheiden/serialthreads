@@ -149,6 +149,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList pushStackFast(int index, int localFrame) {
     InsnList instructions = new InsnList();
+    // frame.stackXXX0 = stack;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new InsnNode(SWAP));
     instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
@@ -157,6 +158,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList pushStackSlow(int index, int localFrame) {
     InsnList instructions = new InsnList();
+    // frame.stacks[index] = stack;
     instructions.add(getStacks(localFrame));
     instructions.add(new InsnNode(SWAP));
     instructions.add(IntValueCode.push(index));
@@ -178,6 +180,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList popStackFast(int index, int localFrame) {
     InsnList instructions = new InsnList();
+    // stack = frame.stackXXX0;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
     instructions.add(cast());
@@ -191,6 +194,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList popStackSlow(int index, int localFrame) {
     InsnList instructions = new InsnList();
+    // stack = frame.stacks[index];
     instructions.add(getStacks(localFrame));
     if (clear) {
       instructions.add(new InsnNode(DUP));
