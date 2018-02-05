@@ -91,7 +91,7 @@ public abstract class AbstractStackCode implements ThreadCode {
    public InsnList getNextFrame(int localPreviousFrame, int localFrame, boolean addIfNotPresent) {
       InsnList instructions = new InsnList();
 
-      // frame = previousFrame.next
+      // frame = previousFrame.next;
       instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
       instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
       if (addIfNotPresent) {
