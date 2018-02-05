@@ -131,54 +131,72 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList pushStack(int index, int localFrame) {
-    InsnList instructions = new InsnList();
     if (index < StackFrame.FAST_FRAME_SIZE) {
-      // for first stack elements use fast stack
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(new InsnNode(SWAP));
-      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
+      // For first stack elements use fast stack.
+      return pushStackFast(index, localFrame);
     } else {
-      // for too deep stack use "slow" storage in array
-      instructions.add(getStacks(localFrame));
-      instructions.add(new InsnNode(SWAP));
-      instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
-      instructions.add(new InsnNode(SWAP));
-      instructions.add(new InsnNode(astore));
+      // For too deep stack use "slow" storage in a dynamic array.
+      return pushStackSlow(index, localFrame);
     }
+  }
 
+  private InsnList pushStackFast(int index, int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new InsnNode(SWAP));
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
+    return instructions;
+  }
+
+  private InsnList pushStackSlow(int index, int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(getStacks(localFrame));
+    instructions.add(new InsnNode(SWAP));
+    instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+    instructions.add(new InsnNode(SWAP));
+    instructions.add(new InsnNode(astore));
     return instructions;
   }
 
   @Override
   public InsnList popStack(int index, int localFrame) {
-    InsnList instructions = new InsnList();
     if (index < StackFrame.FAST_FRAME_SIZE) {
-      // for first stack elements use fast stack
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
-      instructions.add(cast());
-      if (clear) {
-        instructions.add(new VarInsnNode(ALOAD, localFrame));
-        instructions.add(pushNull());
-        instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
-      }
+      // For first stack elements use fast stack.
+      return popStackFast(index, localFrame);
     } else {
-      // for too deep stack use "slow" storage in array
-      instructions.add(getStacks(localFrame));
-      if (clear) {
-        instructions.add(new InsnNode(DUP));
-      }
-      instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
-      instructions.add(new InsnNode(aload));
-      instructions.add(cast());
-      if (clear) {
-        instructions.add(new InsnNode(SWAP));
-        instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
-        instructions.add(pushNull());
-        instructions.add(new InsnNode(astore));
-      }
+      // For too deep stack use "slow" storage in a dynamic array.
+      return popStackSlow(index, localFrame);
     }
+  }
 
+  private InsnList popStackFast(int index, int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
+    instructions.add(cast());
+    if (clear) {
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(pushNull());
+      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
+    }
+    return instructions;
+  }
+
+  private InsnList popStackSlow(int index, int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(getStacks(localFrame));
+    if (clear) {
+      instructions.add(new InsnNode(DUP));
+    }
+    instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+    instructions.add(new InsnNode(aload));
+    instructions.add(cast());
+    if (clear) {
+      instructions.add(new InsnNode(SWAP));
+      instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+      instructions.add(pushNull());
+      instructions.add(new InsnNode(astore));
+    }
     return instructions;
   }
 
@@ -201,62 +219,81 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList pushLocal(int local, int index, boolean more, int localFrame) {
-    InsnList instructions = new InsnList();
     if (index < StackFrame.FAST_FRAME_SIZE) {
-      // for first locals use fast stack
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(new VarInsnNode(load, local));
-      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+      // For first locals use fast stack.
+      return pushLocalFast(local, index, localFrame);
     } else {
-      // for too high locals use "slow" storage in (dynamic) array
-      if (index == StackFrame.FAST_FRAME_SIZE) {
-        instructions.add(getLocals(localFrame));
-      }
-      if (more) {
-        instructions.add(new InsnNode(DUP));
-      }
-      instructions.add(IntValueCode.push(index- StackFrame.FAST_FRAME_SIZE));
-      instructions.add(new VarInsnNode(load, local));
-      instructions.add(new InsnNode(astore));
+      // For too high locals use "slow" storage in a dynamic array.
+      return pushLocalSlow(local, index, more, localFrame);
     }
+  }
+
+  private InsnList pushLocalFast(int local, int index, int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new VarInsnNode(load, local));
+    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+    return instructions;
+  }
+
+  private InsnList pushLocalSlow(int local, int index, boolean more, int localFrame) {
+    InsnList instructions = new InsnList();
+    if (index == StackFrame.FAST_FRAME_SIZE) {
+      instructions.add(getLocals(localFrame));
+    }
+    if (more) {
+      instructions.add(new InsnNode(DUP));
+    }
+    instructions.add(IntValueCode.push(index- StackFrame.FAST_FRAME_SIZE));
+    instructions.add(new VarInsnNode(load, local));
+    instructions.add(new InsnNode(astore));
     return instructions;
   }
 
   @Override
   public InsnList popLocal(int local, int index, boolean more, int localFrame) {
-    InsnList instructions = new InsnList();
     if (index < StackFrame.FAST_FRAME_SIZE) {
-      // for first locals use fast stack
-      // TODO 2010-03-18 mh: clear reference in stack frame?
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
-      instructions.add(cast());
-      instructions.add(new VarInsnNode(store, local));
-      if (clear) {
-        instructions.add(new VarInsnNode(ALOAD, localFrame));
-        instructions.add(pushNull());
-        instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
-      }
+      // For first locals use fast stack.
+      return popLocalFast(local, index, localFrame);
     } else {
-      // for too high locals use "slow" storage in (dynamic) array
-      if (index == StackFrame.FAST_FRAME_SIZE) {
-        instructions.add(getLocals(localFrame));
-      }
-      if (more) {
-        instructions.add(new InsnNode(DUP));
-      }
-      if (clear) {
-        instructions.add(new InsnNode(DUP));
-      }
+      // For too high locals use "slow" storage in a dynamic array.
+      return popLocalSlow(local, index, more, localFrame);
+    }
+  }
+
+  private InsnList popLocalFast(int local, int index, int localFrame) {
+    InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localFrame));
+    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+    instructions.add(cast());
+    instructions.add(new VarInsnNode(store, local));
+    if (clear) {
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(pushNull());
+      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
+    }
+    return instructions;
+  }
+
+  private InsnList popLocalSlow(int local, int index, boolean more, int localFrame) {
+    InsnList instructions = new InsnList();
+    if (index == StackFrame.FAST_FRAME_SIZE) {
+      instructions.add(getLocals(localFrame));
+    }
+    if (more) {
+      instructions.add(new InsnNode(DUP));
+    }
+    if (clear) {
+      instructions.add(new InsnNode(DUP));
+    }
+    instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+    instructions.add(new InsnNode(aload));
+    instructions.add(cast());
+    instructions.add(new VarInsnNode(store, local));
+    if (clear) {
       instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
-      instructions.add(new InsnNode(aload));
-      instructions.add(cast());
-      instructions.add(new VarInsnNode(store, local));
-      if (clear) {
-        instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
-        instructions.add(pushNull());
-        instructions.add(new InsnNode(astore));
-      }
+      instructions.add(pushNull());
+      instructions.add(new InsnNode(astore));
     }
     return instructions;
   }
