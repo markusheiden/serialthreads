@@ -22,15 +22,6 @@ public interface ThreadCode {
   FieldNode threadField();
 
   /**
-   * Push new {@link Stack} and onto stack.
-   *
-   * @param defaultFrameSize
-   *           Default size of frames.
-   * @return Generated code.
-   */
-  InsnList pushNewStack(int defaultFrameSize);
-
-  /**
    * Set this.$$thread$$.
    *
    * @param className
@@ -47,6 +38,15 @@ public interface ThreadCode {
    * @return Generated code.
    */
   InsnList pushThread(String className);
+
+  /**
+   * Push new {@link Stack} and onto stack.
+   *
+   * @param defaultFrameSize
+   *           Default size of frames.
+   * @return Generated code.
+   */
+  InsnList pushNewStack(int defaultFrameSize);
 
   //
   // run() methods.

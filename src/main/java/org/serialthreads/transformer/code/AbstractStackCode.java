@@ -33,20 +33,6 @@ public abstract class AbstractStackCode implements ThreadCode {
    }
 
    @Override
-   public InsnList pushNewStack(int defaultFrameSize) {
-      InsnList instructions = new InsnList();
-      // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
-      instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
-      instructions.add(new InsnNode(DUP));
-      instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC, false));
-      instructions.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC, false));
-      instructions.add(IntValueCode.push(defaultFrameSize));
-      instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
-      return instructions;
-   }
-
-   @Override
    public InsnList setThread(String className) {
      InsnList instructions = new InsnList();
      // this.$$thread$$ = stack;
@@ -63,7 +49,21 @@ public abstract class AbstractStackCode implements ThreadCode {
      return instructions;
    }
 
-   //
+  @Override
+  public InsnList pushNewStack(int defaultFrameSize) {
+    InsnList instructions = new InsnList();
+    // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
+    instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
+    instructions.add(new InsnNode(DUP));
+    instructions.add(new VarInsnNode(ALOAD, 0));
+    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC, false));
+    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC, false));
+    instructions.add(IntValueCode.push(defaultFrameSize));
+    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
+    return instructions;
+  }
+
+  //
    // run() methods.
    //
 
