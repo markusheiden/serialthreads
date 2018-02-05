@@ -136,7 +136,7 @@ public abstract class AbstractValueCode implements IValueCode {
       return pushStackFast(index, localFrame);
     } else {
       // For too deep stack use "slow" storage in a dynamic array.
-      return pushStackSlow(index, localFrame);
+      return pushStackSlow(index - StackFrame.FAST_FRAME_SIZE, localFrame);
     }
   }
 
@@ -152,7 +152,7 @@ public abstract class AbstractValueCode implements IValueCode {
     InsnList instructions = new InsnList();
     instructions.add(getStacks(localFrame));
     instructions.add(new InsnNode(SWAP));
-    instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+    instructions.add(IntValueCode.push(index));
     instructions.add(new InsnNode(SWAP));
     instructions.add(new InsnNode(astore));
     return instructions;
@@ -165,7 +165,7 @@ public abstract class AbstractValueCode implements IValueCode {
       return popStackFast(index, localFrame);
     } else {
       // For too deep stack use "slow" storage in a dynamic array.
-      return popStackSlow(index, localFrame);
+      return popStackSlow(index - StackFrame.FAST_FRAME_SIZE, localFrame);
     }
   }
 
@@ -188,12 +188,12 @@ public abstract class AbstractValueCode implements IValueCode {
     if (clear) {
       instructions.add(new InsnNode(DUP));
     }
-    instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+    instructions.add(IntValueCode.push(index));
     instructions.add(new InsnNode(aload));
     instructions.add(cast());
     if (clear) {
       instructions.add(new InsnNode(SWAP));
-      instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+      instructions.add(IntValueCode.push(index));
       instructions.add(pushNull());
       instructions.add(new InsnNode(astore));
     }
@@ -224,7 +224,7 @@ public abstract class AbstractValueCode implements IValueCode {
       return pushLocalFast(local, index, localFrame);
     } else {
       // For too high locals use "slow" storage in a dynamic array.
-      return pushLocalSlow(local, index, more, localFrame);
+      return pushLocalSlow(local, index - StackFrame.FAST_FRAME_SIZE, more, localFrame);
     }
   }
 
@@ -238,13 +238,13 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList pushLocalSlow(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
-    if (index == StackFrame.FAST_FRAME_SIZE) {
+    if (index == 0) {
       instructions.add(getLocals(localFrame));
     }
     if (more) {
       instructions.add(new InsnNode(DUP));
     }
-    instructions.add(IntValueCode.push(index- StackFrame.FAST_FRAME_SIZE));
+    instructions.add(IntValueCode.push(index));
     instructions.add(new VarInsnNode(load, local));
     instructions.add(new InsnNode(astore));
     return instructions;
@@ -257,7 +257,7 @@ public abstract class AbstractValueCode implements IValueCode {
       return popLocalFast(local, index, localFrame);
     } else {
       // For too high locals use "slow" storage in a dynamic array.
-      return popLocalSlow(local, index, more, localFrame);
+      return popLocalSlow(local, index - StackFrame.FAST_FRAME_SIZE, more, localFrame);
     }
   }
 
@@ -277,7 +277,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   private InsnList popLocalSlow(int local, int index, boolean more, int localFrame) {
     InsnList instructions = new InsnList();
-    if (index == StackFrame.FAST_FRAME_SIZE) {
+    if (index == 0) {
       instructions.add(getLocals(localFrame));
     }
     if (more) {
@@ -286,12 +286,12 @@ public abstract class AbstractValueCode implements IValueCode {
     if (clear) {
       instructions.add(new InsnNode(DUP));
     }
-    instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+    instructions.add(IntValueCode.push(index));
     instructions.add(new InsnNode(aload));
     instructions.add(cast());
     instructions.add(new VarInsnNode(store, local));
     if (clear) {
-      instructions.add(IntValueCode.push(index - StackFrame.FAST_FRAME_SIZE));
+      instructions.add(IntValueCode.push(index));
       instructions.add(pushNull());
       instructions.add(new InsnNode(astore));
     }
