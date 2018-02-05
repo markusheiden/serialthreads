@@ -49,6 +49,7 @@ public abstract class AbstractStackCode implements ThreadCode {
    @Override
    public InsnList setThread(String className) {
      InsnList instructions = new InsnList();
+     // this.$$thread$$ = stack;
      instructions.add(new FieldInsnNode(PUTFIELD, className, THREAD, THREAD_IMPL_DESC));
      return instructions;
    }
@@ -56,6 +57,7 @@ public abstract class AbstractStackCode implements ThreadCode {
    @Override
    public InsnList pushThread(String className) {
      InsnList instructions = new InsnList();
+     // stack = this.$$thread$$;
      instructions.add(new VarInsnNode(ALOAD, 0));
      instructions.add(new FieldInsnNode(GETFIELD, className, THREAD, THREAD_IMPL_DESC));
      return instructions;
@@ -147,6 +149,7 @@ public abstract class AbstractStackCode implements ThreadCode {
    @Override
    public InsnList pushSerializing(int localThread) {
       InsnList instructions = new InsnList();
+      // stack = thread.serializing;
       instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
       return instructions;
@@ -175,6 +178,7 @@ public abstract class AbstractStackCode implements ThreadCode {
    @Override
    public InsnList pushOwner(int localFrame) {
       InsnList instructions = new InsnList();
+      // stack = frame.owner;
       instructions.add(new VarInsnNode(ALOAD, localFrame));
       instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
       return instructions;
@@ -183,6 +187,7 @@ public abstract class AbstractStackCode implements ThreadCode {
    @Override
    public InsnList pushMethod(int localFrame) {
       InsnList instructions = new InsnList();
+      // stack = frame.method;
       instructions.add(new VarInsnNode(ALOAD, localFrame));
       instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));
       return instructions;
