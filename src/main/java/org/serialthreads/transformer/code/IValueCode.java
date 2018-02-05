@@ -96,30 +96,12 @@ public interface IValueCode {
    InsnList pushReturnValue(int localPreviousFrame);
 
    /**
-    * Generate code to capture the current stack as a return value into the thread.
-    *
-    * @param localThread
-    *           Local with stack.
-    */
-   @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-   InsnList pushReturnValueStack(int localThread);
-
-   /**
     * Generate code to restore the return value from a frame.
     *
     * @param localFrame
     *           Local with frame.
     */
    InsnList popReturnValue(int localFrame);
-
-   /**
-    * Generate code to restore the return value from a frame.
-    *
-    * @param localThread
-    *           Local with stack.
-    */
-   @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-   InsnList popReturnValueStack(int localThread);
 
    //
    // Instructions.

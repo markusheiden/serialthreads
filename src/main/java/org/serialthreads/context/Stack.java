@@ -27,36 +27,6 @@ public final class Stack extends SerialThread implements Serializable {
   private final int frameSize;
 
   /**
-   * Return value of the last executed method: Object.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  public Object returnObject;
-
-  /**
-   * Return value of the last executed method: int.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  public int returnInt;
-
-  /**
-   * Return value of the last executed method: long.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  public long returnLong;
-
-  /**
-   * Return value of the last executed method: float.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  public float returnFloat;
-
-  /**
-   * Return value of the last executed method: double.
-   */
-  @Deprecated // TODO 2018-02-04 markus: Remove ASAP, if storing of return values in frames has been fixed.
-  public double returnDouble;
-
-  /**
    * Constructor.
    *
    * @param name Name of the thread
