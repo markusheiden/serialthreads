@@ -28,6 +28,8 @@ public class FloatValueCode extends AbstractValueCode {
       return new InsnNode(FCONST_0);
     } else if (f == 1F) {
       return new InsnNode(FCONST_1);
+    } else if (f == 2F) {
+      return new InsnNode(FCONST_2);
     }
 
     return new LdcInsnNode(f);
