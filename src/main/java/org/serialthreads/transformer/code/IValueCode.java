@@ -9,6 +9,22 @@ import org.objectweb.asm.tree.VarInsnNode;
  * Value specific code generation.
  */
 public interface IValueCode {
+   /**
+    * Is this type compatible with another type?
+    *
+    * @param type
+    *           type.
+    */
+   boolean isCompatibleWith(Type type);
+
+   /**
+    * Is this code responsible for handling the given type?
+    *
+    * @param type
+    *           type.
+    */
+   boolean isResponsibleFor(Type type);
+
    //
    // Stack.
    //
@@ -157,20 +173,4 @@ public interface IValueCode {
     * Return statement. Returns null value (if not void).
     */
    InsnList returnNull();
-
-   /**
-    * Is this type compatible with another type?
-    *
-    * @param type
-    *           type.
-    */
-   boolean isCompatibleWith(Type type);
-
-   /**
-    * Is this code responsible for handling the given type?
-    *
-    * @param type
-    *           type.
-    */
-   boolean isResponsibleFor(Type type);
 }

@@ -16,6 +16,11 @@ public class FloatValueCode extends AbstractValueCode {
   }
 
   @Override
+  public boolean isResponsibleFor(Type type) {
+    return type != null && Type.FLOAT == type.getSort();
+  }
+
+  @Override
   public AbstractInsnNode push(Object value) {
     float f = (Float) value;
 
@@ -26,10 +31,5 @@ public class FloatValueCode extends AbstractValueCode {
     }
 
     return new LdcInsnNode(f);
-  }
-
-  @Override
-  public boolean isResponsibleFor(Type type) {
-    return type != null && Type.FLOAT == type.getSort();
   }
 }

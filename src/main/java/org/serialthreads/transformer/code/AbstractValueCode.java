@@ -112,6 +112,13 @@ public abstract class AbstractValueCode implements IValueCode {
     this.returnValue = returnValue;
   }
 
+  @Override
+  public boolean isCompatibleWith(Type type) {
+    assert type != null : "Precondition: type != null";
+
+    return isResponsibleFor(type);
+  }
+
   //
   // Stack.
   //
@@ -422,12 +429,5 @@ public abstract class AbstractValueCode implements IValueCode {
     instructions.add(pushNull());
     instructions.add(new InsnNode(returnValue));
     return instructions;
-  }
-
-  @Override
-  public boolean isCompatibleWith(Type type) {
-    assert type != null : "Precondition: type != null";
-
-    return isResponsibleFor(type);
   }
 }

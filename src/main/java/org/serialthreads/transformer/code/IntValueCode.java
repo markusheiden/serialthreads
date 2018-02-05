@@ -17,6 +17,17 @@ public class IntValueCode extends AbstractValueCode {
   }
 
   @Override
+  public boolean isResponsibleFor(Type type) {
+    return
+      type != null &&
+        (Type.BOOLEAN == type.getSort() ||
+          Type.CHAR == type.getSort() ||
+          Type.BYTE == type.getSort() ||
+          Type.SHORT == type.getSort() ||
+          Type.INT == type.getSort());
+  }
+
+  @Override
   public AbstractInsnNode push(Object value) {
     int i = (Integer) value;
 
@@ -49,16 +60,5 @@ public class IntValueCode extends AbstractValueCode {
         }
       }
     }
-  }
-
-  @Override
-  public boolean isResponsibleFor(Type type) {
-    return
-      type != null &&
-        (Type.BOOLEAN == type.getSort() ||
-          Type.CHAR == type.getSort() ||
-          Type.BYTE == type.getSort() ||
-          Type.SHORT == type.getSort() ||
-          Type.INT == type.getSort());
   }
 }

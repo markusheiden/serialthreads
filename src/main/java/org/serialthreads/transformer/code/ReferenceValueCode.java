@@ -18,6 +18,18 @@ public class ReferenceValueCode extends AbstractValueCode {
   }
 
   @Override
+  public boolean isCompatibleWith(Type type) {
+    assert type != null : "Precondition: type != null.";
+
+    return super.isCompatibleWith(type) && type.getInternalName().equals(type.getInternalName());
+  }
+
+  @Override
+  public boolean isResponsibleFor(Type type) {
+    return type != null && (Type.OBJECT == type.getSort() || Type.ARRAY == type.getSort());
+  }
+
+  @Override
   protected InsnList cast() {
     InsnList instructions = new InsnList();
     instructions.add(new TypeInsnNode(CHECKCAST, concreteType.getInternalName()));
@@ -32,17 +44,5 @@ public class ReferenceValueCode extends AbstractValueCode {
     }
 
     return new LdcInsnNode(value);
-  }
-
-  @Override
-  public boolean isCompatibleWith(Type type) {
-    assert type != null : "Precondition: type != null.";
-
-    return super.isCompatibleWith(type) && type.getInternalName().equals(type.getInternalName());
-  }
-
-  @Override
-  public boolean isResponsibleFor(Type type) {
-    return type != null && (Type.OBJECT == type.getSort() || Type.ARRAY == type.getSort());
   }
 }

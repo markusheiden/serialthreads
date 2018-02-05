@@ -16,6 +16,11 @@ public class DoubleValueCode extends AbstractValueCode {
   }
 
   @Override
+  public boolean isResponsibleFor(Type type) {
+    return type != null && Type.DOUBLE == type.getSort();
+  }
+
+  @Override
   public AbstractInsnNode push(Object value) {
     double d = (Double) value;
 
@@ -26,10 +31,5 @@ public class DoubleValueCode extends AbstractValueCode {
     }
 
     return new LdcInsnNode(d);
-  }
-
-  @Override
-  public boolean isResponsibleFor(Type type) {
-    return type != null && Type.DOUBLE == type.getSort();
   }
 }
