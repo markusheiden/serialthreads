@@ -27,6 +27,31 @@ public final class Stack extends SerialThread implements Serializable {
   private final int frameSize;
 
   /**
+   * Return value of the last executed method: Object.
+   */
+  public Object returnObject;
+
+  /**
+   * Return value of the last executed method: int.
+   */
+  public int returnInt;
+
+  /**
+   * Return value of the last executed method: long.
+   */
+  public long returnLong;
+
+  /**
+   * Return value of the last executed method: float.
+   */
+  public float returnFloat;
+
+  /**
+   * Return value of the last executed method: double.
+   */
+  public double returnDouble;
+
+  /**
    * Constructor.
    *
    * @param name Name of the thread
