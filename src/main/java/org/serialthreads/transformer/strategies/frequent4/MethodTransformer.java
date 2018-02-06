@@ -269,6 +269,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the method call.
+    // TODO 2018-02-06 markus: Store return value, because it is NOT stored in the CURRENT frame!
+
     // frame.method = position;
     instructions.add(setMethod(position));
     // The serializing flag is already on the stack from the method call.
