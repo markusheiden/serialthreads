@@ -10,6 +10,7 @@ import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
@@ -87,6 +88,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void replaceReturns() {
     logger.debug("      Replacing returns");
 
+    final int localThread = localThread();
     final int localPreviousFrame = localPreviousFrame();
 
     Type returnType = Type.getReturnType(method.desc);
@@ -102,7 +104,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
           // Save return value into the previous frame.
-          replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
+          replacement.add(code(returnType).pushReturnValue(localThread));
         }
         replacement.add(methodReturn(false));
       }
@@ -177,6 +179,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
+    final int localThread = localThread();
     final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
@@ -215,7 +218,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localThread));
     }
 
     // Insert capture code.
@@ -240,7 +243,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the method call.
-    // TODO 2018-02-06 markus: Store return value, because it is NOT stored in the CURRENT frame!
 
     // frame.method = position;
     instructions.add(setMethod(position));
@@ -332,10 +334,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    */
   protected final boolean isTailCall(MetaInfo metaInfo) {
-    // TODO 2018-02-05 markus: Fix tail call detection or handling.
-    // return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL) &&
-    //  !isRun(clazz, method, classInfoCache);
-    return false;
+    return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL) &&
+      !isRun(clazz, method, classInfoCache);
   }
 
   //

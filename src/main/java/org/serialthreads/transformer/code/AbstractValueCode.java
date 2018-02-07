@@ -320,36 +320,36 @@ public abstract class AbstractValueCode implements IValueCode {
   //
 
   @Override
-  public InsnList pushReturnValue(int localPreviousFrame) {
+  public InsnList pushReturnValue(int localThread) {
     InsnList instructions = new InsnList();
-    // previousFrame.returnXXX = stack;
+    // thread.returnXXX = stack;
     if (size == 1) {
-      // Put previousFrame before return value onto stack.
-      instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      // Put thread before return value onto stack.
+      instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new InsnNode(SWAP));
     } else {
-      // Put previousFrame before return value (2 words) onto stack.
-      instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+      // Put thread before return value (2 words) onto stack.
+      instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new InsnNode(DUP_X2));
       // Remove duplicated previousFrame from top of stack.
       instructions.add(new InsnNode(POP));
     }
-    instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     return instructions;
   }
 
   @Override
-  public InsnList popReturnValue(int localFrame) {
+  public InsnList popReturnValue(int localThread) {
     InsnList instructions = new InsnList();
-    // stack = frame.returnXXX;
-    instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
+    // stack = thread.returnXXX;
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     if (clear) {
-      // frame.returnXXX = null;
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      // thread.returnXXX = null;
+      instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(pushNull());
-      instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "return" + methodName, type.getDescriptor()));
+      instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
     }
     return instructions;
   }
