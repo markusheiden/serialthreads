@@ -337,7 +337,7 @@ public abstract class AbstractValueCode implements IValueCode {
     } else {
       // Put thread before return value (2 words) onto stack.
       instructions.add(new InsnNode(DUP_X2));
-      // Remove duplicated previousFrame from top of stack.
+      // Remove duplicated thread from top of stack.
       instructions.add(new InsnNode(POP));
     }
     instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
