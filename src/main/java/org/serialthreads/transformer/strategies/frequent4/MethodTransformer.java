@@ -101,8 +101,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
           // Save return value into the thread.
-          replacement.add(new VarInsnNode(ALOAD, localFrame));
-          replacement.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+          // frame.stack.returnXXX = stack;
+          replacement.add(threadCode.pushThread(localFrame));
           replacement.add(code(returnType).pushReturnValue());
         }
         replacement.add(methodReturn(false));
@@ -247,8 +247,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      instructions.add(new VarInsnNode(ALOAD, localFrame));
-      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+      // stack = frame.stack.returnXXX;
+      instructions.add(threadCode.pushThread(localFrame));
       instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue());
     }
 

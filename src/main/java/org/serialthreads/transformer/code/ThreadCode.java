@@ -22,7 +22,7 @@ public interface ThreadCode {
   FieldNode threadField();
 
   /**
-   * Set this.$$thread$$.
+   * Set "this.$$thread$$".
    *
    * @param className
    *           Class of this.
@@ -31,13 +31,22 @@ public interface ThreadCode {
   InsnList setThread(String className);
 
   /**
-   * Push this.$$thread$$ onto stack.
+   * Push "this.$$thread$$" onto stack.
    *
    * @param className
    *           Class of this.
    * @return Generated code.
    */
   InsnList pushThread(String className);
+
+  /**
+   * Push "frame.stack" onto stack.
+   *
+   * @param localFrame
+   *           Local with frame.
+   * @return Generated code.
+   */
+  InsnList pushThread(int localFrame);
 
   /**
    * Push new {@link Stack} and onto stack.

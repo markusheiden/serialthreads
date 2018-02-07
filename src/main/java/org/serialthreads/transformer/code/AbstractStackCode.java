@@ -50,6 +50,15 @@ public abstract class AbstractStackCode implements ThreadCode {
    }
 
   @Override
+   public InsnList pushThread(int localFrame) {
+     InsnList instructions = new InsnList();
+     // stack = frame.stack;
+     instructions.add(new VarInsnNode(ALOAD, localFrame));
+     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+     return instructions;
+   }
+
+  @Override
   public InsnList pushNewStack(int defaultFrameSize) {
     InsnList instructions = new InsnList();
     // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
