@@ -32,5 +32,5 @@ public class Strategies {
   /**
    * Default strategy.
    */
-  public static final IStrategy DEFAULT = FREQUENT3;
+  public static final IStrategy DEFAULT = FREQUENT4;
 }

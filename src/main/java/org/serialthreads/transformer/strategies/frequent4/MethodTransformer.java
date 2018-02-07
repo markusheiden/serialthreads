@@ -10,6 +10,7 @@ import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
+import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer4}.
@@ -362,10 +363,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param metaInfo Meta information about method call
    */
   protected final boolean isTailCall(MetaInfo metaInfo) {
-    // TODO 2018-02-05 markus: Fix tail call detection or handling.
-    // return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL) &&
-    //  !isRun(clazz, method, classInfoCache);
-    return false;
+     return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL) &&
+      !isRun(clazz, method, classInfoCache);
   }
 
   //
