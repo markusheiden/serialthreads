@@ -85,7 +85,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void replaceReturns() {
     logger.debug("      Replacing returns");
 
-    final int localPreviousFrame = localPreviousFrame();
     final int localFrame = localFrame();
 
     Type returnType = Type.getReturnType(method.desc);
@@ -100,8 +99,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       } else {
         if (returnType.getSort() != Type.VOID) {
           // Default case:
-          // Save return value into the previous frame.
-          replacement.add(code(returnType).pushReturnValue(localPreviousFrame));
+          // Save return value into the thread.
+          replacement.add(new VarInsnNode(ALOAD, localFrame));
+          replacement.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+          replacement.add(code(returnType).pushReturnValue());
         }
         replacement.add(methodReturn(false));
       }
@@ -245,7 +246,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(normal);
     // Restore return value of call, if any.
     if (isNotVoid(methodCall)) {
-      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue(localFrame));
+      instructions.add(new VarInsnNode(ALOAD, localFrame));
+      instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
+      instructions.add(code(Type.getReturnType(methodCall.desc)).popReturnValue());
     }
 
     // Insert capture code.
@@ -269,7 +272,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the method call.
-    // TODO 2018-02-06 markus: Store return value, because it is NOT stored in the CURRENT frame!
 
     // frame.method = position;
     instructions.add(setMethod(position));
