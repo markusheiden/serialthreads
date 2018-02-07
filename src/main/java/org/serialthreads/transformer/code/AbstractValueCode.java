@@ -322,14 +322,20 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList pushReturnValue(int localThread) {
     InsnList instructions = new InsnList();
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(pushReturnValue());
+    return instructions;
+  }
+
+  @Override
+  public InsnList pushReturnValue() {
+    InsnList instructions = new InsnList();
     // thread.returnXXX = stack;
     if (size == 1) {
       // Put thread before return value onto stack.
-      instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new InsnNode(SWAP));
     } else {
       // Put thread before return value (2 words) onto stack.
-      instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new InsnNode(DUP_X2));
       // Remove duplicated previousFrame from top of stack.
       instructions.add(new InsnNode(POP));
@@ -341,13 +347,22 @@ public abstract class AbstractValueCode implements IValueCode {
   @Override
   public InsnList popReturnValue(int localThread) {
     InsnList instructions = new InsnList();
-    // stack = thread.returnXXX;
     instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(popReturnValue());
+    return instructions;
+  }
+
+  @Override
+  public InsnList popReturnValue() {
+    InsnList instructions = new InsnList();
+    if (clear) {
+      instructions.add(new InsnNode(DUP));
+    }
+    // stack = thread.returnXXX;
     instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "return" + methodName, baseType.getDescriptor()));
     instructions.add(cast());
     if (clear) {
       // thread.returnXXX = null;
-      instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(pushNull());
       instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
     }

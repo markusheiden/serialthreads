@@ -96,12 +96,22 @@ public interface IValueCode {
    InsnList pushReturnValue(int localThread);
 
    /**
+    * Generate code to capture the current stack as a return value into the thread. Expects thread on the stack.
+    */
+   InsnList pushReturnValue();
+
+   /**
     * Generate code to restore the return value from a frame.
     *
     * @param localThread
     *           Local with thread.
     */
    InsnList popReturnValue(int localThread);
+
+   /**
+    * Generate code to restore the return value from a frame. Expects thread on the stack.
+    */
+   InsnList popReturnValue();
 
    //
    // Instructions.
