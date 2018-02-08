@@ -146,31 +146,6 @@ public final class StackFrame implements Serializable {
   public double localDouble7;
 
   /**
-   * Return value of the last executed method: Object.
-   */
-  public Object returnObject;
-
-  /**
-   * Return value of the last executed method: int.
-   */
-  public int returnInt;
-
-  /**
-   * Return value of the last executed method: long.
-   */
-  public long returnLong;
-
-  /**
-   * Return value of the last executed method: float.
-   */
-  public float returnFloat;
-
-  /**
-   * Return value of the last executed method: double.
-   */
-  public double returnDouble;
-
-  /**
    * Constructor.
    *
    * @param previous previous stack frame for a linked list
@@ -214,12 +189,6 @@ public final class StackFrame implements Serializable {
     localFloats = new float[size];
     localDoublePtr = 0;
     localDoubles = new double[size];
-
-    returnObject = null;
-    returnInt = 0;
-    returnLong = 0;
-    returnFloat = 0;
-    returnDouble = 0;
   }
 
   /**

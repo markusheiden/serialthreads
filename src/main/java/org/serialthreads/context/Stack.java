@@ -1,15 +1,23 @@
 package org.serialthreads.context;
 
-import java.io.Serializable;
-
 /**
  * Stack for all frames of a thread.
  */
-public final class Stack extends SerialThread implements Serializable {
+public final class Stack implements SerialThread {
   /**
    * Initial size of the stack.
    */
   protected static final int MAX_LEVELS = 256;
+
+  /**
+   * Name.
+   */
+  private final String name;
+
+  /**
+   * Default frame size.
+   */
+  private final int frameSize;
 
   /**
    * Frame for the first method.
@@ -22,9 +30,9 @@ public final class Stack extends SerialThread implements Serializable {
   public StackFrame frame;
 
   /**
-   * Default frame size.
+   * Is the thread in the capturing or restoring phase?.
    */
-  private final int frameSize;
+  public boolean serializing;
 
   /**
    * Return value of the last executed method: Object.
@@ -54,15 +62,26 @@ public final class Stack extends SerialThread implements Serializable {
   /**
    * Constructor.
    *
-   * @param name Name of the thread
+   * @param runnable Runnable.
    * @param frameSize Default size of frames
    */
-  public Stack(String name, int frameSize) {
-    super(name);
-
+  public Stack(Object runnable, int frameSize) {
+    this.name = runnable.getClass().getSimpleName();
     this.frameSize = frameSize;
     first = new StackFrame(this, null, frameSize);
     frame = first;
+
+    serializing = false;
+    returnObject = null;
+    returnInt = 0;
+    returnLong = 0;
+    returnFloat = 0;
+    returnDouble = 0;
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   /**
@@ -140,5 +159,10 @@ public final class Stack extends SerialThread implements Serializable {
    */
   public final void reset() {
     resetTo(first);
+  }
+
+  @Override
+  public String toString() {
+    return name;
   }
 }

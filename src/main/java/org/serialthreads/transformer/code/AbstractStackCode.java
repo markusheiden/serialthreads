@@ -14,8 +14,6 @@ import static org.serialthreads.transformer.code.IntValueCode.push;
 public abstract class AbstractStackCode implements ThreadCode {
    private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
-   private static final String CLASS_NAME = Type.getType(Class.class).getInternalName();
-   private static final String CLASS_DESC = Type.getType(Class.class).getDescriptor();
    private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
    private static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
@@ -61,14 +59,12 @@ public abstract class AbstractStackCode implements ThreadCode {
   @Override
   public InsnList pushNewStack(int defaultFrameSize) {
     InsnList instructions = new InsnList();
-    // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
+    // this.$$thread$$ = new Stack(this, defaultFrameSize);
     instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
     instructions.add(new InsnNode(DUP));
     instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "getClass", "()" + CLASS_DESC, false));
-    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, CLASS_NAME, "getSimpleName", "()" + STRING_DESC, false));
     instructions.add(IntValueCode.push(defaultFrameSize));
-    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + STRING_DESC + "I)V", false));
+    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + OBJECT_DESC + "I)V", false));
     return instructions;
   }
 

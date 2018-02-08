@@ -330,7 +330,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
       // init $$thread$$ field before returning from constructor
       InsnList instructions = new InsnList();
-      // this.$$thread$$ = new Stack(getClass().getSimpleName(), defaultFrameSize);
+      // this.$$thread$$ = new Stack(this, defaultFrameSize);
       instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(threadCode.pushNewStack(defaultFrameSize));
       instructions.add(threadCode.setThread(clazz.name));
