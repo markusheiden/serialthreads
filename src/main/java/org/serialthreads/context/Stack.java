@@ -5,11 +5,6 @@ package org.serialthreads.context;
  */
 public final class Stack implements SerialThread {
   /**
-   * Initial size of the stack.
-   */
-  protected static final int MAX_LEVELS = 256;
-
-  /**
    * Name.
    */
   private final String name;
