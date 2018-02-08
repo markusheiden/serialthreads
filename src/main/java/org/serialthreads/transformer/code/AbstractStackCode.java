@@ -14,7 +14,6 @@ import static org.serialthreads.transformer.code.IntValueCode.push;
 public abstract class AbstractStackCode implements ThreadCode {
    private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
    private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
-   private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
    private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
    private static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
    private static final String THREAD = "$$thread$$";
