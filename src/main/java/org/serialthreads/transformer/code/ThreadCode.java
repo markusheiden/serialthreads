@@ -58,30 +58,6 @@ public interface ThreadCode {
   InsnList pushNewStack(int defaultFrameSize);
 
   //
-  // run() methods.
-  //
-
-  /**
-   * Get first frame of the stack and store in a local.
-   *
-   * @param localThread
-   *           Number of local containing the thread.
-   * @param localFrame
-   *           Number of local that will hold the current frame.
-   * @return Generated code.
-   */
-  InsnList getFirstFrame(int localThread, int localFrame);
-
-  /**
-   * Get first frame of the stack and store in a local. Expects the stack on the stack.
-   *
-   * @param localFrame
-   *           Number of local that will hold the current frame.
-   * @return Generated code.
-   */
-  InsnList getFirstFrame(int localFrame);
-
-  //
   // Capture.
   //
 

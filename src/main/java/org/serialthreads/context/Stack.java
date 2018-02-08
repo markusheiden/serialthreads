@@ -3,7 +3,7 @@ package org.serialthreads.context;
 /**
  * Stack for all frames of a thread.
  */
-public final class Stack implements SerialThread {
+public final class Stack extends StackFrame implements SerialThread {
   /**
    * Name.
    */
@@ -13,11 +13,6 @@ public final class Stack implements SerialThread {
    * Default frame size.
    */
   private final int frameSize;
-
-  /**
-   * Frame for the first method.
-   */
-  public final StackFrame first;
 
   /**
    * The currently active frame.
@@ -61,10 +56,11 @@ public final class Stack implements SerialThread {
    * @param frameSize Default size of frames
    */
   public Stack(Object runnable, int frameSize) {
+    super(null, null, frameSize);
+    this.stack = this;
     this.name = runnable.getClass().getSimpleName();
     this.frameSize = frameSize;
-    first = new StackFrame(this, null, frameSize);
-    frame = first;
+    frame = this;
 
     serializing = false;
     returnObject = null;
@@ -105,7 +101,7 @@ public final class Stack implements SerialThread {
    * @return the frame for the method
    */
   public final StackFrame enterFirstMethod() {
-    return frame = first;
+    return frame = this;
   }
 
   /**
@@ -152,8 +148,8 @@ public final class Stack implements SerialThread {
   /**
    * Resets the complete stack.
    */
-  public final void reset() {
-    resetTo(first);
+  public final void resetAll() {
+    resetTo(this);
   }
 
   @Override

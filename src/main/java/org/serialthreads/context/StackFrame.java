@@ -12,7 +12,7 @@ import java.util.Arrays;
  * Used to store the content of a stack frame.
  */
 @SuppressWarnings("unused")
-public final class StackFrame implements Serializable {
+public class StackFrame implements Serializable {
   /**
    * Logger.
    */
@@ -23,7 +23,7 @@ public final class StackFrame implements Serializable {
 
   public static MethodType METHOD_TYPE = MethodType.methodType(void.class, Stack.class, StackFrame.class);
 
-  public final Stack stack;
+  public Stack stack;
   // double linked list of stack frames
   public final StackFrame previous;
   public StackFrame next;
