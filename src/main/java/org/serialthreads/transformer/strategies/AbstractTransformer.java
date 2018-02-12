@@ -29,6 +29,7 @@ import java.util.List;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -349,12 +350,13 @@ public abstract class AbstractTransformer implements ITransformer {
   private void createGetThread(ClassNode clazz) {
     MethodNode getThread = new MethodNode(ACC_PUBLIC, "getThread", "()" + THREAD_DESC, null, new String[0]);
 
-    getThread.maxLocals = 1;
+    getThread.maxLocals = 2;
     getThread.maxStack = 1;
 
     InsnList instructions = getThread.instructions;
     // return this.$$thread$$;
-    instructions.add(threadCode.pushThread(clazz.name));
+    instructions.add(threadCode.getRunThread(clazz.name, 1));
+    instructions.add(new VarInsnNode(ALOAD, 1));
     instructions.add(new InsnNode(ARETURN));
 
     clazz.methods.add(getThread);

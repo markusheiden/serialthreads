@@ -22,7 +22,7 @@ public interface ThreadCode {
   FieldNode threadField();
 
   /**
-   * Set "this.$$thread$$".
+   * "thread = new Stack(this, defaultFrameSize); this.$$thread$$ = thread".
    *
    * @param className
    *           Class of this.
@@ -44,6 +44,17 @@ public interface ThreadCode {
   InsnList initRunThread(String className);
 
   /**
+   * "thread = this.$$thread$$".
+   *
+   * @param className
+   *           Class of this.
+   * @param localThread
+   *           Number of local containing to contain the thread.
+   * @return Generated code.
+   */
+  InsnList getRunThread(String className, int localThread);
+
+  /**
    * Create field "$$frame$$" for holding the first frame.
    */
   FieldNode frameField();
@@ -60,21 +71,11 @@ public interface ThreadCode {
   InsnList initRunFrame(int localThread, String className);
 
   /**
-   * Push "thread.$$frame$$" onto stack.
+   * "frame = thread.$$frame$$".
    *
    * @return Generated code.
    */
-  InsnList pushFrame(String className);
-
-  /**
-   * Push "this.$$thread$$" onto stack.
-   *
-   * @param className
-   *           Class of this.
-   * @return Generated code.
-   */
-  InsnList pushThread(String className);
-
+  InsnList getRunFrame(String className, int localFrame);
   /**
    * Push "frame.stack" onto stack.
    *

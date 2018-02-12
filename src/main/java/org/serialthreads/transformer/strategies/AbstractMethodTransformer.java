@@ -352,12 +352,10 @@ public abstract class AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // thread = this.$$thread$$;
-    instructions.add(threadCode.pushThread(clazz.name));
+    instructions.add(threadCode.getRunThread(clazz.name, localThread));
 
     LabelNode retry = new LabelNode();
     instructions.add(retry);
-    // Store thread always in a new local variable.
-    instructions.add(new VarInsnNode(ASTORE, localThread));
 
     // Labels (for try block) around restore code.
     LabelNode beginTry = new LabelNode();
@@ -380,8 +378,8 @@ public abstract class AbstractMethodTransformer {
     handler.add(new VarInsnNode(ALOAD, 0));
     handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
     handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
-    handler.add(new InsnNode(DUP_X1));
     handler.add(threadCode.initRunThread(clazz.name));
+    instructions.add(new VarInsnNode(ASTORE, localThread));
     handler.add(new JumpInsnNode(GOTO, retry));
     method.instructions.add(handler);
     //noinspection unchecked

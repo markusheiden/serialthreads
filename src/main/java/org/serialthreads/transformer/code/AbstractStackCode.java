@@ -59,6 +59,16 @@ public abstract class AbstractStackCode implements ThreadCode {
   }
 
   @Override
+  public InsnList getRunThread(String className, int localThread) {
+    InsnList instructions = new InsnList();
+    // stack = this.$$thread$$;
+    instructions.add(new VarInsnNode(ALOAD, 0));
+    instructions.add(new FieldInsnNode(GETFIELD, className, THREAD, THREAD_IMPL_DESC));
+    instructions.add(new VarInsnNode(ASTORE, localThread));
+    return instructions;
+  }
+
+  @Override
   public FieldNode frameField() {
     return new FieldNode(ACC_PRIVATE + ACC_FINAL + ACC_SYNTHETIC, FRAME, FRAME_IMPL_DESC, FRAME_IMPL_DESC, null);
   }
@@ -75,20 +85,12 @@ public abstract class AbstractStackCode implements ThreadCode {
   }
 
   @Override
-  public InsnList pushFrame(String className) {
+  public InsnList getRunFrame(String className, int localFrame) {
     InsnList instructions = new InsnList();
-    // stack = thread.first;
+    // local = this.$$frame$$;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new FieldInsnNode(GETFIELD, className, FRAME, FRAME_IMPL_DESC));
-    return instructions;
-  }
-
-  @Override
-  public InsnList pushThread(String className) {
-    InsnList instructions = new InsnList();
-    // stack = this.$$thread$$;
-    instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new FieldInsnNode(GETFIELD, className, THREAD, THREAD_IMPL_DESC));
+    instructions.add(new VarInsnNode(ASTORE, localFrame));
     return instructions;
   }
 

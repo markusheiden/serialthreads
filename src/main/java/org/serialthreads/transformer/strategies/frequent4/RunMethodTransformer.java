@@ -1,12 +1,13 @@
 package org.serialthreads.transformer.strategies.frequent4;
 
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
-
-import static org.objectweb.asm.Opcodes.ASTORE;
 
 /**
  * Method transformer for run methods.
@@ -62,8 +63,7 @@ class RunMethodTransformer extends MethodTransformer {
     InsnList instructions = new InsnList();
 
     // frame = this.$$frame$$;
-    instructions.add(threadCode.pushFrame(clazz.name));
-    instructions.add(new VarInsnNode(ASTORE, localFrame));
+    instructions.add(threadCode.getRunFrame(clazz.name, localFrame));
 
     // No previous frame needed in run, because there may not be a previous frame.
 
