@@ -381,7 +381,7 @@ public abstract class AbstractMethodTransformer {
     handler.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
     handler.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     handler.add(new InsnNode(DUP_X1));
-    handler.add(threadCode.setThread(clazz.name));
+    handler.add(threadCode.initRunThread(clazz.name));
     handler.add(new JumpInsnNode(GOTO, retry));
     method.instructions.add(handler);
     //noinspection unchecked

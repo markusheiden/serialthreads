@@ -28,7 +28,9 @@ import java.util.List;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
@@ -323,24 +325,17 @@ public abstract class AbstractTransformer implements ITransformer {
     constructor.maxLocals = Math.max(constructor.maxLocals, 2);
     constructor.maxStack = Math.max(constructor.maxStack, 5);
 
+    int localThread = 1;
+
     for (AbstractInsnNode returnInstruction : returnInstructions(constructor)) {
       // constructors may not return a value
       assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
 
-      // init $$thread$$ field before returning from constructor
       InsnList instructions = new InsnList();
       // this.$$thread$$ = new Stack(this, defaultFrameSize);
-      instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(threadCode.pushNewStack(defaultFrameSize));
-      instructions.add(new InsnNode(DUP));
-      instructions.add(new VarInsnNode(ASTORE, 1));
-      instructions.add(threadCode.setThread(clazz.name));
-
+      instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
       // this.$$frame$$ = this.$$thread$$.first;
-      instructions.add(new VarInsnNode(ALOAD, 0));
-      instructions.add(new VarInsnNode(ALOAD, 1));
-      instructions.add(threadCode.pushFirstFrame());
-      instructions.add(threadCode.setFrame(clazz.name));
+      instructions.add(threadCode.initRunFrame(localThread, clazz.name));
 
       constructor.instructions.insertBefore(returnInstruction, instructions);
     }

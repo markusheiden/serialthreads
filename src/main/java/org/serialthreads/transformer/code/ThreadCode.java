@@ -26,23 +26,22 @@ public interface ThreadCode {
    *
    * @param className
    *           Class of this.
+   * @param defaultFrameSize
+   *           Default size of frames.
+   * @param localThread
+   *           Number of local containing the thread.
    * @return Generated code.
    */
-  InsnList setThread(String className);
+  InsnList initRunThread(String className, int defaultFrameSize, int localThread);
 
   /**
-   * Push "thread.first" onto stack.
+   * Set "this.$$thread$$".
    *
+   * @param className
+   *           Class of this.
    * @return Generated code.
    */
-  InsnList pushFirstFrame();
-
-  /**
-   * Push "thread.$$frame$$" onto stack.
-   *
-   * @return Generated code.
-   */
-  InsnList pushFrame(String className);
+  InsnList initRunThread(String className);
 
   /**
    * Create field "$$frame$$" for holding the first frame.
@@ -50,13 +49,22 @@ public interface ThreadCode {
   FieldNode frameField();
 
   /**
-   * Set "this.$$frame$$".
+   * Set "this.$$frame$$" to "thread.first".
    *
+   * @param localThread
+   *           Number of local containing the thread.
    * @param className
    *           Class of this.
    * @return Generated code.
    */
-  InsnList setFrame(String className);
+  InsnList initRunFrame(int localThread, String className);
+
+  /**
+   * Push "thread.$$frame$$" onto stack.
+   *
+   * @return Generated code.
+   */
+  InsnList pushFrame(String className);
 
   /**
    * Push "this.$$thread$$" onto stack.
@@ -75,15 +83,6 @@ public interface ThreadCode {
    * @return Generated code.
    */
   InsnList pushThread(int localFrame);
-
-  /**
-   * Push new {@link Stack} and onto stack.
-   *
-   * @param defaultFrameSize
-   *           Default size of frames.
-   * @return Generated code.
-   */
-  InsnList pushNewStack(int defaultFrameSize);
 
   //
   // Capture.
