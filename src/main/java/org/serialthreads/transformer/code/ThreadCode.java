@@ -55,6 +55,15 @@ public interface ThreadCode {
   InsnList getRunThread(String className, int localThread);
 
   /**
+   * Push "frame.stack" onto stack.
+   *
+   * @param localFrame
+   *           Local with frame.
+   * @return Generated code.
+   */
+  InsnList pushThread(int localFrame);
+
+  /**
    * Create field "$$frame$$" for holding the first frame.
    */
   FieldNode frameField();
@@ -76,14 +85,6 @@ public interface ThreadCode {
    * @return Generated code.
    */
   InsnList getRunFrame(String className, int localFrame);
-  /**
-   * Push "frame.stack" onto stack.
-   *
-   * @param localFrame
-   *           Local with frame.
-   * @return Generated code.
-   */
-  InsnList pushThread(int localFrame);
 
   //
   // Capture.
