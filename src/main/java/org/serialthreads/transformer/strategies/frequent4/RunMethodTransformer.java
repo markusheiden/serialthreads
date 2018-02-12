@@ -61,8 +61,8 @@ class RunMethodTransformer extends MethodTransformer {
 
     InsnList instructions = new InsnList();
 
-    // frame = this.$$thread$$;
-    instructions.add(threadCode.pushThread(clazz.name));
+    // frame = this.$$frame$$;
+    instructions.add(threadCode.pushFrame(clazz.name));
     instructions.add(new VarInsnNode(ASTORE, localFrame));
 
     // No previous frame needed in run, because there may not be a previous frame.

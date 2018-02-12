@@ -17,7 +17,7 @@ public interface ThreadCode {
   //
 
   /**
-   * Create field for holding the associated thread.
+   * Create field "$$thread$$" for holding the associated thread.
    */
   FieldNode threadField();
 
@@ -29,6 +29,34 @@ public interface ThreadCode {
    * @return Generated code.
    */
   InsnList setThread(String className);
+
+  /**
+   * Push "thread.first" onto stack.
+   *
+   * @return Generated code.
+   */
+  InsnList pushFirstFrame();
+
+  /**
+   * Push "thread.$$frame$$" onto stack.
+   *
+   * @return Generated code.
+   */
+  InsnList pushFrame(String className);
+
+  /**
+   * Create field "$$frame$$" for holding the first frame.
+   */
+  FieldNode frameField();
+
+  /**
+   * Set "this.$$frame$$".
+   *
+   * @param className
+   *           Class of this.
+   * @return Generated code.
+   */
+  InsnList setFrame(String className);
 
   /**
    * Push "this.$$thread$$" onto stack.

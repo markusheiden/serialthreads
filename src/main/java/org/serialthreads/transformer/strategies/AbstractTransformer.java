@@ -28,10 +28,7 @@ import java.util.List;
 
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
@@ -298,6 +295,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
     // add $$thread$$ field
     clazz.fields.add(threadCode.threadField());
+    clazz.fields.add(threadCode.frameField());
 
     // init $$thread$$ fields in constructors
     for (MethodNode constructor : constructors) {
@@ -322,7 +320,8 @@ public abstract class AbstractTransformer implements ITransformer {
 
     logger.debug("    Transforming constructor {}", methodName(clazz, constructor));
 
-    constructor.maxStack = Math.max(5, constructor.maxStack);
+    constructor.maxLocals = Math.max(constructor.maxLocals, 2);
+    constructor.maxStack = Math.max(constructor.maxStack, 5);
 
     for (AbstractInsnNode returnInstruction : returnInstructions(constructor)) {
       // constructors may not return a value
@@ -333,7 +332,15 @@ public abstract class AbstractTransformer implements ITransformer {
       // this.$$thread$$ = new Stack(this, defaultFrameSize);
       instructions.add(new VarInsnNode(ALOAD, 0));
       instructions.add(threadCode.pushNewStack(defaultFrameSize));
+      instructions.add(new InsnNode(DUP));
+      instructions.add(new VarInsnNode(ASTORE, 1));
       instructions.add(threadCode.setThread(clazz.name));
+
+      // this.$$frame$$ = this.$$thread$$.first;
+      instructions.add(new VarInsnNode(ALOAD, 0));
+      instructions.add(new VarInsnNode(ALOAD, 1));
+      instructions.add(threadCode.pushFirstFrame());
+      instructions.add(threadCode.setFrame(clazz.name));
 
       constructor.instructions.insertBefore(returnInstruction, instructions);
     }

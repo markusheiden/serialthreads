@@ -6,7 +6,6 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 
 /**
@@ -66,9 +65,8 @@ class RunMethodTransformer extends MethodTransformer {
     instructions.add(threadCode.pushThread(clazz.name));
     instructions.add(new VarInsnNode(ASTORE, localThread));
 
-    // TODO 2018-02-08 markus: How to avoid this move?
-    // frame = thread;
-    instructions.add(new VarInsnNode(ALOAD, localThread));
+    // frame = this.$$frame$$;
+    instructions.add(threadCode.pushFrame(clazz.name));
     instructions.add(new VarInsnNode(ASTORE, localFrame));
 
     // No previous frame needed in run, because there may not be a previous frame.
