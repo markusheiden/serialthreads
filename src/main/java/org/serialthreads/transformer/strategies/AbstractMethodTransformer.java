@@ -336,7 +336,6 @@ public abstract class AbstractMethodTransformer {
     instructions.add(restoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-    return;
   }
 
   /**
@@ -353,22 +352,13 @@ public abstract class AbstractMethodTransformer {
 
     // thread = this.$$thread$$;
     instructions.add(threadCode.getRunThread(clazz.name, localThread));
-
-    LabelNode retry = new LabelNode();
-    instructions.add(retry);
-
-    // Labels (for try block) around restore code.
-    LabelNode beginTry = new LabelNode();
-    instructions.add(beginTry);
-    // Code relying on thread to be not null.
+    // TODO 2018-02-13 markus: thread is always != null now, because of init in constructor. Inline this code.
     instructions.add(tryCode);
-    LabelNode endTry = new LabelNode();
-    instructions.add(endTry);
     // Remaining restore code.
     instructions.add(restoreCode);
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-
+/*
     // try / catch (NullPointerException) for thread access
     InsnList handler = new InsnList();
     LabelNode catchNPE = new LabelNode();
@@ -384,6 +374,7 @@ public abstract class AbstractMethodTransformer {
     method.instructions.add(handler);
     //noinspection unchecked
     method.tryCatchBlocks.add(new TryCatchBlockNode(beginTry, endTry, catchNPE, NPE_NAME));
+*/
   }
 
   //
