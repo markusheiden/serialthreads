@@ -334,9 +334,10 @@ public abstract class AbstractTransformer implements ITransformer {
       assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
 
       InsnList instructions = new InsnList();
-      // this.$$thread$$ = new Stack(this, defaultFrameSize);
+      // thread = new Stack(this, defaultFrameSize);
+      // this.$$thread$$ = thread;
       instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
-      // this.$$frame$$ = this.$$thread$$.first;
+      // this.$$frame$$ = thread.first;
       instructions.add(threadCode.initRunFrame(localThread, clazz.name));
 
       constructor.instructions.insertBefore(returnInstruction, instructions);
