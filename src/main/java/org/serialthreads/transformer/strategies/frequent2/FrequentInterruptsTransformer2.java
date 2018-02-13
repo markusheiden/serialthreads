@@ -77,5 +77,6 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
     // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptible method?
     // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
     addThreadField(clazz);
+    constructors.forEach(constructor -> transformConstructor(clazz, constructor, false));
   }
 }

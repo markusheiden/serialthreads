@@ -301,9 +301,7 @@ public abstract class AbstractTransformer implements ITransformer {
     clazz.fields.add(threadCode.frameField());
 
     // Init $$thread$$ and $$frame$$ fields in constructors.
-    for (MethodNode constructor : constructors) {
-      transformConstructor(clazz, constructor);
-    }
+    constructors.forEach(constructor -> transformConstructor(clazz, constructor, true));
 
     // Implement ITransformedRunnable.getThread().
     createGetThread(clazz);
@@ -324,8 +322,9 @@ public abstract class AbstractTransformer implements ITransformer {
    *
    * @param clazz class to alter
    * @param constructor method to transform
+   * @param initFrame Initialize $$frame$$?.
    */
-  protected void transformConstructor(ClassNode clazz, MethodNode constructor) {
+  protected void transformConstructor(ClassNode clazz, MethodNode constructor, boolean initFrame) {
     assert constructor.name.equals("<init>") : "Precondition: constructor.name.equals(\"<init>\")";
 
     logger.debug("    Transforming constructor {}", methodName(clazz, constructor));
@@ -343,8 +342,10 @@ public abstract class AbstractTransformer implements ITransformer {
       // thread = new Stack(this, defaultFrameSize);
       // this.$$thread$$ = thread;
       instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
-      // this.$$frame$$ = thread.first;
-      instructions.add(threadCode.initRunFrame(localThread, clazz.name));
+      if (initFrame) {
+        // this.$$frame$$ = thread.first;
+        instructions.add(threadCode.initRunFrame(localThread, clazz.name));
+      }
 
       constructor.instructions.insertBefore(returnInstruction, instructions);
     }
