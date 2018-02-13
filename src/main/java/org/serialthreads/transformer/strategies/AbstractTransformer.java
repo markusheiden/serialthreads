@@ -296,8 +296,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
     clazz.interfaces.add(ITRANSFORMED_RUNNABLE_NAME);
 
-    // Add $$thread$$ field.
-    clazz.fields.add(threadCode.threadField());
+    addThreadField(clazz);
     // Add $$frame$$ field.
     clazz.fields.add(threadCode.frameField());
 
@@ -310,6 +309,13 @@ public abstract class AbstractTransformer implements ITransformer {
     createGetThread(clazz);
 
     return true;
+  }
+
+  /**
+   * Add field "$$thread$$" for thread.
+   */
+  protected void addThreadField(ClassNode clazz) {
+    clazz.fields.add(threadCode.threadField());
   }
 
   /**
