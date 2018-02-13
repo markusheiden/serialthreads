@@ -289,23 +289,24 @@ public abstract class AbstractTransformer implements ITransformer {
 
     logger.debug("  Implement ITransformedRunnable");
 
-    // make class implement ITransformedRunnable
+    // Make class implement ITransformedRunnable.
     if (clazz.interfaces.contains(ITRANSFORMED_RUNNABLE_NAME)) {
       throw new NotTransformableException("Custom classes may not not implement ITransformedRunnable. Implement IRunnable instead.");
     }
 
     clazz.interfaces.add(ITRANSFORMED_RUNNABLE_NAME);
 
-    // add $$thread$$ field
+    // Add $$thread$$ field.
     clazz.fields.add(threadCode.threadField());
+    // Add $$frame$$ field.
     clazz.fields.add(threadCode.frameField());
 
-    // init $$thread$$ fields in constructors
+    // Init $$thread$$ and $$frame$$ fields in constructors.
     for (MethodNode constructor : constructors) {
       transformConstructor(clazz, constructor);
     }
 
-    // implement ITransformedRunnable.getThread()
+    // Implement ITransformedRunnable.getThread().
     createGetThread(clazz);
 
     return true;
