@@ -2,6 +2,8 @@ package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
+import org.serialthreads.context.SerialThread;
+import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 
@@ -12,8 +14,9 @@ import static org.serialthreads.transformer.code.IntValueCode.push;
  * Base code that is independent from stack frame storage algorithm.
  */
 public abstract class AbstractStackCode implements ThreadCode {
-  private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
   private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
+  private static final String MANAGER_NAME = Type.getType(SerialThreadManager.class).getInternalName();
+  private static final String THREAD_DESC = Type.getType(SerialThread.class).getDescriptor();
   private static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
   private static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
   private static final String THREAD = "$$thread$$";
@@ -64,6 +67,16 @@ public abstract class AbstractStackCode implements ThreadCode {
     // stack = this.$$thread$$;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new FieldInsnNode(GETFIELD, className, THREAD, THREAD_IMPL_DESC));
+    instructions.add(new VarInsnNode(ASTORE, localThread));
+    return instructions;
+  }
+
+  @Override
+  public InsnList getThread(int localThread) {
+    InsnList instructions = new InsnList();
+    // thread = SerialThreadManager.getThread();
+    instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
+    instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
     instructions.add(new VarInsnNode(ASTORE, localThread));
     return instructions;
   }

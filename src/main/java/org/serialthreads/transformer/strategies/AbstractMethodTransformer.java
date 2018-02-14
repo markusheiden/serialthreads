@@ -4,8 +4,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.context.*;
 import org.serialthreads.context.Stack;
+import org.serialthreads.context.StackFrame;
+import org.serialthreads.context.ThreadFinishedException;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
@@ -33,17 +34,11 @@ public abstract class AbstractMethodTransformer {
    */
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-  protected static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
-  protected static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
-  protected static final String STRING_DESC = Type.getType(String.class).getDescriptor();
-  protected static final String NPE_NAME = Type.getType(NullPointerException.class).getInternalName();
-  protected static final String MANAGER_NAME = Type.getType(SerialThreadManager.class).getInternalName();
-  protected static final String THREAD_DESC = Type.getType(SerialThread.class).getDescriptor();
-  protected static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
+  private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
+  private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
+  private static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
 
-  protected static final String THREAD_IMPL_NAME = Type.getType(Stack.class).getInternalName();
   protected static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
-  protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
   protected static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
   protected final ClassNode clazz;
@@ -91,7 +86,7 @@ public abstract class AbstractMethodTransformer {
     LabelNode last = insertLabelAfter(method.instructions.getLast());
 
     List<LocalVariableNode> locals = method.localVariables;
-//    locals.add(new LocalVariableNode("thread", THREAD_DESC, null, first, last, localThread()));
+//    locals.add(new LocalVariableNode("thread", THREAD_IMPL_DESC, null, first, last, localThread()));
     locals.add(new LocalVariableNode("previousFrame", FRAME_IMPL_DESC, null, first, last, localPreviousFrame()));
     locals.add(new LocalVariableNode("frame", FRAME_IMPL_DESC, null, first, last, localFrame()));
   }
@@ -151,7 +146,7 @@ public abstract class AbstractMethodTransformer {
    * Analyze a method to compute frames.
    * Extract all interruptible method calls.
    *
-   * @throws AnalyzerException
+   * @throws AnalyzerException on invalid byte code.
    */
   protected void analyze() throws AnalyzerException {
     // Init meta information
@@ -327,9 +322,7 @@ public abstract class AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // thread = SerialThreadManager.getThread();
-    instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
-    instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
-    instructions.add(new VarInsnNode(ASTORE, localThread));
+    instructions.add(threadCode.getThread(localThread));
     // thread is always not null, so new exception handling needed here.
     instructions.add(tryCode);
     // Remaining restore code.

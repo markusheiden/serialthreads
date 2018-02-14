@@ -49,10 +49,19 @@ public interface ThreadCode {
    * @param className
    *           Class of this.
    * @param localThread
-   *           Number of local containing to contain the thread.
+   *           Number of local to contain the thread.
    * @return Generated code.
    */
   InsnList getRunThread(String className, int localThread);
+
+  /**
+   * "thread = SerialThreadManager.getThread()".
+   *
+   * @param localThread
+   *           Number of local to contain the thread.
+   * @return Generated code.
+   */
+  InsnList getThread(int localThread);
 
   /**
    * Push "frame.stack" onto stack.
