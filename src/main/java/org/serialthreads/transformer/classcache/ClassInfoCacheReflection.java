@@ -9,7 +9,14 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Checks and caches which methods are marked as interruptible.
@@ -107,31 +114,31 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
       for (Method method : methods) {
         String name = method.getName();
         String desc = Type.getMethodDescriptor(method);
-        Set<String> annotations = new HashSet<>();
-        for (Annotation annotation : method.getAnnotations()) {
-          annotations.add(Type.getDescriptor(annotation.getClass()));
-        }
+        Set<Type> annotations = stream(method.getAnnotations())
+          .map(Annotation::getClass)
+          .map(Type::getType)
+          .collect(toSet());
 
         MethodInfo info = new MethodInfo(name, desc, annotations);
-        methodInfos.put(info.getID(), info);
+        methodInfos.put(info.getId(), info);
       }
 
       Constructor<?>[] constructors = clazz.getDeclaredConstructors();
       for (Constructor<?> constructor : constructors) {
         String name = "<init>";
         String desc = Type.getConstructorDescriptor(constructor);
-        Set<String> annotations = new HashSet<>();
+        Set<Type> annotations = emptySet();
 
         MethodInfo info = new MethodInfo(name, desc, annotations);
-        methodInfos.put(info.getID(), info);
+        methodInfos.put(info.getId(), info);
       }
 
       String name = "<clinit>";
       String desc = "()V";
-      Set<String> annotations = new HashSet<>();
+      Set<Type> annotations = emptySet();
 
       MethodInfo info = new MethodInfo(name, desc, annotations);
-      methodInfos.put(info.getID(), info);
+      methodInfos.put(info.getId(), info);
 
       ClassInfo classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);
       if (clazz.getSuperclass() != null) {

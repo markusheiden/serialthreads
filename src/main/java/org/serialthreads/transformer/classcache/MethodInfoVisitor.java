@@ -3,6 +3,7 @@ package org.serialthreads.transformer.classcache;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Set;
 public class MethodInfoVisitor extends MethodVisitor {
   private final String methodName;
   private final String methodDesc;
-  private final Set<String> methodAnnotations = new HashSet<>();
+  private final Set<Type> methodAnnotations = new HashSet<>();
 
   private final Map<String, MethodInfo> methods;
 
@@ -28,13 +29,13 @@ public class MethodInfoVisitor extends MethodVisitor {
 
   @Override
   public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-    methodAnnotations.add(desc);
+    methodAnnotations.add(Type.getType(desc));
     return null;
   }
 
   @Override
   public void visitEnd() {
     MethodInfo method = new MethodInfo(methodName, methodDesc, methodAnnotations);
-    methods.put(method.getID(), method);
+    methods.put(method.getId(), method);
   }
 }

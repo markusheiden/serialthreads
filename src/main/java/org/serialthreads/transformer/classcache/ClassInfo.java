@@ -54,7 +54,7 @@ public class ClassInfo {
     for (MethodInfo method : methods.values()) {
       if (method.hasAnnotation(TYPE_INTERRUPT) && !method.getDesc().equals("()V")) {
         throw new NotTransformableException(
-          "Interrupt method " + method.getID() + " in class " + className +
+          "Interrupt method " + method.getId() + " in class " + className +
             " must not have parameters nor a return value");
       }
     }
