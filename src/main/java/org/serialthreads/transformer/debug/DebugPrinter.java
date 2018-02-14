@@ -42,13 +42,15 @@ class DebugPrinter extends Textifier {
       for (int i = 0; i < frame.getLocals(); i++) {
         BasicValue local = frame.getLocal(i);
         if (local != BasicValue.UNINITIALIZED_VALUE) {
-          frameText.add(tab3 + "Local: " + i + ": " + (local.isReference() ? local.getType().getDescriptor() : local) + "\n");
+          Object value = local.isReference() ? local.getType().getDescriptor() : local;
+          frameText.add(tab3 + "Local: " + i + ": " + value + "\n");
         }
       }
       frameText.add(tab3 + "Needed locals: " + frame.neededLocals + "\n");
       for (int i = 0; i < frame.getStackSize(); i++) {
         BasicValue stack = frame.getStack(i);
-        frameText.add(tab3 + "Stack: " + i + ": " + (stack.isReference() ? stack.getType().getDescriptor() : stack) + "\n");
+        Object value = stack.isReference() ? stack.getType().getDescriptor() : stack;
+        frameText.add(tab3 + "Stack: " + i + ": " + value + "\n");
       }
 
       text.addAll(lastSize, frameText);
