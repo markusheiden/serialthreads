@@ -1,8 +1,10 @@
 package org.serialthreads.transformer.strategies;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.serialthreads.context.IRunnable;
+import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
 
 import java.util.function.Function;
@@ -13,6 +15,15 @@ import static org.junit.Assert.assertEquals;
  * Integration test for transformer.
  */
 public abstract class TransformerIntegration_AbstractTest {
+  private SerialThreadManager manager;
+
+  @After
+  public void tearDown() {
+    if (manager != null) {
+      manager.close();
+    }
+  }
+
   /**
    * Check that transformation does not alter behaviour.
    */
@@ -20,7 +31,7 @@ public abstract class TransformerIntegration_AbstractTest {
   public void testTransform() {
     TestInterruptible test = new TestInterruptible(true);
 
-    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager = new SimpleSerialThreadManager(test);
     manager.execute();
 
     test.assertExpectedResult();
@@ -35,7 +46,7 @@ public abstract class TransformerIntegration_AbstractTest {
   public void testRunNo() {
     TestRunNoInterruptible test = new TestRunNoInterruptible();
 
-    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager = new SimpleSerialThreadManager(test);
     manager.execute();
 
     test.assertExpectedResult();
@@ -50,7 +61,7 @@ public abstract class TransformerIntegration_AbstractTest {
   public void testRunSingle() {
     TestRunSingleInterruptible test = new TestRunSingleInterruptible();
 
-    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager = new SimpleSerialThreadManager(test);
     manager.execute();
 
     test.assertExpectedResult();
@@ -65,7 +76,7 @@ public abstract class TransformerIntegration_AbstractTest {
   public void testRunMulti() {
     TestRunMultiInterruptible test = new TestRunMultiInterruptible();
 
-    SimpleSerialThreadManager manager = new SimpleSerialThreadManager(test);
+    manager = new SimpleSerialThreadManager(test);
     manager.execute();
 
     test.assertExpectedResult();
@@ -110,11 +121,12 @@ public abstract class TransformerIntegration_AbstractTest {
    * @param parser Parser for the primitive type which is tested.
    */
   private void testLocalStorage(IRunnable test, Function<String, Number> parser) throws Exception {
-    run(test);
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
     for (int i = 0; i < 9; i++) {
       assertEquals(parser.apply("-1"), field(test, "value" + i));
     }
-    run(test);
+    manager.execute(1);
     for (int i = 0; i < 9; i++) {
       assertEquals(parser.apply("" + i), field(test, "value" + i));
     }
@@ -124,11 +136,12 @@ public abstract class TransformerIntegration_AbstractTest {
    * Test that tail calls return the correct value.
    */
   @Test
-  public void testTailCall() throws Exception {
+  public void testTailCall() {
     TestTailCall test = new TestTailCall();
-    run(test);
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
     assertEquals(-1, test.value);
-    run(test);
+    manager.execute(1);
     assertEquals(1, test.value);
   }
 
@@ -137,25 +150,18 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Ignore // TODO markus 2018-01-04: Implement exception handling.
   @Test
-  public void testException() throws Exception {
+  public void testException() {
     TestException test = new TestException();
-    run(test);
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
     assertEquals(-1, test.value);
-    run(test);
+    manager.execute(1);
     assertEquals(1, test.value);
   }
 
   //
   // Reflection test support
   //
-
-  /**
-   * Run test object once (until the next interrupt).
-   */
-  private void run(IRunnable test) throws Exception {
-    // Do NOT call "run()" directly, to avoid transformation.
-    test.getClass().getMethod("run").invoke(test);
-  }
 
   /**
    * Get value of a field of the test object.

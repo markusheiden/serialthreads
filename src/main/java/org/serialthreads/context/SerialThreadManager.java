@@ -5,10 +5,16 @@ import org.serialthreads.Executor;
 /**
  * Manages the access to serial threads for transformed classes.
  */
-public abstract class SerialThreadManager {
+public abstract class SerialThreadManager implements AutoCloseable {
+  /**
+   * Thread managers.
+   */
   private static final ThreadLocal<SerialThreadManager> threadManagers = new ThreadLocal<>();
 
-  protected SerialThread currentThread;
+  /**
+   * Currently executing thread.
+   */
+  private SerialThread currentThread;
 
   /**
    * Register a thread manager for the current thread.
@@ -28,12 +34,20 @@ public abstract class SerialThreadManager {
    *
    * @param manager thread manager
    */
-  protected static void deregisterManager(SerialThreadManager manager) {
-    assert threadManagers.get() == manager : "Precondition: manager registered for this thread yet.";
+  public static void deregisterManager(SerialThreadManager manager) {
+    SerialThreadManager registerManager = threadManagers.get();
+    assert registerManager == null || registerManager == manager : "Precondition: manager registered for this thread yet.";
 
     threadManagers.remove();
 
     assert threadManagers.get() == null : "Precondition: manager deregistered successfully.";
+  }
+
+  /**
+   * Set the current thread.
+   */
+  public static void setThread(SerialThread thread) {
+    threadManagers.get().currentThread = thread;
   }
 
   /**
@@ -56,4 +70,9 @@ public abstract class SerialThreadManager {
    */
   @Executor
   public abstract void execute(int interrupts);
+
+  @Override
+  public void close() {
+    deregisterManager(this);
+  }
 }

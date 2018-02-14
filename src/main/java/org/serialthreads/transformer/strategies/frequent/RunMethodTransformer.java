@@ -67,6 +67,8 @@ class RunMethodTransformer extends MethodTransformer {
     // frame = this.$$frame$$;
     instructions.add(threadCode.getRunFrame(clazz.name, localFrame));
 
+    // SerialThreadManager.setThread(thread);
+    instructions.add(threadCode.setThread(localThread));
     // Store current frame, so next method can fetch is as previous frame.
     // thread.frame = frame;
     instructions.add(threadCode.setFrame(localThread, localFrame));

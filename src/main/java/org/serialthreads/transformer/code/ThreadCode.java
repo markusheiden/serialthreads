@@ -64,6 +64,15 @@ public interface ThreadCode {
   InsnList getThread(int localThread);
 
   /**
+   * "SerialThreadManager.setThread(thread)".
+   *
+   * @param localThread
+   *           Number of local to containing the thread.
+   * @return Generated code.
+   */
+  InsnList setThread(int localThread);
+
+  /**
    * Push "frame.stack" onto stack.
    *
    * @param localFrame

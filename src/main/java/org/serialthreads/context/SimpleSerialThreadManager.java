@@ -32,7 +32,6 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
       //noinspection InfiniteLoopStatement
       for (;;) {
         chain = chain.next;
-        currentThread = chain.thread;
         chain.runnable.run();
       }
     } catch (ThreadFinishedException e) {
@@ -57,7 +56,6 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
     try {
       do {
         chain = chain.next;
-        currentThread = chain.thread;
         chain.runnable.run();
       } while (--loops != 0);
 

@@ -8,5 +8,5 @@ public interface ITransformedRunnable extends IRunnable {
   /**
    * Get serial thread.
    */
-  public SerialThread getThread();
+  SerialThread getThread();
 }

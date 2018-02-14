@@ -67,6 +67,8 @@ class RunMethodTransformer extends MethodTransformer {
     // frame = this.$$frame$$;
     instructions.add(threadCode.getRunFrame(clazz.name, localFrame));
 
+    // SerialThreadManager.setThread(thread);
+    instructions.add(threadCode.setThread(localThread));
     // No previous frame needed in run, because there may not be a previous frame.
 
     // Add label for first call of run() at index -1, see "startIndex" below.

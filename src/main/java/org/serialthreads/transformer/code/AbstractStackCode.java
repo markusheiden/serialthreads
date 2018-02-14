@@ -82,6 +82,15 @@ public abstract class AbstractStackCode implements ThreadCode {
   }
 
   @Override
+  public InsnList setThread(int localThread) {
+    InsnList instructions = new InsnList();
+    // SerialThreadManager.setThread(thread);
+    instructions.add(new VarInsnNode(ALOAD, localThread));
+    instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "setThread", "(" + THREAD_DESC + ")V", false));
+    return instructions;
+  }
+
+  @Override
   public InsnList pushThread(int localFrame) {
     InsnList instructions = new InsnList();
     // stack = frame.stack;
