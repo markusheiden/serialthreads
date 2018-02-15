@@ -46,17 +46,17 @@ public abstract class AbstractStackCode implements ThreadCode {
     instructions.add(new VarInsnNode(ASTORE, localThread));
 
     // this.$$thread$$ = thread;
-    instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new VarInsnNode(ALOAD, localThread));
-    instructions.add(initRunThread(className));
+    instructions.add(initThread(className, localThread));
 
     return instructions;
   }
 
   @Override
-  public InsnList initRunThread(String className) {
+  public InsnList initThread(String className, int localThread) {
     InsnList instructions = new InsnList();
     // this.$$thread$$ = stack;
+    instructions.add(new VarInsnNode(ALOAD, 0));
+    instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new FieldInsnNode(PUTFIELD, className, THREAD, THREAD_IMPL_DESC));
     return instructions;
   }

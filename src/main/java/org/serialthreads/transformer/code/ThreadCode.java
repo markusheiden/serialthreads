@@ -39,9 +39,11 @@ public interface ThreadCode {
    *
    * @param className
    *           Class of this.
+   * @param localThread
+   *           Number of local containing the thread.
    * @return Generated code.
    */
-  InsnList initRunThread(String className);
+  InsnList initThread(String className, int localThread);
 
   /**
    * "thread = this.$$thread$$".

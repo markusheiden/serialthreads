@@ -272,7 +272,7 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param constructors all constructors of class
    */
   protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
-    implementTransformedRunnable(clazz, constructors);
+    implementTransformedRunnable(clazz, constructors, true);
   }
 
   /**
@@ -282,12 +282,12 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param constructors constructors
    * @return whether ITransformedRunnable has been implemented
    */
-  protected boolean implementTransformedRunnable(ClassNode clazz, List<MethodNode> constructors) {
+  protected boolean implementTransformedRunnable(ClassNode clazz, List<MethodNode> constructors, boolean initThread) {
     if (!classInfoCache.hasSuperClass(clazz.name, IRUNNABLE_NAME)) {
       return false;
     }
 
-    logger.debug("  Implement ITransformedRunnable");
+    logger.debug("  Implement ITransformedRunnable for {}", clazz.name);
 
     // Make class implement ITransformedRunnable.
     if (clazz.interfaces.contains(ITRANSFORMED_RUNNABLE_NAME)) {
@@ -301,7 +301,7 @@ public abstract class AbstractTransformer implements ITransformer {
     clazz.fields.add(threadCode.frameField());
 
     // Init $$thread$$ and $$frame$$ fields in constructors.
-    constructors.forEach(constructor -> transformConstructor(clazz, constructor, true));
+    constructors.forEach(constructor -> transformConstructor(clazz, constructor, initThread, true));
 
     // Implement ITransformedRunnable.getThread().
     createGetThread(clazz);
@@ -324,7 +324,7 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param constructor method to transform
    * @param initFrame Initialize $$frame$$?.
    */
-  protected void transformConstructor(ClassNode clazz, MethodNode constructor, boolean initFrame) {
+  protected void transformConstructor(ClassNode clazz, MethodNode constructor, boolean initThread, boolean initFrame) {
     assert constructor.name.equals("<init>") : "Precondition: constructor.name.equals(\"<init>\")";
 
     logger.debug("    Transforming constructor {}", methodName(clazz, constructor));
@@ -339,9 +339,16 @@ public abstract class AbstractTransformer implements ITransformer {
       assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
 
       InsnList instructions = new InsnList();
-      // thread = new Stack(this, defaultFrameSize);
-      // this.$$thread$$ = thread;
-      instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
+      if (initThread) {
+        // thread = new Stack(this, defaultFrameSize);
+        // this.$$thread$$ = thread;
+        instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
+      } else {
+        // thread = SerialThreadManager.getThread();
+        instructions.add(threadCode.getThread(localThread));
+        // this.$$thread$$ = thread;
+        instructions.add(threadCode.initThread(clazz.name, localThread));
+      }
       if (initFrame) {
         // this.$$frame$$ = thread.first;
         instructions.add(threadCode.initRunFrame(localThread, clazz.name));
