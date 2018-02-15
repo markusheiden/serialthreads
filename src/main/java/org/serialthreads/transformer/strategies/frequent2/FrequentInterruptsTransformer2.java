@@ -11,6 +11,7 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -45,13 +46,13 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
     if (isAbstract(method)) {
       // change signature of abstract methods
-      return asList(
+      return singletonList(
         new CopyMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     if (isRun(clazz, method, classInfoCache)) {
       // take special care of run method
-      return asList(
+      return singletonList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
 

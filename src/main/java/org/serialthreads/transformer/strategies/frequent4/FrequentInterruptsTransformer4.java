@@ -12,6 +12,7 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -51,13 +52,13 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
       }
 
       // Take special care of run method.
-      return asList(
+      return singletonList(
         new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
     if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
       // Copied method not needed, because it will be called never.
-      return asList(
+      return singletonList(
         new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
