@@ -19,8 +19,6 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
 
     chains = ChainedRunnable.chain(runnables);
     lastExecuted = chains[chains.length - 1];
-
-    registerManager(this);
   }
 
   @Override
@@ -38,7 +36,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.runnable.getThread()).reset();
-      deregisterManager(this);
+      close();
     }
 
     lastExecuted = chain;
@@ -64,7 +62,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
       // expected: execution finished normally due to the end of a serial thread
       // TODO 2009-12-09 mh: Avoid cast
       ((Stack) chain.runnable.getThread()).reset();
-      deregisterManager(this);
+      close();
     }
 
     lastExecuted = chain;
