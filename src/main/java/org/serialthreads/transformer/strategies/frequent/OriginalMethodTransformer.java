@@ -6,7 +6,9 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
 
+import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IFNONNULL;
 import static org.serialthreads.transformer.code.MethodCode.isStatic;
 
 /**
@@ -65,8 +67,16 @@ class OriginalMethodTransformer extends MethodTransformer {
       // thread = SerialThreadManager.getThread();
       instructions.add(threadCode.getThread(localThread));
     } else {
+      LabelNode exist = new LabelNode();
       // thread = this.$$thread$$;
       instructions.add(threadCode.getRunThread(clazz.name, localThread));
+      instructions.add(new VarInsnNode(ALOAD, localThread));
+      instructions.add(new JumpInsnNode(IFNONNULL, exist));
+      // thread = SerialThreadManager.getThread();
+      instructions.add(threadCode.getThread(localThread));
+      // this.$$thread$$ = thread;
+      instructions.add(threadCode.initThread(clazz.name, localThread));
+      instructions.add(exist);
     }
     // previousFrame = thread.frame;
     instructions.add(threadCode.getPreviousFrame(localThread, localPreviousFrame));

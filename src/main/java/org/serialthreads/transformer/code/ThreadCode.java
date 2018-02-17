@@ -17,9 +17,11 @@ public interface ThreadCode {
   //
 
   /**
-   * Create field "$$thread$$" for holding the associated thread.
+   * Create field "private (final) $$thread$$" for holding the associated thread.
+   *
+   * @param finalField Make field final?.
    */
-  FieldNode threadField();
+  FieldNode threadField(boolean finalField);
 
   /**
    * "thread = new Stack(this, defaultFrameSize); this.$$thread$$ = thread".
@@ -35,7 +37,7 @@ public interface ThreadCode {
   InsnList initRunThread(String className, int defaultFrameSize, int localThread);
 
   /**
-   * Set "this.$$thread$$".
+   * "this.$$thread$$ = thread".
    *
    * @param className
    *           Class of this.

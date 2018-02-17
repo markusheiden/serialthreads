@@ -272,7 +272,7 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param constructors all constructors of class
    */
   protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
-    implementTransformedRunnable(clazz, constructors, true);
+    implementTransformedRunnable(clazz, constructors, false, true);
   }
 
   /**
@@ -280,9 +280,11 @@ public abstract class AbstractTransformer implements ITransformer {
    *
    * @param clazz class to transform
    * @param constructors constructors
+   * @param storeThread Store thread via "SerialThreadManager.setThread(thread)".
+   * @param initFrame Initialize $$frame$$?.
    * @return whether ITransformedRunnable has been implemented
    */
-  protected boolean implementTransformedRunnable(ClassNode clazz, List<MethodNode> constructors, boolean initThread) {
+  protected boolean implementTransformedRunnable(ClassNode clazz, List<MethodNode> constructors, boolean storeThread, boolean initFrame) {
     if (!classInfoCache.hasSuperClass(clazz.name, IRUNNABLE_NAME)) {
       return false;
     }
@@ -296,12 +298,12 @@ public abstract class AbstractTransformer implements ITransformer {
 
     clazz.interfaces.add(ITRANSFORMED_RUNNABLE_NAME);
 
-    addThreadField(clazz);
+    addThreadField(clazz, true);
     // Add $$frame$$ field.
     clazz.fields.add(threadCode.frameField());
 
     // Init $$thread$$ and $$frame$$ fields in constructors.
-    constructors.forEach(constructor -> transformConstructor(clazz, constructor, initThread, true));
+    constructors.forEach(constructor -> transformConstructor(clazz, constructor, storeThread, initFrame));
 
     // Implement ITransformedRunnable.getThread().
     createGetThread(clazz);
@@ -312,19 +314,20 @@ public abstract class AbstractTransformer implements ITransformer {
   /**
    * Add field "$$thread$$" for thread.
    */
-  protected void addThreadField(ClassNode clazz) {
-    clazz.fields.add(threadCode.threadField());
+  protected void addThreadField(ClassNode clazz, boolean finalField) {
+    clazz.fields.add(threadCode.threadField(finalField));
   }
 
   /**
    * Transform constructor of runnables.
    * Initializes $$thread$$ field.
    *
-   * @param clazz class to alter
-   * @param constructor method to transform
+   * @param clazz Class to alter.
+   * @param constructor Method to transform.
+   * @param storeThread Store thread via "SerialThreadManager.setThread(thread)".
    * @param initFrame Initialize $$frame$$?.
    */
-  protected void transformConstructor(ClassNode clazz, MethodNode constructor, boolean initThread, boolean initFrame) {
+  private void transformConstructor(ClassNode clazz, MethodNode constructor, boolean storeThread, boolean initFrame) {
     assert constructor.name.equals("<init>") : "Precondition: constructor.name.equals(\"<init>\")";
 
     logger.debug("    Transforming constructor {}", methodName(clazz, constructor));
@@ -339,15 +342,11 @@ public abstract class AbstractTransformer implements ITransformer {
       assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
 
       InsnList instructions = new InsnList();
-      if (initThread) {
-        // thread = new Stack(this, defaultFrameSize);
-        // this.$$thread$$ = thread;
-        instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
-      } else {
-        // thread = SerialThreadManager.getThread();
-        instructions.add(threadCode.getThread(localThread));
-        // this.$$thread$$ = thread;
-        instructions.add(threadCode.initThread(clazz.name, localThread));
+      // thread = new Stack(this, defaultFrameSize);
+      // this.$$thread$$ = thread;
+      instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
+      if (storeThread) {
+        instructions.add(threadCode.setThread(localThread));
       }
       if (initFrame) {
         // this.$$frame$$ = thread.first;
