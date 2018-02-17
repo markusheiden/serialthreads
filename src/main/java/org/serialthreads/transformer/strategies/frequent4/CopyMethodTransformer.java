@@ -7,6 +7,7 @@ import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
 
+import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
@@ -48,6 +49,7 @@ class CopyMethodTransformer extends MethodTransformer {
       fixMaxs();
     }
 
+    method.access |= ACC_SYNTHETIC;
     method.name = changeCopyName(method.name, method.desc);
     method.desc = changeCopyDesc(method.desc);
     clazz.methods.add(method);
