@@ -116,7 +116,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   // Capture and restore code inserted after method calls.
   //
 
-
   @Override
   protected int paramThread() {
     // TODO 2018-01-31 markus: Handle this without overwriting.
