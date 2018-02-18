@@ -36,11 +36,6 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
   }
 
   @Override
-  public String toString() {
-    return "Transformer " + STRATEGY;
-  }
-
-  @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
     if (isAbstract(method)) {
       // abstract methods need no transformation
@@ -75,5 +70,10 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
     // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
     // TODO 2018-02-13 mh: use this field.
     addThreadField(clazz, false);
+  }
+
+  @Override
+  public String toString() {
+    return "Transformer " + STRATEGY;
   }
 }

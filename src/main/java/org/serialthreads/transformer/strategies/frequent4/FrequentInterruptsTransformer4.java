@@ -39,11 +39,6 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
   }
 
   @Override
-  public String toString() {
-    return "Transformer " + STRATEGY;
-  }
-
-  @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
     if (isRun(clazz, method, classInfoCache)) {
       return doTransformRun(clazz, method);
@@ -78,5 +73,10 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
     // Take special care of run method.
     return singletonList(
       new RunMethodTransformer(clazz, method, classInfoCache).transform());
+  }
+
+  @Override
+  public String toString() {
+    return "Transformer " + STRATEGY;
   }
 }

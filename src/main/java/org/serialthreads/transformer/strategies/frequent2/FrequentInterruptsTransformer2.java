@@ -38,11 +38,6 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
   }
 
   @Override
-  public String toString() {
-    return "Transformer " + STRATEGY;
-  }
-
-  @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
     if (isAbstract(method)) {
       // change signature of abstract methods
@@ -78,5 +73,10 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
     // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptible method?
     // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
     addThreadField(clazz, false);
+  }
+
+  @Override
+  public String toString() {
+    return "Transformer " + STRATEGY;
   }
 }
