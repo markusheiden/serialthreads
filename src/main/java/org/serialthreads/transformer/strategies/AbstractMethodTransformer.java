@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
@@ -155,8 +156,8 @@ public abstract class AbstractMethodTransformer {
   /**
    * Tag an instruction.
    *
-   * @param instruction Instruction
-   * @param tag Tag
+   * @param instruction Instruction.
+   * @param tag Tag.
    */
   private void tag(AbstractInsnNode instruction, String tag) {
     metaInfos.get(instruction).tags.add(tag);
@@ -388,14 +389,11 @@ public abstract class AbstractMethodTransformer {
    */
   protected LabelNode insertLabelAtStart() {
     AbstractInsnNode first = method.instructions.getFirst();
-    for (AbstractInsnNode f = first; f != null && f.getOpcode() < 0; f = f.getNext()) {
-      if (f instanceof LabelNode) {
-        return (LabelNode) f;
-      }
+    LabelNode label = searchLabel(first, AbstractInsnNode::getNext);
+    if (label == null) {
+      label = new LabelNode();
+      method.instructions.insertBefore(first, label);
     }
-
-    LabelNode label = new LabelNode();
-    method.instructions.insertBefore(first, label);
 
     return label;
   }
@@ -407,14 +405,11 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label before the instruction, new label otherwise.
    */
   protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
-    for (AbstractInsnNode p = instruction.getPrevious(); p != null && p.getOpcode() < 0; p = p.getPrevious()) {
-      if (p instanceof LabelNode) {
-        return (LabelNode) p;
-      }
+    LabelNode label = searchLabel(instruction, AbstractInsnNode::getPrevious);
+    if (label == null) {
+      label = new LabelNode();
+      method.instructions.insertBefore(instruction, label);
     }
-
-    LabelNode label = new LabelNode();
-    method.instructions.insertBefore(instruction, label);
 
     return label;
   }
@@ -426,14 +421,11 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label after the instruction, new label otherwise.
    */
   protected LabelNode insertLabelAfter(AbstractInsnNode instruction) {
-    for (AbstractInsnNode n = instruction.getNext(); n != null && n.getOpcode() < 0; n = n.getNext()) {
-      if (n instanceof LabelNode) {
-        return (LabelNode) n;
-      }
+    LabelNode label = searchLabel(instruction, AbstractInsnNode::getNext);
+    if (label == null) {
+      label = new LabelNode();
+      method.instructions.insert(instruction, label);
     }
-
-    LabelNode label = new LabelNode();
-    method.instructions.insert(instruction, label);
 
     return label;
   }
@@ -445,15 +437,29 @@ public abstract class AbstractMethodTransformer {
    */
   protected LabelNode insertLabelAtEnd() {
     final AbstractInsnNode last = method.instructions.getLast();
-    for (AbstractInsnNode l = last; l != null && l.getOpcode() < 0; l = l.getPrevious()) {
+    LabelNode label = searchLabel(last, AbstractInsnNode::getPrevious);
+    if (label == null) {
+      label = new LabelNode();
+      method.instructions.insert(last, label);
+    }
+
+    return label;
+  }
+
+  /**
+   * Search label node. Stops at first real instruction.
+   *
+   * @param start Instruction to start search at.
+   * @param direction Direction of search.
+   * @return Label, if there is a label before any real instruction, null otherwise.
+   */
+  private LabelNode searchLabel(AbstractInsnNode start, Function<AbstractInsnNode, AbstractInsnNode> direction) {
+    for (AbstractInsnNode l = start; l != null && l.getOpcode() < 0; l = direction.apply(l)) {
       if (l instanceof LabelNode) {
         return (LabelNode) l;
       }
     }
 
-    LabelNode label = new LabelNode();
-    method.instructions.insert(last, label);
-
-    return label;
+    return null;
   }
 }

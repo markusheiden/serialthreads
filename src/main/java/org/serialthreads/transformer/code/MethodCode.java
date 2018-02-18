@@ -268,8 +268,8 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static boolean isReturn(AbstractInsnNode instruction) {
-    int opcode = instruction.getOpcode();
-    return opcode >= IRETURN && opcode <= RETURN;
+    return instruction != null &&
+      instruction.getOpcode() >= IRETURN && instruction.getOpcode() <= RETURN;
   }
 
   /**
