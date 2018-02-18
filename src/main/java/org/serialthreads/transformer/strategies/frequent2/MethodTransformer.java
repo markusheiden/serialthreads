@@ -52,6 +52,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
   }
 
+  /**
+   * Local holding the thread.
+   * This is the parameter holding the thread in original methods.
+   */
+  protected int localThread() {
+    return local(0);
+  }
+
   //
   // Capture and restore code inserted after method calls.
   //

@@ -117,12 +117,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected int localThread() {
-    // TODO 2018-01-31 markus: Handle this without overwriting.
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   protected int localPreviousFrame() {
     // TODO 2018-01-31 markus: Handle this without overwriting.
     return super.local(0);

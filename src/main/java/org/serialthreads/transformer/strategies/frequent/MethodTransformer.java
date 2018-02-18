@@ -30,6 +30,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     super(clazz, method, classInfoCache);
   }
 
+  /**
+   * Local holding the thread.
+   * This is the parameter holding the thread in original methods.
+   */
+  protected int localThread() {
+    return local(0);
+  }
+
   //
   // Capture and restore code inserted after method calls.
   //

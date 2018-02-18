@@ -99,14 +99,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Local holding the thread.
-   * This is the parameter holding the thread in original methods.
-   */
-  protected int localThread() {
-    return local(0);
-  }
-
-  /**
    * Local holding the previous frame.
    * This is the parameter holding the previous frame in original methods.
    */

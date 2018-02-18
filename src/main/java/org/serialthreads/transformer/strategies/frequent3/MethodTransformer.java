@@ -29,6 +29,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
+   * Local holding the thread.
+   * This is the parameter holding the thread in original methods.
+   */
+  protected int localThread() {
+    return local(0);
+  }
+
+  /**
    * Change the name of a copied method.
    * Computes an unique name based on the name and the descriptor.
    *
