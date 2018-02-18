@@ -3,6 +3,7 @@ package org.serialthreads.transformer.strategies.frequent3;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
@@ -47,6 +48,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected int localFrame() {
     return local(2);
+  }
+
+  /**
+   * Shift index of the locals to get place for the three needed new locals.
+   * Local 0: thread, local 1: previous frame, local 2: current frame.
+   */
+  protected void shiftLocals() {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
   }
 
   /**

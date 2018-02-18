@@ -11,7 +11,6 @@ import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.CompactingStackCode;
-import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.code.ThreadCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,11 +71,17 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Shift index of the locals to get place for the three needed new locals.
-   * Local 0: thread, local 1: previous frame, local 2: current frame.
+   * Parameter p used by this transformer.
    */
-  protected void shiftLocals() {
-    LocalVariablesShifter.shift(firstLocal(method), 3, method);
+  protected final int param(int p) {
+    return firstParam(method) + p;
+  }
+
+  /**
+   * Local l used by this transformer.
+   */
+  protected final int local(int l) {
+    return firstLocal(method) + l;
   }
 
   /**
@@ -89,20 +94,6 @@ public abstract class AbstractMethodTransformer {
   protected void nameLocal(int local, String desc, String variableName) {
     method.localVariables.add(
       new LocalVariableNode(variableName, desc, null, insertLabelAtStart(), insertLabelAtEnd(), local));
-  }
-
-  /**
-   * Parameter p used by this transformer.
-   */
-  protected final int param(int p) {
-    return firstParam(method) + p;
-  }
-
-  /**
-   * Local l used by this transformer.
-   */
-  protected final int local(int l) {
-    return firstLocal(method) + l;
   }
 
   /**

@@ -3,14 +3,12 @@ package org.serialthreads.transformer.strategies.frequent;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.serialthreads.transformer.code.MethodCode.dummyArguments;
-import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
-import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
-import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 
@@ -49,6 +47,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected int localFrame() {
     return local(2);
+  }
+
+  /**
+   * Shift index of the locals to get place for the three needed new locals.
+   * Local 0: thread, local 1: previous frame, local 2: current frame.
+   */
+  protected void shiftLocals() {
+    LocalVariablesShifter.shift(firstLocal(method), 3, method);
   }
 
   /**

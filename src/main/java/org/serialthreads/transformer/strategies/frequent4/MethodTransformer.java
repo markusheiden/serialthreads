@@ -3,6 +3,7 @@ package org.serialthreads.transformer.strategies.frequent4;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
+import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
@@ -32,14 +33,22 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * Local holding the previous frame.
    */
   protected final int localPreviousFrame() {
-    return super.local(0);
+    return local(0);
   }
 
   /**
    * Local holding the current frame.
    */
   protected final int localFrame() {
-    return super.local(1);
+    return local(1);
+  }
+
+  /**
+   * Shift index of the locals to get place for the two needed new locals.
+   * Local 0: previous frame, local 1: frame.
+   */
+  protected void shiftLocals() {
+    LocalVariablesShifter.shift(firstLocal(method), 2, method);
   }
 
   /**
