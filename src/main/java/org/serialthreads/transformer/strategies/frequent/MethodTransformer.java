@@ -32,10 +32,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   /**
    * Local holding the thread.
-   * This is the parameter holding the thread in original methods.
    */
   protected final int localThread() {
     return local(0);
+  }
+
+  /**
+   * Local holding the previous frame.
+   */
+  protected int localPreviousFrame() {
+    return local(1);
   }
 
   /**
@@ -80,7 +86,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // frame.method = position;
     instructions.add(setMethod(position));
     // previousFrame.owner = this;
-    instructions.add(setOwner(methodCall, metaInfo, suppressOwner));
+    instructions.add(setOwner(methodCall, metaInfo, suppressOwner, localPreviousFrame()));
     // thread.serializing = true;
     instructions.add(threadCode.setSerializing(localThread(), true));
     // return;
@@ -139,7 +145,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // frame.method = position;
     instructions.add(setMethod(position));
     // previousFrame.owner = this;
-    instructions.add(setOwner(methodCall, metaInfo, suppressOwner));
+    instructions.add(setOwner(methodCall, metaInfo, suppressOwner, localPreviousFrame));
     // return;
     instructions.add(dummyReturnStatement(method));
 

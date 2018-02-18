@@ -28,12 +28,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     super(clazz, method, classInfoCache);
   }
 
-  @Override
+  /**
+   * Local holding the previous frame.
+   */
   protected final int localPreviousFrame() {
-    // TODO 2018-01-31 markus: Handle this without overwriting.
     return super.local(0);
   }
 
+  /**
+   * Local holding the current frame.
+   */
   @Override
   protected final int localFrame() {
     // TODO 2018-01-31 markus: Handle this without overwriting.

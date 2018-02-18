@@ -99,14 +99,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Local holding the previous frame.
-   * This is the parameter holding the previous frame in original methods.
-   */
-  protected int localPreviousFrame() {
-    return local(1);
-  }
-
-  /**
    * Newly introduced local holding the current frame.
    */
   protected int localFrame() {
@@ -307,14 +299,16 @@ public abstract class AbstractMethodTransformer {
    *           Meta information about method call
    * @param suppressOwner
    *           Suppress saving the owner?.
+   * @param localPreviousFrame
+   *           Number of local containing the previous frame .
    * @return generated capture code.
    */
-  protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner) {
+  protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner, int localPreviousFrame) {
     if (suppressOwner || isSelfCall(methodCall, metaInfo) || isStatic(method)) {
       return new InsnList();
     }
 
-    return threadCode.setOwner(localPreviousFrame());
+    return threadCode.setOwner(localPreviousFrame);
   }
 
   /**

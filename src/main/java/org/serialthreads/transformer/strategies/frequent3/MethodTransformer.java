@@ -30,10 +30,16 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   /**
    * Local holding the thread.
-   * This is the parameter holding the thread in original methods.
    */
   protected final int localThread() {
     return local(0);
+  }
+
+  /**
+   * Local holding the previous frame.
+   */
+  protected int localPreviousFrame() {
+    return local(1);
   }
 
   /**

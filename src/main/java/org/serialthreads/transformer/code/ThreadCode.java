@@ -129,7 +129,7 @@ public interface ThreadCode {
    * Set "this" as {@link StackFrame#owner} into the previous frame.
    *
    * @param localPreviousFrame
-   *           Number of local containing the previous frame .
+   *           Number of local containing the previous frame.
    * @return Generated code.
    */
   InsnList setOwner(int localPreviousFrame);
