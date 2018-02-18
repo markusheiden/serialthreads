@@ -324,10 +324,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * <p/>
    * A frame is not needed, if following conditions apply:
    * - There is just one interruptible method call (-> no need to store the method index)
-   * - The method call is a self call (-> no need to store the method owner)
-   * - The method is a tail call (-> needs no storing of locals and stack)
+   * - The method call is a static or self call (-> no need to store the method owner)
+   * - The method call is a tail call (-> needs no storing of locals and stack)
    * The third condition is somewhat suboptimal,
-   * but for now the easiest way to implement the detection, that neither the locals nor the stack is needed / used.
+   * but for now the easiest way to implement the detection,
+   * that neither the locals nor the stack is needed / used.
    */
   protected final boolean needsFrame() {
     // TODO 2018-01-21 markus: Why not "> 1"?
@@ -337,7 +338,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     MethodInsnNode methodCall = interruptibleMethodCalls.iterator().next();
     MetaInfo metaInfo = metaInfos.get(methodCall);
-    return !isSelfCall(methodCall, metaInfo) || !isTailCall(metaInfo);
+    return
+      !(isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) ||
+      !isTailCall(metaInfo);
   }
 
   /**
