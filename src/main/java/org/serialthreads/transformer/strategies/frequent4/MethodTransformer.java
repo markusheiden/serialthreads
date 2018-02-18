@@ -290,7 +290,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     return restoreLabel;
   }
 
-
   /**
    * Call copy method.
    *
