@@ -27,7 +27,7 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
   /**
    * Strategy name.
    */
-  public static final String STRATEGY = "FREQUENT3";
+  public static final String STRATEGY = "FREQUENT4";
 
   /**
    * Constructor.
