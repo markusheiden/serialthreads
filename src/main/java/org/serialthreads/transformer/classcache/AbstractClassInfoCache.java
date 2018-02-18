@@ -11,9 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
 
-import static org.objectweb.asm.ClassReader.*;
+import static java.util.Arrays.asList;
+import static org.objectweb.asm.ClassReader.SKIP_CODE;
+import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
+import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -239,7 +245,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       // check super classes always first
       toProcess.addFirst(classInfoVisitor.getSuperClassName());
     }
-    toProcess.addAll(Arrays.asList(classInfoVisitor.getInterfaceNames()));
+    toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));
 
     return result;
   }
