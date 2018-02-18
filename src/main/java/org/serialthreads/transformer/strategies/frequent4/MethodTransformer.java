@@ -28,6 +28,18 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     super(clazz, method, classInfoCache);
   }
 
+  @Override
+  protected int localPreviousFrame() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    return super.local(0);
+  }
+
+  @Override
+  protected int localFrame() {
+    // TODO 2018-01-31 markus: Handle this without overwriting.
+    return super.local(1);
+  }
+
   /**
    * Change the name of a copied method.
    * Computes an unique name based on the name and the descriptor.
@@ -115,18 +127,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
   // Capture and restore code inserted after method calls.
   //
-
-  @Override
-  protected int localPreviousFrame() {
-    // TODO 2018-01-31 markus: Handle this without overwriting.
-    return super.local(0);
-  }
-
-  @Override
-  protected int localFrame() {
-    // TODO 2018-01-31 markus: Handle this without overwriting.
-    return super.local(1);
-  }
 
   @Override
   protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {

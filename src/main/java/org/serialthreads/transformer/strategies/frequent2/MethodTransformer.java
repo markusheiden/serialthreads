@@ -32,6 +32,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
+   * Local holding the thread.
+   * This is the parameter holding the thread in original methods.
+   */
+  private int localThread() {
+    return local(0);
+  }
+
+  /**
    * Change the name of a copied method.
    *
    * @param name name of method
@@ -50,14 +58,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected String changeCopyDesc(String desc) {
     return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
-  }
-
-  /**
-   * Local holding the thread.
-   * This is the parameter holding the thread in original methods.
-   */
-  protected int localThread() {
-    return local(0);
   }
 
   //
