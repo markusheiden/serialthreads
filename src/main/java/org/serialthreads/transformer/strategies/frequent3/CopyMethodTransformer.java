@@ -19,6 +19,16 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 @SuppressWarnings({"UnusedAssignment"})
 class CopyMethodTransformer extends MethodTransformer {
   /**
+   * Parameter holding the thread.
+   */
+  private final int paramThread;
+
+  /**
+   * Parameter holding the previous frame.
+   */
+  private final int paramPreviousFrame;
+
+  /**
    * Constructor.
    *
    * @param clazz class to transform
@@ -27,20 +37,9 @@ class CopyMethodTransformer extends MethodTransformer {
    */
   protected CopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, MethodNodeCopier.copy(method), classInfoCache);
-  }
 
-  /**
-   * Parameter holding the thread in copied methods.
-   */
-  private int paramThread() {
-    return param(0);
-  }
-
-  /**
-   * Parameter holding the previous frame in copied methods.
-   */
-  private int paramPreviousFrame() {
-    return param(1);
+    this.paramThread = param(0);
+    this.paramPreviousFrame = param(1);
   }
 
   /**
@@ -82,9 +81,6 @@ class CopyMethodTransformer extends MethodTransformer {
     assert !restores.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
 
     logger.debug("    Creating restore handler for copied method");
-
-    final int paramThread = paramThread();
-    final int paramPreviousFrame = paramPreviousFrame();
 
     InsnList instructions = new InsnList();
 
