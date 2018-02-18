@@ -325,8 +325,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * that neither the locals nor the stack is needed / used.
    */
   protected final boolean needsFrame() {
-    // TODO 2018-01-21 markus: Why not "> 1"?
-    if (interruptibleMethodCalls.size() != 1) {
+    if (interruptibleMethodCalls.isEmpty()) {
+      return false;
+    }
+    if (interruptibleMethodCalls.size() > 1) {
       return true;
     }
 
