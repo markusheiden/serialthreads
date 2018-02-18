@@ -282,7 +282,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated capture code.
    */
   protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner, int localPreviousFrame) {
-    if (suppressOwner || isSelfCall(methodCall, metaInfo) || isStatic(method)) {
+    if (suppressOwner || isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) {
       return new InsnList();
     }
 
