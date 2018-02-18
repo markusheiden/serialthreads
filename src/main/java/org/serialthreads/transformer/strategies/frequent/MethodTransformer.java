@@ -45,6 +45,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   /**
+   * Local holding the current frame.
+   */
+  protected int localFrame() {
+    return local(2);
+  }
+
+  /**
    * Add names for added locals.
    */
   protected void nameLocals() {

@@ -38,9 +38,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Local holding the current frame.
    */
-  @Override
   protected final int localFrame() {
-    // TODO 2018-01-31 markus: Handle this without overwriting.
     return super.local(1);
   }
 

@@ -99,13 +99,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Newly introduced local holding the current frame.
-   */
-  protected int localFrame() {
-    return local(2);
-  }
-
-  /**
    * Local l used by this transformer.
    */
   protected final int local(int l) {
