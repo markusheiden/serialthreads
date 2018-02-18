@@ -33,13 +33,13 @@ class RunMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
-    nameAddedLocals();
     analyze();
 
     replaceRunReturns();
     List<LabelNode> restores = insertCaptureAndRestoreCode(true);
     createRestoreHandlerRun(restores);
     fixMaxs();
+    nameLocals();
 
     return method;
   }

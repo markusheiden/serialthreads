@@ -53,7 +53,6 @@ class CopyMethodTransformer extends MethodTransformer {
     boolean concrete = !isAbstract(method);
     if (concrete) {
       shiftLocals();
-      nameAddedLocals();
       analyze();
 
       replaceReturns();
@@ -61,6 +60,7 @@ class CopyMethodTransformer extends MethodTransformer {
       createRestoreHandlerCopy(restores);
       addThreadAndFrame();
       fixMaxs();
+      nameLocals();
     }
 
     method.access |= ACC_SYNTHETIC;

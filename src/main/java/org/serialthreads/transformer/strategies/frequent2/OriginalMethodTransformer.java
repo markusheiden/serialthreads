@@ -32,12 +32,12 @@ class OriginalMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
-    nameAddedLocals();
     analyze();
 
     insertCaptureCode();
     createRestoreHandlerMethod();
     fixMaxs();
+    nameLocals();
 
     return method;
   }

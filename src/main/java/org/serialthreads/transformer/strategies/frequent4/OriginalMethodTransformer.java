@@ -38,7 +38,6 @@ class OriginalMethodTransformer extends MethodTransformer {
     boolean concrete = !isAbstract(method);
     if (concrete) {
       shiftLocals();
-      nameAddedLocals();
       analyze();
 
       replaceReturns();
@@ -46,6 +45,7 @@ class OriginalMethodTransformer extends MethodTransformer {
       createRestoreHandlerMethod();
       addFrame();
       fixMaxs();
+      nameLocals();
     }
 
     method.desc = changeDesc(method.desc);

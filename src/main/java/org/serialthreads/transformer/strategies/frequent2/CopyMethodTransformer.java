@@ -54,13 +54,13 @@ class CopyMethodTransformer extends MethodTransformer {
     boolean concrete = !isAbstract(method);
     if (concrete) {
       shiftLocals();
-      nameAddedLocals();
       analyze();
 
       // create copy of method with shortened signature
       List<LabelNode> restores = insertCaptureAndRestoreCode(true);
       createRestoreHandlerCopy(restores);
       fixMaxs();
+      nameLocals();
     }
 
     method.access |= ACC_SYNTHETIC;

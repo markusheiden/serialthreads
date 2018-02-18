@@ -35,12 +35,12 @@ class OriginalMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
-    nameAddedLocals();
     analyze();
 
     List<LabelNode> restores = insertCaptureAndRestoreCode(false);
     createRestoreHandlerMethod(restores);
     fixMaxs();
+    nameLocals();
 
     return method;
   }

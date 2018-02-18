@@ -79,16 +79,18 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Add names for added locals.
+   * Name local in the whole method.
+   *
+   * @param local Number of local.
+   * @param desc Type descriptor.
+   * @param variableName Name for local.
    */
-  protected void nameAddedLocals() {
+  protected void nameLocal(int local, String desc, String variableName) {
+    // TODO 2018-02-18 markus: Create / use method insert at start / end.
     LabelNode first = insertLabelBefore(method.instructions.getFirst());
     LabelNode last = insertLabelAfter(method.instructions.getLast());
 
-    List<LocalVariableNode> locals = method.localVariables;
-//    locals.add(new LocalVariableNode("thread", THREAD_IMPL_DESC, null, first, last, localThread()));
-    locals.add(new LocalVariableNode("previousFrame", FRAME_IMPL_DESC, null, first, last, localPreviousFrame()));
-    locals.add(new LocalVariableNode("frame", FRAME_IMPL_DESC, null, first, last, localFrame()));
+    method.localVariables.add(new LocalVariableNode(variableName, desc, null, first, last, local));
   }
 
   /**

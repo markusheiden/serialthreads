@@ -33,7 +33,6 @@ class RunMethodTransformer extends MethodTransformer {
    */
   public MethodNode transform() throws AnalyzerException {
     shiftLocals();
-    nameAddedLocals();
     analyze();
 
     replaceRunReturns();
@@ -41,6 +40,7 @@ class RunMethodTransformer extends MethodTransformer {
     createRestoreHandlerRun(restores);
     addFrame();
     fixMaxs();
+    nameLocals();
 
     return method;
   }

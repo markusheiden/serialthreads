@@ -38,6 +38,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     return local(0);
   }
 
+  /**
+   * Add names for added locals.
+   */
+  protected void nameLocals() {
+    nameLocal(localThread(), THREAD_IMPL_DESC, "thread");
+    nameLocal(localPreviousFrame(), FRAME_IMPL_DESC, "previousFrame");
+    nameLocal(localFrame(), FRAME_IMPL_DESC, "frame");
+  }
+
   //
   // Capture and restore code inserted after method calls.
   //
