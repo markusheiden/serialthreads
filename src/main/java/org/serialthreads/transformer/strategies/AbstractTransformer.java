@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -218,7 +218,7 @@ public abstract class AbstractTransformer implements ITransformer {
     if (classInfoCache.isExecutor(clazz, method)) {
       // TODO 2009-12-11 mh: check executor
       // bypass check()
-      return Arrays.asList(method);
+      return singletonList(method);
     }
 
     if (!classInfoCache.isInterruptible(clazz, method)) {
