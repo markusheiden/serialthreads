@@ -80,7 +80,7 @@ class RunMethodTransformer extends MethodTransformer {
     LabelNode startRun = new LabelNode();
     restores.add(0, startRun);
 
-    instructions.add(restoreCodeDispatcher(pushMethod(), restores, -1));
+    instructions.add(restoreCodeDispatcher(threadCode.pushMethod(localFrame), restores, -1));
 
     // Dummy startup code to avoid check of thread.serializing.
     instructions.add(startRun);

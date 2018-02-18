@@ -282,15 +282,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Restore method from frame.
-   *
-   * @return generated restore code.
-   */
-  protected InsnList pushMethod() {
-    return threadCode.pushMethod(localFrame());
-  }
-
-  /**
    * Push owner onto frame.
    *
    * @param methodCall

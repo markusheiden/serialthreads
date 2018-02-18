@@ -104,7 +104,7 @@ class CopyMethodTransformer extends MethodTransformer {
     instructions.add(new VarInsnNode(ASTORE, localThread));
 
     // Restore code dispatcher.
-    instructions.add(restoreCodeDispatcher(pushMethod(), restores, 0));
+    instructions.add(restoreCodeDispatcher(threadCode.pushMethod(localFrame), restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
   }

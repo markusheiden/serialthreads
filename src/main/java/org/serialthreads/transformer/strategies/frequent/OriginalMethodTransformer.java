@@ -92,7 +92,7 @@ class OriginalMethodTransformer extends MethodTransformer {
     instructions.add(new JumpInsnNode(IFEQ, normal));
 
     // else restore code dispatcher.
-    instructions.add(restoreCodeDispatcher(pushMethod(), restores, 0));
+    instructions.add(restoreCodeDispatcher(threadCode.pushMethod(localFrame), restores, 0));
 
     // Insert label for normal body of method.
     instructions.add(normal);
