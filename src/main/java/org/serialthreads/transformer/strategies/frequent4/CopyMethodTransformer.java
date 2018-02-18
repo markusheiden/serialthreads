@@ -78,8 +78,6 @@ class CopyMethodTransformer extends MethodTransformer {
 
     final int paramPreviousFrame = paramPreviousFrame();
 
-    final int localFrame = localFrame();
-
     InsnList instructions = new InsnList();
 
     if (needsFrame()) {

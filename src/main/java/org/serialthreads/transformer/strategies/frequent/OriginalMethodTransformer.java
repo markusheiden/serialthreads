@@ -55,10 +55,6 @@ class OriginalMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for method");
 
-    final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
-    final int localFrame = localFrame();
-
     LabelNode normal = new LabelNode();
 
     InsnList instructions = new InsnList();

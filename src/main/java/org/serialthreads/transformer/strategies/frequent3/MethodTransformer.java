@@ -19,6 +19,21 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 @SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
 abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
+   * Local holding the thread.
+   */
+  protected final int localThread;
+
+  /**
+   * Local holding the previous frame.
+   */
+  protected final int localPreviousFrame;
+
+  /**
+   * Local holding the current frame.
+   */
+  protected final int localFrame;
+
+  /**
    * Constructor.
    *
    * @param clazz class to transform
@@ -27,27 +42,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected MethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
     super(clazz, method, classInfoCache);
-  }
 
-  /**
-   * Local holding the thread.
-   */
-  protected final int localThread() {
-    return local(0);
-  }
-
-  /**
-   * Local holding the previous frame.
-   */
-  protected int localPreviousFrame() {
-    return local(1);
-  }
-
-  /**
-   * Local holding the current frame.
-   */
-  protected int localFrame() {
-    return local(2);
+    this.localThread = local(0);
+    this.localPreviousFrame = local(1);
+    this.localFrame = local(2);
   }
 
   /**
@@ -62,9 +60,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * Add names for added locals.
    */
   protected void nameLocals() {
-    nameLocal(localThread(), THREAD_IMPL_DESC, "thread");
-    nameLocal(localPreviousFrame(), FRAME_IMPL_DESC, "previousFrame");
-    nameLocal(localFrame(), FRAME_IMPL_DESC, "frame");
+    nameLocal(localThread, THREAD_IMPL_DESC, "thread");
+    nameLocal(localPreviousFrame, FRAME_IMPL_DESC, "previousFrame");
+    nameLocal(localFrame, FRAME_IMPL_DESC, "frame");
   }
 
   /**
@@ -108,9 +106,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void addThreadAndFrame() {
     InsnList instructions = method.instructions;
 
-    final int localThread = localThread();
-    final int localFrame = localFrame();
-
     for (MethodInsnNode methodCall : interruptibleMethodCalls) {
       if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall)) {
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localThread));
@@ -126,9 +121,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected void replaceReturns() {
     logger.debug("      Replacing returns");
-
-    final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
 
     Type returnType = Type.getReturnType(method.desc);
     for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
@@ -182,9 +174,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // Capture frame and return early.
-    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame()));
+    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
     // frame.method = position;
-    instructions.add(setMethod(localFrame(), position));
+    instructions.add(setMethod(localFrame, position));
     // We are serializing.
     instructions.add(methodReturn(true));
 
@@ -194,7 +186,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Restore frame.
-      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame()));
+      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
       // Continue.
     }
 
@@ -215,9 +207,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
-
-    final int localThread = localThread();
-    final int localFrame = localFrame();
 
     LabelNode normal = new LabelNode();
     LabelNode serializing = new LabelNode();
@@ -282,7 +271,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // The return value needs not to be restored, because it has already been stored by the method call.
 
     // frame.method = position;
-    instructions.add(setMethod(localFrame(), position));
+    instructions.add(setMethod(localFrame, position));
     // The serializing flag is already on the stack from the method call.
     // return serializing;
     instructions.add(methodReturn(null));
@@ -313,9 +302,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param metaInfo Meta information about method call.
    */
   private InsnList callCopyMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    final int localThread = localThread();
-    final int localFrame = localFrame();
-
     MethodInsnNode callCopyMethod = (MethodInsnNode) methodCall.clone(null);
     callCopyMethod.name = changeCopyName(methodCall.name, methodCall.desc);
     callCopyMethod.desc = changeCopyDesc(methodCall.desc);

@@ -58,8 +58,6 @@ class RunMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for run");
 
-    final int localFrame = localFrame();
-
     InsnList instructions = new InsnList();
 
     // frame = this.$$frame$$;

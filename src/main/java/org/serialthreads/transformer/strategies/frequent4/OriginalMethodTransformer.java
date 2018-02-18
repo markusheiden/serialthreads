@@ -59,9 +59,6 @@ class OriginalMethodTransformer extends MethodTransformer {
   private void createRestoreHandlerMethod() {
     logger.debug("    Creating restore handler for method");
 
-    final int localPreviousFrame = localPreviousFrame();
-    final int localFrame = localFrame();
-
     InsnList instructions = new InsnList();
 
     if (isNotStatic(method)) {

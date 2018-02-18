@@ -86,10 +86,6 @@ class CopyMethodTransformer extends MethodTransformer {
     final int paramThread = paramThread();
     final int paramPreviousFrame = paramPreviousFrame();
 
-    final int localThread = localThread();
-    final int localPreviousFrame = localPreviousFrame();
-    final int localFrame = localFrame();
-
     InsnList instructions = new InsnList();
 
     // Move previousFrame to the correct local.
