@@ -46,14 +46,7 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
   @Override
   protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
     if (isRun(clazz, method, classInfoCache)) {
-      if (isInterface(clazz) || isAbstract(method)) {
-        // Do not transform IRunnable.run() itself.
-        return null;
-      }
-
-      // Take special care of run method.
-      return singletonList(
-        new RunMethodTransformer(clazz, method, classInfoCache).transform());
+      return doTransformRun(clazz, method);
     }
 
     if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
@@ -67,5 +60,23 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
     return asList(
       new CopyMethodTransformer(clazz, method, classInfoCache).transform(),
       new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
+  }
+
+  /**
+   * Execute byte code transformation on run method.
+   *
+   * @param clazz class to transform
+   * @param method method node to transform
+   * @return transformed methods
+   */
+  private List<MethodNode> doTransformRun(ClassNode clazz, MethodNode method) throws AnalyzerException {
+    if (isInterface(clazz) || isAbstract(method)) {
+      // Do not transform IRunnable.run() itself.
+      return null;
+    }
+
+    // Take special care of run method.
+    return singletonList(
+      new RunMethodTransformer(clazz, method, classInfoCache).transform());
   }
 }
