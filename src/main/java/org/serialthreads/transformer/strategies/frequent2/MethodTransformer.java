@@ -106,7 +106,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame()));
     // frame.method = position;
-    instructions.add(setMethod(position));
+    instructions.add(setMethod(localFrame(), position));
     // previousFrame.owner = this;
     instructions.add(setOwner(methodCall, metaInfo, suppressOwner, localPreviousFrame()));
     // thread.serializing = true;
@@ -165,7 +165,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
     // frame.method = position;
-    instructions.add(setMethod(position));
+    instructions.add(setMethod(localFrame, position));
     // previousFrame.owner = this;
     instructions.add(setOwner(methodCall, metaInfo, suppressOwner, localPreviousFrame));
     // return;

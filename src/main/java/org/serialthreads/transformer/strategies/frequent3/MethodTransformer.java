@@ -168,7 +168,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame()));
     // frame.method = position;
-    instructions.add(setMethod(position));
+    instructions.add(setMethod(localFrame(), position));
     // We are serializing.
     instructions.add(methodReturn(true));
 
@@ -214,7 +214,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
     // frame.method = position;
-    instructions.add(setMethod(position));
+    instructions.add(setMethod(localFrame, position));
 
     // We are already serializing.
     instructions.add(serializing);
@@ -266,7 +266,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // The return value needs not to be restored, because it has already been stored by the method call.
 
     // frame.method = position;
-    instructions.add(setMethod(position));
+    instructions.add(setMethod(localFrame(), position));
     // The serializing flag is already on the stack from the method call.
     // return serializing;
     instructions.add(methodReturn(null));

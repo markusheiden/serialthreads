@@ -270,16 +270,18 @@ public abstract class AbstractMethodTransformer {
   /**
    * Push method onto frame.
    *
+   * @param localFrame
+   *           Number of local containing the current frame .
    * @param position
    *           position of method call.
    * @return generated capture code.
    */
-  protected InsnList setMethod(int position) {
+  protected InsnList setMethod(int localFrame, int position) {
     if (interruptibleMethodCalls.size() <= 1) {
       return new InsnList();
     }
 
-    return threadCode.setMethod(localFrame(), position);
+    return threadCode.setMethod(localFrame, position);
   }
 
   /**
