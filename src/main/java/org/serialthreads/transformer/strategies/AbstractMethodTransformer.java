@@ -86,11 +86,8 @@ public abstract class AbstractMethodTransformer {
    * @param variableName Name for local.
    */
   protected void nameLocal(int local, String desc, String variableName) {
-    // TODO 2018-02-18 markus: Create / use method insert at start / end.
-    LabelNode first = insertLabelBefore(method.instructions.getFirst());
-    LabelNode last = insertLabelAfter(method.instructions.getLast());
-
-    method.localVariables.add(new LocalVariableNode(variableName, desc, null, first, last, local));
+    method.localVariables.add(
+      new LocalVariableNode(variableName, desc, null, insertLabelAtStart(), insertLabelAtEnd(), local));
   }
 
   /**
@@ -385,6 +382,25 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
+   * Insert label before all instructions.
+   *
+   * @return Existing label, if there is already a label at the start of the method, new label otherwise.
+   */
+  protected LabelNode insertLabelAtStart() {
+    AbstractInsnNode first = method.instructions.getFirst();
+    for (AbstractInsnNode f = first; f != null && f.getOpcode() < 0; f = f.getNext()) {
+      if (f instanceof LabelNode) {
+        return (LabelNode) f;
+      }
+    }
+
+    LabelNode label = new LabelNode();
+    method.instructions.insertBefore(first, label);
+
+    return label;
+  }
+
+  /**
    * Insert label before instruction.
    *
    * @param instruction Instruction to insert label before.
@@ -418,6 +434,25 @@ public abstract class AbstractMethodTransformer {
 
     LabelNode label = new LabelNode();
     method.instructions.insert(instruction, label);
+
+    return label;
+  }
+
+  /**
+   * Insert label after all instructions.
+   *
+   * @return Existing label, if there is already a label at the end of the method, new label otherwise.
+   */
+  protected LabelNode insertLabelAtEnd() {
+    final AbstractInsnNode last = method.instructions.getLast();
+    for (AbstractInsnNode l = last; l != null && l.getOpcode() < 0; l = l.getPrevious()) {
+      if (l instanceof LabelNode) {
+        return (LabelNode) l;
+      }
+    }
+
+    LabelNode label = new LabelNode();
+    method.instructions.insert(last, label);
 
     return label;
   }
