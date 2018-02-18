@@ -27,12 +27,21 @@ public class MethodCode {
   //
 
   /**
+   * Is a static method been called?.
+   *
+   * @param methodCall method call
+   */
+  public static boolean isStatic(MethodInsnNode methodCall) {
+    return methodCall.getOpcode() == Opcodes.INVOKESTATIC;
+  }
+
+  /**
    * Is a not static method been called?.
    *
    * @param methodCall method call
    */
   public static boolean isNotStatic(MethodInsnNode methodCall) {
-    return methodCall.getOpcode() != Opcodes.INVOKESTATIC;
+    return !isStatic(methodCall);
   }
 
   /**

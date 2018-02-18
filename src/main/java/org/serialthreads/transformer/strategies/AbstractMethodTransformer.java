@@ -275,32 +275,6 @@ public abstract class AbstractMethodTransformer {
   //
 
   /**
-   * Save current "frameAfter" after returning from a method call.
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated capture code.
-   */
-  protected InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return threadCode.captureFrame(method, methodCall, metaInfo, localFrame());
-  }
-
-  /**
-   * Restore current frame before resuming the method call
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @return generated restore code.
-   */
-  protected InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    return threadCode.restoreFrame(method, methodCall, metaInfo, localFrame());
-  }
-
-  /**
    * Push method onto frame.
    *
    * @param position

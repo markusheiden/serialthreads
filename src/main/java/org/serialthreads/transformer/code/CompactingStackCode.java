@@ -2,7 +2,6 @@ package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
@@ -32,7 +31,7 @@ public class CompactingStackCode extends AbstractStackCode {
    private static final Logger logger = LoggerFactory.getLogger(CompactingStackCode.class);
 
    @Override
-   public InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       InsnList instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
@@ -40,7 +39,7 @@ public class CompactingStackCode extends AbstractStackCode {
       }
 
       ExtendedFrame frameAfter = metaInfo.frameAfter;
-      final boolean isMethodNotStatic = isNotStatic(method);
+      final boolean isMethodNotStatic = isNotStatic(methodCall);
       final boolean isCallNotVoid = isNotVoid(methodCall);
 
       // save stack
@@ -86,7 +85,7 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    @Override
-   public InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       InsnList instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
@@ -94,7 +93,7 @@ public class CompactingStackCode extends AbstractStackCode {
       }
 
       ExtendedFrame frameAfter = metaInfo.frameAfter;
-      final boolean isMethodNotStatic = isNotStatic(method);
+      final boolean isMethodNotStatic = isNotStatic(methodCall);
       final boolean isCallNotVoid = isNotVoid(methodCall);
 
       // Restore locals by type.

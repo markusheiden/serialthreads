@@ -161,7 +161,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // Capture frame and return early.
-    instructions.add(captureFrame(methodCall, metaInfo));
+    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame()));
     // frame.method = position;
     instructions.add(setMethod(position));
     // We are serializing.
@@ -173,7 +173,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Restore frame.
-      instructions.add(restoreFrame(methodCall, metaInfo));
+      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame()));
       // Continue.
     }
 
@@ -208,7 +208,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(new JumpInsnNode(IFEQ, normal));
 
     // Capture frame and return early.
-    instructions.add(captureFrame(methodCall, metaInfo));
+    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
     // frame.method = position;
     instructions.add(setMethod(position));
 
@@ -227,7 +227,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(new JumpInsnNode(IFNE, serializing));
 
       // Restore stack "under" the returned value, if any.
-      instructions.add(restoreFrame(methodCall, metaInfo));
+      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
       // Continue.
     }
 

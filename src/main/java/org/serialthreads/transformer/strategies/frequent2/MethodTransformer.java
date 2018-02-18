@@ -98,7 +98,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // Capture frame and return early.
-    instructions.add(captureFrame(methodCall, metaInfo));
+    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame()));
     // frame.method = position;
     instructions.add(setMethod(position));
     // previousFrame.owner = this;
@@ -116,7 +116,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // Stop deserializing.
       instructions.add(threadCode.setSerializing(localThread(), false));
       // Restore frame.
-      instructions.add(restoreFrame(methodCall, metaInfo));
+      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame()));
       // Continue.
     }
 
@@ -157,7 +157,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     }
 
     // Capture frame and return early.
-    instructions.add(captureFrame(methodCall, metaInfo));
+    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
     // frame.method = position;
     instructions.add(setMethod(position));
     // previousFrame.owner = this;
@@ -204,7 +204,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       if (needToSaveReturnValue) {
         instructions.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
       }
-      instructions.add(restoreFrame(clonedCall, metaInfo));
+      instructions.add(threadCode.restoreFrame(clonedCall, metaInfo, localFrame));
       if (needToSaveReturnValue) {
         instructions.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
       }
