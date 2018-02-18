@@ -30,6 +30,20 @@ class CopyMethodTransformer extends MethodTransformer {
   }
 
   /**
+   * Parameter holding the thread in copied methods.
+   */
+  private int paramThread() {
+    return param(0);
+  }
+
+  /**
+   * Parameter holding the previous frame in copied methods.
+   */
+  private int paramPreviousFrame() {
+    return param(1);
+  }
+
+  /**
    * Transform method.
    *
    * @return Transformed method

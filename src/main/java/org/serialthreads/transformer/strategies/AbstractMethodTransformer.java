@@ -92,20 +92,6 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Parameter holding the thread in copied methods.
-   */
-  protected int paramThread() {
-    return param(0);
-  }
-
-  /**
-   * Parameter holding the previous frame in copied methods.
-   */
-  protected int paramPreviousFrame() {
-    return param(1);
-  }
-
-  /**
    * Parameter p used by this transformer.
    */
   protected final int param(int p) {
