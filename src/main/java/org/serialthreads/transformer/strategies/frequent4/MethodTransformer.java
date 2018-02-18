@@ -29,13 +29,13 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   }
 
   @Override
-  protected int localPreviousFrame() {
+  protected final int localPreviousFrame() {
     // TODO 2018-01-31 markus: Handle this without overwriting.
     return super.local(0);
   }
 
   @Override
-  protected int localFrame() {
+  protected final int localFrame() {
     // TODO 2018-01-31 markus: Handle this without overwriting.
     return super.local(1);
   }

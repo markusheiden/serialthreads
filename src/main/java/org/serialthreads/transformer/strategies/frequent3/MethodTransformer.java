@@ -32,7 +32,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * Local holding the thread.
    * This is the parameter holding the thread in original methods.
    */
-  private int localThread() {
+  protected final int localThread() {
     return local(0);
   }
 
