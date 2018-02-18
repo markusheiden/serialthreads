@@ -163,7 +163,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       LabelNode restoreFrame = new LabelNode();
 
       // call interrupted method
-      instructions.add(pushOwner(methodCall, metaInfo));
+      instructions.add(pushOwner(methodCall, metaInfo, localFrame));
       // push arguments on stack and jump to method call
       // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
       instructions.add(dummyArguments(methodCall));

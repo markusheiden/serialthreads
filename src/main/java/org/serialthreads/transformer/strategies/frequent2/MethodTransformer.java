@@ -182,7 +182,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       LabelNode restoreFrame = new LabelNode();
 
       // call interrupted method
-      instructions.add(pushOwner(methodCall, metaInfo));
+      instructions.add(pushOwner(methodCall, metaInfo, localFrame));
       // jump to cloned method call with thread and frame as arguments
       instructions.add(new VarInsnNode(ALOAD, localThread));
       instructions.add(new VarInsnNode(ALOAD, localFrame));

@@ -292,7 +292,7 @@ public abstract class AbstractMethodTransformer {
    * @param suppressOwner
    *           Suppress saving the owner?.
    * @param localPreviousFrame
-   *           Number of local containing the previous frame .
+   *           Number of local containing the previous frame.
    * @return generated capture code.
    */
   protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner, int localPreviousFrame) {
@@ -310,9 +310,11 @@ public abstract class AbstractMethodTransformer {
    *           method call to process.
    * @param metaInfo
    *           Meta information about method call.
+   * @param localFrame
+   *           Number of local containing the current frame .
    * @return generated restore code.
    */
-  protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo) {
+  protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
     InsnList instructions = new InsnList();
 
     if (isSelfCall(methodCall, metaInfo)) {
@@ -320,7 +322,7 @@ public abstract class AbstractMethodTransformer {
       instructions.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(methodCall)) {
       // get owner
-      instructions.add(threadCode.pushOwner(localFrame()));
+      instructions.add(threadCode.pushOwner(localFrame));
       instructions.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 

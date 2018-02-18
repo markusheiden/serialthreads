@@ -307,7 +307,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     InsnList instructions = new InsnList();
 
     // Push owner onto stack.
-    instructions.add(pushOwner(methodCall, metaInfo));
+    instructions.add(pushOwner(methodCall, metaInfo, localFrame));
     // Push thread and frame (as arguments) onto stack.
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new VarInsnNode(ALOAD, localFrame));
