@@ -93,7 +93,7 @@ class CopyMethodTransformer extends MethodTransformer {
     }
 
     // Restore code dispatcher.
-    instructions.add(restoreCodeDispatcher(threadCode.pushMethod(localFrame), restores, 0));
+    instructions.add(restoreCodeDispatcher(localFrame, restores, 0));
 
     method.instructions.insertBefore(method.instructions.getFirst(), instructions);
   }

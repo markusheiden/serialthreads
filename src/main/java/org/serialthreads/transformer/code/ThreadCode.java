@@ -142,7 +142,7 @@ public interface ThreadCode {
    * @param metaInfo
    *           Meta information about method call.
    * @param localFrame
-   *           number of local containing the frameAfter.
+   *           Number of local containing the current frame.
    * @return Generated code.
    */
   InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);

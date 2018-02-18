@@ -158,11 +158,12 @@ public abstract class AbstractMethodTransformer {
   /**
    * Create restore code dispatcher.
    *
-   * @param getMethod instruction to get method index onto the top of the stack.
+   * @param localFrame Number of local containing the current frame.
+   * @param restores Restore codes for each interruptible method call.
    * @param startIndex first method index, should be -1 for run(), 0 otherwise.
    * @return Generated restore code.
    */
-  protected InsnList restoreCodeDispatcher(InsnList getMethod, List<LabelNode> restores, int startIndex) {
+  protected InsnList restoreCodeDispatcher(int localFrame, List<LabelNode> restores, int startIndex) {
     assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
     InsnList instructions = new InsnList();
@@ -177,7 +178,7 @@ public abstract class AbstractMethodTransformer {
     restores.replaceAll(label -> label != null? label : defaultLabel);
 
     // switch(currentFrame.method) // branch to specific restore code
-    instructions.add(getMethod);
+    instructions.add(threadCode.pushMethod(localFrame));
     instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(new LabelNode[restores.size()])));
 
     // default case -> may not happen -> throw IllegalThreadStateException
