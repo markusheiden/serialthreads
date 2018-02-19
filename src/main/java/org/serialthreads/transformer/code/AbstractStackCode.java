@@ -30,9 +30,11 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public FieldNode threadField(boolean finalField) {
-    int access = ACC_PRIVATE + ACC_SYNTHETIC;
+    int access;
     if (finalField) {
-      access += ACC_FINAL;
+      access = ACC_PRIVATE + ACC_FINAL + ACC_SYNTHETIC;
+    } else {
+      access = ACC_PROTECTED + ACC_SYNTHETIC;
     }
     return new FieldNode(access, THREAD, THREAD_IMPL_DESC, THREAD_IMPL_DESC, null);
   }

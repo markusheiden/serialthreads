@@ -137,7 +137,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     ClassInfo classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
-    logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
+    logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
 
     return result;
   }
@@ -158,6 +158,11 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     logger.debug("{} is {} interrupt", methodName(owner, name, desc), result ? "an" : "no");
 
     return result;
+  }
+
+  @Override
+  public boolean isInterruptible(Type type) {
+    return getClassInfo(type.getInternalName()).isInterruptible();
   }
 
   /**

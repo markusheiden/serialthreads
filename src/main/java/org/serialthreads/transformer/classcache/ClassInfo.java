@@ -32,6 +32,7 @@ public class ClassInfo {
   private final String superClassName;
   private final Set<String> superClasses;
   private final Map<String, MethodInfo> methods;
+  private boolean interruptible;
 
   /**
    * Constructor.
@@ -48,6 +49,8 @@ public class ClassInfo {
     this.superClassName = superClassName;
     this.superClasses = new TreeSet<>();
     this.methods = new TreeMap<>(methods);
+    this.interruptible = methods.values().stream()
+      .anyMatch(method -> method.hasAnnotation(TYPE_INTERRUPT) || method.hasAnnotation(TYPE_INTERRUPTIBLE));
 
     superClasses.add(className);
 
@@ -127,10 +130,17 @@ public class ClassInfo {
   }
 
   /**
-   * All methods IDs of this class.
+   * All methods ids of this class.
    */
   protected Set<String> getMethods() {
     return methods.keySet();
+  }
+
+  /**
+   * Has this class at least one interruptible method?.
+   */
+  public boolean isInterruptible() {
+    return interruptible;
   }
 
   /**
@@ -183,6 +193,7 @@ public class ClassInfo {
           "Interrupt status of method " + methodId + " in class " + getClassName() +
             " does not match its definition in the super class or interface " + classInfo.getClassName());
       }
+      interruptible |= classInfo.interruptible;
 
       // executor status need not be checked
     }

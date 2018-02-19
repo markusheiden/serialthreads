@@ -81,4 +81,9 @@ public interface IClassInfoCache {
    * @param method method call
    */
   boolean isInterrupt(MethodInsnNode method);
+
+  /**
+   * Has the class at least one interruptible method?.
+   */
+  boolean isInterruptible(Type type);
 }

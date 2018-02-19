@@ -64,12 +64,10 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
       return;
     }
 
-    logger.debug("  Creating stack for {}", clazz.name);
-
-    // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptible method?
-    // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
-    // TODO 2018-02-13 mh: use this field.
-    addThreadField(clazz, false);
+    if (!classInfoCache.isInterruptible(classInfoCache.getSuperClass(clazz.name))) {
+      logger.debug("  Creating stack for {}", clazz.name);
+      addThreadField(clazz, false);
+    }
   }
 
   @Override
