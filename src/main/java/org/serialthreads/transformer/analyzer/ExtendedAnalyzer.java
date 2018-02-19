@@ -10,6 +10,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.*;
 
+import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isLoad;
 import static org.serialthreads.transformer.code.MethodCode.isStore;
 
@@ -65,7 +66,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     for (String interfaceName : clazz.interfaces) {
       interfaceTypes.add(Type.getObjectType(interfaceName));
     }
-    boolean isInterface = (clazz.access & ACC_INTERFACE) != 0;
+    boolean isInterface = isInterface(clazz);
 
     return new ExtendedAnalyzer(new ExtendedVerifier(classInfoCache, classType, superClassType, interfaceTypes, isInterface));
   }
