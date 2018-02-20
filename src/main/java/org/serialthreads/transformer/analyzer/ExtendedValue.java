@@ -38,6 +38,29 @@ public class ExtendedValue extends BasicValue {
   private final SortedSet<Integer> locals;
 
   /**
+   * Factory method for wrapping a value.
+   *
+   * @param value Basic value.
+   */
+  public static BasicValue value(BasicValue value) {
+    if (value == null) {
+      // No value.
+      return null;
+    }
+    if (value.getType() == null) {
+      // Return uninitialized value.
+      return value;
+    }
+    if (value instanceof ExtendedValue) {
+      // Value is already wrapped.
+      return value;
+    }
+
+    // Wrap value.
+    return value(value.getType());
+  }
+
+  /**
    * Factory method for a value which is currently not hold in a local.
    *
    * @param type type of value

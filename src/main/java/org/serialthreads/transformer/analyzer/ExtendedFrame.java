@@ -121,7 +121,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
       super.push(value);
     } else {
       // convert the value to an extended value -> new value
-      super.push(value(value.getType()));
+      super.push(value(value));
     }
   }
 

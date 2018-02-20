@@ -76,12 +76,11 @@ public class ExtendedVerifier extends SimpleVerifier {
 
   @Override
   public BasicValue newValue(Type type) {
-    BasicValue value = super.newValue(type);
-    return value != null && value != BasicValue.UNINITIALIZED_VALUE? value(value.getType()) : value;
+    return value(super.newValue(type));
   }
 
   @Override
-  public ExtendedValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
+  public BasicValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
     // remove references to local, if required
     switch (insn.getOpcode()) {
       case Opcodes.ACONST_NULL:
@@ -121,23 +120,7 @@ public class ExtendedVerifier extends SimpleVerifier {
         return constantValue(super.newOperation(insn).getType(), ((LdcInsnNode) insn).cst);
       default:
         // TODO 2018-02-20: Support remaining opcodes too!?!
-        return extendedValue(super.newOperation(insn));
-    }
-  }
-
-  /**
-   * Convert values to {@link ExtendedValue}.
-   */
-  private ExtendedValue extendedValue(BasicValue value) throws IndexOutOfBoundsException {
-    if (value.equals(BasicValue.UNINITIALIZED_VALUE)) {
-      // no uninitialized values on the stack are allowed
-      throw new IllegalArgumentException("Stack values have to be initialized");
-    } else if (value instanceof ExtendedValue) {
-      // the value already has been converted to an extended value -> copy value
-      return (ExtendedValue) value;
-    } else {
-      // convert the value to an extended value -> new value
-      return value(value.getType());
+        return value(super.newOperation(insn));
     }
   }
 
