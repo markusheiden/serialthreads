@@ -75,6 +75,11 @@ public class ExtendedVerifier extends SimpleVerifier {
   }
 
   @Override
+  public BasicValue newValue(Type type) {
+    return ExtendedValue.value(type);
+  }
+
+  @Override
   public ExtendedValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
     // remove references to local, if required
     switch (insn.getOpcode()) {
