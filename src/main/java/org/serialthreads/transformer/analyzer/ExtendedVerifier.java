@@ -75,60 +75,60 @@ public class ExtendedVerifier extends SimpleVerifier {
   }
 
   @Override
-  public BasicValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
+  public ExtendedValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
     // remove references to local, if required
     switch (insn.getOpcode()) {
       case Opcodes.ACONST_NULL:
-        return extendedValue(constantValue(Type.getObjectType("null"), null));
+        return constantValue(Type.getObjectType("null"), null);
       case Opcodes.ICONST_M1:
-        return extendedValue(constantValue(Type.INT_TYPE, -1));
+        return constantValue(Type.INT_TYPE, -1);
       case Opcodes.ICONST_0:
-        return extendedValue(constantValue(Type.INT_TYPE, 0));
+        return constantValue(Type.INT_TYPE, 0);
       case Opcodes.ICONST_1:
-        return extendedValue(constantValue(Type.INT_TYPE, 1));
+        return constantValue(Type.INT_TYPE, 1);
       case Opcodes.ICONST_2:
-        return extendedValue(constantValue(Type.INT_TYPE, 2));
+        return constantValue(Type.INT_TYPE, 2);
       case Opcodes.ICONST_3:
-        return extendedValue(constantValue(Type.INT_TYPE, 3));
+        return constantValue(Type.INT_TYPE, 3);
       case Opcodes.ICONST_4:
-        return extendedValue(constantValue(Type.INT_TYPE, 4));
+        return constantValue(Type.INT_TYPE, 4);
       case Opcodes.ICONST_5:
-        return extendedValue(constantValue(Type.INT_TYPE, 5));
+        return constantValue(Type.INT_TYPE, 5);
       case Opcodes.LCONST_0:
-        return extendedValue(constantValue(Type.LONG_TYPE, 0L));
+        return constantValue(Type.LONG_TYPE, 0L);
       case Opcodes.LCONST_1:
-        return extendedValue(constantValue(Type.LONG_TYPE, 1L));
+        return constantValue(Type.LONG_TYPE, 1L);
       case Opcodes.FCONST_0:
-        return extendedValue(constantValue(Type.FLOAT_TYPE, 0F));
+        return constantValue(Type.FLOAT_TYPE, 0F);
       case Opcodes.FCONST_1:
-        return extendedValue(constantValue(Type.FLOAT_TYPE, 1F));
+        return constantValue(Type.FLOAT_TYPE, 1F);
       case Opcodes.FCONST_2:
-        return extendedValue(constantValue(Type.FLOAT_TYPE, 2F));
+        return constantValue(Type.FLOAT_TYPE, 2F);
       case Opcodes.DCONST_0:
-        return extendedValue(constantValue(Type.DOUBLE_TYPE, 0D));
+        return constantValue(Type.DOUBLE_TYPE, 0D);
       case Opcodes.DCONST_1:
-        return extendedValue(constantValue(Type.DOUBLE_TYPE, 1D));
+        return constantValue(Type.DOUBLE_TYPE, 1D);
       case Opcodes.BIPUSH:
       case Opcodes.SIPUSH:
-        return extendedValue(constantValue(Type.INT_TYPE, ((IntInsnNode) insn).operand));
+        return constantValue(Type.INT_TYPE, ((IntInsnNode) insn).operand);
       case Opcodes.LDC:
-        return extendedValue(constantValue(super.newOperation(insn).getType(), ((LdcInsnNode) insn).cst));
+        return constantValue(super.newOperation(insn).getType(), ((LdcInsnNode) insn).cst);
       default:
         // TODO 2018-02-20: Support remaining opcodes too!?!
-        return super.newOperation(insn);
+        return extendedValue(super.newOperation(insn));
     }
   }
 
   /**
    * Convert values to {@link ExtendedValue}.
    */
-  public BasicValue extendedValue(BasicValue value) throws IndexOutOfBoundsException {
+  private ExtendedValue extendedValue(BasicValue value) throws IndexOutOfBoundsException {
     if (value.equals(BasicValue.UNINITIALIZED_VALUE)) {
       // no uninitialized values on the stack are allowed
       throw new IllegalArgumentException("Stack values have to be initialized");
     } else if (value instanceof ExtendedValue) {
       // the value already has been converted to an extended value -> copy value
-      return value;
+      return (ExtendedValue) value;
     } else {
       // convert the value to an extended value -> new value
       return value(value.getType());
