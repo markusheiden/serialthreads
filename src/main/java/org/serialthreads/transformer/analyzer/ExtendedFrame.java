@@ -1,13 +1,14 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;
 
@@ -44,58 +45,6 @@ public final class ExtendedFrame extends Frame<BasicValue> {
   public void execute(AbstractInsnNode insn, Interpreter<BasicValue> interpreter) throws AnalyzerException {
     // remove references to local, if required
     switch (insn.getOpcode()) {
-      case Opcodes.ACONST_NULL:
-        push(constantValue(interpreter.newOperation(insn).getType(), null));
-        break;
-      case Opcodes.ICONST_M1:
-        push(constantValue(interpreter.newOperation(insn).getType(), -1));
-        break;
-      case Opcodes.ICONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0));
-        break;
-      case Opcodes.ICONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1));
-        break;
-      case Opcodes.ICONST_2:
-        push(constantValue(interpreter.newOperation(insn).getType(), 2));
-        break;
-      case Opcodes.ICONST_3:
-        push(constantValue(interpreter.newOperation(insn).getType(), 3));
-        break;
-      case Opcodes.ICONST_4:
-        push(constantValue(interpreter.newOperation(insn).getType(), 4));
-        break;
-      case Opcodes.ICONST_5:
-        push(constantValue(interpreter.newOperation(insn).getType(), 5));
-        break;
-      case Opcodes.LCONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0L));
-        break;
-      case Opcodes.LCONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1L));
-        break;
-      case Opcodes.FCONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0F));
-        break;
-      case Opcodes.FCONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1F));
-        break;
-      case Opcodes.FCONST_2:
-        push(constantValue(interpreter.newOperation(insn).getType(), 2F));
-        break;
-      case Opcodes.DCONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0D));
-        return;
-      case Opcodes.DCONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1D));
-        return;
-      case Opcodes.BIPUSH:
-      case Opcodes.SIPUSH:
-        push(constantValue(interpreter.newOperation(insn).getType(), ((IntInsnNode) insn).operand));
-        return;
-      case Opcodes.LDC:
-        push(constantValue(interpreter.newOperation(insn).getType(), ((LdcInsnNode) insn).cst));
-        return;
       case Opcodes.ISTORE:
       case Opcodes.LSTORE:
       case Opcodes.FSTORE:

@@ -1,6 +1,11 @@
 package org.serialthreads.transformer.analyzer;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
@@ -11,6 +16,8 @@ import java.util.Set;
 
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.constantInLocals;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocals;
 
 /**
@@ -65,6 +72,67 @@ public class ExtendedVerifier extends SimpleVerifier {
     this.currentClassInterfaces = currentClassInterfaces;
     this.isInterface = isInterface;
     this.classInfoCache = classInfoCache;
+  }
+
+  @Override
+  public BasicValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
+    // remove references to local, if required
+    switch (insn.getOpcode()) {
+      case Opcodes.ACONST_NULL:
+        return extendedValue(constantValue(Type.getObjectType("null"), null));
+      case Opcodes.ICONST_M1:
+        return extendedValue(constantValue(Type.INT_TYPE, -1));
+      case Opcodes.ICONST_0:
+        return extendedValue(constantValue(Type.INT_TYPE, 0));
+      case Opcodes.ICONST_1:
+        return extendedValue(constantValue(Type.INT_TYPE, 1));
+      case Opcodes.ICONST_2:
+        return extendedValue(constantValue(Type.INT_TYPE, 2));
+      case Opcodes.ICONST_3:
+        return extendedValue(constantValue(Type.INT_TYPE, 3));
+      case Opcodes.ICONST_4:
+        return extendedValue(constantValue(Type.INT_TYPE, 4));
+      case Opcodes.ICONST_5:
+        return extendedValue(constantValue(Type.INT_TYPE, 5));
+      case Opcodes.LCONST_0:
+        return extendedValue(constantValue(Type.LONG_TYPE, 0L));
+      case Opcodes.LCONST_1:
+        return extendedValue(constantValue(Type.LONG_TYPE, 1L));
+      case Opcodes.FCONST_0:
+        return extendedValue(constantValue(Type.FLOAT_TYPE, 0F));
+      case Opcodes.FCONST_1:
+        return extendedValue(constantValue(Type.FLOAT_TYPE, 1F));
+      case Opcodes.FCONST_2:
+        return extendedValue(constantValue(Type.FLOAT_TYPE, 2F));
+      case Opcodes.DCONST_0:
+        return extendedValue(constantValue(Type.DOUBLE_TYPE, 0D));
+      case Opcodes.DCONST_1:
+        return extendedValue(constantValue(Type.DOUBLE_TYPE, 1D));
+      case Opcodes.BIPUSH:
+      case Opcodes.SIPUSH:
+        return extendedValue(constantValue(Type.INT_TYPE, ((IntInsnNode) insn).operand));
+      case Opcodes.LDC:
+        return extendedValue(constantValue(super.newOperation(insn).getType(), ((LdcInsnNode) insn).cst));
+      default:
+        // TODO 2018-02-20: Support remaining opcodes too!?!
+        return super.newOperation(insn);
+    }
+  }
+
+  /**
+   * Convert values to {@link ExtendedValue}.
+   */
+  public BasicValue extendedValue(BasicValue value) throws IndexOutOfBoundsException {
+    if (value.equals(BasicValue.UNINITIALIZED_VALUE)) {
+      // no uninitialized values on the stack are allowed
+      throw new IllegalArgumentException("Stack values have to be initialized");
+    } else if (value instanceof ExtendedValue) {
+      // the value already has been converted to an extended value -> copy value
+      return value;
+    } else {
+      // convert the value to an extended value -> new value
+      return value(value.getType());
+    }
   }
 
   @Override
