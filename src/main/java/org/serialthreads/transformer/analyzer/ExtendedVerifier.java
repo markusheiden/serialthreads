@@ -77,7 +77,7 @@ public class ExtendedVerifier extends SimpleVerifier {
   @Override
   public BasicValue newValue(Type type) {
     BasicValue value = super.newValue(type);
-    return value != null? value(value.getType()) : null;
+    return value != null && value != BasicValue.UNINITIALIZED_VALUE? value(value.getType()) : value;
   }
 
   @Override
