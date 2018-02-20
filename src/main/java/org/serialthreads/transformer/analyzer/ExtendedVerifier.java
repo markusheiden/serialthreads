@@ -76,7 +76,8 @@ public class ExtendedVerifier extends SimpleVerifier {
 
   @Override
   public BasicValue newValue(Type type) {
-    return ExtendedValue.value(type);
+    BasicValue value = super.newValue(type);
+    return value != null? value(value.getType()) : null;
   }
 
   @Override
