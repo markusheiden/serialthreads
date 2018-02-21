@@ -151,7 +151,7 @@ public class ExtendedValue extends BasicValue {
   public Object getConstant() {
     assert isConstant() : "Precondition: isConstant()";
 
-    assert constant != NOT_CONSTANT : "Precondition: constant != NOT_CONSTANT";
+    assert constant != NOT_CONSTANT : "Postcondition: constant != NOT_CONSTANT";
     return constant;
   }
 
