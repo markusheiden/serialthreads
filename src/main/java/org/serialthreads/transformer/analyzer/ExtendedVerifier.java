@@ -81,8 +81,8 @@ public class ExtendedVerifier extends SimpleVerifier {
 
   @Override
   public BasicValue newOperation(AbstractInsnNode insn) throws AnalyzerException {
-    // remove references to local, if required
     switch (insn.getOpcode()) {
+      // Record constants.
       case Opcodes.ACONST_NULL:
         return constantValue(Type.getObjectType("null"), null);
       case Opcodes.ICONST_M1:
