@@ -1,6 +1,6 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,7 +11,7 @@ public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
   private final AtomicInteger waiting = new AtomicInteger();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     barrierCount.set(0);
     waiting.set(1);

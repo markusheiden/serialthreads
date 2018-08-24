@@ -1,52 +1,46 @@
 package org.serialthreads.agent;
 
-import org.junit.runner.Runner;
-import org.junit.runners.BlockJUnit4ClassRunner;
-import org.junit.runners.model.InitializationError;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestInstanceFactory;
+import org.junit.jupiter.api.extension.TestInstanceFactoryContext;
+import org.junit.jupiter.api.extension.TestInstantiationException;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 /**
- * {@link Runner} using a {@link TransformingClassLoader} for loading all classes.
+ * {@link TestInstanceFactory} using a {@link TransformingClassLoader} for loading all classes.
  * <p />
  * Expects test class to have a method "String[] getClassPrefixes()" to define the class prefixes.
  */
-public class TransformingRunner extends BlockJUnit4ClassRunner {
-  /**
-   * Constructor.
-   *
-   * @param clazz Test class.
-   * @throws InitializationError in case of all errors.
-   */
-  public TransformingRunner(Class<?> clazz) throws InitializationError {
-    super(loadClass(clazz));
-  }
-
+public class TransformingTestInstanceFactory implements TestInstanceFactory {
   /**
    * Construct the {@link TransformingClassLoader} and load test class with it.
    *
-   * @param clazz Test class.
    * @return Test class loaded with the {@link TransformingClassLoader}.
-   * @throws InitializationError in case of all errors.
+   * @throws TestInstantiationException in case of all errors.
    */
-  static Class<?> loadClass(Class<?> clazz) throws InitializationError {
+  @Override
+  public Object createTestInstance(TestInstanceFactoryContext factoryContext, ExtensionContext extensionContext) throws TestInstantiationException {
+    Class<?> clazz = factoryContext.getTestClass();
     Transform annotation = clazz.getAnnotation(Transform.class);
     if (annotation == null) {
-      throw new InitializationError("Missing @Transform at test.");
+      throw new TestInstantiationException("Missing @Transform at test.");
     }
     if (annotation.transformer() == null) {
-      throw new InitializationError("Transformer class not configured in @Transform.");
+      throw new TestInstantiationException("Transformer class not configured in @Transform.");
     }
     if (annotation.classPrefixes() == null) {
-      throw new InitializationError("Class prefixes not configured in @Transform.");
+      throw new TestInstantiationException("Class prefixes not configured in @Transform.");
     }
 
     try {
-      return Class.forName(clazz.getName(), true,
-        new TransformingClassLoader(new Strategy(annotation.transformer()), annotation.classPrefixes()));
+      return new TransformingClassLoader(new Strategy(annotation.transformer()), annotation.classPrefixes())
+              .loadClass(clazz.getName(), true)
+              .getConstructor()
+              .newInstance();
     } catch (Exception e) {
-      throw new InitializationError(e);
+      throw new TestInstantiationException("Failed to create test instance.", e);
     }
   }
 

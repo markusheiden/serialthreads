@@ -1,12 +1,12 @@
 package org.serialthreads.transformer.classcache;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 
 import java.util.Map;
 import java.util.SortedMap;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Test for ClassInfoCache.

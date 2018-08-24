@@ -1,6 +1,6 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Test to analyze performance of threading with {@link Thread#yield()}.
@@ -8,7 +8,7 @@ import org.junit.Before;
 public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
   private volatile int barrierCount;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     barrierCount = 0;
     for (int i = 0; i < counters.length; i++) {

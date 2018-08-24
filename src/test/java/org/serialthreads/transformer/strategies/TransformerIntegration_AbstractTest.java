@@ -1,15 +1,15 @@
 package org.serialthreads.transformer.strategies;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
 import org.serialthreads.context.SimpleSerialThreadManager;
 
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Integration test for transformer.
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 public abstract class TransformerIntegration_AbstractTest {
   private SerialThreadManager manager;
 
-  @After
+  @AfterEach
   public void tearDown() {
     if (manager != null) {
       manager.close();
@@ -148,7 +148,7 @@ public abstract class TransformerIntegration_AbstractTest {
   /**
    * Test exception handling.
    */
-  @Ignore // TODO markus 2018-01-04: Implement exception handling.
+  @Disabled // TODO markus 2018-01-04: Implement exception handling.
   @Test
   public void testException() {
     TestException test = new TestException();

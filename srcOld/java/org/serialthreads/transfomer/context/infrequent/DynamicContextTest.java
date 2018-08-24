@@ -1,6 +1,6 @@
 package org.serialthreads.transfomer.context.infrequent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for Context.

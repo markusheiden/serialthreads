@@ -1,14 +1,12 @@
 package org.serialthreads.transformer.classcache;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 
 import java.util.HashSet;
 
 import static java.util.Collections.singleton;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test for {@link MethodInfo}.
@@ -39,11 +37,11 @@ public class MethodInfoTest {
     assertTrue(info.hasAnnotation(Type.INT_TYPE));
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void testGetAnnotations_immutable() {
     MethodInfo info = new MethodInfo("name", "desc", new HashSet<>(singleton(Type.INT_TYPE)));
 
-    info.getAnnotations().add(Type.getType(getClass()));
+    assertThrows(UnsupportedOperationException.class, () -> info.getAnnotations().add(Type.getType(getClass())));
   }
 
   @Test

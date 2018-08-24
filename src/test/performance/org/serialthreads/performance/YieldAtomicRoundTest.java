@@ -1,6 +1,6 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -11,7 +11,7 @@ public class YieldAtomicRoundTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
   private final AtomicInteger round = new AtomicInteger();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     barrierCount.set(COUNT);
     round.set(Integer.MIN_VALUE);

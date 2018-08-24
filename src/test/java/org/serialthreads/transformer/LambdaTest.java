@@ -1,6 +1,6 @@
 package org.serialthreads.transformer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaMetafactory;

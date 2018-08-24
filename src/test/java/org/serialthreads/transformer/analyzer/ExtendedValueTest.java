@@ -1,16 +1,13 @@
 package org.serialthreads.transformer.analyzer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Value;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test for {@link ExtendedValue}.
@@ -99,18 +96,18 @@ public class ExtendedValueTest {
    * @param value value
    */
   public static void assertEqualsValue(ExtendedValue expected, Value value) {
-    assertTrue("expected ExtendedValue but was: <" + value.getClass().getName() + ">", value instanceof ExtendedValue);
+    assertTrue(value instanceof ExtendedValue, "expected ExtendedValue but was: <" + value.getClass().getName() + ">");
     ExtendedValue ev = (ExtendedValue) value;
     assertNotSame(expected, ev);
     if (expected.isConstant()) {
-      assertTrue("expected a constant value: <" + expected.getConstant() + "> but was: none", ev.isConstant());
-      assertEquals("expected constant: <" + expected.getConstant() + "> but was: <" + ev.getConstant() + ">",
-        expected.getConstant(), ev.getConstant());
+      assertTrue(ev.isConstant(), "expected a constant value: <" + expected.getConstant() + "> but was: none");
+      assertEquals(expected.getConstant(), ev.getConstant(),
+              "expected constant: <" + expected.getConstant() + "> but was: <" + ev.getConstant() + ">");
     } else {
-      assertFalse("expected no constant value", ev.isConstant());
+      assertFalse(ev.isConstant(), "expected no constant value");
     }
-    assertEquals("expected locals: <" + expected.getLocals() + "> but was: <" + ev.getLocals() + ">",
-      expected.getLocals(), ev.getLocals());
+    assertEquals(expected.getLocals(), ev.getLocals(),
+            "expected locals: <" + expected.getLocals() + "> but was: <" + ev.getLocals() + ">");
     assertTrue(expected.equalsValue((ExtendedValue) value));
   }
 }

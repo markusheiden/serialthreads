@@ -1,6 +1,6 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.concurrent.locks.LockSupport;
 
@@ -8,7 +8,7 @@ import java.util.concurrent.locks.LockSupport;
  * Test to analyze performance of threading with {@link LockSupport}.
  */
 public class LockSupportSerialTest extends AbstractPerformanceTest {
-  @Before
+  @BeforeEach
   public void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new ConcurrentSerialCounter(i);

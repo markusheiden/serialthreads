@@ -1,6 +1,6 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -11,7 +11,7 @@ import java.util.concurrent.CyclicBarrier;
 public class CyclicBarrierTest extends AbstractPerformanceTest {
   private final CyclicBarrier barrier = new CyclicBarrier(COUNT);
 
-  @Before
+  @BeforeEach
   public void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new BarrierCounter(i);

@@ -1,6 +1,6 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Test to analyze performance of threading with synchronization.
@@ -9,7 +9,7 @@ public class SynchronizedRoundTest extends AbstractPerformanceTest {
   private int barrierCount;
   private int round;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     barrierCount = COUNT;
     round = Integer.MIN_VALUE;

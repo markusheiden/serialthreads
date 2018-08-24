@@ -1,6 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for ClassInfoCacheASM.

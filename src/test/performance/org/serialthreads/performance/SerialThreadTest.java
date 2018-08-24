@@ -1,25 +1,25 @@
 package org.serialthreads.performance;
 
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.agent.Transform;
-import org.serialthreads.agent.TransformingRunner;
+import org.serialthreads.agent.TransformingTestInstanceFactory;
 import org.serialthreads.context.SimpleSerialThreadManager;
 import org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3;
 
 /**
  * Test to analyze performance of threading with serial threads.
  */
-@RunWith(TransformingRunner.class)
+@ExtendWith(TransformingTestInstanceFactory.class)
 @Transform(transformer = FrequentInterruptsTransformer3.class, classPrefixes = "org.serialthreads.performance")
 public class SerialThreadTest extends AbstractPerformanceTest {
   private Thread managerThread;
   private volatile boolean ready;
   private final Object lock = new Object();
 
-  @Before
+  @BeforeEach
   public void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new SerialCounter(i);
