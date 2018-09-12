@@ -8,6 +8,8 @@ import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
+import java.lang.reflect.Constructor;
+
 /**
  * {@link TestInstanceFactory} using a {@link TransformingClassLoader} for loading all classes.
  * <p />
@@ -35,10 +37,11 @@ public class TransformingTestInstanceFactory implements TestInstanceFactory {
     }
 
     try {
-      return new TransformingClassLoader(new Strategy(annotation.transformer()), annotation.classPrefixes())
-              .loadClass(clazz.getName(), true)
-              .getConstructor()
-              .newInstance();
+      TransformingClassLoader cl = new TransformingClassLoader(new Strategy(annotation.transformer()), annotation.classPrefixes());
+      Class<?> testClass = cl.loadClass(clazz.getName(), true);
+      Constructor<?> constructor = testClass.getDeclaredConstructor();
+      constructor.setAccessible(true);
+      return constructor.newInstance();
     } catch (Exception e) {
       throw new TestInstantiationException("Failed to create test instance.", e);
     }
