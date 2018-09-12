@@ -1,5 +1,6 @@
 package org.serialthreads.agent;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.serialthreads.transformer.ITransformer;
 
 import java.lang.annotation.*;
@@ -10,6 +11,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
+@ExtendWith(TransformingTestInstanceFactory.class)
 public @interface Transform {
   /**
    * Transformer class.
