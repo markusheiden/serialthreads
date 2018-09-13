@@ -168,12 +168,9 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
   @Override
   protected void newControlFlowEdge(int from, int to) {
-    NavigableSet<Integer> froms = backflow.get(to);
-    if (froms == null) {
-      froms = new TreeSet<>();
-      backflow.put(to, froms);
-    }
-    froms.add(from);
+    backflow
+      .computeIfAbsent(to, k -> new TreeSet<>())
+      .add(from);
   }
 
   @Override
