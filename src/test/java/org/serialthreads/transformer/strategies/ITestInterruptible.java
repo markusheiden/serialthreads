@@ -7,5 +7,5 @@ import org.serialthreads.Interruptible;
  */
 public interface ITestInterruptible {
   @Interruptible
-  public long testLong(boolean z, char c, byte b, short s, int i, long j);
+  long testLong(boolean z, char c, byte b, short s, int i, long j);
 }
