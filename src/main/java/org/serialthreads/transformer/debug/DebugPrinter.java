@@ -25,7 +25,7 @@ class DebugPrinter extends Textifier {
 
   private void addByteCodeIndexWithoutFrame(int lastSize) {
     String index = "000" + Integer.toString(instruction);
-    index = index.substring(index.length() - 4, index.length());
+    index = index.substring(index.length() - 4);
 
     for (int i = lastSize; i < text.size(); i++) {
       String line = (String) text.get(i);
