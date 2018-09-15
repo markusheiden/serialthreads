@@ -2,10 +2,7 @@ package org.serialthreads.transformer.classcache;
 
 import org.objectweb.asm.Type;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import static java.util.Collections.unmodifiableSet;
 
 /**
  * Method info for methods of scanned classes.
@@ -31,7 +28,7 @@ public class MethodInfo {
     this.id = name + desc;
     this.name = name;
     this.desc = desc;
-    this.annotations = unmodifiableSet(new HashSet<>(annotations));
+    this.annotations = Set.copyOf(annotations);
   }
 
   /**
