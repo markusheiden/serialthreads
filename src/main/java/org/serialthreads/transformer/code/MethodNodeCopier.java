@@ -21,7 +21,7 @@ public class MethodNodeCopier {
    */
   @SuppressWarnings({"UnusedDeclaration"})
   public static MethodNode copyEmpty(MethodNode method) {
-    String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);
+    String[] exceptions = method.exceptions.toArray(new String[0]);
     return new MethodNode(method.access, method.name, method.desc, method.signature, exceptions);
   }
 
@@ -33,7 +33,7 @@ public class MethodNodeCopier {
    * @return copied method
    */
   public static MethodNode copy(MethodNode method) {
-    String[] exceptions = method.exceptions.toArray(new String[method.exceptions.size()]);
+    String[] exceptions = method.exceptions.toArray(new String[0]);
     MethodNode result = new MethodNode(ASM6, method.access, method.name, method.desc, method.signature, exceptions) {
       /**
        * Label remapping.
