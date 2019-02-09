@@ -1,13 +1,14 @@
 package org.serialthreads.transformer.debug;
 
 import org.objectweb.asm.Label;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.util.Textifier;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.objectweb.asm.Opcodes.ASM7;
 
 /**
  * Extended {@link Textifier} which adds frame infos after each byte code instruction.
@@ -17,14 +18,14 @@ class DebugPrinter extends Textifier {
   private final ExtendedFrame[] frames;
 
   public DebugPrinter(ExtendedFrame[] frames) {
-    super(Opcodes.ASM6);
+    super(ASM7);
 
     this.instruction = 0;
     this.frames = frames;
   }
 
   private void addByteCodeIndexWithoutFrame(int lastSize) {
-    String index = "000" + Integer.toString(instruction);
+    String index = "000" + instruction;
     index = index.substring(index.length() - 4);
 
     for (int i = lastSize; i < text.size(); i++) {

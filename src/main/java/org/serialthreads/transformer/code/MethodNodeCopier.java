@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.MethodNode;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.objectweb.asm.Opcodes.ASM6;
+import static org.objectweb.asm.Opcodes.ASM7;
 
 /**
  * Copies method nodes.
@@ -34,7 +34,7 @@ public class MethodNodeCopier {
    */
   public static MethodNode copy(MethodNode method) {
     String[] exceptions = method.exceptions.toArray(new String[0]);
-    MethodNode result = new MethodNode(ASM6, method.access, method.name, method.desc, method.signature, exceptions) {
+    MethodNode result = new MethodNode(ASM7, method.access, method.name, method.desc, method.signature, exceptions) {
       /**
        * Label remapping.
        * Old label -> new label.

@@ -7,6 +7,8 @@ import org.objectweb.asm.Opcodes;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.objectweb.asm.Opcodes.ASM7;
+
 /**
  * Visitor which checks all methods for the presence of the @Interruptible annotation.
  */
@@ -19,7 +21,7 @@ public class ClassInfoVisitor extends ClassVisitor {
   private final Map<String, MethodInfo> methods;
 
   public ClassInfoVisitor() {
-    super(Opcodes.ASM4);
+    super(ASM7);
 
     this.methods = new TreeMap<>();
   }

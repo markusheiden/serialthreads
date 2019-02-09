@@ -58,7 +58,7 @@ public class ExtendedVerifier extends SimpleVerifier {
     Type currentSuperClass,
     List<Type> currentClassInterfaces,
     boolean isInterface) {
-    super(ASM6, currentClass, currentSuperClass, currentClassInterfaces, isInterface);
+    super(ASM7, currentClass, currentSuperClass, currentClassInterfaces, isInterface);
 
     this.currentClass = currentClass;
     this.currentSuperClass = currentSuperClass;
