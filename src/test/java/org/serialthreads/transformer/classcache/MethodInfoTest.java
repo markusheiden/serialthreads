@@ -53,6 +53,5 @@ public class MethodInfoTest {
     assertEquals(info.getName(), copy.getName());
     assertEquals(info.getDesc(), copy.getDesc());
     assertEquals(info.getAnnotations(), copy.getAnnotations());
-    assertNotSame(info.getAnnotations(), copy.getAnnotations());
   }
 }
