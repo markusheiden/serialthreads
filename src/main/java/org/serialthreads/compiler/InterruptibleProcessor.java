@@ -21,7 +21,7 @@ import java.util.Set;
  * Checks correct usage of {@link org.serialthreads.Interruptible} annotations.
  */
 @SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
-@SupportedSourceVersion(SourceVersion.RELEASE_10)
+@SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class InterruptibleProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
