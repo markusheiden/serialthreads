@@ -39,7 +39,8 @@ public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
     public void run() {
       try {
         waitForStart();
-        for (;;) {
+          //noinspection InfiniteLoopStatement
+          while (true) {
           count++;
           tick(count);
         }

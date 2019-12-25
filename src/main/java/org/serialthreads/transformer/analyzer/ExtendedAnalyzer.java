@@ -10,9 +10,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.*;
 
-import static org.serialthreads.transformer.code.MethodCode.isInterface;
-import static org.serialthreads.transformer.code.MethodCode.isLoad;
-import static org.serialthreads.transformer.code.MethodCode.isStore;
+import static org.serialthreads.transformer.code.MethodCode.*;
 
 /**
  * Extended analyzer.
@@ -130,7 +128,8 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     }
 
     InsnList instructions = method.instructions;
-    for (;;) {
+    //noinspection InfiniteLoopStatement
+    while (true) {
       AbstractInsnNode instruction = instructions.get(index);
       ExtendedFrame frameBefore = frames[index];
 
