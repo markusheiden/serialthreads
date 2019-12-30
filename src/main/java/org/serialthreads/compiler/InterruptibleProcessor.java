@@ -11,7 +11,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementScanner7;
+import javax.lang.model.util.ElementScanner14;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
@@ -37,7 +37,7 @@ public class InterruptibleProcessor extends AbstractProcessor {
   /**
    * Inner visitor class for scanning types.
    */
-  private class Scanner extends ElementScanner7<Void, Void> {
+  private class Scanner extends ElementScanner14<Void, Void> {
     @Override
     public Void visitExecutable(ExecutableElement element, Void dummy) {
       try {
