@@ -20,10 +20,10 @@ dependencies {
   runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
   runtimeOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
-  api "org.ow2.asm:asm:${asmVersion}"
-  api "org.ow2.asm:asm-analysis:${asmVersion}"
-  api "org.ow2.asm:asm-tree:${asmVersion}"
-  api "org.ow2.asm:asm-util:${asmVersion}"
+  implementation "org.ow2.asm:asm:${asmVersion}"
+  implementation "org.ow2.asm:asm-analysis:${asmVersion}"
+  implementation "org.ow2.asm:asm-tree:${asmVersion}"
+  implementation "org.ow2.asm:asm-util:${asmVersion}"
 
   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
   testImplementation "org.assertj:assertj-core:${assertjVersion}"
