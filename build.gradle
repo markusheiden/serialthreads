@@ -36,7 +36,7 @@ jar {
       "Implementation-Version": archiveVersion,
       "Premain-Class": "org.serialthreads.agent.Agent",
       "Agent-Class": "org.serialthreads.agent.Agent",
-      "Can-Redefine-Classes": true,
+      "Can-Redefine-Classes": false,
       "Can-Retransform-Classes": false)
   }
 }
