@@ -2,6 +2,12 @@
 
 Allows to execute many serial threads on one java thread. This is done by capture and restore the call stack.
 
+# Build
+
+````shell script
+./gradlew build publishToMavenLocal
+````
+
 # TODO
 
    * Lambdas cannot be interrupted.
