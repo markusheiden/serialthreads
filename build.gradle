@@ -67,3 +67,14 @@ test {
   include '**/*Test.*'
   exclude '**/*Abstract*.*'
 }
+
+sourceSets {
+  performanceTest {
+    java {
+      compileClasspath += main.output + test.output
+      runtimeClasspath += main.output + test.output
+      srcDir file('src/test/performance/java')
+    }
+  }
+}
+
