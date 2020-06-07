@@ -84,11 +84,11 @@
       <version>${slf4j.version}</version>
     </dependency>
 
-    <dependency>
+    <!--dependency>
       <groupId>org.bitbucket.cowwoc</groupId>
       <artifactId>requirements-core</artifactId>
       <version>${requirements.version}</version>
-    </dependency>
+    </dependency-->
 
     <dependency>
       <groupId>org.ow2.asm</groupId>
