@@ -56,6 +56,7 @@ publishing {
     }
   }
 }
+build.dependsOn publishToMavenLocal
 
 test {
   // ignore failing tests
