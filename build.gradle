@@ -13,10 +13,14 @@ group = 'org.serialthreads'
 archivesBaseName = 'serialhtreads'
 version = '1.0-SNAPSHOT'
 
-sourceCompatibility = JavaVersion.VERSION_15
-
 repositories {
   mavenCentral()
+}
+
+java {
+  toolchain {
+    languageVersion.set(JavaLanguageVersion.of(15))
+  }
 }
 
 dependencies {
