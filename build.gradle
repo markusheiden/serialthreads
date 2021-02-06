@@ -50,7 +50,7 @@ jar {
 }
 
 task testJar(type: Jar) {
-    archiveClassifier = 'tests'
+    archiveClassifier.set('tests')
     from sourceSets.test.output
 }
 
