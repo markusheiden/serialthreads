@@ -1,14 +1,14 @@
 package org.serialthreads.transformer.classcache;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.objectweb.asm.Opcodes.ASM7;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
+
+import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
  * Visitor which checks all methods for the presence of the @Interruptible annotation.
@@ -21,7 +21,7 @@ public class MethodInfoVisitor extends MethodVisitor {
   private final Map<String, MethodInfo> methods;
 
   public MethodInfoVisitor(String name, String desc, Map<String, MethodInfo> methods) {
-    super(ASM7);
+    super(ASM9);
 
     methodName = name;
     methodDesc = desc;
