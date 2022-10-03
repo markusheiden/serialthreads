@@ -72,12 +72,6 @@ test {
 
     // ignore failing tests
     ignoreFailures = true
-
-    // workaround for gradle (included asm) not supporting jdk8
-    scanForTestClasses = false
-    // probably have to tweak the include and exclude patterns, depending on the naming scheme you use
-    include '**/*Test.*'
-    exclude '**/*Abstract*.*'
 }
 
 sourceSets {
