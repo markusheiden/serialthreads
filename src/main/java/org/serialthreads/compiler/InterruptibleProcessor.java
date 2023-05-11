@@ -2,10 +2,10 @@ package org.serialthreads.compiler;
 
 import org.serialthreads.Interruptible;
 
-import jakarta.annotation.processing.AbstractProcessor;
-import jakarta.annotation.processing.RoundEnvironment;
-import jakarta.annotation.processing.SupportedAnnotationTypes;
-import jakarta.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
