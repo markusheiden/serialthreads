@@ -8,7 +8,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 
 /**
- * Test target for method handle test in {@link org.serialthreads.transformer.InvokeDynamicTest}.
+ * Test target for method handle test in {@link InvokeDynamicTest}.
  */
 public class SubMethodHandleTestTarget extends MethodHandleTestTarget {
   public static MethodHandle overriddenHandle;

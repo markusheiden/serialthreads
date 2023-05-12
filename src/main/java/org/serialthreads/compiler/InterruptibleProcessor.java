@@ -18,7 +18,7 @@ import javax.tools.Diagnostic.Kind;
 import java.util.Set;
 
 /**
- * Checks correct usage of {@link org.serialthreads.Interruptible} annotations.
+ * Checks correct usage of {@link Interruptible} annotations.
  */
 @SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
 @SupportedSourceVersion(SourceVersion.RELEASE_14)

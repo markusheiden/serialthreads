@@ -6,7 +6,7 @@ import org.serialthreads.agent.TransformingTestInstanceFactory;
 import org.serialthreads.transformer.strategies.TransformerIntegration_AbstractTest;
 
 /**
- * Integration-test for {@link org.serialthreads.transformer.strategies.frequent.FrequentInterruptsTransformer}.
+ * Integration-test for {@link FrequentInterruptsTransformer}.
  */
 @ExtendWith(TransformingTestInstanceFactory.class)
 @Transform(transformer = FrequentInterruptsTransformer.class)
