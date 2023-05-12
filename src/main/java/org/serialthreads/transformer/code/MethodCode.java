@@ -71,7 +71,7 @@ public final class MethodCode {
     var s = frameBefore.getStackSize() - argumentTypes.length;
     assert s > 0 : "Check: stack pointer is positive";
     var ownerType = frameBefore.getStack(s - 1);
-    return ownerType instanceof ExtendedValue && ((ExtendedValue) ownerType).getLocals().contains(0);
+    return ownerType instanceof ExtendedValue o && o.getLocals().contains(0);
   }
 
   /**
