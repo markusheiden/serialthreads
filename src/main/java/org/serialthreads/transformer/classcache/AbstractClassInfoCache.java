@@ -20,6 +20,8 @@ import static java.util.Arrays.asList;
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
+import static org.objectweb.asm.Type.ARRAY;
+import static org.objectweb.asm.Type.OBJECT;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 
 /**
@@ -64,7 +66,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     assert superClassName != null : "Precondition: superClassName != null";
 
     var classType = Type.getObjectType(className);
-    if (classType.getSort() == Type.ARRAY) {
+    if (classType.getSort() == ARRAY) {
       return hasSuperClassArray(className, superClassName);
     }
 
@@ -75,7 +77,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     var classType = Type.getObjectType(className);
     var superClassType = Type.getObjectType(superClassName);
 
-    if (superClassType.getSort() != Type.ARRAY) {
+    if (superClassType.getSort() != ARRAY) {
       // only possible non array super class is Object
       return superClassType.equals(Type.getType(Object.class));
     }
@@ -85,7 +87,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       return false;
     }
 
-    if (classType.getElementType().getSort() != Type.OBJECT) {
+    if (classType.getElementType().getSort() != OBJECT) {
       // primitive arrays -> no inheritance
       return classType.getElementType().equals(superClassType.getElementType());
     }

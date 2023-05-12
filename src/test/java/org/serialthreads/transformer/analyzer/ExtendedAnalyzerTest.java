@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.objectweb.asm.Opcodes.*;
 import static org.objectweb.asm.Type.DOUBLE_TYPE;
+import static org.objectweb.asm.Type.INT_TYPE;
 import static org.objectweb.asm.Type.LONG_TYPE;
 import static org.objectweb.asm.tree.analysis.BasicValue.DOUBLE_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.INT_VALUE;
@@ -40,7 +41,7 @@ public class ExtendedAnalyzerTest {
     frame.setLocal(0, UNINITIALIZED_VALUE);
     frame.setLocal(1, INT_VALUE);
     assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
-    assertEquals(ExtendedValue.valueInLocal(Type.INT_TYPE, 1), frame.getLocal(1));
+    assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
     assertEquals(2, frame.getLocals());
 
     frame.push(LONG_VALUE);
@@ -71,7 +72,7 @@ public class ExtendedAnalyzerTest {
     var frame = analyzer.newFrame(src);
 
     assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
-    assertEquals(ExtendedValue.valueInLocal(Type.INT_TYPE, 1), frame.getLocal(1));
+    assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
     assertEquals(2, frame.getLocals());
 
     assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));

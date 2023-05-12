@@ -11,8 +11,13 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.DOUBLE_TYPE;
+import static org.objectweb.asm.Type.FLOAT_TYPE;
 import static org.objectweb.asm.Type.INT_TYPE;
+import static org.objectweb.asm.Type.LONG_TYPE;
+import static org.objectweb.asm.tree.analysis.BasicValue.DOUBLE_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.INT_VALUE;
+import static org.objectweb.asm.tree.analysis.BasicValue.LONG_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqualsValue;
 
@@ -33,10 +38,10 @@ public class ExtendedFrameTest {
     assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
     assertEquals(2, frame.getLocals());
 
-    frame.push(BasicValue.LONG_VALUE);
-    frame.push(BasicValue.DOUBLE_VALUE);
-    assertEquals(ExtendedValue.value(Type.LONG_TYPE), frame.getStack(0));
-    assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
+    frame.push(LONG_VALUE);
+    frame.push(DOUBLE_VALUE);
+    assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));
+    assertEquals(ExtendedValue.value(DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
 
     try {
@@ -55,8 +60,8 @@ public class ExtendedFrameTest {
     var src = new ExtendedFrame(2, 2);
     src.setLocal(0, UNINITIALIZED_VALUE);
     src.setLocal(1, INT_VALUE);
-    src.push(BasicValue.LONG_VALUE);
-    src.push(BasicValue.DOUBLE_VALUE);
+    src.push(LONG_VALUE);
+    src.push(DOUBLE_VALUE);
 
     var frame = new ExtendedFrame(src);
 
@@ -64,8 +69,8 @@ public class ExtendedFrameTest {
     assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
     assertEquals(2, frame.getLocals());
 
-    assertEquals(ExtendedValue.value(Type.LONG_TYPE), frame.getStack(0));
-    assertEquals(ExtendedValue.value(Type.DOUBLE_TYPE), frame.getStack(1));
+    assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));
+    assertEquals(ExtendedValue.value(DOUBLE_TYPE), frame.getStack(1));
     assertEquals(2, frame.getStackSize());
 
     try {
@@ -89,13 +94,13 @@ public class ExtendedFrameTest {
     testExecute_const(new InsnNode(ICONST_3), INT_TYPE, 3);
     testExecute_const(new InsnNode(ICONST_4), INT_TYPE, 4);
     testExecute_const(new InsnNode(ICONST_5), INT_TYPE, 5);
-    testExecute_const(new InsnNode(LCONST_0), Type.LONG_TYPE, 0L);
-    testExecute_const(new InsnNode(LCONST_1), Type.LONG_TYPE, 1L);
-    testExecute_const(new InsnNode(FCONST_0), Type.FLOAT_TYPE, 0F);
-    testExecute_const(new InsnNode(FCONST_1), Type.FLOAT_TYPE, 1F);
-    testExecute_const(new InsnNode(FCONST_2), Type.FLOAT_TYPE, 2F);
-    testExecute_const(new InsnNode(DCONST_0), Type.DOUBLE_TYPE, 0D);
-    testExecute_const(new InsnNode(DCONST_1), Type.DOUBLE_TYPE, 1D);
+    testExecute_const(new InsnNode(LCONST_0), LONG_TYPE, 0L);
+    testExecute_const(new InsnNode(LCONST_1), LONG_TYPE, 1L);
+    testExecute_const(new InsnNode(FCONST_0), FLOAT_TYPE, 0F);
+    testExecute_const(new InsnNode(FCONST_1), FLOAT_TYPE, 1F);
+    testExecute_const(new InsnNode(FCONST_2), FLOAT_TYPE, 2F);
+    testExecute_const(new InsnNode(DCONST_0), DOUBLE_TYPE, 0D);
+    testExecute_const(new InsnNode(DCONST_1), DOUBLE_TYPE, 1D);
 
     testExecute_const(new IntInsnNode(BIPUSH, 64), INT_TYPE, 64);
     testExecute_const(new IntInsnNode(SIPUSH, 4096), INT_TYPE, 4096);
@@ -119,9 +124,9 @@ public class ExtendedFrameTest {
   @Test
   public void testExecute_store() throws Exception {
     testExecute_store(new VarInsnNode(ISTORE, 0), INT_TYPE);
-    testExecute_store(new VarInsnNode(LSTORE, 0), Type.LONG_TYPE);
-    testExecute_store(new VarInsnNode(FSTORE, 0), Type.FLOAT_TYPE);
-    testExecute_store(new VarInsnNode(DSTORE, 0), Type.DOUBLE_TYPE);
+    testExecute_store(new VarInsnNode(LSTORE, 0), LONG_TYPE);
+    testExecute_store(new VarInsnNode(FSTORE, 0), FLOAT_TYPE);
+    testExecute_store(new VarInsnNode(DSTORE, 0), DOUBLE_TYPE);
     testExecute_store(new VarInsnNode(ASTORE, 0), Type.getType(Object.class));
 
     testExecute_store(new IincInsnNode(0, 1), INT_TYPE);

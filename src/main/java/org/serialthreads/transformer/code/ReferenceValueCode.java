@@ -4,6 +4,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.ARRAY;
+import static org.objectweb.asm.Type.OBJECT;
 
 /**
  * Code for object values.
@@ -26,7 +28,7 @@ public class ReferenceValueCode extends AbstractValueCode {
 
   @Override
   public boolean isResponsibleFor(Type type) {
-    return type != null && (Type.OBJECT == type.getSort() || Type.ARRAY == type.getSort());
+    return type != null && (type.getSort() == OBJECT || type.getSort() == ARRAY);
   }
 
   @Override

@@ -8,6 +8,8 @@ import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.BOOLEAN_TYPE;
+import static org.objectweb.asm.Type.VOID;
 import static org.serialthreads.transformer.code.MethodCode.*;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
@@ -77,7 +79,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @return changed parameters
    */
   protected String changeCopyDesc(String desc) {
-    return "(" + FRAME_IMPL_DESC + ")" + Type.BOOLEAN_TYPE;
+    return "(" + FRAME_IMPL_DESC + ")" + BOOLEAN_TYPE;
   }
 
   /**
@@ -89,7 +91,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    */
   protected String changeDesc(String desc) {
     int index = desc.indexOf(")");
-    return desc.substring(0, index) + FRAME_IMPL_DESC + ")" + Type.BOOLEAN_TYPE;
+    return desc.substring(0, index) + FRAME_IMPL_DESC + ")" + BOOLEAN_TYPE;
   }
 
   /**
@@ -124,7 +126,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         replacement.add(methodReturn(false));
         logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
       } else {
-        if (returnType.getSort() != Type.VOID) {
+        if (returnType.getSort() != VOID) {
           // Default case:
           // Save return value into the thread.
           // frame.stack.returnXXX = stack;
