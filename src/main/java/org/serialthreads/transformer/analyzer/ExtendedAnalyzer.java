@@ -58,10 +58,10 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
    * @param classInfoCache class info cache
    */
   public static ExtendedAnalyzer create(ClassNode clazz, IClassInfoCache classInfoCache) {
-    Type classType = Type.getObjectType(clazz.name);
-    Type superClassType = Type.getObjectType(clazz.superName);
-    List<Type> interfaceTypes = new ArrayList<>(clazz.interfaces.size());
-    for (String interfaceName : clazz.interfaces) {
+    var classType = Type.getObjectType(clazz.name);
+    var superClassType = Type.getObjectType(clazz.superName);
+    var interfaceTypes = new ArrayList<Type>(clazz.interfaces.size());
+    for (var interfaceName : clazz.interfaces) {
       interfaceTypes.add(Type.getObjectType(interfaceName));
     }
     boolean isInterface = isInterface(clazz);
@@ -80,23 +80,23 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
   @Override
   public ExtendedFrame[] getFrames() {
-    Frame<BasicValue>[] frames = super.getFrames();
-    ExtendedFrame[] result = new ExtendedFrame[frames.length];
+    var frames = super.getFrames();
+    var result = new ExtendedFrame[frames.length];
     System.arraycopy(frames, 0, result, 0, frames.length);
     return result;
   }
 
   @Override
   public ExtendedFrame[] analyze(String owner, MethodNode m) throws AnalyzerException {
-    Frame<BasicValue>[] frames = super.analyze(owner, m);
-    ExtendedFrame[] result = new ExtendedFrame[frames.length];
+    var frames = super.analyze(owner, m);
+    var result = new ExtendedFrame[frames.length];
     System.arraycopy(frames, 0, result, 0, frames.length);
 
-    InsnList instructions = m.instructions;
+    var instructions = m.instructions;
 
-    SortedSet<Integer> startingPoints = new TreeSet<>();
+    var startingPoints = new TreeSet<Integer>();
     for (int i = 0; i < instructions.size(); i++) {
-      AbstractInsnNode instruction = instructions.get(i);
+      var instruction = instructions.get(i);
       if (STARTING_POINT_OPCODES.contains(instruction.getOpcode())) {
         startingPoints.add(i);
       }
@@ -119,19 +119,19 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
    */
   private void traceBack(MethodNode method, SortedSet<Integer> startingPoints, ExtendedFrame[] frames) {
     // Use last starting point
-    Integer index = startingPoints.last();
+    var index = startingPoints.last();
     startingPoints.remove(index);
-    ExtendedFrame firstFrame = frames[index];
+    var firstFrame = frames[index];
     if (firstFrame == null) {
       // No frame -> unreachable code -> no need to compute
       return;
     }
 
-    InsnList instructions = method.instructions;
+    var instructions = method.instructions;
     //noinspection InfiniteLoopStatement
     while (true) {
-      AbstractInsnNode instruction = instructions.get(index);
-      ExtendedFrame frameBefore = frames[index];
+      var instruction = instructions.get(index);
+      var frameBefore = frames[index];
 
       if (isLoad(instruction)) {
         frameBefore.neededLocals.add(((VarInsnNode) instruction).var);
@@ -140,15 +140,15 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         frameBefore.neededLocals.remove(((VarInsnNode) instruction).var);
       }
 
-      NavigableSet<Integer> froms = backflow.get(index);
+      var froms = backflow.get(index);
       if (froms == null || froms.isEmpty()) {
         // no predecessors at all -> we are finished with the current starting point
         return;
       }
 
       // Update needed locals of all other predecessors
-      for (Integer from : froms) {
-        ExtendedFrame fromFrame = frames[from];
+      for (var from : froms) {
+        var fromFrame = frames[from];
         boolean modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
         if (modified) {
           startingPoints.add(from);

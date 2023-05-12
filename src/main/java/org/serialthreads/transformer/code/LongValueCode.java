@@ -6,18 +6,20 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.LONG;
+import static org.objectweb.asm.Type.LONG_TYPE;
 
 /**
  * Code for long values.
  */
 public class LongValueCode extends AbstractValueCode {
   public LongValueCode() {
-    super(Type.LONG_TYPE, "Long", LLOAD, LSTORE, LALOAD, LASTORE, LCONST_0, LRETURN);
+    super(LONG_TYPE, "Long", LLOAD, LSTORE, LALOAD, LASTORE, LCONST_0, LRETURN);
   }
 
   @Override
   public boolean isResponsibleFor(Type type) {
-    return type != null && Type.LONG == type.getSort();
+    return type != null && type.getSort() == LONG;
   }
 
   @Override

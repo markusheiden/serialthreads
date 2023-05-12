@@ -10,6 +10,8 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
+import static org.serialthreads.transformer.Strategies.DEFAULT;
+
 /**
  * Byte code enhancement agent.
  * Does the same as {@link TransformingClassLoader}.
@@ -54,7 +56,7 @@ public class Agent implements ClassFileTransformer {
       logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
       classInfoCache.start(loader, className, classfileBuffer);
 
-      byte[] result = transformer.transform(classfileBuffer);
+      var result = transformer.transform(classfileBuffer);
       failure = false;
 
       logger.info("Successfully transformed class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
@@ -100,7 +102,7 @@ public class Agent implements ClassFileTransformer {
    */
   public static void agentmain(String arguments, Instrumentation inst) {
     try {
-      inst.addTransformer(new Agent(Strategies.DEFAULT));
+      inst.addTransformer(new Agent(DEFAULT));
     } catch (RuntimeException e) {
       logger.error("Failed to init agent", e);
     }

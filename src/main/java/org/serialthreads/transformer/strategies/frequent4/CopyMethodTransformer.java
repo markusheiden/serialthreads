@@ -49,7 +49,7 @@ class CopyMethodTransformer extends MethodTransformer {
       analyze();
 
       replaceReturns();
-      List<LabelNode> restores = insertCaptureAndRestoreCode(true);
+      var restores = insertCaptureAndRestoreCode(true);
       createRestoreHandlerCopy(restores);
       addFrame();
       fixMaxs();
@@ -67,7 +67,7 @@ class CopyMethodTransformer extends MethodTransformer {
   }
 
   /**
-   * Insert frame restoring code at the begin of a copied method.
+   * Insert frame restoring code at the beginning of a copied method.
    *
    * @param restores Labels pointing to the generated restore codes for method calls.
    */
@@ -76,7 +76,7 @@ class CopyMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for copied method");
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     if (needsFrame()) {
       // frame = previousFrame.next; // etc.

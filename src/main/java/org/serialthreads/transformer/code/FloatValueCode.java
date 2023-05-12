@@ -6,18 +6,20 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.FLOAT;
+import static org.objectweb.asm.Type.FLOAT_TYPE;
 
 /**
  * Code for float values.
  */
 public class FloatValueCode extends AbstractValueCode {
   public FloatValueCode() {
-    super(Type.FLOAT_TYPE, "Float", FLOAD, FSTORE, FALOAD, FASTORE, FCONST_0, FRETURN);
+    super(FLOAT_TYPE, "Float", FLOAD, FSTORE, FALOAD, FASTORE, FCONST_0, FRETURN);
   }
 
   @Override
   public boolean isResponsibleFor(Type type) {
-    return type != null && Type.FLOAT == type.getSort();
+    return type != null && type.getSort() == FLOAT;
   }
 
   @Override

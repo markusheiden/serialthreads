@@ -29,7 +29,7 @@ public class SerialThreadExecutor {
   @Executor
   public void execute() {
     // loop until a chain finishes
-    ChainedRunnable chain = lastExecuted;
+    var chain = lastExecuted;
     try {
       //noinspection InfiniteLoopStatement
       while (true) {
@@ -55,7 +55,7 @@ public class SerialThreadExecutor {
     int loops = interrupts * chains.length;
 
     // loop until a chain finishes
-    ChainedRunnable chain = lastExecuted;
+    var chain = lastExecuted;
     try {
       do {
         chain = chain.next;

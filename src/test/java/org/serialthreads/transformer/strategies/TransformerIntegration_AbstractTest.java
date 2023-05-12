@@ -29,7 +29,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testTransform() {
-    TestInterruptible test = new TestInterruptible(true);
+    var test = new TestInterruptible(true);
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute();
@@ -44,7 +44,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testRunNo() {
-    TestRunNoInterruptible test = new TestRunNoInterruptible();
+    var test = new TestRunNoInterruptible();
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute();
@@ -59,7 +59,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testRunSingle() {
-    TestRunSingleInterruptible test = new TestRunSingleInterruptible();
+    var test = new TestRunSingleInterruptible();
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute();
@@ -74,7 +74,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testRunMulti() {
-    TestRunMultiInterruptible test = new TestRunMultiInterruptible();
+    var test = new TestRunMultiInterruptible();
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute();
@@ -137,7 +137,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Test
   public void testTailCall() {
-    TestTailCall test = new TestTailCall();
+    var test = new TestTailCall();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
     assertEquals(-1, test.value);
@@ -151,7 +151,7 @@ public abstract class TransformerIntegration_AbstractTest {
   @Disabled // TODO markus 2018-01-04: Implement exception handling.
   @Test
   public void testException() {
-    TestException test = new TestException();
+    var test = new TestException();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
     assertEquals(-1, test.value);

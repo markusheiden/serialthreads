@@ -74,14 +74,14 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     logger.debug("Scanning class {}", className);
 
     // remove class info visitor, because we scan a class at max once
-    ClassInfoVisitor classInfoVisitor = classes.remove(className);
+    var classInfoVisitor = classes.remove(className);
     if (classInfoVisitor != null) {
       // scan not yet loaded class with asm to avoid circular class loading
       logger.debug("  Direct ASM scan of {}", className);
       return scan(classInfoVisitor, toProcess);
     }
 
-    InputStream classFile = classLoader.getResourceAsStream(className + ".class");
+    var classFile = classLoader.getResourceAsStream(className + ".class");
     if (classFile != null) {
       logger.debug("  Class file based ASM scan of {}", className);
       return scan(read(new ClassReader(classFile)), toProcess);
@@ -103,48 +103,48 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess) {
     try {
       // scan all other classes via reflection, because not all other classes have class files
-      Class<?> clazz = Class.forName(className.replace('/', '.'), false, classLoader);
+      var clazz = Class.forName(className.replace('/', '.'), false, classLoader);
 
       String superClassName = null;
       if (clazz.getSuperclass() != null) {
         superClassName = clazz.getSuperclass().getName().replace('.', '/');
       }
-      Map<String, MethodInfo> methodInfos = new HashMap<>();
-      Method[] methods = clazz.getDeclaredMethods();
-      for (Method method : methods) {
-        String name = method.getName();
-        String desc = Type.getMethodDescriptor(method);
-        Set<Type> annotations = stream(method.getAnnotations())
+      var methodInfos = new HashMap<String, MethodInfo>();
+      var methods = clazz.getDeclaredMethods();
+      for (var method : methods) {
+        var name = method.getName();
+        var desc = Type.getMethodDescriptor(method);
+        var annotations = stream(method.getAnnotations())
           .map(Annotation::getClass)
           .map(Type::getType)
           .collect(toSet());
 
-        MethodInfo info = new MethodInfo(name, desc, annotations);
+        var info = new MethodInfo(name, desc, annotations);
         methodInfos.put(info.getId(), info);
       }
 
-      Constructor<?>[] constructors = clazz.getDeclaredConstructors();
-      for (Constructor<?> constructor : constructors) {
-        String name = "<init>";
-        String desc = Type.getConstructorDescriptor(constructor);
+      var constructors = clazz.getDeclaredConstructors();
+      for (var constructor : constructors) {
+        var name = "<init>";
+        var desc = Type.getConstructorDescriptor(constructor);
         Set<Type> annotations = emptySet();
 
-        MethodInfo info = new MethodInfo(name, desc, annotations);
+        var info = new MethodInfo(name, desc, annotations);
         methodInfos.put(info.getId(), info);
       }
 
-      String name = "<clinit>";
-      String desc = "()V";
+      var name = "<clinit>";
+      var desc = "()V";
       Set<Type> annotations = emptySet();
 
-      MethodInfo info = new MethodInfo(name, desc, annotations);
+      var info = new MethodInfo(name, desc, annotations);
       methodInfos.put(info.getId(), info);
 
-      ClassInfo classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);
+      var classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);
       if (clazz.getSuperclass() != null) {
         toProcess.addFirst(clazz.getSuperclass().getName().replace('.', '/'));
       }
-      for (Class<?> superInterface : clazz.getInterfaces()) {
+      for (var superInterface : clazz.getInterfaces()) {
         toProcess.add(superInterface.getName().replace('.', '/'));
       }
 

@@ -48,7 +48,7 @@ class OriginalMethodTransformer extends MethodTransformer {
   private void createRestoreHandlerMethod() {
     logger.debug("    Creating restore handler for method");
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     if (isStatic(method)) {
       // thread = SerialThreadManager.getThread();

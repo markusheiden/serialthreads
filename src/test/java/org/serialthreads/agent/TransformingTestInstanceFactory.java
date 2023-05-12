@@ -24,8 +24,8 @@ public class TransformingTestInstanceFactory implements TestInstanceFactory {
    */
   @Override
   public Object createTestInstance(TestInstanceFactoryContext factoryContext, ExtensionContext extensionContext) throws TestInstantiationException {
-    Class<?> clazz = factoryContext.getTestClass();
-    Transform annotation = clazz.getAnnotation(Transform.class);
+    var clazz = factoryContext.getTestClass();
+    var annotation = clazz.getAnnotation(Transform.class);
     if (annotation == null) {
       throw new TestInstantiationException("Missing @Transform at test.");
     }
@@ -37,9 +37,9 @@ public class TransformingTestInstanceFactory implements TestInstanceFactory {
     }
 
     try {
-      TransformingClassLoader cl = new TransformingClassLoader(new Strategy(annotation.transformer()), annotation.classPrefixes());
-      Class<?> testClass = cl.loadClass(clazz.getName(), true);
-      Constructor<?> constructor = testClass.getDeclaredConstructor();
+      var cl = new TransformingClassLoader(new Strategy(annotation.transformer()), annotation.classPrefixes());
+      var testClass = cl.loadClass(clazz.getName(), true);
+      var constructor = testClass.getDeclaredConstructor();
       constructor.setAccessible(true);
       return constructor.newInstance();
     } catch (Exception e) {

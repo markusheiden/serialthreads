@@ -74,7 +74,7 @@ public class MethodInfo {
    * Copy this method info.
    */
   public MethodInfo copy() {
-    MethodInfo result = new MethodInfo(name, desc, annotations);
+    var result = new MethodInfo(name, desc, annotations);
 
     assert result != null : "Postcondition: result != null";
     assert getId().equals(result.getId()) : "Postcondition: getID().equals(result.getID())";

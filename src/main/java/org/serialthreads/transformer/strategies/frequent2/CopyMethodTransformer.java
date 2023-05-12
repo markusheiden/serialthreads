@@ -56,7 +56,7 @@ class CopyMethodTransformer extends MethodTransformer {
       analyze();
 
       // create copy of method with shortened signature
-      List<LabelNode> restores = insertCaptureAndRestoreCode(true);
+      var restores = insertCaptureAndRestoreCode(true);
       createRestoreHandlerCopy(restores);
       fixMaxs();
       nameLocals();
@@ -82,7 +82,7 @@ class CopyMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for copied method");
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // Move previousFrame to the correct local.
     instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));

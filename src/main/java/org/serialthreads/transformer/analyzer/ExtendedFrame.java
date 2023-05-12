@@ -7,6 +7,8 @@ import org.objectweb.asm.tree.analysis.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;
@@ -44,73 +46,50 @@ public final class ExtendedFrame extends Frame<BasicValue> {
   public void execute(AbstractInsnNode insn, Interpreter<BasicValue> interpreter) throws AnalyzerException {
     // remove references to local, if required
     switch (insn.getOpcode()) {
-      case Opcodes.ACONST_NULL:
-        push(constantValue(interpreter.newOperation(insn).getType(), null));
-        break;
-      case Opcodes.ICONST_M1:
-        push(constantValue(interpreter.newOperation(insn).getType(), -1));
-        break;
-      case Opcodes.ICONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0));
-        break;
-      case Opcodes.ICONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1));
-        break;
-      case Opcodes.ICONST_2:
-        push(constantValue(interpreter.newOperation(insn).getType(), 2));
-        break;
-      case Opcodes.ICONST_3:
-        push(constantValue(interpreter.newOperation(insn).getType(), 3));
-        break;
-      case Opcodes.ICONST_4:
-        push(constantValue(interpreter.newOperation(insn).getType(), 4));
-        break;
-      case Opcodes.ICONST_5:
-        push(constantValue(interpreter.newOperation(insn).getType(), 5));
-        break;
-      case Opcodes.LCONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0L));
-        break;
-      case Opcodes.LCONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1L));
-        break;
-      case Opcodes.FCONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0F));
-        break;
-      case Opcodes.FCONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1F));
-        break;
-      case Opcodes.FCONST_2:
-        push(constantValue(interpreter.newOperation(insn).getType(), 2F));
-        break;
-      case Opcodes.DCONST_0:
-        push(constantValue(interpreter.newOperation(insn).getType(), 0D));
-        return;
-      case Opcodes.DCONST_1:
-        push(constantValue(interpreter.newOperation(insn).getType(), 1D));
-        return;
-      case Opcodes.BIPUSH:
-      case Opcodes.SIPUSH:
-        push(constantValue(interpreter.newOperation(insn).getType(), ((IntInsnNode) insn).operand));
-        return;
-      case Opcodes.LDC:
-        push(constantValue(interpreter.newOperation(insn).getType(), ((LdcInsnNode) insn).cst));
-        return;
-      case Opcodes.ISTORE:
-      case Opcodes.LSTORE:
-      case Opcodes.FSTORE:
-      case Opcodes.DSTORE:
-      case Opcodes.ASTORE:
+      case ACONST_NULL ->
+              push(constantValue(interpreter.newOperation(insn).getType(), null));
+      case ICONST_M1 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), -1));
+      case ICONST_0 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 0));
+      case ICONST_1 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 1));
+      case ICONST_2 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 2));
+      case ICONST_3 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 3));
+      case ICONST_4 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 4));
+      case ICONST_5 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 5));
+      case LCONST_0 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 0L));
+      case LCONST_1 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 1L));
+      case FCONST_0 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 0F));
+      case FCONST_1 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 1F));
+      case FCONST_2 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 2F));
+      case DCONST_0 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 0D));
+      case DCONST_1 ->
+              push(constantValue(interpreter.newOperation(insn).getType(), 1D));
+      case BIPUSH, SIPUSH ->
+              push(constantValue(interpreter.newOperation(insn).getType(), ((IntInsnNode) insn).operand));
+      case LDC ->
+              push(constantValue(interpreter.newOperation(insn).getType(), ((LdcInsnNode) insn).cst));
+      case ISTORE, LSTORE, FSTORE, DSTORE, ASTORE -> {
         removeLocalFromStack(((VarInsnNode) insn).var);
         super.execute(insn, interpreter);
-        break;
-      case Opcodes.IINC:
+      }
+      case IINC -> {
         removeLocalFromStack(((IincInsnNode) insn).var);
         super.execute(insn, interpreter);
-        break;
-      default:
-        super.execute(insn, interpreter);
-        break;
+      }
+      default ->
+              super.execute(insn, interpreter);
     }
   }
 
@@ -124,16 +103,16 @@ public final class ExtendedFrame extends Frame<BasicValue> {
   private void removeLocalFromStack(int modifiedLocal) {
     assert modifiedLocal >= 0 && modifiedLocal < getLocals() : "Precondition: modifiedLocal >= 0 && modifiedLocal < getLocals()";
 
-    ExtendedFrame copy = new ExtendedFrame(this);
+    var copy = new ExtendedFrame(this);
     for (int i = 0; i < copy.getLocals(); i++) {
-      Value local = copy.getLocal(i);
-      if (local instanceof ExtendedValue) {
-        super.setLocal(i, ((ExtendedValue) local).removeLocal(modifiedLocal));
+      var local = copy.getLocal(i);
+      if (local instanceof ExtendedValue l) {
+        super.setLocal(i, l.removeLocal(modifiedLocal));
       }
     }
     clearStack();
     for (int i = 0; i < copy.getStackSize(); i++) {
-      Value stack = copy.getStack(i);
+      var stack = copy.getStack(i);
       super.push(((ExtendedValue) stack).removeLocal(modifiedLocal));
     }
   }
@@ -145,12 +124,12 @@ public final class ExtendedFrame extends Frame<BasicValue> {
    */
   @Override
   public void setLocal(int i, BasicValue value) throws IndexOutOfBoundsException {
-    if (value.equals(BasicValue.UNINITIALIZED_VALUE)) {
+    if (value.equals(UNINITIALIZED_VALUE)) {
       // it is the uninitialized value -> no annotation needed, because there is no value
       super.setLocal(i, value);
-    } else if (value instanceof ExtendedValue) {
+    } else if (value instanceof ExtendedValue v) {
       // annotate the value, that it belongs to the local too
-      super.setLocal(i, ((ExtendedValue) value).addLocal(i));
+      super.setLocal(i, v.addLocal(i));
     } else {
       // annotate the value, that it belongs to the local -> new annotated value
       super.setLocal(i, valueInLocal(value.getType(), i));
@@ -164,12 +143,12 @@ public final class ExtendedFrame extends Frame<BasicValue> {
    */
   @Override
   public void push(BasicValue value) throws IndexOutOfBoundsException {
-    if (value.equals(BasicValue.UNINITIALIZED_VALUE)) {
+    if (value.equals(UNINITIALIZED_VALUE)) {
       // no uninitialized values on the stack are allowed
       throw new IllegalArgumentException("Stack values have to be initialized");
-    } else if (value instanceof ExtendedValue) {
+    } else if (value instanceof ExtendedValue v) {
       // the value already has been converted to an extended value -> copy value
-      super.push(value);
+      super.push(v);
     } else {
       // convert the value to an extended value -> new value
       super.push(value(value.getType()));

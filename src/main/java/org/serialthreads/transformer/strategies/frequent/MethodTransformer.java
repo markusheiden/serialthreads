@@ -90,7 +90,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for interrupt");
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
@@ -104,7 +104,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(dummyReturnStatement(method));
 
     // Restore code to continue.
-    LabelNode restoreLabel = new LabelNode();
+    var restoreLabel = new LabelNode();
     if (restore) {
       instructions.add(restoreLabel);
 
@@ -134,9 +134,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
-    LabelNode normal = new LabelNode();
+    var normal = new LabelNode();
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // if (!thread.serializing) "GOTO" normal.
     instructions.add(threadCode.pushSerializing(localThread));
@@ -157,7 +157,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(dummyReturnStatement(method));
 
     // Restore code to continue.
-    LabelNode restoreLabel = new LabelNode();
+    var restoreLabel = new LabelNode();
     if (restore) {
       instructions.add(restoreLabel);
 
@@ -167,7 +167,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       final int localReturnValue = method.maxLocals;
 
       // label "normal" points the code directly after the method call
-      LabelNode restoreFrame = new LabelNode();
+      var restoreFrame = new LabelNode();
 
       // call interrupted method
       instructions.add(pushOwner(methodCall, metaInfo, localFrame));

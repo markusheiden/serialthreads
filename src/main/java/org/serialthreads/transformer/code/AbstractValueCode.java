@@ -9,6 +9,8 @@ import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.ARRAY;
+import static org.objectweb.asm.Type.OBJECT;
 
 /**
  * Value specific code generation.
@@ -94,7 +96,7 @@ public abstract class AbstractValueCode implements IValueCode {
    */
   public AbstractValueCode(Type type, String methodName, int load, int store, int aload, int astore, int pushNull, int returnValue) {
     this.type = type;
-    if (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY) {
+    if (type.getSort() == OBJECT || type.getSort() == ARRAY) {
       this.baseType = Type.getType(Object.class);
       this.size = 1;
       this.clear = true;
@@ -130,7 +132,7 @@ public abstract class AbstractValueCode implements IValueCode {
    *           local with frame.
    */
   private InsnList getStacks(int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + "s", "[" + type.getDescriptor()));
     return instructions;
@@ -148,7 +150,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList pushStackFast(int index, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // frame.stack.stackXXX0 = stack;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new InsnNode(SWAP));
@@ -157,7 +159,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList pushStackSlow(int index, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // frame.stack.stackXXXs[index] = stack;
     instructions.add(getStacks(localFrame));
     instructions.add(new InsnNode(SWAP));
@@ -179,7 +181,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList popStackFast(int index, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = frame.stack.stackXXX0;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
@@ -193,7 +195,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList popStackSlow(int index, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = frame.stack.stackXXXs[index];
     instructions.add(getStacks(localFrame));
     if (clear) {
@@ -222,7 +224,7 @@ public abstract class AbstractValueCode implements IValueCode {
    *           local with frame.
    */
   private InsnList getLocals(int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + "s", "[" + type.getDescriptor()));
     return instructions;
@@ -240,7 +242,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList pushLocalFast(int local, int index, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // frame.localXXX0 = local0;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new VarInsnNode(load, local));
@@ -249,7 +251,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList pushLocalSlow(int local, int index, boolean more, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // frame.localXXXs[index] = local0;
     if (index == 0) {
       instructions.add(getLocals(localFrame));
@@ -275,7 +277,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList popLocalFast(int local, int index, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // local0 = frame.localXXX0;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "local" + methodName + index, type.getDescriptor()));
@@ -291,7 +293,7 @@ public abstract class AbstractValueCode implements IValueCode {
   }
 
   private InsnList popLocalSlow(int local, int index, boolean more, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // local0 = frame.localXXXs[index];
     if (index == 0) {
       instructions.add(getLocals(localFrame));
@@ -321,7 +323,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList pushReturnValue(int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(pushReturnValue());
     return instructions;
@@ -329,7 +331,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList pushReturnValue() {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // thread.returnXXX = stack;
     if (size == 1) {
       // Put thread before return value onto stack.
@@ -346,7 +348,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList popReturnValue(int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(popReturnValue());
     return instructions;
@@ -354,7 +356,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList popReturnValue() {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     if (clear) {
       instructions.add(new InsnNode(DUP));
     }
@@ -399,7 +401,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList move(int from, int to) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     if (from != to) {
       instructions.add(load(from));
       instructions.add(store(to));
@@ -419,7 +421,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
   @Override
   public InsnList returnNull() {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(pushNull());
     instructions.add(new InsnNode(returnValue));
     return instructions;

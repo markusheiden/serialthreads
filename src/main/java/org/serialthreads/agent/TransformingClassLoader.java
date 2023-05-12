@@ -57,13 +57,13 @@ public class TransformingClassLoader extends ClassLoader {
    */
   @Override
   protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    Class<?> result = findLoadedClass(name);
+    var result = findLoadedClass(name);
     if (result == null) {
       byte[] byteCode = null;
 
       try {
         if (!shouldBeTransformed(name)) {
-          // use default behaviour for all classes not directly marked as interruptible
+          // Use the default behaviour for all classes not directly marked as interruptible.
           return super.loadClass(name, resolve);
         }
 
@@ -103,17 +103,17 @@ public class TransformingClassLoader extends ClassLoader {
    */
   private byte[] loadByteCode(String name) throws IOException {
     // class content
-    InputStream in = getResourceAsStream(name.replace('.', '/') + ".class");
+    var in = getResourceAsStream(name.replace('.', '/') + ".class");
     if (in == null) {
       return null;
     }
 
     // byte buffer
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    var out = new ByteArrayOutputStream();
 
     // try to load the byte code
     try {
-      byte[] buffer = new byte[16384];
+      var buffer = new byte[16384];
       for (int bytesRead; (bytesRead = in.read(buffer)) != -1; ) {
         out.write(buffer, 0, bytesRead);
       }
@@ -139,7 +139,7 @@ public class TransformingClassLoader extends ClassLoader {
    * @param className fully qualified name of class
    */
   protected boolean shouldBeTransformed(String className) {
-    for (String classPrefix : classPrefixes) {
+    for (var classPrefix : classPrefixes) {
       if (className.startsWith(classPrefix)) {
         return true;
       }

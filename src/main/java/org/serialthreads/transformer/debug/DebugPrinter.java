@@ -25,11 +25,11 @@ class DebugPrinter extends Textifier {
   }
 
   private void addByteCodeIndexWithoutFrame(int lastSize) {
-    String index = "000" + instruction;
+    var index = "000" + instruction;
     index = index.substring(index.length() - 4);
 
     for (int i = lastSize; i < text.size(); i++) {
-      String line = (String) text.get(i);
+      var line = (String) text.get(i);
       text.set(i, index.toUpperCase() + line);
     }
 
@@ -37,20 +37,20 @@ class DebugPrinter extends Textifier {
   }
 
   private void addByteCodeIndex(int lastSize) {
-    ExtendedFrame frame = frames[instruction];
+    var frame = frames[instruction];
     if (frame != null) {
-      List<String> frameText = new ArrayList<>();
+      var frameText = new ArrayList<String>();
       for (int i = 0; i < frame.getLocals(); i++) {
-        BasicValue local = frame.getLocal(i);
+        var local = frame.getLocal(i);
         if (local != BasicValue.UNINITIALIZED_VALUE) {
-          Object value = local.isReference() ? local.getType().getDescriptor() : local;
+          var value = local.isReference() ? local.getType().getDescriptor() : local;
           frameText.add(tab3 + "Local: " + i + ": " + value + "\n");
         }
       }
       frameText.add(tab3 + "Needed locals: " + frame.neededLocals + "\n");
       for (int i = 0; i < frame.getStackSize(); i++) {
-        BasicValue stack = frame.getStack(i);
-        Object value = stack.isReference() ? stack.getType().getDescriptor() : stack;
+        var stack = frame.getStack(i);
+        var value = stack.isReference() ? stack.getType().getDescriptor() : stack;
         frameText.add(tab3 + "Stack: " + i + ": " + value + "\n");
       }
 
@@ -62,7 +62,7 @@ class DebugPrinter extends Textifier {
 
   private void addNoByteCodeIndex(int lastSize) {
     for (int i = lastSize; i < text.size(); i++) {
-      String line = (String) text.get(i);
+      var line = (String) text.get(i);
       text.set(i, "----" + line);
     }
   }

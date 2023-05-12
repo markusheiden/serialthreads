@@ -16,7 +16,7 @@ public class SubMethodHandleTestTarget extends MethodHandleTestTarget {
 
   static {
     try {
-      Lookup lookup = MethodHandles.lookup();
+      var lookup = MethodHandles.lookup();
       overriddenHandle = lookup.findVirtual(SubMethodHandleTestTarget.class, "test", StackFrame.METHOD_TYPE);
       overriddenSuperHandle = lookup.findSpecial(MethodHandleTestTarget.class, "test", StackFrame.METHOD_TYPE, SubMethodHandleTestTarget.class);
     } catch (Exception e) {

@@ -25,8 +25,8 @@ import java.util.Set;
 public class InterruptibleProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    Scanner scanner = new Scanner();
-    for (Element root : roundEnv.getRootElements()) {
+    var scanner = new Scanner();
+    for (var root : roundEnv.getRootElements()) {
       root.accept(scanner, null);
     }
 
@@ -55,17 +55,17 @@ public class InterruptibleProcessor extends AbstractProcessor {
    * @param overrider Method to check, whether it overrides something
    */
   private void check(ExecutableElement overrider) {
-    Types types = processingEnv.getTypeUtils();
-    Elements elements = processingEnv.getElementUtils();
+    var types = processingEnv.getTypeUtils();
+    var elements = processingEnv.getElementUtils();
 
-    boolean interruptible = overrider.getAnnotation(Interruptible.class) != null;
+    var interruptible = overrider.getAnnotation(Interruptible.class) != null;
 
-    TypeElement overriderType = (TypeElement) overrider.getEnclosingElement();
-    for (TypeMirror superType : types.directSupertypes(overriderType.asType())) {
-      TypeElement overriddenType = (TypeElement) types.asElement(superType);
-      for (Element overridden : elements.getAllMembers(overriddenType)) {
-        if (overridden instanceof ExecutableElement && elements.overrides(overrider, (ExecutableElement) overridden, overriderType)) {
-          boolean overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
+    var overriderType = (TypeElement) overrider.getEnclosingElement();
+    for (var superType : types.directSupertypes(overriderType.asType())) {
+      var overriddenType = (TypeElement) types.asElement(superType);
+      for (var overridden : elements.getAllMembers(overriddenType)) {
+        if (overridden instanceof ExecutableElement o && elements.overrides(overrider, o, overriderType)) {
+          var overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
 
           if (interruptible && !overriddenInterruptible) {
             processingEnv.getMessager().printMessage(Kind.NOTE,

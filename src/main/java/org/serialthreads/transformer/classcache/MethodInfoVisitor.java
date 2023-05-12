@@ -36,7 +36,7 @@ public class MethodInfoVisitor extends MethodVisitor {
 
   @Override
   public void visitEnd() {
-    MethodInfo method = new MethodInfo(methodName, methodDesc, methodAnnotations);
+    var method = new MethodInfo(methodName, methodDesc, methodAnnotations);
     methods.put(method.getId(), method);
   }
 }

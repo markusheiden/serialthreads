@@ -104,9 +104,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * Alters the method descriptor to reflect these changes.
    */
   protected void addThreadAndFrame() {
-    InsnList instructions = method.instructions;
+    var instructions = method.instructions;
 
-    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
+    for (var methodCall : interruptibleMethodCalls) {
       if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall)) {
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localThread));
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localFrame));
@@ -122,10 +122,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected void replaceReturns() {
     logger.debug("      Replacing returns");
 
-    Type returnType = Type.getReturnType(method.desc);
-    for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
-      AbstractInsnNode previous = previousInstruction(returnInstruction);
-      InsnList replacement = new InsnList();
+    var returnType = Type.getReturnType(method.desc);
+    for (var returnInstruction : returnInstructions(method)) {
+      var previous = previousInstruction(returnInstruction);
+      var replacement = new InsnList();
       if (isTailCall(previous)) {
         // Tail call optimization:
         // The return value has already been saved into the thread by the capture code of the called method.
@@ -171,7 +171,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for interrupt");
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
@@ -181,7 +181,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(methodReturn(true));
 
     // Restore code to continue.
-    LabelNode restoreLabel = new LabelNode();
+    var restoreLabel = new LabelNode();
     if (restore) {
       instructions.add(restoreLabel);
 
@@ -208,10 +208,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
-    LabelNode normal = new LabelNode();
-    LabelNode serializing = new LabelNode();
+    var normal = new LabelNode();
+    var serializing = new LabelNode();
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // If not serializing "GOTO" normal.
     instructions.add(new JumpInsnNode(IFEQ, normal));
@@ -226,7 +226,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(methodReturn(true));
 
     // Restore code to continue.
-    LabelNode restoreLabel = new LabelNode();
+    var restoreLabel = new LabelNode();
     if (restore) {
       instructions.add(restoreLabel);
 
@@ -265,7 +265,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   private LabelNode createCaptureAndRestoreCodeForMethodTail(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method tail call to {}", methodName(methodCall));
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // Early exit for tail calls.
     // The return value needs not to be restored, because it has already been stored by the method call.
@@ -277,7 +277,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(methodReturn(null));
 
     // Restore code to continue.
-    LabelNode restoreLabel = new LabelNode();
+    var restoreLabel = new LabelNode();
     if (restore) {
       instructions.add(restoreLabel);
 
@@ -302,11 +302,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param metaInfo Meta information about method call.
    */
   private InsnList callCopyMethod(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    MethodInsnNode callCopyMethod = (MethodInsnNode) methodCall.clone(null);
+    var callCopyMethod = (MethodInsnNode) methodCall.clone(null);
     callCopyMethod.name = changeCopyName(methodCall.name, methodCall.desc);
     callCopyMethod.desc = changeCopyDesc(methodCall.desc);
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // Push owner onto stack.
     instructions.add(pushOwner(methodCall, metaInfo, localFrame));
@@ -338,8 +338,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       return true;
     }
 
-    MethodInsnNode methodCall = interruptibleMethodCalls.iterator().next();
-    MetaInfo metaInfo = metaInfos.get(methodCall);
+    var methodCall = interruptibleMethodCalls.iterator().next();
+    var metaInfo = metaInfos.get(methodCall);
     return
       !(isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) ||
       !isTailCall(metaInfo);
@@ -351,7 +351,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param instruction Instruction
    */
   protected final boolean isTailCall(AbstractInsnNode instruction) {
-    MetaInfo metaInfo = metaInfos.get(instruction);
+    var metaInfo = metaInfos.get(instruction);
     return metaInfo != null && isTailCall(metaInfo);
   }
 
@@ -376,7 +376,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param serializing Serializing flag. Null means the serializing flag is already on the stack.
    */
   private InsnList methodReturn(Boolean serializing) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     if (isRun(clazz, method, classInfoCache)) {
       instructions.add(new InsnNode(RETURN));
     } else if (serializing != null) {

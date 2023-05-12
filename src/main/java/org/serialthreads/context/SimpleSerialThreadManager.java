@@ -25,7 +25,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
   @Executor
   public void execute() {
     // loop until a chain finishes
-    ChainedRunnable chain = lastExecuted;
+    var chain = lastExecuted;
     try {
       //noinspection InfiniteLoopStatement
       while (true) {
@@ -50,7 +50,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
     int loops = interrupts * chains.length;
 
     // loop until a chain finishes
-    ChainedRunnable chain = lastExecuted;
+    var chain = lastExecuted;
     try {
       do {
         chain = chain.next;

@@ -15,19 +15,17 @@ public class LocalVariablesShifter {
    * @param method method to transform
    */
   public static void shift(int point, int shift, MethodNode method) {
-    // adopt instructions
-    for (AbstractInsnNode instruction : method.instructions.toArray()) {
-      if (instruction instanceof VarInsnNode) {
-        VarInsnNode varInstruction = (VarInsnNode) instruction;
+    // Adopt instructions.
+    for (var instruction : method.instructions.toArray()) {
+      if (instruction instanceof VarInsnNode varInstruction) {
         varInstruction.var = remap(point, shift, varInstruction.var);
-      } else if (instruction instanceof IincInsnNode) {
-        IincInsnNode incInstruction = (IincInsnNode) instruction;
+      } else if (instruction instanceof IincInsnNode incInstruction) {
         incInstruction.var = remap(point, shift, incInstruction.var);
       }
     }
 
     // adopt local variable debug info
-    for (LocalVariableNode local : method.localVariables) {
+    for (var local : method.localVariables) {
       local.index = remap(point, shift, local.index);
     }
 

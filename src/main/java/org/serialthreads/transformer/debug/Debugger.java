@@ -48,7 +48,7 @@ public class Debugger {
    * @param classReader Class reader with the class.
    */
   private static String debug(ClassReader classReader) {
-    ClassNode clazz = new ClassNode();
+    var clazz = new ClassNode();
     classReader.accept(clazz, SKIP_DEBUG + SKIP_FRAMES);
     return debug(clazz);
   }
@@ -59,7 +59,7 @@ public class Debugger {
    * @param clazz Class node.
    */
   public static String debug(ClassNode clazz) {
-    StringBuilder result = new StringBuilder(65536);
+    var result = new StringBuilder(65536);
     result.append("Class ").append(clazz.name).append("\n");
     clazz.methods.stream()
       .map(method -> debug(clazz, method))
@@ -74,7 +74,7 @@ public class Debugger {
    * @param methodToDebug Name of method to debug.
    */
   public static String debug(ClassNode clazz, String methodToDebug) {
-    StringBuilder result = new StringBuilder(65536);
+    var result = new StringBuilder(65536);
     clazz.methods.stream()
       .filter(method -> method.name.startsWith(methodToDebug))
       .map(method -> debug(clazz, method))
@@ -89,22 +89,22 @@ public class Debugger {
    * @param method Method node.
    */
   public static String debug(ClassNode clazz, MethodNode method) {
-    ExtendedAnalyzer analyzer = ExtendedAnalyzer.create(clazz, new ClassInfoCacheASM(Debugger.class.getClassLoader()));
+    var analyzer = ExtendedAnalyzer.create(clazz, new ClassInfoCacheASM(Debugger.class.getClassLoader()));
     try {
       analyzer.analyze(clazz.name, method);
     } catch (Exception e) {
       // Ignore, we are only interested in the frames.
     }
-    ExtendedFrame[] frames = analyzer.getFrames();
+    var frames = analyzer.getFrames();
 
-    DebugPrinter printer = new DebugPrinter(frames);
+    var printer = new DebugPrinter(frames);
     try {
       method.accept(new TraceMethodVisitor(printer));
     } catch (Exception e) {
       // Ignore, to get at least the already generated output.
     }
 
-    StringWriter result = new StringWriter(4096);
+    var result = new StringWriter(4096);
     result.append("Method ").append(methodName(clazz.name, method.name, method.desc)).append("\n");
     printer.print(new PrintWriter(result));
 

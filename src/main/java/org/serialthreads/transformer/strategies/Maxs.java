@@ -3,10 +3,15 @@ package org.serialthreads.transformer.strategies;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.serialthreads.transformer.NotTransformableException;
 
+import static org.objectweb.asm.tree.analysis.BasicValue.DOUBLE_VALUE;
+import static org.objectweb.asm.tree.analysis.BasicValue.FLOAT_VALUE;
+import static org.objectweb.asm.tree.analysis.BasicValue.INT_VALUE;
+import static org.objectweb.asm.tree.analysis.BasicValue.LONG_VALUE;
+
 /**
  * Used to calculate maxs sizes.
  */
-public class Maxs {
+public final class Maxs {
   public int maxStackObjects;
   public int maxStackInts;
   public int maxStackLongs;
@@ -26,13 +31,13 @@ public class Maxs {
   public void addStack(BasicValue value) {
     if (value.isReference()) {
       maxStackObjects++;
-    } else if (BasicValue.INT_VALUE.equals(value)) {
+    } else if (INT_VALUE.equals(value)) {
       maxStackInts++;
-    } else if (BasicValue.LONG_VALUE.equals(value)) {
+    } else if (LONG_VALUE.equals(value)) {
       maxStackLongs++;
-    } else if (BasicValue.FLOAT_VALUE.equals(value)) {
+    } else if (FLOAT_VALUE.equals(value)) {
       maxStackFloats++;
-    } else if (BasicValue.DOUBLE_VALUE.equals(value)) {
+    } else if (DOUBLE_VALUE.equals(value)) {
       maxStackDoubles++;
     } else {
       throw new NotTransformableException("Unknown type " + value + " in stack detected");
@@ -47,13 +52,13 @@ public class Maxs {
   public void addLocal(BasicValue value) {
     if (value.isReference()) {
       maxLocalObjects++;
-    } else if (BasicValue.INT_VALUE.equals(value)) {
+    } else if (INT_VALUE.equals(value)) {
       maxLocalInts++;
-    } else if (BasicValue.LONG_VALUE.equals(value)) {
+    } else if (LONG_VALUE.equals(value)) {
       maxLocalLongs++;
-    } else if (BasicValue.FLOAT_VALUE.equals(value)) {
+    } else if (FLOAT_VALUE.equals(value)) {
       maxLocalFloats++;
-    } else if (BasicValue.DOUBLE_VALUE.equals(value)) {
+    } else if (DOUBLE_VALUE.equals(value)) {
       maxLocalDoubles++;
     } else {
       throw new NotTransformableException("Unknown type " + value + " in local variable detected");

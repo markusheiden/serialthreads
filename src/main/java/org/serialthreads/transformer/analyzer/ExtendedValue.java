@@ -4,6 +4,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -16,7 +17,7 @@ import static java.util.Collections.unmodifiableSortedSet;
  * A basic value which - besides the type - can additionally hold,
  * whether the value is "this" or a method parameter.
  */
-public class ExtendedValue extends BasicValue {
+public final class ExtendedValue extends BasicValue {
   /**
    * Constant for not constant values.
    */
@@ -150,7 +151,7 @@ public class ExtendedValue extends BasicValue {
       return this;
     }
 
-    Set<Integer> modifiedLocals = new HashSet<>(locals);
+    var modifiedLocals = new HashSet<>(locals);
     modifiedLocals.add(local);
     return new ExtendedValue(getType(), constant, modifiedLocals);
   }
@@ -167,7 +168,7 @@ public class ExtendedValue extends BasicValue {
       return this;
     }
 
-    Set<Integer> modifiedLocals = new HashSet<>(locals);
+    var modifiedLocals = new HashSet<>(locals);
     modifiedLocals.remove(modifiedLocal);
     return new ExtendedValue(getType(), constant, modifiedLocals);
   }
@@ -191,8 +192,7 @@ public class ExtendedValue extends BasicValue {
   private boolean equalsConstant(ExtendedValue value) {
     assert value != null : "Precondition: value != null";
 
-    return constant == value.constant ||
-      constant != null && constant.equals(value.constant);
+    return Objects.equals(constant, value.constant);
   }
 
   /**

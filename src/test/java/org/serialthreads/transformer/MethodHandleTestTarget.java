@@ -19,7 +19,7 @@ public class MethodHandleTestTarget {
 
   static {
     try {
-      Lookup lookup = MethodHandles.lookup();
+      var lookup = MethodHandles.lookup();
       overrideHandle = lookup.findVirtual(MethodHandleTestTarget.class, "test", StackFrame.METHOD_TYPE);
       privateHandle = lookup.findVirtual(MethodHandleTestTarget.class, "privateTest", StackFrame.METHOD_TYPE);
       privateStaticHandle = lookup.findStatic(MethodHandleTestTarget.class, "privateStaticTest", StackFrame.METHOD_TYPE);

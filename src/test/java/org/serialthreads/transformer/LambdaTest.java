@@ -13,7 +13,7 @@ import java.lang.invoke.MethodType;
 public class LambdaTest {
   @Test
   public void test() throws Throwable {
-    CallSite callSite = LambdaMetafactory.metafactory(
+    var callSite = LambdaMetafactory.metafactory(
       MethodHandles.lookup(),
       "execute",
       MethodType.methodType(Opcode.class, LambdaTest.class),
@@ -21,7 +21,7 @@ public class LambdaTest {
       MethodHandles.lookup().findVirtual(LambdaTest.class, "opcode00", MethodType.methodType(void.class)),
       MethodType.methodType(void.class));
 
-    Object o = callSite.getTarget().invoke(new LambdaTest());
+    var o = callSite.getTarget().invoke(new LambdaTest());
 
     System.out.println(o.getClass());
     System.out.println(o instanceof Opcode);

@@ -31,7 +31,7 @@ public class InvokeDynamicTest {
   }
 
   private static void printClass(Class<?> clazz) throws IOException {
-    ClassReader r = new ClassReader(clazz.getResourceAsStream(clazz.getSimpleName() + ".class"));
+    var r = new ClassReader(clazz.getResourceAsStream(clazz.getSimpleName() + ".class"));
     r.accept(new TraceClassVisitor(new PrintWriter(System.out)), 0);
   }
 

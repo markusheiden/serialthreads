@@ -16,9 +16,9 @@ public abstract class ClassInfoCacheAbstractTest {
 
   @Test
   public void testIsInterruptible() {
-    String mapName = Type.getType(Map.class).getInternalName();
-    String sortedMapName = Type.getType(SortedMap.class).getInternalName();
-    String objectDesc = Type.getType(Object.class).getDescriptor();
+    var mapName = Type.getType(Map.class).getInternalName();
+    var sortedMapName = Type.getType(SortedMap.class).getInternalName();
+    var objectDesc = Type.getType(Object.class).getDescriptor();
     assertFalse(cache.isInterruptible(sortedMapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc));
     assertFalse(cache.isInterruptible(mapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc));
     assertFalse(cache.isInterruptible(sortedMapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc));

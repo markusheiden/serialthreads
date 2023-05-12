@@ -1,11 +1,9 @@
 package org.serialthreads.transformer.code;
 
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.Value;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
@@ -15,11 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Type.VOID_TYPE;
 
 /**
  * Method related code.
  */
-public class MethodCode {
+public final class MethodCode {
   private static final String IRUNNABLE_NAME = Type.getType(IRunnable.class).getInternalName();
 
   //
@@ -32,7 +31,7 @@ public class MethodCode {
    * @param methodCall method call
    */
   public static boolean isStatic(MethodInsnNode methodCall) {
-    return methodCall.getOpcode() == Opcodes.INVOKESTATIC;
+    return methodCall.getOpcode() == INVOKESTATIC;
   }
 
   /**
@@ -50,7 +49,7 @@ public class MethodCode {
    * @param methodCall method call
    */
   public static boolean isNotVoid(MethodInsnNode methodCall) {
-    return !Type.getReturnType(methodCall.desc).equals(Type.VOID_TYPE);
+    return !Type.getReturnType(methodCall.desc).equals(VOID_TYPE);
   }
 
   /**
@@ -60,18 +59,18 @@ public class MethodCode {
    * @param metaInfo Meta information about method call
    */
   public static boolean isSelfCall(MethodInsnNode methodCall, MetaInfo metaInfo) {
-    if (methodCall.getOpcode() == Opcodes.INVOKESTATIC) {
+    if (methodCall.getOpcode() == INVOKESTATIC) {
       // static methods have no owner
       return false;
     }
 
-    Frame frameBefore = metaInfo.frameBefore;
+    var frameBefore = metaInfo.frameBefore;
 
     // "pop" all arguments from stack
-    Type[] argumentTypes = Type.getArgumentTypes(methodCall.desc);
-    int s = frameBefore.getStackSize() - argumentTypes.length;
+    var argumentTypes = Type.getArgumentTypes(methodCall.desc);
+    var s = frameBefore.getStackSize() - argumentTypes.length;
     assert s > 0 : "Check: stack pointer is positive";
-    Value ownerType = frameBefore.getStack(s - 1);
+    var ownerType = frameBefore.getStack(s - 1);
     return ownerType instanceof ExtendedValue && ((ExtendedValue) ownerType).getLocals().contains(0);
   }
 
@@ -95,9 +94,9 @@ public class MethodCode {
    * @param method method node to create arguments for
    */
   public static InsnList dummyArguments(MethodInsnNode method) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
-    for (Type type : Type.getArgumentTypes(method.desc)) {
+    for (var type : Type.getArgumentTypes(method.desc)) {
       instructions.add(ValueCodeFactory.code(type).pushNull());
     }
 
@@ -114,7 +113,7 @@ public class MethodCode {
    * @param clazz class
    */
   public static boolean isInterface(ClassNode clazz) {
-    return (clazz.access & Opcodes.ACC_INTERFACE) != 0;
+    return (clazz.access & ACC_INTERFACE) != 0;
   }
 
   //
@@ -127,7 +126,7 @@ public class MethodCode {
    * @param method method
    */
   public static boolean isStatic(MethodNode method) {
-    return (method.access & Opcodes.ACC_STATIC) != 0;
+    return (method.access & ACC_STATIC) != 0;
   }
 
   /**
@@ -136,7 +135,7 @@ public class MethodCode {
    * @param method method
    */
   public static boolean isNotStatic(MethodNode method) {
-    return (method.access & Opcodes.ACC_STATIC) == 0;
+    return (method.access & ACC_STATIC) == 0;
   }
 
   /**
@@ -145,7 +144,7 @@ public class MethodCode {
    * @param method method
    */
   public static boolean isAbstract(MethodNode method) {
-    return (method.access & Opcodes.ACC_ABSTRACT) != 0;
+    return (method.access & ACC_ABSTRACT) != 0;
   }
 
   /**
@@ -154,7 +153,7 @@ public class MethodCode {
    * @param method method
    */
   public static boolean isNotVoid(MethodNode method) {
-    return !Type.getReturnType(method.desc).equals(Type.VOID_TYPE);
+    return !Type.getReturnType(method.desc).equals(VOID_TYPE);
   }
 
   /**
@@ -190,7 +189,7 @@ public class MethodCode {
    */
   public static int firstLocal(MethodNode method) {
     int local = firstParam(method);
-    for (Type type : Type.getArgumentTypes(method.desc)) {
+    for (var type : Type.getArgumentTypes(method.desc)) {
       local += type.getSize();
     }
 
@@ -204,10 +203,10 @@ public class MethodCode {
    * @param method method node to create return statement for
    */
   public static InsnList dummyReturnStatement(MethodNode method) {
-    Type returnType = Type.getReturnType(method.desc);
+    var returnType = Type.getReturnType(method.desc);
     if (returnType.getSort() == Type.VOID) {
-      InsnList instructions = new InsnList();
-      instructions.add(new InsnNode(Opcodes.RETURN));
+      var instructions = new InsnList();
+      instructions.add(new InsnNode(RETURN));
       return instructions;
     }
 
@@ -220,16 +219,16 @@ public class MethodCode {
    * @param method method
    * @param frame frame check
    */
-  public static boolean isCompatible(MethodNode method, Frame frame) {
-    Type[] arguments = Type.getArgumentTypes(method.desc);
+  public static boolean isCompatible(MethodNode method, Frame<?> frame) {
+    var arguments = Type.getArgumentTypes(method.desc);
     // Condition "l < frame.getLocals()" holds  always, because each argument is stored in a local
     for (int l = isNotStatic(method) ? 1 : 0, a = 0; a < arguments.length; a++) {
-      BasicValue local = (BasicValue) frame.getLocal(l);
+      var local = (BasicValue) frame.getLocal(l);
       if (BasicValue.UNINITIALIZED_VALUE.equals(local)) {
         throw new IllegalArgumentException("Locals have to be initialized at least with arguments");
       }
 
-      Type argument = arguments[a];
+      var argument = arguments[a];
       if (!ValueCodeFactory.code(local).isCompatibleWith(argument)) {
         return false;
       }
@@ -237,7 +236,7 @@ public class MethodCode {
       l += argument.getSize();
     }
 
-    // scanned all arguments and they passed the test
+    // Scanned all arguments and they passed the test.
     return true;
   }
 
@@ -261,8 +260,9 @@ public class MethodCode {
    * @param method method
    */
   public static List<AbstractInsnNode> returnInstructions(MethodNode method) {
-    List<AbstractInsnNode> result = new ArrayList<>();
-    for (AbstractInsnNode instruction : method.instructions.toArray()) {
+    var result = new ArrayList<AbstractInsnNode>();
+    // TODO markus 2023-05-12: Why toArray()?
+    for (var instruction : method.instructions.toArray()) {
       if (isReturn(instruction)) {
         result.add(instruction);
       }
@@ -287,7 +287,7 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static boolean isLoad(AbstractInsnNode instruction) {
-    int opcode = instruction.getOpcode();
+    var opcode = instruction.getOpcode();
     return opcode >= ILOAD && opcode <= ALOAD;
   }
 
@@ -297,7 +297,7 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static boolean isStore(AbstractInsnNode instruction) {
-    int opcode = instruction.getOpcode();
+    var opcode = instruction.getOpcode();
     return opcode >= ISTORE && opcode <= ASTORE;
   }
 
@@ -307,7 +307,7 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static AbstractInsnNode previousInstruction(AbstractInsnNode instruction) {
-    for (AbstractInsnNode result = instruction.getPrevious(); result != null; result = result.getPrevious()) {
+    for (var result = instruction.getPrevious(); result != null; result = result.getPrevious()) {
       if (result.getOpcode() >= 0) {
         return result;
       }
@@ -322,7 +322,7 @@ public class MethodCode {
    * @param instruction Instruction
    */
   public static AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
-    for (AbstractInsnNode result = instruction.getNext(); result != null; result = result.getNext()) {
+    for (var result = instruction.getNext(); result != null; result = result.getNext()) {
       if (result.getOpcode() >= 0) {
         return result;
       }

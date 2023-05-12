@@ -54,7 +54,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   public Type getSuperClass(String className) {
     assert className != null : "Precondition: className != null";
 
-    String superClassName = getClassInfo(className).getSuperClassName();
+    var superClassName = getClassInfo(className).getSuperClassName();
     return superClassName == null ? null : Type.getObjectType(superClassName);
   }
 
@@ -63,7 +63,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     assert className != null : "Precondition: className != null";
     assert superClassName != null : "Precondition: superClassName != null";
 
-    Type classType = Type.getObjectType(className);
+    var classType = Type.getObjectType(className);
     if (classType.getSort() == Type.ARRAY) {
       return hasSuperClassArray(className, superClassName);
     }
@@ -72,8 +72,8 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   }
 
   private boolean hasSuperClassArray(String className, String superClassName) {
-    Type classType = Type.getObjectType(className);
-    Type superClassType = Type.getObjectType(superClassName);
+    var classType = Type.getObjectType(className);
+    var superClassType = Type.getObjectType(superClassName);
 
     if (superClassType.getSort() != Type.ARRAY) {
       // only possible non array super class is Object
@@ -90,7 +90,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       return classType.getElementType().equals(superClassType.getElementType());
     }
 
-    // non primitive arrays with same dimension -> check inheritance relationship of element types
+    // Non-primitive arrays with same dimension -> check inheritance relationship of element types.
     return hasSuperClass(classType.getElementType().getInternalName(), superClassType.getElementType().getInternalName());
   }
 
@@ -105,7 +105,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       return false;
     }
 
-    ClassInfo classInfo = getClassInfo(owner);
+    var classInfo = getClassInfo(owner);
     boolean result = classInfo.isExecutor(name + desc);
     logger.debug("{} is {} executor", methodName(owner, name, desc), result ? "an" : "no");
 
@@ -135,7 +135,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       return false;
     }
 
-    ClassInfo classInfo = getClassInfo(owner);
+    var classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
     logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
 
@@ -153,7 +153,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       return false;
     }
 
-    ClassInfo classInfo = getClassInfo(owner);
+    var classInfo = getClassInfo(owner);
     boolean result = classInfo.isInterrupt(name + desc);
     logger.debug("{} is {} interrupt", methodName(owner, name, desc), result ? "an" : "no");
 
@@ -172,7 +172,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    * @return class info
    */
   protected ClassInfo getClassInfo(String className) {
-    ClassInfo classInfo = classes.get(className);
+    var classInfo = classes.get(className);
     if (classInfo == null) {
       classInfo = process(className);
       classes.put(className, classInfo);
@@ -195,8 +195,8 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     String className = null;
     try {
-      Deque<String> toProcess = new LinkedList<>();
-      ClassInfo result = scan(owner, toProcess);
+      var toProcess = new LinkedList<String>();
+      var result = scan(owner, toProcess);
 
       while (!toProcess.isEmpty()) {
         className = toProcess.pollFirst();
@@ -230,7 +230,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    * @return class info visitor
    */
   protected ClassInfoVisitor read(ClassReader reader) {
-    ClassInfoVisitor classInfoVisitor = new ClassInfoVisitor();
+    var classInfoVisitor = new ClassInfoVisitor();
     reader.accept(classInfoVisitor, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
     return classInfoVisitor;
   }
@@ -245,7 +245,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    * @return ClassInfo
    */
   protected ClassInfo scan(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
-    ClassInfo result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
+    var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
     if (classInfoVisitor.getSuperClassName() != null) {
       // check super classes always first
       toProcess.addFirst(classInfoVisitor.getSuperClassName());

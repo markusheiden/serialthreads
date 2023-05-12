@@ -21,7 +21,8 @@ public final class StackFrame implements Serializable {
   public static int DEFAULT_FRAME_SIZE = 64;
   public static final int FAST_FRAME_SIZE = 8;
 
-  public static MethodType METHOD_TYPE = MethodType.methodType(void.class, Stack.class, StackFrame.class);
+  public static final MethodType METHOD_TYPE =
+          MethodType.methodType(void.class, Stack.class, StackFrame.class);
 
   public Stack stack;
   // double linked list of stack frames
@@ -208,7 +209,7 @@ public final class StackFrame implements Serializable {
    * Get owner.
    * Mainly for debugging purposes to be able to do a "not null" check.
    */
-  public final Object getOwner() {
+  public Object getOwner() {
     assert owner != null : "Check: owner != null";
     return owner;
   }
@@ -217,7 +218,7 @@ public final class StackFrame implements Serializable {
    * Get method index.
    * Mainly for debugging purposes to be able to do a ">= 0" check.
    */
-  public final int getMethod() {
+  public int getMethod() {
     assert method >= 0 : "Check: method >= 0";
     return method;
   }
@@ -225,7 +226,7 @@ public final class StackFrame implements Serializable {
   /**
    * Reset frame to empty state.
    */
-  public final void reset() {
+  public void reset() {
     owner = null;
     method = -1;
     methodHandle = null;
@@ -251,7 +252,7 @@ public final class StackFrame implements Serializable {
   // standard interface for capture / restore
   //
 
-  public final void pushStackObject(Object object) {
+  public void pushStackObject(Object object) {
     try {
       stackObjects[stackObjectPtr++] = object;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -259,15 +260,15 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final Object popStackObject() {
-    final int ptr = --stackObjectPtr;
-    Object result = stackObjects[ptr];
+  public Object popStackObject() {
+    int ptr = --stackObjectPtr;
+    var result = stackObjects[ptr];
     // TODO 2009-10-11 mh: remove deletion of reference for performance reasons?
     stackObjects[ptr] = null;
     return result;
   }
 
-  public final void pushStackInt(int value) {
+  public void pushStackInt(int value) {
     try {
       stackInts[stackIntPtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -275,11 +276,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final int popStackInt() {
+  public int popStackInt() {
     return stackInts[--stackIntPtr];
   }
 
-  public final void pushStackLong(long value) {
+  public void pushStackLong(long value) {
     try {
       stackLongs[stackLongPtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -287,11 +288,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final long popStackLong() {
+  public long popStackLong() {
     return stackLongs[--stackLongPtr];
   }
 
-  public final void pushStackFloat(float value) {
+  public void pushStackFloat(float value) {
     try {
       stackFloats[stackFloatPtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -299,11 +300,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final float popStackFloat() {
+  public float popStackFloat() {
     return stackFloats[--stackFloatPtr];
   }
 
-  public final void pushStackDouble(double value) {
+  public void pushStackDouble(double value) {
     try {
       stackDoubles[stackDoublePtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -311,11 +312,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final double popStackDouble() {
+  public double popStackDouble() {
     return stackDoubles[--stackDoublePtr];
   }
 
-  public final void pushLocalObject(Object object) {
+  public void pushLocalObject(Object object) {
     try {
       localObjects[localObjectPtr++] = object;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -323,15 +324,15 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final Object popLocalObject() {
+  public Object popLocalObject() {
     final int ptr = --localObjectPtr;
-    final Object result = localObjects[ptr];
+    final var result = localObjects[ptr];
     // TODO 2009-10-11 mh: remove deletion of reference for performance reasons?
     localObjects[ptr] = null;
     return result;
   }
 
-  public final void pushLocalInt(int value) {
+  public void pushLocalInt(int value) {
     try {
       localInts[localIntPtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -339,11 +340,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final int popLocalInt() {
+  public int popLocalInt() {
     return localInts[--localIntPtr];
   }
 
-  public final void pushLocalLong(long value) {
+  public void pushLocalLong(long value) {
     try {
       localLongs[localLongPtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -351,11 +352,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final long popLocalLong() {
+  public long popLocalLong() {
     return localLongs[--localLongPtr];
   }
 
-  public final void pushLocalFloat(float value) {
+  public void pushLocalFloat(float value) {
     try {
       localFloats[localFloatPtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -363,11 +364,11 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final float popLocalFloat() {
+  public float popLocalFloat() {
     return localFloats[--localFloatPtr];
   }
 
-  public final void pushLocalDouble(double value) {
+  public void pushLocalDouble(double value) {
     try {
       localDoubles[localDoublePtr++] = value;
     } catch (ArrayIndexOutOfBoundsException e) {
@@ -375,7 +376,7 @@ public final class StackFrame implements Serializable {
     }
   }
 
-  public final double popLocalDouble() {
+  public double popLocalDouble() {
     return localDoubles[--localDoublePtr];
   }
 
@@ -383,41 +384,41 @@ public final class StackFrame implements Serializable {
   // resize support
   //
 
-  protected final Object[] resize(Object[] old, Object object) {
+  protected Object[] resize(Object[] old, Object object) {
     final int oldLength = old.length;
-    Object[] result = new Object[oldLength << 1];
+    final var result = new Object[oldLength << 1];
     System.arraycopy(old, 0, result, 0, oldLength);
     result[oldLength] = object;
     return result;
   }
 
-  protected final int[] resize(int[] old, int value) {
+  protected int[] resize(int[] old, int value) {
     final int oldLength = old.length;
-    int[] result = new int[oldLength << 1];
+    final var result = new int[oldLength << 1];
     System.arraycopy(old, 0, result, 0, oldLength);
     result[oldLength] = value;
     return result;
   }
 
-  protected final long[] resize(long[] old, long value) {
+  protected long[] resize(long[] old, long value) {
     final int oldLength = old.length;
-    long[] result = new long[oldLength << 1];
+    final var result = new long[oldLength << 1];
     System.arraycopy(old, 0, result, 0, oldLength);
     result[oldLength] = value;
     return result;
   }
 
-  protected final float[] resize(float[] old, float value) {
+  protected float[] resize(float[] old, float value) {
     final int oldLength = old.length;
-    float[] result = new float[oldLength << 1];
+    final var result = new float[oldLength << 1];
     System.arraycopy(old, 0, result, 0, oldLength);
     result[oldLength] = value;
     return result;
   }
 
-  protected final double[] resize(double[] old, double value) {
+  protected double[] resize(double[] old, double value) {
     final int oldLength = old.length;
-    double[] result = new double[oldLength << 1];
+    final var result = new double[oldLength << 1];
     System.arraycopy(old, 0, result, 0, oldLength);
     result[oldLength] = value;
     return result;
@@ -427,7 +428,7 @@ public final class StackFrame implements Serializable {
   // optimized interface for capture / restore
   //
 
-  public final void resize(int max) {
+  public void resize(int max) {
     if (max < size) {
       return;
     }
@@ -452,32 +453,32 @@ public final class StackFrame implements Serializable {
   // resize support
   //
 
-  protected final Object[] resize(Object[] old) {
-    Object[] result = new Object[size];
+  protected Object[] resize(Object[] old) {
+    final var result = new Object[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
-  protected final int[] resize(int[] old) {
-    int[] result = new int[size];
+  protected int[] resize(int[] old) {
+    final var result = new int[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
-  protected final long[] resize(long[] old) {
-    long[] result = new long[size];
+  protected long[] resize(long[] old) {
+    final var result = new long[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
-  protected final float[] resize(float[] old) {
-    float[] result = new float[size];
+  protected float[] resize(float[] old) {
+    final var result = new float[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
-  protected final double[] resize(double[] old) {
-    double[] result = new double[size];
+  protected double[] resize(double[] old) {
+    final var result = new double[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }

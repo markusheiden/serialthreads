@@ -2,7 +2,6 @@ package org.serialthreads.transformer.analyzer;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -72,7 +71,7 @@ public class ExtendedVerifier extends SimpleVerifier {
     assert v != null : "Precondition: v != null";
     assert w != null : "Precondition: w != null";
 
-    BasicValue result = super.merge(v, w);
+    var result = super.merge(v, w);
     if (result.equals(UNINITIALIZED_VALUE)) {
       // return uninitialized value
       return result;
@@ -81,8 +80,8 @@ public class ExtendedVerifier extends SimpleVerifier {
     assert !v.equals(UNINITIALIZED_VALUE) : "Check: !v.equals(UNINITIALIZED_VALUE)";
     assert !w.equals(UNINITIALIZED_VALUE) : "Check: !w.equals(UNINITIALIZED_VALUE)";
 
-    final ExtendedValue ev = (ExtendedValue) v;
-    final ExtendedValue ew = (ExtendedValue) w;
+    var ev = (ExtendedValue) v;
+    var ew = (ExtendedValue) w;
     if (ev != result || !ev.equalsValue(ew)) {
       // the type has been changed -> create new value with merged constant and locals or
       // the type has not been changed, but the constant or the locals have to be merged
@@ -90,7 +89,7 @@ public class ExtendedVerifier extends SimpleVerifier {
       boolean isConstant = ev.isConstant() && ew.isConstant() &&
         (ev.getConstant() == ew.getConstant() || ev.getConstant() != null && ev.getConstant().equals(ew.getConstant()));
 
-      Set<Integer> mergedLocals = new HashSet<>(ev.getLocals());
+      var mergedLocals = new HashSet<>(ev.getLocals());
       mergedLocals.retainAll(ew.getLocals());
 
       return isConstant ?
@@ -120,7 +119,6 @@ public class ExtendedVerifier extends SimpleVerifier {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   protected boolean isAssignableFrom(final Type t, final Type u) {
     if (t.equals(u)) {
       return true;
@@ -145,7 +143,7 @@ public class ExtendedVerifier extends SimpleVerifier {
   }
 
   @Override
-  protected Class getClass(Type t) {
+  protected Class<?> getClass(Type t) {
     throw new UnsupportedOperationException("Classes should be loaded via the class info cache");
   }
 }

@@ -94,7 +94,7 @@ public final class Stack implements SerialThread {
    *
    * @return the frame for the method
    */
-  public final StackFrame enterMethod() {
+  public StackFrame enterMethod() {
     return frame = frame.next;
   }
 
@@ -104,7 +104,7 @@ public final class Stack implements SerialThread {
    *
    * @return the frame for the method
    */
-  public final StackFrame enterFirstMethod() {
+  public StackFrame enterFirstMethod() {
     return frame = first;
   }
 
@@ -114,7 +114,7 @@ public final class Stack implements SerialThread {
    * @param owner Owner of the called method == this in the called method. for the frame one level above
    * @param method Index of method which will be left
    */
-  public final void leaveMethod(Object owner, int method) {
+  public void leaveMethod(Object owner, int method) {
     frame.method = method;
     frame.previous.owner = owner;
   }
@@ -124,7 +124,7 @@ public final class Stack implements SerialThread {
    *
    * @param owner Owner of the called method == this in the called method. for the frame one level above
    */
-  public final void leaveMethod(Object owner) {
+  public void leaveMethod(Object owner) {
     frame.previous.owner = owner;
   }
 
@@ -133,7 +133,7 @@ public final class Stack implements SerialThread {
    *
    * @param method Index of method which will be left
    */
-  public final void leaveMethod(int method) {
+  public void leaveMethod(int method) {
     frame.method = method;
   }
 
@@ -143,7 +143,7 @@ public final class Stack implements SerialThread {
    *
    * @param resetTo Frame to reset to
    */
-  public final void resetTo(StackFrame resetTo) {
+  public void resetTo(StackFrame resetTo) {
     for (StackFrame frame = resetTo.next; frame != null; frame = frame.next) {
       frame.reset();
     }
@@ -152,7 +152,7 @@ public final class Stack implements SerialThread {
   /**
    * Resets the complete stack.
    */
-  public final void reset() {
+  public void reset() {
     resetTo(first);
   }
 

@@ -36,7 +36,7 @@ class RunMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceRunReturns();
-    List<LabelNode> restores = insertCaptureAndRestoreCode(true);
+    var restores = insertCaptureAndRestoreCode(true);
     createRestoreHandlerRun(restores);
     addFrame();
     fixMaxs();
@@ -58,7 +58,7 @@ class RunMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for run");
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // frame = this.$$frame$$;
     instructions.add(threadCode.getRunFrame(clazz.name, localFrame));
@@ -67,7 +67,7 @@ class RunMethodTransformer extends MethodTransformer {
 
     // Add label for first call of run() at index -1, see "startIndex" below.
     // Empty frames are expected to have method == -1.
-    LabelNode startRun = new LabelNode();
+    var startRun = new LabelNode();
     restores.add(0, startRun);
 
     instructions.add(restoreCodeDispatcher(localFrame, restores, -1));

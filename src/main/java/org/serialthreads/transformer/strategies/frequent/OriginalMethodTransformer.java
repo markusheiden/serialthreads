@@ -37,7 +37,7 @@ class OriginalMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    List<LabelNode> restores = insertCaptureAndRestoreCode(false);
+    var restores = insertCaptureAndRestoreCode(false);
     createRestoreHandlerMethod(restores);
     fixMaxs();
     nameLocals();
@@ -55,15 +55,15 @@ class OriginalMethodTransformer extends MethodTransformer {
 
     logger.debug("    Creating restore handler for method");
 
-    LabelNode normal = new LabelNode();
+    var normal = new LabelNode();
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     if (isStatic(method)) {
       // thread = SerialThreadManager.getThread();
       instructions.add(threadCode.getThread(localThread));
     } else {
-      LabelNode exist = new LabelNode();
+      var exist = new LabelNode();
       // thread = this.$$thread$$;
       instructions.add(threadCode.getRunThread(clazz.name, localThread));
       instructions.add(new VarInsnNode(ALOAD, localThread));

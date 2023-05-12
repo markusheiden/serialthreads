@@ -82,8 +82,8 @@ public abstract class AbstractTransformer implements ITransformer {
   @Override
   public byte[] transform(byte[] byteCode) throws NotTransformableException {
     // Read class.
-    ClassReader reader = new ClassReader(byteCode);
-    ClassNode clazz = new ClassNode();
+    var reader = new ClassReader(byteCode);
+    var clazz = new ClassNode();
     reader.accept(clazz, SKIP_FRAMES);
 
     // Transform class.
@@ -100,11 +100,11 @@ public abstract class AbstractTransformer implements ITransformer {
     }
 
     // Write class.
-    ClassWriter writer = new ClassWriter(COMPUTE_FRAMES);
+    var writer = new ClassWriter(COMPUTE_FRAMES);
     clazz.accept(check? new CheckClassAdapter(writer) : writer);
 
     // Log transformed byte code.
-    byte[] result = writer.toByteArray();
+    var result = writer.toByteArray();
     if (logger.isDebugEnabled()) {
       logger.debug("Byte code:\n{}", debug(result));
     }
@@ -121,9 +121,9 @@ public abstract class AbstractTransformer implements ITransformer {
     logger.info("Transforming class {} with {}", clazz.name, this);
 
     // separate constructors and methods
-    List<MethodNode> constructors = new ArrayList<>(clazz.methods.size());
-    List<MethodNode> methods = new ArrayList<>(clazz.methods.size());
-    for (MethodNode method : clazz.methods) {
+    var constructors = new ArrayList<MethodNode>(clazz.methods.size());
+    var methods = new ArrayList<MethodNode>(clazz.methods.size());
+    for (var method : clazz.methods) {
       if (method.name.equals("<init>")) {
         constructors.add(method);
       } else {
@@ -131,9 +131,9 @@ public abstract class AbstractTransformer implements ITransformer {
       }
     }
 
-    List<MethodNode> allTransformedMethods = new ArrayList<>(methods.size() * 2);
-    for (MethodNode method : methods) {
-      List<MethodNode> transformedMethods = transformMethod(clazz, method);
+    var allTransformedMethods = new ArrayList<MethodNode>(methods.size() * 2);
+    for (var method : methods) {
+      var transformedMethods = transformMethod(clazz, method);
       if (transformedMethods == null) {
         // method not transformed? -> check that it contains no calls of interruptible methods
         check(clazz, method);
@@ -165,9 +165,9 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method Method to check
    */
   private void check(ClassNode clazz, MethodNode method) {
-    for (AbstractInsnNode instruction : method.instructions.toArray()) {
+    for (var instruction : method.instructions.toArray()) {
       if (instruction.getType() == AbstractInsnNode.METHOD_INSN) {
-        MethodInsnNode methodCall = (MethodInsnNode) instruction;
+        var methodCall = (MethodInsnNode) instruction;
 
         if (!classInfoCache.isInterruptible(methodCall)) {
           // nothing to check on not interruptible methods
@@ -193,7 +193,7 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param methods transformed methods
    */
   private void reanalyzeMethods(ClassNode clazz, List<MethodNode> methods) throws NotTransformableException {
-    for (MethodNode method : methods) {
+    for (var method : methods) {
       try {
         ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
       } catch (Exception e) {
@@ -253,9 +253,9 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method method node to transform
    */
   protected boolean hasNoInterruptibleMethodCalls(MethodNode method) {
-    for (AbstractInsnNode instruction : method.instructions.toArray()) {
-      if (instruction instanceof MethodInsnNode) {
-        if (classInfoCache.isInterruptible((MethodInsnNode) instruction)) {
+    for (var instruction : method.instructions.toArray()) {
+      if (instruction instanceof MethodInsnNode methodCall) {
+        if (classInfoCache.isInterruptible(methodCall)) {
           return false;
         }
       }
@@ -337,11 +337,11 @@ public abstract class AbstractTransformer implements ITransformer {
 
     int localThread = 1;
 
-    for (AbstractInsnNode returnInstruction : returnInstructions(constructor)) {
+    for (var returnInstruction : returnInstructions(constructor)) {
       // constructors may not return a value
       assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
 
-      InsnList instructions = new InsnList();
+      var instructions = new InsnList();
       // thread = new Stack(this, defaultFrameSize);
       // this.$$thread$$ = thread;
       instructions.add(threadCode.initRunThread(clazz.name, defaultFrameSize, localThread));
@@ -363,12 +363,12 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param clazz clazz to alter
    */
   private void createGetThread(ClassNode clazz) {
-    MethodNode getThread = new MethodNode(ACC_PUBLIC, "getThread", "()" + THREAD_DESC, null, new String[0]);
+    var getThread = new MethodNode(ACC_PUBLIC, "getThread", "()" + THREAD_DESC, null, new String[0]);
 
     getThread.maxLocals = 2;
     getThread.maxStack = 1;
 
-    InsnList instructions = getThread.instructions;
+    var instructions = getThread.instructions;
     // return this.$$thread$$;
     instructions.add(threadCode.getRunThread(clazz.name, 1));
     instructions.add(new VarInsnNode(ALOAD, 1));
@@ -399,11 +399,11 @@ public abstract class AbstractTransformer implements ITransformer {
   @SuppressWarnings({"UnusedDeclaration"})
   protected void logDebug(Frame frame) {
     for (int i = 0; i < frame.getLocals(); i++) {
-      BasicValue local = (BasicValue) frame.getLocal(i);
+      var local = (BasicValue) frame.getLocal(i);
       logger.debug("        Local {}: {}", i, local.isReference() ? local.getType().getDescriptor() : local);
     }
     for (int i = 0; i < frame.getStackSize(); i++) {
-      BasicValue stack = (BasicValue) frame.getStack(i);
+      var stack = (BasicValue) frame.getStack(i);
       logger.debug("        Stack {}: {}", i, stack.isReference() ? stack.getType().getDescriptor() : stack);
     }
   }

@@ -31,7 +31,7 @@ public class ReferenceValueCode extends AbstractValueCode {
 
   @Override
   protected InsnList cast() {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(new TypeInsnNode(CHECKCAST, concreteType.getInternalName()));
 
     return instructions;

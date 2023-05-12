@@ -54,7 +54,7 @@ public class ClassInfo {
 
     superClasses.add(className);
 
-    for (MethodInfo method : methods.values()) {
+    for (var method : methods.values()) {
       if (method.hasAnnotation(TYPE_INTERRUPT) && !method.getDesc().equals("()V")) {
         throw new NotTransformableException(
           "Interrupt method " + method.getId() + " in class " + className +
@@ -177,9 +177,9 @@ public class ClassInfo {
     logger.debug("Merging interruptible status of class {} into status of class {}", classInfo.getClassName(), getClassName());
 
     superClasses.addAll(classInfo.getSuperClasses());
-    for (String methodId : classInfo.getMethods()) {
-      MethodInfo method = classInfo.getMethodInfo(methodId);
-      MethodInfo ownerMethod = getMethodInfo(methodId);
+    for (var methodId : classInfo.getMethods()) {
+      var method = classInfo.getMethodInfo(methodId);
+      var ownerMethod = getMethodInfo(methodId);
       if (ownerMethod == null) {
         // copy inherited method info to this class
         ownerMethod = method.copy();

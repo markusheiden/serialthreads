@@ -31,11 +31,11 @@ public class ChainedRunnable {
   public static ChainedRunnable[] chain(Collection<? extends IRunnable> runnables) {
     int count = runnables.size();
 
-    ChainedRunnable[] result = new ChainedRunnable[count];
-    Iterator<? extends IRunnable> iterator = runnables.iterator();
+    var result = new ChainedRunnable[count];
+    var iterator = runnables.iterator();
     result[0] = new ChainedRunnable(iterator.next());
     for (int i = 1; i < count; i++) {
-      ChainedRunnable chain = new ChainedRunnable(iterator.next());
+      var chain = new ChainedRunnable(iterator.next());
       result[i] = chain;
       result[i - 1].next = chain;
     }

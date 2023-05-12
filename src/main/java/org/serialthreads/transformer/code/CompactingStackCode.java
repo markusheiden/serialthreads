@@ -32,21 +32,21 @@ public class CompactingStackCode extends AbstractStackCode {
 
    @Override
    public InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-      InsnList instructions = new InsnList();
+      var instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
          return instructions;
       }
 
-      ExtendedFrame frameAfter = metaInfo.frameAfter;
+      var frameAfter = metaInfo.frameAfter;
       final boolean isMethodNotStatic = isNotStatic(methodCall);
       final boolean isCallNotVoid = isNotVoid(methodCall);
 
       // save stack
       // the topmost element is a dummy return value, if the called method returns one
-      int[] stackIndexes = stackIndexes(frameAfter);
+      var stackIndexes = stackIndexes(frameAfter);
       for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
-         ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
+         var value = (ExtendedValue) frameAfter.getStack(stack);
          int lowestLocal = frameAfter.getLowestNeededLocal(value);
          if (value.isConstant() || lowestLocal >= 0) {
             // just pop the value from stack, because the stack value is constant or stored in a local too.
@@ -57,14 +57,14 @@ public class CompactingStackCode extends AbstractStackCode {
       }
 
       // save locals separated by type
-      for (IValueCode code : ValueCodeFactory.CODES) {
-         List<Integer> pushLocals = new ArrayList<>(frameAfter.getLocals());
+      for (var code : ValueCodeFactory.CODES) {
+         var pushLocals = new ArrayList<Integer>(frameAfter.getLocals());
 
-         // do not store local 0 for non static methods, because it always contains "this"
+         // Do not store local 0 for non-static methods, because it always contains "this".
          for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-            BasicValue value = frameAfter.getLocal(local);
+            var value = frameAfter.getLocal(local);
             if (code.isResponsibleFor(value.getType())) {
-               ExtendedValue extendedValue = (ExtendedValue) value;
+               var extendedValue = (ExtendedValue) value;
                int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
                if (local == lowestLocal) {
                   // Only store value, if it is not stored in a lower needed local.
@@ -73,10 +73,10 @@ public class CompactingStackCode extends AbstractStackCode {
             }
          }
 
-         Iterator<Integer> iter = pushLocals.iterator();
+         var iter = pushLocals.iterator();
          for (int i = 0; iter.hasNext(); i++) {
             int local = iter.next();
-            IValueCode localCode = code(frameAfter.getLocal(local));
+            var localCode = code(frameAfter.getLocal(local));
             instructions.add(localCode.pushLocal(local, i, iter.hasNext(), localFrame));
          }
       }
@@ -86,26 +86,26 @@ public class CompactingStackCode extends AbstractStackCode {
 
    @Override
    public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-      InsnList instructions = new InsnList();
+      var instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
          return instructions;
       }
 
-      ExtendedFrame frameAfter = metaInfo.frameAfter;
+      var frameAfter = metaInfo.frameAfter;
       final boolean isMethodNotStatic = isNotStatic(methodCall);
       final boolean isCallNotVoid = isNotVoid(methodCall);
 
       // Restore locals by type.
-      for (IValueCode code : ValueCodeFactory.CODES) {
-         List<Integer> popLocals = new ArrayList<>();
-         InsnList copyLocals = new InsnList();
+      for (var code : ValueCodeFactory.CODES) {
+         var popLocals = new ArrayList<Integer>();
+         var copyLocals = new InsnList();
 
-         // Do not restore local 0 for non static methods, because it always contains "this".
+         // Do not restore local 0 for non-static methods, because it always contains "this".
          for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-            BasicValue value = frameAfter.getLocal(local);
+            var value = frameAfter.getLocal(local);
             if (code.isResponsibleFor(value.getType())) {
-               ExtendedValue extendedValue = (ExtendedValue) value;
+               var extendedValue = (ExtendedValue) value;
                // Ignore not needed locals.
                int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
                if (local == lowestLocal) {
@@ -122,10 +122,10 @@ public class CompactingStackCode extends AbstractStackCode {
          }
 
          // first restore not duplicated locals, if any
-         Iterator<Integer> iter = popLocals.iterator();
+         var iter = popLocals.iterator();
          for (int i = 0; iter.hasNext(); i++) {
             int local = iter.next();
-            IValueCode localCode = code(frameAfter.getLocal(local));
+            var localCode = code(frameAfter.getLocal(local));
             instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
          }
 
@@ -135,10 +135,10 @@ public class CompactingStackCode extends AbstractStackCode {
 
       // restore stack
       // the topmost element is a dummy return value, if the called method is not a void method
-      int[] stackIndexes = stackIndexes(frameAfter);
+      var stackIndexes = stackIndexes(frameAfter);
       for (int stack = 0, end = isCallNotVoid ? frameAfter.getStackSize() - 1 : frameAfter.getStackSize(); stack < end; stack++) {
-         ExtendedValue value = (ExtendedValue) frameAfter.getStack(stack);
-         int lowestLocal = frameAfter.getLowestNeededLocal(value);
+         var value = (ExtendedValue) frameAfter.getStack(stack);
+         var lowestLocal = frameAfter.getLowestNeededLocal(value);
          if (value.isConstant()) {
             // the stack value is constant -> push constant
             logger.debug("        Detected constant value on stack: {} / value {}", value, value.getConstant());
@@ -164,11 +164,11 @@ public class CompactingStackCode extends AbstractStackCode {
     * @return array stack element -> stack element index.
     */
    private int[] stackIndexes(Frame frame) {
-      int[] result = new int[frame.getStackSize()];
+      var result = new int[frame.getStackSize()];
       Arrays.fill(result, -1);
-      for (IValueCode code : ValueCodeFactory.CODES) {
+      for (var code : ValueCodeFactory.CODES) {
          for (int stack = 0, end = frame.getStackSize(), i = 0; stack < end; stack++) {
-            BasicValue value = (BasicValue) frame.getStack(stack);
+            var value = (BasicValue) frame.getStack(stack);
             if (code.isResponsibleFor(value.getType())) {
                result[stack] = i++;
             }

@@ -11,7 +11,7 @@ import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.IntValueCode.push;
 
 /**
- * Base code that is independent from stack frame storage algorithm.
+ * Base code that is independent of stack frame storage algorithm.
  */
 public abstract class AbstractStackCode implements ThreadCode {
   private static final String OBJECT_DESC = Type.getType(Object.class).getDescriptor();
@@ -41,13 +41,13 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList initRunThread(String className, int defaultFrameSize, int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // thread = new Stack(this, defaultFrameSize);
     instructions.add(new TypeInsnNode(NEW, THREAD_IMPL_NAME));
     instructions.add(new InsnNode(DUP));
     instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(IntValueCode.push(defaultFrameSize));
+    instructions.add(push(defaultFrameSize));
     instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_IMPL_NAME, "<init>", "(" + OBJECT_DESC + "I)V", false));
     instructions.add(new VarInsnNode(ASTORE, localThread));
 
@@ -59,7 +59,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList initThread(String className, int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // this.$$thread$$ = stack;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new VarInsnNode(ALOAD, localThread));
@@ -69,7 +69,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList getRunThread(String className, int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = this.$$thread$$;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new FieldInsnNode(GETFIELD, className, THREAD, THREAD_IMPL_DESC));
@@ -79,7 +79,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList getThread(int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // thread = SerialThreadManager.getThread();
     instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "getThread", "()" + THREAD_DESC, false));
     instructions.add(new TypeInsnNode(CHECKCAST, THREAD_IMPL_NAME));
@@ -89,7 +89,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList setThread(int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // SerialThreadManager.setThread(thread);
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new MethodInsnNode(INVOKESTATIC, MANAGER_NAME, "setThread", "(" + THREAD_DESC + ")V", false));
@@ -98,7 +98,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList pushThread(int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = frame.stack;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "stack", THREAD_IMPL_DESC));
@@ -112,7 +112,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList initRunFrame(int localThread, String className) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // this.$$frame$$ = thread.first;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new VarInsnNode(ALOAD, localThread));
@@ -123,7 +123,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList getRunFrame(String className, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // frame = this.$$frame$$;
     instructions.add(new VarInsnNode(ALOAD, 0));
     instructions.add(new FieldInsnNode(GETFIELD, className, FRAME, FRAME_IMPL_DESC));
@@ -137,13 +137,13 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList getNextFrame(int localPreviousFrame, int localFrame, boolean addIfNotPresent) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     // frame = previousFrame.next;
     instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "next", FRAME_IMPL_DESC));
     if (addIfNotPresent) {
-      LabelNode normal = new LabelNode();
+      var normal = new LabelNode();
 
       instructions.add(new InsnNode(DUP));
       instructions.add(new JumpInsnNode(IFNONNULL, normal));
@@ -160,7 +160,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList setOwner(int localPreviousFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // previousFrame.owner = this;
     instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
     instructions.add(new VarInsnNode(ALOAD, 0));
@@ -170,7 +170,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList setMethod(int localFrame, int position) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // frame.method = position;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(push(position));
@@ -180,7 +180,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList setSerializing(int localThread, boolean serializing) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // thread.serializing = serializing;
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new InsnNode(serializing ? ICONST_1 : ICONST_0));
@@ -194,7 +194,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList pushSerializing(int localThread) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = thread.serializing;
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
@@ -203,7 +203,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList getPreviousFrame(int localThread, int localPreviousFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // previousFrame = thread.frame;
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "frame", FRAME_IMPL_DESC));
@@ -213,7 +213,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList setFrame(int localThread, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // thread.frame = frame;
     instructions.add(new VarInsnNode(ALOAD, localThread));
     instructions.add(new VarInsnNode(ALOAD, localFrame));
@@ -223,7 +223,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList pushOwner(int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = frame.owner;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
@@ -232,7 +232,7 @@ public abstract class AbstractStackCode implements ThreadCode {
 
   @Override
   public InsnList pushMethod(int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     // stack = frame.method;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
     instructions.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "method", "I"));

@@ -104,17 +104,16 @@ public abstract class AbstractMethodTransformer {
    */
   protected void analyze() throws AnalyzerException {
     // Init meta information
-    Frame[] frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
-    InsnList instructions = method.instructions;
+    var frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
+    var instructions = method.instructions;
     for (int i = 0, e = instructions.size(), last = e - 1; i < e; i++) {
       metaInfos.put(instructions.get(i), new MetaInfo((ExtendedFrame) frames[i], i < last ? (ExtendedFrame) frames[i + 1] : null));
     }
 
     // Tag special instructions
     for (int i = 0, e = instructions.size(); i < e; i++) {
-      AbstractInsnNode instruction = instructions.get(i);
-      if (instruction instanceof MethodInsnNode) {
-        MethodInsnNode methodCall = (MethodInsnNode) instruction;
+      var instruction = instructions.get(i);
+      if (instruction instanceof MethodInsnNode methodCall) {
         if (classInfoCache.isInterruptible(methodCall)) {
           interruptibleMethodCalls.add(methodCall);
           tag(instruction, TAG_INTERRUPTIBLE);
@@ -150,7 +149,7 @@ public abstract class AbstractMethodTransformer {
   protected InsnList restoreCodeDispatcher(int localFrame, List<LabelNode> restores, int startIndex) {
     assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     if (restores.size() == 1) {
       // just one method call -> nothing to dispatch -> execute directly
@@ -158,7 +157,7 @@ public abstract class AbstractMethodTransformer {
       return instructions;
     }
 
-    LabelNode defaultLabel = new LabelNode();
+    var defaultLabel = new LabelNode();
     restores.replaceAll(label -> label != null? label : defaultLabel);
 
     // switch(currentFrame.method) // branch to specific restore code
@@ -186,8 +185,8 @@ public abstract class AbstractMethodTransformer {
    */
   protected void insertCaptureCode() {
     int methodCallIndex = 0;
-    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
-      MetaInfo metaInfo = metaInfos.get(methodCall);
+    for (var methodCall : interruptibleMethodCalls) {
+      var metaInfo = metaInfos.get(methodCall);
       createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false, false);
     }
   }
@@ -200,10 +199,10 @@ public abstract class AbstractMethodTransformer {
    * @return Labels pointing to the generated restore codes for method calls.
    */
   protected List<LabelNode> insertCaptureAndRestoreCode(boolean suppressOwner) {
-    List<LabelNode> restores = new ArrayList<>(interruptibleMethodCalls.size());
+    var restores = new ArrayList<LabelNode>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
-    for (MethodInsnNode methodCall : interruptibleMethodCalls) {
-      MetaInfo metaInfo = metaInfos.get(methodCall);
+    for (var methodCall : interruptibleMethodCalls) {
+      var metaInfo = metaInfos.get(methodCall);
       restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, true));
     }
 
@@ -229,12 +228,12 @@ public abstract class AbstractMethodTransformer {
   protected void replaceRunReturns() {
     // TODO 2013-11-24 mh: implement as method -> call method?
 
-    LabelNode exception = new LabelNode();
-    for (AbstractInsnNode returnInstruction : returnInstructions(method)) {
+    var exception = new LabelNode();
+    for (var returnInstruction : returnInstructions(method)) {
       method.instructions.set(returnInstruction, new JumpInsnNode(GOTO, exception));
     }
 
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
     instructions.add(exception);
     // throw new ThreadFinishedException(this.toString());
     instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
@@ -301,7 +300,7 @@ public abstract class AbstractMethodTransformer {
    * @return generated restore code.
    */
   protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    InsnList instructions = new InsnList();
+    var instructions = new InsnList();
 
     if (isSelfCall(methodCall, metaInfo)) {
       // self call: owner == this
@@ -336,8 +335,8 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label at the start of the method, new label otherwise.
    */
   protected LabelNode insertLabelAtStart() {
-    AbstractInsnNode first = method.instructions.getFirst();
-    LabelNode label = searchLabel(first, AbstractInsnNode::getNext);
+    var first = method.instructions.getFirst();
+    var label = searchLabel(first, AbstractInsnNode::getNext);
     if (label == null) {
       label = new LabelNode();
       method.instructions.insertBefore(first, label);
@@ -353,7 +352,7 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label before the instruction, new label otherwise.
    */
   protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
-    LabelNode label = searchLabel(instruction, AbstractInsnNode::getPrevious);
+    var label = searchLabel(instruction, AbstractInsnNode::getPrevious);
     if (label == null) {
       label = new LabelNode();
       method.instructions.insertBefore(instruction, label);
@@ -369,7 +368,7 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label after the instruction, new label otherwise.
    */
   protected LabelNode insertLabelAfter(AbstractInsnNode instruction) {
-    LabelNode label = searchLabel(instruction, AbstractInsnNode::getNext);
+    var label = searchLabel(instruction, AbstractInsnNode::getNext);
     if (label == null) {
       label = new LabelNode();
       method.instructions.insert(instruction, label);
@@ -384,8 +383,8 @@ public abstract class AbstractMethodTransformer {
    * @return Existing label, if there is already a label at the end of the method, new label otherwise.
    */
   protected LabelNode insertLabelAtEnd() {
-    final AbstractInsnNode last = method.instructions.getLast();
-    LabelNode label = searchLabel(last, AbstractInsnNode::getPrevious);
+    var last = method.instructions.getLast();
+    var label = searchLabel(last, AbstractInsnNode::getPrevious);
     if (label == null) {
       label = new LabelNode();
       method.instructions.insert(last, label);
@@ -402,9 +401,9 @@ public abstract class AbstractMethodTransformer {
    * @return Label, if there is a label before any real instruction, null otherwise.
    */
   private LabelNode searchLabel(AbstractInsnNode start, Function<AbstractInsnNode, AbstractInsnNode> direction) {
-    for (AbstractInsnNode l = start; l != null && l.getOpcode() < 0; l = direction.apply(l)) {
-      if (l instanceof LabelNode) {
-        return (LabelNode) l;
+    for (var l = start; l != null && l.getOpcode() < 0; l = direction.apply(l)) {
+      if (l instanceof LabelNode labelNode) {
+        return labelNode;
       }
     }
 

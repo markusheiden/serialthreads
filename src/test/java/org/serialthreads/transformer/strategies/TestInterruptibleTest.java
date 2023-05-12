@@ -11,7 +11,7 @@ public class TestInterruptibleTest {
    */
   @Test
   public void testNoTransform() {
-    TestInterruptible test = new TestInterruptible(false);
+    var test = new TestInterruptible(false);
     test.run();
     test.assertExpectedResult();
   }

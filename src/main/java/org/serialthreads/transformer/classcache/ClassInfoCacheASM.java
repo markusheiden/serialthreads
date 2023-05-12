@@ -37,7 +37,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
 
-    InputStream classFile = classLoader.getResourceAsStream(className + ".class");
+    var classFile = classLoader.getResourceAsStream(className + ".class");
     return scan(read(new ClassReader(classFile)), toProcess);
   }
 }
