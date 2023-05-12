@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test runnable for transformer integration tests.
- * <p />
+ * <p>
  * Extends base class to test base class transformation.
  * Implements interface to test interface transformation.
  */

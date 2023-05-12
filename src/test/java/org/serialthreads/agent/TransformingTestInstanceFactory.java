@@ -12,7 +12,7 @@ import java.lang.reflect.Constructor;
 
 /**
  * {@link TestInstanceFactory} using a {@link TransformingClassLoader} for loading all classes.
- * <p />
+ * <p>
  * Expects test class to have a method "String[] getClassPrefixes()" to define the class prefixes.
  */
 public class TransformingTestInstanceFactory implements TestInstanceFactory {
