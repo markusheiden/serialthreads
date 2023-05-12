@@ -140,7 +140,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
 
   /**
    * {@inheritDoc}
-   * <p/>
+   * <p>
    * Always uses extended values.
    */
   @Override
@@ -159,7 +159,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
 
   /**
    * {@inheritDoc}
-   * <p/>
+   * <p>
    * Always uses extended values.
    */
   @Override

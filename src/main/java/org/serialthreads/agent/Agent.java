@@ -13,7 +13,7 @@ import java.security.ProtectionDomain;
 /**
  * Byte code enhancement agent.
  * Does the same as {@link TransformingClassLoader}.
- * <p/>
+ * <p>
  * TODO mh: Do not throw exception in case of transforming problems, because otherwise the vm disables the transformer
  */
 public class Agent implements ClassFileTransformer {

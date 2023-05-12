@@ -52,7 +52,7 @@ public class TransformingClassLoader extends ClassLoader {
 
   /**
    * {@inheritDoc}
-   * <p/>
+   * <p>
    * Tries to transform class first, if possible.
    */
   @Override

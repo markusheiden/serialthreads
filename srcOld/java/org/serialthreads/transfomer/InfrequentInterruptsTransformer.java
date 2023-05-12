@@ -19,7 +19,7 @@ import static org.serialthreads.transformer.code.MethodCode.*;
 
 /**
  * Class adapter executing byte code enhancement of all methods.
- * <p/>
+ * <p>
  * TODO 2008-08-29 mh: Add line numbers to generated code?
  * TODO 2008-08-29 mh: Name local variables in generated code?
  * TODO 2008-08-29 mh: Need to fix longs and doubles (size==2)?

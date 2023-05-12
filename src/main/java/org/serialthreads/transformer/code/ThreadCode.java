@@ -185,7 +185,7 @@ public interface ThreadCode {
 
   /**
    * Get (previous) frame from {@link Stack#frame} and store it to local #localPreviousFrame.
-   * <p/>
+   * <p>
    * Needed just for transformers not passing a {@link StackFrame} as parameter.
    *
    * @param localThread
@@ -198,7 +198,7 @@ public interface ThreadCode {
 
   /**
    * Set frame to {@link Stack#frame}.
-   * <p/>
+   * <p>
    * Needed just for transformers not passing a {@link StackFrame} as parameter.
    *
    * @param localThread

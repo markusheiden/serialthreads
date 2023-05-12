@@ -315,7 +315,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
   /**
    * Does the method need a frame for storing its state?.
-   * <p/>
+   * <p>
    * A frame is not needed, if following conditions apply:
    * - There is just one interruptible method call (-> no need to store the method index)
    * - The method call is a static or self call (-> no need to store the method owner)
