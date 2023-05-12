@@ -17,7 +17,7 @@ public abstract class AbstractPerformanceTest {
   private long startTime;
 
   @Test
-  public synchronized void testPerformance() throws Exception {
+  synchronized void testPerformance() throws Exception {
     start();
     wait(TIME);
     stop();

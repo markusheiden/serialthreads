@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * Test to analyze performance of threading with synchronization.
  */
-public class SynchronizedBarrierTest extends AbstractPerformanceTest {
+class SynchronizedBarrierTest extends AbstractPerformanceTest {
   private int barrierCount;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     barrierCount = 0;
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new SynchronizedCounter(i);
@@ -24,7 +24,7 @@ public class SynchronizedBarrierTest extends AbstractPerformanceTest {
   private class SynchronizedCounter extends Counter {
     private int nextBarrier;
 
-    public SynchronizedCounter(int number) {
+    SynchronizedCounter(int number) {
       super(number);
       nextBarrier = barrierCount + COUNT;
     }

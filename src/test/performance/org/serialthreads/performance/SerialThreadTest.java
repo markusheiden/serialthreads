@@ -14,13 +14,13 @@ import org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTran
  */
 @ExtendWith(TransformingTestInstanceFactory.class)
 @Transform(transformer = FrequentInterruptsTransformer3.class, classPrefixes = "org.serialthreads.performance")
-public class SerialThreadTest extends AbstractPerformanceTest {
+class SerialThreadTest extends AbstractPerformanceTest {
   private Thread managerThread;
   private volatile boolean ready;
   private final Object lock = new Object();
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new SerialCounter(i);
     }
@@ -73,7 +73,7 @@ public class SerialThreadTest extends AbstractPerformanceTest {
     managerThread.join();
   }
 
-  public static class SerialCounter extends Counter {
+  static class SerialCounter extends Counter {
     SerialCounter(int number) {
       super(number);
     }

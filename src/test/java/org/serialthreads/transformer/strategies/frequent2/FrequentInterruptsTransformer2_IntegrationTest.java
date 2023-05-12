@@ -10,5 +10,5 @@ import org.serialthreads.transformer.strategies.TransformerIntegration_AbstractT
  */
 @ExtendWith(TransformingTestInstanceFactory.class)
 @Transform(transformer = FrequentInterruptsTransformer2.class)
-public class FrequentInterruptsTransformer2_IntegrationTest extends TransformerIntegration_AbstractTest {
+class FrequentInterruptsTransformer2_IntegrationTest extends TransformerIntegration_AbstractTest {
 }

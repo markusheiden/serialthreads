@@ -13,9 +13,9 @@ import static org.objectweb.asm.Type.INT_TYPE;
 /**
  * Test for {@link ExtendedValue}.
  */
-public class ExtendedValueTest {
+class ExtendedValueTest {
   @Test
-  public void testValue() {
+  void testValue() {
     var value = ExtendedValue.value(INT_TYPE);
     assertEquals(INT_TYPE, value.getType());
     assertFalse(value.isConstant());
@@ -23,7 +23,7 @@ public class ExtendedValueTest {
   }
 
   @Test
-  public void testValueInLocal() {
+  void testValueInLocal() {
     var value = ExtendedValue.valueInLocal(INT_TYPE, 1);
     assertEquals(INT_TYPE, value.getType());
     assertFalse(value.isConstant());
@@ -31,7 +31,7 @@ public class ExtendedValueTest {
   }
 
   @Test
-  public void testValueInLocals() {
+  void testValueInLocals() {
     var value = ExtendedValue.valueInLocal(INT_TYPE, 1).addLocal(2);
     assertEquals(INT_TYPE, value.getType());
     assertFalse(value.isConstant());
@@ -39,7 +39,7 @@ public class ExtendedValueTest {
   }
 
   @Test
-  public void testConstantValue() {
+  void testConstantValue() {
     var value = ExtendedValue.constantValue(INT_TYPE, 1);
     assertEquals(INT_TYPE, value.getType());
     assertTrue(value.isConstant());
@@ -48,7 +48,7 @@ public class ExtendedValueTest {
   }
 
   @Test
-  public void testConstantInLocals() {
+  void testConstantInLocals() {
     var value = ExtendedValue.constantInLocals(INT_TYPE, 1, Set.of(1, 2));
     assertEquals(INT_TYPE, value.getType());
     assertTrue(value.isConstant());
@@ -57,21 +57,21 @@ public class ExtendedValueTest {
   }
 
   @Test
-  public void testAddLocal() {
+  void testAddLocal() {
     var value = ExtendedValue.value(INT_TYPE);
     var local1 = ExtendedValue.valueInLocal(INT_TYPE, 1);
     assertEqualsValue(local1, value.addLocal(1));
   }
 
   @Test
-  public void testRemoveLocal() {
+  void testRemoveLocal() {
     var value = ExtendedValue.value(INT_TYPE);
     var local1 = ExtendedValue.valueInLocal(INT_TYPE, 1);
     assertEqualsValue(value, local1.removeLocal(1));
   }
 
   @Test
-  public void testEqualsValue() {
+  void testEqualsValue() {
     var const1Local1A = ExtendedValue.constantValue(INT_TYPE, 1).addLocal(1);
     var const1Local1B = ExtendedValue.constantValue(INT_TYPE, 1).addLocal(1);
     assertEqualsValue(const1Local1A, const1Local1B);
@@ -96,7 +96,7 @@ public class ExtendedValueTest {
    * @param expected expected value
    * @param value value
    */
-  public static void assertEqualsValue(ExtendedValue expected, Value value) {
+  static void assertEqualsValue(ExtendedValue expected, Value value) {
     assertTrue(value instanceof ExtendedValue, "expected ExtendedValue but was: <" + value.getClass().getName() + ">");
     var ev = (ExtendedValue) value;
     assertNotSame(expected, ev);

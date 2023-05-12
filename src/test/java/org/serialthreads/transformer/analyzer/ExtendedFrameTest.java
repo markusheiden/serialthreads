@@ -23,12 +23,12 @@ import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqu
 /**
  * Test for {@link ExtendedFrame}.
  */
-public class ExtendedFrameTest {
+class ExtendedFrameTest {
   /**
    * Test for {@link ExtendedFrame#ExtendedFrame(int, int)}.
    */
   @Test
-  public void testConstructor_ii() {
+  void testConstructor_ii() {
     var frame = new ExtendedFrame(2, 2);
 
     frame.setLocal(0, UNINITIALIZED_VALUE);
@@ -55,7 +55,7 @@ public class ExtendedFrameTest {
    * Test for {@link ExtendedFrame#ExtendedFrame(Frame)}.
    */
   @Test
-  public void testConstructor_frame() {
+  void testConstructor_frame() {
     var src = new ExtendedFrame(2, 2);
     src.setLocal(0, UNINITIALIZED_VALUE);
     src.setLocal(1, INT_VALUE);
@@ -84,7 +84,7 @@ public class ExtendedFrameTest {
    * Test for {@link ExtendedFrame#execute(AbstractInsnNode, Interpreter)} handling constant values.
    */
   @Test
-  public void testExecute_const() throws Exception {
+  void testExecute_const() throws Exception {
     testExecute_const(new InsnNode(ACONST_NULL), Type.getObjectType("null"), null);
     testExecute_const(new InsnNode(ICONST_M1), INT_TYPE, -1);
     testExecute_const(new InsnNode(ICONST_0), INT_TYPE, 0);
@@ -121,7 +121,7 @@ public class ExtendedFrameTest {
    * Test for {@link ExtendedFrame#execute(AbstractInsnNode, Interpreter)} handling stores to locals.
    */
   @Test
-  public void testExecute_store() throws Exception {
+  void testExecute_store() throws Exception {
     testExecute_store(new VarInsnNode(ISTORE, 0), INT_TYPE);
     testExecute_store(new VarInsnNode(LSTORE, 0), LONG_TYPE);
     testExecute_store(new VarInsnNode(FSTORE, 0), FLOAT_TYPE);
@@ -153,7 +153,7 @@ public class ExtendedFrameTest {
    * Test for {@link ExtendedFrame#setLocal(int, BasicValue)}.
    */
   @Test
-  public void testSetLocal() {
+  void testSetLocal() {
     var frame = new ExtendedFrame(1, 0);
 
     frame.setLocal(0, UNINITIALIZED_VALUE);
@@ -170,7 +170,7 @@ public class ExtendedFrameTest {
    * Test for {@link ExtendedFrame#push(BasicValue)}.
    */
   @Test
-  public void testPush() {
+  void testPush() {
     var frame = new ExtendedFrame(0, 1);
 
     frame.push(INT_VALUE);
@@ -195,7 +195,7 @@ public class ExtendedFrameTest {
    * Test for {@link ExtendedFrame#getLowestNeededLocal(ExtendedValue)}.
    */
   @Test
-  public void getLowestNeededLocal() {
+  void getLowestNeededLocal() {
     var frame = new ExtendedFrame(5, 0);
     frame.neededLocals.add(2);
     frame.neededLocals.add(3);

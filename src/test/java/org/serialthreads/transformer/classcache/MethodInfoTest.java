@@ -12,9 +12,9 @@ import static org.objectweb.asm.Type.INT_TYPE;
 /**
  * Test for {@link MethodInfo}.
  */
-public class MethodInfoTest {
+class MethodInfoTest {
   @Test
-  public void testDefault() {
+  void testDefault() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
 
     assertEquals("namedesc", info.getId());
@@ -25,28 +25,28 @@ public class MethodInfoTest {
   }
 
   @Test
-  public void testToString() {
+  void testToString() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
 
     assertEquals("Method info namedesc", info.toString());
   }
 
   @Test
-  public void testHasAnnotation() {
+  void testHasAnnotation() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
 
     assertTrue(info.hasAnnotation(INT_TYPE));
   }
 
   @Test
-  public void testGetAnnotations_immutable() {
+  void testGetAnnotations_immutable() {
     var info = new MethodInfo("name", "desc", new HashSet<>(singleton(INT_TYPE)));
 
     assertThrows(UnsupportedOperationException.class, () -> info.getAnnotations().add(Type.getType(getClass())));
   }
 
   @Test
-  public void testCopy() {
+  void testCopy() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
     var copy = info.copy();
 

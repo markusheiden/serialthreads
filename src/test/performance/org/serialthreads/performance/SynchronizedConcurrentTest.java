@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test to analyze performance of threading with synchronization.
  */
-public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
+class SynchronizedConcurrentTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
   private final AtomicInteger waiting = new AtomicInteger();
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     barrierCount.set(0);
     waiting.set(1);
     for (int i = 0; i < counters.length; i++) {
@@ -30,7 +30,7 @@ public class SynchronizedConcurrentTest extends AbstractPerformanceTest {
   private class SynchronizedConcurrentCounter extends Counter {
     private int next;
 
-    public SynchronizedConcurrentCounter(int number) {
+    SynchronizedConcurrentCounter(int number) {
       super(number);
       next = COUNT;
     }

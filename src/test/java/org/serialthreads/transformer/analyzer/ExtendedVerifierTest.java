@@ -14,9 +14,9 @@ import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqu
 /**
  * Test for ExtendedVerifier.
  */
-public class ExtendedVerifierTest {
+class ExtendedVerifierTest {
   @Test
-  public void testMerge() throws Exception {
+  void testMerge() {
     var verifier = new ExtendedVerifier(
       new ClassInfoCacheASM(getClass().getClassLoader()), null, null, null, false);
 

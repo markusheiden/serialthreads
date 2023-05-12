@@ -18,7 +18,7 @@ public abstract class TransformerIntegration_AbstractTest {
   private SerialThreadManager manager;
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     if (manager != null) {
       manager.close();
     }
@@ -28,7 +28,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * Check that transformation does not alter behaviour.
    */
   @Test
-  public void testTransform() {
+  void testTransform() {
     var test = new TestInterruptible(true);
 
     manager = new SimpleSerialThreadManager(test);
@@ -43,7 +43,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * if not containing any interruptible method call.
    */
   @Test
-  public void testRunNo() {
+  void testRunNo() {
     var test = new TestRunNoInterruptible();
 
     manager = new SimpleSerialThreadManager(test);
@@ -58,7 +58,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * if just containing one interruptible method call.
    */
   @Test
-  public void testRunSingle() {
+  void testRunSingle() {
     var test = new TestRunSingleInterruptible();
 
     manager = new SimpleSerialThreadManager(test);
@@ -73,7 +73,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * if just containing multiple interruptible method calls.
    */
   @Test
-  public void testRunMulti() {
+  void testRunMulti() {
     var test = new TestRunMultiInterruptible();
 
     manager = new SimpleSerialThreadManager(test);
@@ -86,7 +86,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * Test capture and restore of locals of type {@link int}.
    */
   @Test
-  public void testLocalStorage_int() throws Exception {
+  void testLocalStorage_int() throws Exception {
     testLocalStorage(new TestInt(0), Integer::parseInt);
   }
 
@@ -94,7 +94,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * Test capture and restore of locals of type {@link long}.
    */
   @Test
-  public void testLocalStorage_long() throws Exception {
+  void testLocalStorage_long() throws Exception {
     testLocalStorage(new TestLong(0), Long::parseLong);
   }
 
@@ -102,7 +102,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * Test capture and restore of locals of type {@link float}.
    */
   @Test
-  public void testLocalStorage_float() throws Exception {
+  void testLocalStorage_float() throws Exception {
     testLocalStorage(new TestFloat(0), Float::parseFloat);
   }
 
@@ -110,7 +110,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * Test capture and restore of locals of type {@link double}.
    */
   @Test
-  public void testLocalStorage_double() throws Exception {
+  void testLocalStorage_double() throws Exception {
     testLocalStorage(new TestDouble(0), Double::parseDouble);
   }
 
@@ -136,7 +136,7 @@ public abstract class TransformerIntegration_AbstractTest {
    * Test that tail calls return the correct value.
    */
   @Test
-  public void testTailCall() {
+  void testTailCall() {
     var test = new TestTailCall();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
@@ -150,7 +150,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Disabled // TODO markus 2018-01-04: Implement exception handling.
   @Test
-  public void testException() {
+  void testException() {
     var test = new TestException();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);

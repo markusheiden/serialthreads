@@ -10,9 +10,9 @@ import java.lang.invoke.MethodType;
 /**
  * Test to reproduce lambda creation via {@link LambdaMetafactory}.
  */
-public class LambdaTest {
+class LambdaTest {
   @Test
-  public void test() throws Throwable {
+  void test() throws Throwable {
     var callSite = LambdaMetafactory.metafactory(
       MethodHandles.lookup(),
       "execute",

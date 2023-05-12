@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 /**
  * Test for ClassInfoCache.
  */
-public abstract class ClassInfoCacheAbstractTest {
+abstract class ClassInfoCacheAbstractTest {
   protected IClassInfoCache cache;
 
   @Test
-  public void testIsInterruptible() {
+  void testIsInterruptible() {
     var mapName = Type.getType(Map.class).getInternalName();
     var sortedMapName = Type.getType(SortedMap.class).getInternalName();
     var objectDesc = Type.getType(Object.class).getDescriptor();

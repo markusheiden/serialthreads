@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test to analyze performance of threading with {@link Thread#yield()}.
  */
-public class YieldAtomicRoundTest extends AbstractPerformanceTest {
+class YieldAtomicRoundTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
   private final AtomicInteger round = new AtomicInteger();
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     barrierCount.set(COUNT);
     round.set(Integer.MIN_VALUE);
     for (int i = 0; i < counters.length; i++) {
@@ -28,7 +28,7 @@ public class YieldAtomicRoundTest extends AbstractPerformanceTest {
   private class YieldConcurrentCounter extends Counter {
     private int currentRound;
 
-    public YieldConcurrentCounter(int number) {
+    YieldConcurrentCounter(int number) {
       super(number);
       currentRound = round.get();
     }

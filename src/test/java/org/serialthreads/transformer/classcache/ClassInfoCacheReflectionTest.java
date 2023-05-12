@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 /**
  * Test for ClassInfoCacheASM.
  */
-public class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
+class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
   @Override
   @Test
-  public void testIsInterruptible() {
+  void testIsInterruptible() {
     // TODO 2010-01-20 mh: add tests with other start method
 
     cache = new ClassInfoCacheReflection();

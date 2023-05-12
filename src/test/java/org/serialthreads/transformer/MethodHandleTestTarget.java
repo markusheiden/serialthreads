@@ -11,7 +11,7 @@ import java.lang.invoke.MethodType;
 /**
  * Test target for method handle test in {@link InvokeDynamicTest}.
  */
-public class MethodHandleTestTarget {
+class MethodHandleTestTarget {
   public static MethodHandle overrideHandle;
   public static MethodHandle privateHandle;
   public static MethodHandle privateStaticHandle;

@@ -11,7 +11,7 @@ import java.io.PrintWriter;
 /**
  * Test of invoke dynamic.
  */
-public class InvokeDynamicTest {
+class InvokeDynamicTest {
   public static void main(String[] args) {
     try {
       System.out.println("================================================================================");

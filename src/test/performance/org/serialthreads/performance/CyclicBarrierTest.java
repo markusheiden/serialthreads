@@ -8,11 +8,11 @@ import java.util.concurrent.CyclicBarrier;
 /**
  * Test to analyze performance of threading with a {@link CyclicBarrier}.
  */
-public class CyclicBarrierTest extends AbstractPerformanceTest {
+class CyclicBarrierTest extends AbstractPerformanceTest {
   private final CyclicBarrier barrier = new CyclicBarrier(COUNT);
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new BarrierCounter(i);
     }
@@ -24,7 +24,7 @@ public class CyclicBarrierTest extends AbstractPerformanceTest {
   }
 
   private class BarrierCounter extends Counter {
-    public BarrierCounter(int number) {
+    BarrierCounter(int number) {
       super(number);
     }
 

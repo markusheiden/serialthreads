@@ -25,7 +25,7 @@ import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 /**
  * Test for {@link ExtendedAnalyzer}.
  */
-public class ExtendedAnalyzerTest {
+class ExtendedAnalyzerTest {
   /**
    * Analyzer instance for testing.
    */
@@ -35,7 +35,7 @@ public class ExtendedAnalyzerTest {
    * Test for {@link ExtendedAnalyzer#newFrame(int, int)}.
    */
   @Test
-  public void testNewFrame_ii() {
+  void testNewFrame_ii() {
     var frame = analyzer.newFrame(2, 2);
 
     frame.setLocal(0, UNINITIALIZED_VALUE);
@@ -62,7 +62,7 @@ public class ExtendedAnalyzerTest {
    * Test for {@link ExtendedAnalyzer#newFrame(Frame)}.
    */
   @Test
-  public void testNewFrame_frame() {
+  void testNewFrame_frame() {
     var src = new ExtendedFrame(2, 2);
     src.setLocal(0, UNINITIALIZED_VALUE);
     src.setLocal(1, INT_VALUE);
@@ -91,7 +91,7 @@ public class ExtendedAnalyzerTest {
    * Test for backward flow analysis with simple byte code.
    */
   @Test
-  public void testBackflow_simple() throws Exception {
+  void testBackflow_simple() throws Exception {
     var method = new MethodNode(0, "test", "()I", null, new String[0]);
     method.maxLocals = 4;
     method.maxStack = 1;
@@ -144,7 +144,7 @@ public class ExtendedAnalyzerTest {
    * Test for backward flow analysis with an endless loop.
    */
   @Test
-  public void testBackflow_endless() throws Exception {
+  void testBackflow_endless() throws Exception {
     var method = new MethodNode(0, "test", "()I", null, new String[0]);
     method.maxLocals = 3;
     method.maxStack = 1;
@@ -174,7 +174,7 @@ public class ExtendedAnalyzerTest {
    * Test for backward flow analysis that ensures that locals are just considered as needed the shortest possible range.
    */
   @Test
-  public void testBackflow_minimumNeededLocals() throws Exception {
+  void testBackflow_minimumNeededLocals() throws Exception {
     var method = new MethodNode(0, "test", "()I", null, new String[0]);
     method.maxLocals = 2;
     method.maxStack = 1;

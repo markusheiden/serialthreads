@@ -7,9 +7,9 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Test to analyze performance of threading with {@link LockSupport}.
  */
-public class LockSupportSerialTest extends AbstractPerformanceTest {
+class LockSupportSerialTest extends AbstractPerformanceTest {
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new ConcurrentSerialCounter(i);
     }
@@ -33,7 +33,7 @@ public class LockSupportSerialTest extends AbstractPerformanceTest {
   private class ConcurrentSerialCounter extends Counter {
     private Thread next;
 
-    public ConcurrentSerialCounter(int number) {
+    ConcurrentSerialCounter(int number) {
       super(number);
     }
 

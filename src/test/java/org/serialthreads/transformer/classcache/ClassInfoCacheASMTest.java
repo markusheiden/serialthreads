@@ -5,9 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * Test for ClassInfoCacheASM.
  */
-public class ClassInfoCacheASMTest extends ClassInfoCacheAbstractTest {
+class ClassInfoCacheASMTest extends ClassInfoCacheAbstractTest {
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     cache = new ClassInfoCacheASM(ClassInfoCacheASMTest.class.getClassLoader());
   }
 }

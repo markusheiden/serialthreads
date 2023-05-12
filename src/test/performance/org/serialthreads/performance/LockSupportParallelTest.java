@@ -8,11 +8,11 @@ import java.util.concurrent.locks.LockSupport;
 /**
  * Test to analyze performance of threading with {@link LockSupport}.
  */
-public class LockSupportParallelTest extends AbstractPerformanceTest {
+class LockSupportParallelTest extends AbstractPerformanceTest {
   private final AtomicInteger barrierCount = new AtomicInteger();
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     barrierCount.set(COUNT);
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new ConcurrentCounter(i);
@@ -27,7 +27,7 @@ public class LockSupportParallelTest extends AbstractPerformanceTest {
   }
 
   private class ConcurrentCounter extends Counter {
-    public ConcurrentCounter(int number) {
+    ConcurrentCounter(int number) {
       super(number);
     }
 

@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * Test to analyze performance of threading with {@link Thread#yield()}.
  */
-public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
+class YieldVolatileBarrierTest extends AbstractPerformanceTest {
   private volatile int barrierCount;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     barrierCount = 0;
     for (int i = 0; i < counters.length; i++) {
       counters[i] = new YieldCounter(i);
@@ -24,7 +24,7 @@ public class YieldVolatileBarrierTest extends AbstractPerformanceTest {
   private class YieldCounter extends Counter {
     private int nextBarrier;
 
-    public YieldCounter(int number) {
+    YieldCounter(int number) {
       super(number);
       nextBarrier = barrierCount + COUNT;
     }

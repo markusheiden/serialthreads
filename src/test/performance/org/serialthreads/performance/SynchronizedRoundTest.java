@@ -5,12 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * Test to analyze performance of threading with synchronization.
  */
-public class SynchronizedRoundTest extends AbstractPerformanceTest {
+class SynchronizedRoundTest extends AbstractPerformanceTest {
   private int barrierCount;
   private int round;
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     barrierCount = COUNT;
     round = Integer.MIN_VALUE;
     for (int i = 0; i < counters.length; i++) {
@@ -26,7 +26,7 @@ public class SynchronizedRoundTest extends AbstractPerformanceTest {
   private class YieldCounter extends Counter {
     private int currentRound;
 
-    public YieldCounter(int number) {
+    YieldCounter(int number) {
       super(number);
       currentRound = round;
     }
