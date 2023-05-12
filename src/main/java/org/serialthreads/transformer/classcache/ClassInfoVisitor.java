@@ -7,6 +7,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
@@ -30,7 +31,7 @@ public class ClassInfoVisitor extends ClassVisitor {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     super.visit(version, access, name, signature, superName, interfaces);
 
-    isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
+    isInterface = (access & ACC_INTERFACE) != 0;
     className = name;
     superClassName = superName;
     interfaceNames = interfaces;
