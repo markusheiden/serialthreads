@@ -12,7 +12,6 @@ import org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTran
 /**
  * Test to analyze performance of threading with serial threads.
  */
-@ExtendWith(TransformingTestInstanceFactory.class)
 @Transform(transformer = FrequentInterruptsTransformer3.class, classPrefixes = "org.serialthreads.performance")
 class SerialThreadTest extends AbstractPerformanceTest {
   private Thread managerThread;
