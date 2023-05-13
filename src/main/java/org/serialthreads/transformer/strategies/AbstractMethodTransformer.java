@@ -162,7 +162,7 @@ public abstract class AbstractMethodTransformer {
 
     // switch(currentFrame.method) // branch to specific restore code
     instructions.add(threadCode.pushMethod(localFrame));
-    instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(new LabelNode[0])));
+    instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(LabelNode[]::new)));
 
     // default case -> may not happen -> throw IllegalThreadStateException
     instructions.add(defaultLabel);
