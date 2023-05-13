@@ -25,16 +25,17 @@ class TransformingTestClassLoader extends ClassLoader {
         super(parent);
     }
 
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
+    @Override
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         var transform = findTransform(name);
         if (transform == null) {
             logger.info("{}: Loading without transformation.", name);
-            return super.loadClass(name);
+            return super.loadClass(name, resolve);
         }
 
         logger.info("{}: Transforming.", name);
         var classLoader = new TransformingClassLoader(new Strategy(transform.transformer()), transform.classPrefixes());
-        return classLoader.loadClass(name, true);
+        return classLoader.loadClass(name, resolve);
     }
 
     /**
