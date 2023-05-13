@@ -22,15 +22,16 @@ class TransformingTestClassLoader extends ClassLoader {
     private static final Logger logger = LoggerFactory.getLogger(TransformingTestClassLoader.class);
 
     TransformingTestClassLoader(ClassLoader parent) {
-        super(parent);
+        super("TransformingTestClassLoader", parent);
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
         var transform = findTransform(name);
         if (transform == null) {
-            logger.info("{}: Loading without transformation.", name);
-            return super.loadClass(name, resolve);
+            var clazz = super.loadClass(name, resolve);
+            logger.info("{}/{}: Loading without transformation.", clazz.getClassLoader().getName(), clazz.getName());
+            return clazz;
         }
 
         logger.info("{}: Transforming.", name);
@@ -46,7 +47,7 @@ class TransformingTestClassLoader extends ClassLoader {
      * @throws ClassNotFoundException on any class loading problems.
      */
     private Transform findTransform(String name) throws ClassNotFoundException {
-        var classFile = getResourceAsStream(name + ".class");
+        var classFile = getResourceAsStream(name.replace('.', '/') + ".class");
         if (classFile == null) {
             logger.info("{}: Class not found.", name);
             return null;
