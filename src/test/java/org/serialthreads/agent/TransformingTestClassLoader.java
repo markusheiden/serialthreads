@@ -22,7 +22,7 @@ class TransformingTestClassLoader extends ClassLoader {
     private static final Logger logger = LoggerFactory.getLogger(TransformingTestClassLoader.class);
 
     TransformingTestClassLoader(ClassLoader parent) {
-        super("TransformingTestClassLoader", parent);
+        super("test", parent);
     }
 
     @Override
