@@ -8,12 +8,8 @@ import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
-import java.lang.reflect.Constructor;
-
 /**
  * {@link TestInstanceFactory} using a {@link TransformingClassLoader} for loading all classes.
- * <p>
- * Expects test class to have a method "String[] getClassPrefixes()" to define the class prefixes.
  */
 public class TransformingTestInstanceFactory implements TestInstanceFactory {
   /**

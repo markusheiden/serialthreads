@@ -11,7 +11,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@ExtendWith(TransformingTestInstanceFactory.class)
 public @interface Transform {
   /**
    * Transformer class.
