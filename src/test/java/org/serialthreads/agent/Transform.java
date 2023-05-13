@@ -18,7 +18,7 @@ public @interface Transform {
   Class<? extends ITransformer> transformer();
 
   /**
-   * Prefixes of classes to transform. "org.serialthreads." will be always added.
+   * Prefixes of classes to transform. "org.serialthreads." will always be added.
    */
   String[] classPrefixes() default {};
 }
