@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * ClassLoader which applies a transformer to the loaded classes.
@@ -42,7 +41,7 @@ public class TransformingClassLoader extends ClassLoader {
    * @param classPrefixes prefixes of class to transform
    */
   public TransformingClassLoader(ClassLoader parent, IStrategy strategy, String... classPrefixes) {
-    super(parent);
+    super("serialthreads", parent);
 
     this.classPrefixes = new String[1 + classPrefixes.length];
     this.classPrefixes[0] = "org.serialthreads.";
