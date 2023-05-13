@@ -10,16 +10,13 @@ import org.slf4j.LoggerFactory;
 public class TransformingLauncherInterceptor implements LauncherInterceptor {
     private static final Logger logger = LoggerFactory.getLogger(TransformingLauncherInterceptor.class);
 
-    public TransformingLauncherInterceptor() {
-        logger.info("Intercepting launches.");
-    }
-
     @Override
     public <T> T intercept(Invocation<T> invocation) {
         var currentThread = Thread.currentThread();
         var originalClassLoader = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(new TransformingTestClassLoader(originalClassLoader));
         try {
+            logger.debug("Intercepting launches.");
             return invocation.proceed();
         } finally {
             currentThread.setContextClassLoader(originalClassLoader);
