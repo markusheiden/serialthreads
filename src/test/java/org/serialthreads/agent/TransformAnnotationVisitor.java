@@ -2,20 +2,17 @@ package org.serialthreads.agent;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.serialthreads.transformer.classcache.MethodInfo;
-import org.serialthreads.transformer.classcache.MethodInfoVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.TreeMap;
-
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
  * Visitor which checks all methods for the presence of the @Interruptible annotation.
  */
 public class TransformAnnotationVisitor extends ClassVisitor {
+  private static final Logger logger = LoggerFactory.getLogger(TransformAnnotationVisitor.class);
+
   private Transform transform;
 
   public TransformAnnotationVisitor() {
@@ -24,6 +21,7 @@ public class TransformAnnotationVisitor extends ClassVisitor {
 
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+    logger.info("Found annotation {}.", descriptor);
     return super.visitAnnotation(descriptor, visible);
   }
 
