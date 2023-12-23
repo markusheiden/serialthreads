@@ -46,7 +46,7 @@ class TransformingTestClassLoader extends ClassLoader {
      * @return Annotation, or {@code null} if none.
      * @throws ClassNotFoundException on any class loading problems.
      */
-    private Transform findTransform(String name) throws ClassNotFoundException {
+    private TransformAnnotation findTransform(String name) throws ClassNotFoundException {
         var classFile = getResourceAsStream(name.replace('.', '/') + ".class");
         if (classFile == null) {
             logger.info("{}: Class not found.", name);
@@ -70,7 +70,7 @@ class TransformingTestClassLoader extends ClassLoader {
         return transform;
     }
 
-    private static Transform findTransform(InputStream classFile) throws ClassNotFoundException {
+    private static TransformAnnotation findTransform(InputStream classFile) throws ClassNotFoundException {
         try {
             var classReader = new ClassReader(classFile);
             var visitor = new TransformAnnotationVisitor();
