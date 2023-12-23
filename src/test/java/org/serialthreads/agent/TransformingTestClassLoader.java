@@ -30,7 +30,9 @@ class TransformingTestClassLoader extends ClassLoader {
         var transform = findTransform(name);
         if (transform == null) {
             var clazz = super.loadClass(name, resolve);
-            logger.info("{}/{}: Loading without transformation.", clazz.getClassLoader().getName(), clazz.getName());
+            var classLoader = clazz.getClassLoader();
+            var classLoaderName = classLoader != null ? classLoader.getName() : "bootstrap";
+            logger.info("{}/{}: Loading without transformation.", classLoaderName, clazz.getName());
             return clazz;
         }
 
