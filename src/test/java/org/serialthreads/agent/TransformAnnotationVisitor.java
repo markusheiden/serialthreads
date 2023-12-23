@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
- * Visitor which checks all methods for the presence of the @Interruptible annotation.
+ * Visitor which checks all methods for the presence of the {@link Transform} annotation.
  */
 public class TransformAnnotationVisitor extends ClassVisitor {
   private static final Logger logger = LoggerFactory.getLogger(TransformAnnotationVisitor.class);
