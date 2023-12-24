@@ -1,16 +1,16 @@
 package org.serialthreads.agent;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.objectweb.asm.ClassReader;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
@@ -61,30 +61,32 @@ class TransformingTestClassLoader extends ClassLoader {
         }
 
         var transform = findTransform(name, classFile);
+        for (var className = name; transform == null; transform = findTransform(className)) {
+            className = superClassNames.get(className);
+            if (className == null) {
+                break;
+            }
+        }
         if (transform == null) {
             logger.info("{}: Transform not found.", name);
             return null;
         }
-        transforms.put(name, transform);
 
         logger.info("{}: Transform found.", name);
         return transform;
     }
 
+    /**
+     * Find {@link Transform} annotation and populated {@link #superClassNames} and {@link #transforms}.
+     */
     private TransformAnnotation findTransform(String name, InputStream classFile) throws ClassNotFoundException {
         var visitor = new TransformAnnotationVisitor();
 
         visitClass(classFile, visitor);
 
         superClassNames.put(name, visitor.getSuperClassName());
-
         var transform = visitor.getTransform();
-        for (var className = name; transform == null; transform = findTransform(className)) {
-            className = superClassNames.get(className);
-            if (className == null) {
-                return null;
-            }
-        }
+        transforms.put(name, transform);
         return transform;
     }
 
