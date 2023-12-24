@@ -15,7 +15,7 @@ import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 
 /**
- * A {@link ClassLoader} that delegates to a {@link TransformingTestClassLoader}
+ * A {@link ClassLoader} that delegates to a {@link TransformingClassLoader}
  * for (test) classes annotated with {@link Transform}.
  */
 class TransformingTestClassLoader extends ClassLoader {
@@ -61,23 +61,18 @@ class TransformingTestClassLoader extends ClassLoader {
             return null;
         }
 
-        if (transform.transformer() == null) {
-            throw new ClassNotFoundException("Transformer class not configured in @Transform.");
-        }
-        if (transform.classPrefixes() == null) {
-            throw new ClassNotFoundException("Class prefixes not configured in @Transform.");
-        }
-
         logger.info("{}: Transform found.", name);
         return transform;
     }
 
-    private static TransformAnnotation findTransform(InputStream classFile) throws ClassNotFoundException {
+    private TransformAnnotation findTransform(InputStream classFile) throws ClassNotFoundException {
         try {
             var classReader = new ClassReader(classFile);
             var visitor = new TransformAnnotationVisitor();
             classReader.accept(visitor, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
             return visitor.getTransform();
+        } catch (IllegalArgumentException e) {
+            throw new ClassNotFoundException("Invalid class.", e);
         } catch (IOException e) {
             throw new ClassNotFoundException("Failed to read class.", e);
         }
