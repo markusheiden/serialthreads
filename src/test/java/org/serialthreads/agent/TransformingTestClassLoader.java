@@ -41,7 +41,7 @@ class TransformingTestClassLoader extends ClassLoader {
         }
 
         logger.info("{}: Transforming.", name);
-        var classLoader = new TransformingClassLoader(new Strategy(transform.transformer()), transform.classPrefixes());
+        var classLoader = new TransformingClassLoader(getParent(), new Strategy(transform.transformer()), transform.classPrefixes());
         return classLoader.loadClass(name, resolve);
     }
 
