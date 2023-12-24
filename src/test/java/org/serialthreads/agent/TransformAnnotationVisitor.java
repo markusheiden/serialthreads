@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import static org.objectweb.asm.Opcodes.ASM9;
 
 /**
- * Visitor which checks all methods for the presence of the {@link Transform} annotation.
+ * Visitor which checks classes for the presence of the {@link Transform} annotation.
  */
 @SuppressWarnings({ "AnonymousInnerClassWithTooManyMethods", "ReturnOfInnerClass" })
 class TransformAnnotationVisitor extends ClassVisitor {
@@ -22,9 +22,14 @@ class TransformAnnotationVisitor extends ClassVisitor {
   private static final String TRANSFORM_DESCRIPTOR = Type.getType(Transform.class).getDescriptor();
 
   /**
-   * {@link Transform#transformer() Transformer class}.
+   * The class has a {@link Transform} annotation.
    */
-  private Type transformer;
+  private boolean found = false;
+
+  /**
+   * {@link Transform#transformer() Transformer class name}.
+   */
+  private String transformerClassName;
 
   /**
    * {@link Transform#classPrefixes() Prefixes of classes to transform}.
@@ -49,7 +54,8 @@ class TransformAnnotationVisitor extends ClassVisitor {
           if (value == null) {
             throw new IllegalArgumentException("Transformer class not configured in @Transform.");
           }
-          transformer = ((Type) value);
+          found = true;
+          transformerClassName = ((Type) value).getClassName();
         } else {
           throw new IllegalArgumentException("Invalid @Transform value");
         }
@@ -80,16 +86,19 @@ class TransformAnnotationVisitor extends ClassVisitor {
    * @return The (valid) information, or {@code} null if there was no {@link Transform} annotation.
    */
   public TransformAnnotation getTransform() {
-    if (transformer == null) {
+    if (!found) {
       return null;
+    }
+    if (transformerClassName == null) {
+      throw new IllegalArgumentException("Transformer class not configured in @Transform.");
     }
 
     try {
       @SuppressWarnings("unchecked")
-      var transformerClass = (Class<? extends ITransformer>) Class.forName(transformer.getClassName());
+      var transformerClass = (Class<? extends ITransformer>) Class.forName(transformerClassName);
       return new TransformAnnotation(transformerClass, classPrefixes.toArray(String[]::new));
     } catch (ClassNotFoundException e) {
-      logger.info("Transformer class {} not found.", this.transformer);
+      logger.info("Transformer class {} not found.", transformerClassName);
       throw new IllegalArgumentException("Transformer not found");
     }
   }
