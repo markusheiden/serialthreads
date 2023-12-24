@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.agent.Transform;
-import org.serialthreads.agent.TransformingTestInstanceFactory;
 import org.serialthreads.context.SimpleSerialThreadManager;
 import org.serialthreads.transformer.strategies.frequent3.FrequentInterruptsTransformer3;
 
