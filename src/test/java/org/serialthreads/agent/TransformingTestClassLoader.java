@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
@@ -20,6 +22,9 @@ import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
  */
 class TransformingTestClassLoader extends ClassLoader {
     private static final Logger logger = LoggerFactory.getLogger(TransformingTestClassLoader.class);
+
+    private final Map<String, String> superClassNames = new HashMap<>();
+    private final Map<String, TransformAnnotation> transforms = new HashMap<>();
 
     TransformingTestClassLoader(ClassLoader parent) {
         super("test", parent);
@@ -55,22 +60,38 @@ class TransformingTestClassLoader extends ClassLoader {
             return null;
         }
 
-        var transform = findTransform(classFile);
+        var transform = findTransform(name, classFile);
         if (transform == null) {
             logger.info("{}: Transform not found.", name);
             return null;
         }
+        transforms.put(name, transform);
 
         logger.info("{}: Transform found.", name);
         return transform;
     }
 
-    private TransformAnnotation findTransform(InputStream classFile) throws ClassNotFoundException {
+    private TransformAnnotation findTransform(String name, InputStream classFile) throws ClassNotFoundException {
+        var visitor = new TransformAnnotationVisitor();
+
+        visitClass(classFile, visitor);
+
+        superClassNames.put(name, visitor.getSuperClassName());
+
+        var transform = visitor.getTransform();
+        for (var className = name; transform == null; transform = findTransform(className)) {
+            className = superClassNames.get(className);
+            if (className == null) {
+                return null;
+            }
+        }
+        return transform;
+    }
+
+    private void visitClass(InputStream classFile, TransformAnnotationVisitor visitor) throws ClassNotFoundException {
         try {
             var classReader = new ClassReader(classFile);
-            var visitor = new TransformAnnotationVisitor();
             classReader.accept(visitor, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
-            return visitor.getTransform();
         } catch (IllegalArgumentException e) {
             throw new ClassNotFoundException("Invalid class.", e);
         } catch (IOException e) {

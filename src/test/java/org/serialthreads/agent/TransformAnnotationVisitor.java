@@ -26,6 +26,8 @@ class TransformAnnotationVisitor extends ClassVisitor {
    */
   private boolean found = false;
 
+  private String superClassName;
+
   /**
    * {@link Transform#transformer() Transformer class name}.
    */
@@ -38,6 +40,11 @@ class TransformAnnotationVisitor extends ClassVisitor {
 
   TransformAnnotationVisitor() {
     super(ASM9);
+  }
+
+  @Override
+  public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    superClassName = superName;
   }
 
   @Override
@@ -78,6 +85,13 @@ class TransformAnnotationVisitor extends ClassVisitor {
         }
       }
     };
+  }
+
+  /**
+   * Name of the super class.
+   */
+  public String getSuperClassName() {
+    return superClassName;
   }
 
   /**
