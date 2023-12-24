@@ -24,7 +24,6 @@ class TransformingTestClassLoader extends ClassLoader {
     private static final Logger logger = LoggerFactory.getLogger(TransformingTestClassLoader.class);
 
     private final Map<String, String> superClassNames = new HashMap<>();
-    private final Map<String, TransformAnnotation> transforms = new HashMap<>();
 
     TransformingTestClassLoader(ClassLoader parent) {
         super("test", parent);
@@ -77,7 +76,7 @@ class TransformingTestClassLoader extends ClassLoader {
     }
 
     /**
-     * Find {@link Transform} annotation and populated {@link #superClassNames} and {@link #transforms}.
+     * Find {@link Transform} annotation and populate {@link #superClassNames}.
      */
     private TransformAnnotation findTransform(String name, InputStream classFile) throws ClassNotFoundException {
         var visitor = new TransformAnnotationVisitor();
@@ -85,9 +84,7 @@ class TransformingTestClassLoader extends ClassLoader {
         visitClass(classFile, visitor);
 
         superClassNames.put(name, visitor.getSuperClassName());
-        var transform = visitor.getTransform();
-        transforms.put(name, transform);
-        return transform;
+        return visitor.getTransform();
     }
 
     private void visitClass(InputStream classFile, TransformAnnotationVisitor visitor) throws ClassNotFoundException {
