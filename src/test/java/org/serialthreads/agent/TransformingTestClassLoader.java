@@ -80,22 +80,10 @@ class TransformingTestClassLoader extends ClassLoader {
 
     /**
      * Transformation strategy.
+     *
+     * @param transformerClass Transformer class.
      */
-    private static class Strategy implements IStrategy {
-        /**
-         * Transformer class.
-         */
-        private final Class<? extends ITransformer> transformerClass;
-
-        /**
-         * Constructor.
-         *
-         * @param transformerClass Transformer class.
-         */
-        public Strategy(Class<? extends ITransformer> transformerClass) {
-            this.transformerClass = transformerClass;
-        }
-
+    private record Strategy(Class<? extends ITransformer> transformerClass) implements IStrategy {
         @Override
         public ITransformer getTransformer(IClassInfoCache classInfoCache) {
             try {
