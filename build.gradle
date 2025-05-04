@@ -10,8 +10,10 @@ wrapper {
 }
 
 group = 'org.serialthreads'
-archivesBaseName = 'serialhtreads'
 version = '1.0-SNAPSHOT'
+base {
+    archivesName = 'serialhtreads'
+}
 
 repositories {
     mavenCentral()
