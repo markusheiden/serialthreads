@@ -2,7 +2,7 @@
 asm = "9.8"
 junit-platform = "6.0.3"
 spring-boot = "4.0.3"
-versions-plugin = "0.52.0"
+versions-plugin = "0.53.0"
 
 [libraries]
 # BOM — provides versions for slf4j, logback, junit, assertj
