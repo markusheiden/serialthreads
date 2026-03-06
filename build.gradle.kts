@@ -5,10 +5,6 @@ plugins {
     alias(libs.plugins.versions)
 }
 
-tasks.wrapper {
-    gradleVersion = libs.versions.gradle.get()
-}
-
 group = "org.serialthreads"
 version = "1.0-SNAPSHOT"
 base {

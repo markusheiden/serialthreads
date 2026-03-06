@@ -1,6 +1,5 @@
 [versions]
 asm = "9.8"
-gradle = "9.4.0"
 junit-platform = "6.0.3"
 spring-boot = "4.0.3"
 versions-plugin = "0.52.0"
