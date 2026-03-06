@@ -1,19 +1,11 @@
 plugins {
     `java-library`
     `maven-publish`
-    id("com.github.ben-manes.versions")
-    id("io.spring.dependency-management") apply false
+    alias(libs.plugins.versions)
 }
 
-val slf4jVersion: String by project
-val asmVersion: String by project
-val junitPlatformVersion: String by project
-val junitVersion: String by project
-val assertjVersion: String by project
-val logbackVersion: String by project
-
 tasks.wrapper {
-    gradleVersion = providers.gradleProperty("gradleVersion").get()
+    gradleVersion = libs.versions.gradle.get()
 }
 
 group = "org.serialthreads"
@@ -36,17 +28,19 @@ java {
 }
 
 dependencies {
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation(platform(libs.spring.boot.bom))
 
-    implementation("org.ow2.asm:asm:$asmVersion")
-    implementation("org.ow2.asm:asm-analysis:$asmVersion")
-    implementation("org.ow2.asm:asm-tree:$asmVersion")
-    implementation("org.ow2.asm:asm-util:$asmVersion")
+    implementation(libs.slf4j.api)
 
-    testImplementation("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
-    testRuntimeOnly("ch.qos.logback:logback-classic:$logbackVersion")
+    implementation(libs.asm)
+    implementation(libs.asm.analysis)
+    implementation(libs.asm.tree)
+    implementation(libs.asm.util)
+
+    testImplementation(libs.junit.platform.launcher)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.assertj.core)
+    testRuntimeOnly(libs.logback.classic)
 }
 
 tasks.jar {
