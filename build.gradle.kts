@@ -6,10 +6,6 @@ plugins {
 }
 
 group = "org.serialthreads"
-version = "1.0-SNAPSHOT"
-base {
-    archivesName = "serialhtreads"
-}
 
 repositories {
     mavenCentral()
