@@ -5,8 +5,6 @@ plugins {
     alias(libs.plugins.versions)
 }
 
-group = "org.serialthreads"
-
 repositories {
     mavenCentral()
 }
