@@ -18,6 +18,10 @@ java {
     }
 }
 
+configurations.all {
+    resolutionStrategy.failOnDynamicVersions()
+}
+
 dependencies {
     implementation(platform(libs.spring.boot.bom))
 
@@ -38,6 +42,11 @@ dependencies {
     testFixturesImplementation(libs.junit.platform.launcher)
     testFixturesImplementation(libs.slf4j.api)
     testFixturesImplementation(libs.asm)
+}
+
+tasks.withType<AbstractArchiveTask> {
+    isReproducibleFileOrder = true
+    isPreserveFileTimestamps = false
 }
 
 tasks.jar {
