@@ -1,6 +1,6 @@
 [versions]
 gradle = "9.4.0"
-spring-boot = "3.4.3"
+spring-boot = "4.0.3"
 asm = "9.8"
 versions-plugin = "0.52.0"
 
@@ -9,17 +9,17 @@ versions-plugin = "0.52.0"
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 
 # Not managed by Spring Boot BOM
-asm             = { module = "org.ow2.asm:asm",          version.ref = "asm" }
-asm-analysis    = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
-asm-tree        = { module = "org.ow2.asm:asm-tree",     version.ref = "asm" }
-asm-util        = { module = "org.ow2.asm:asm-util",     version.ref = "asm" }
+asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
+asm-analysis = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
+asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
+asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
 
 # Managed by Spring Boot BOM (versions omitted intentionally)
-slf4j-api               = { module = "org.slf4j:slf4j-api" }
+slf4j-api = { module = "org.slf4j:slf4j-api" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-junit-jupiter           = { module = "org.junit.jupiter:junit-jupiter" }
-assertj-core            = { module = "org.assertj:assertj-core" }
-logback-classic         = { module = "ch.qos.logback:logback-classic" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+assertj-core = { module = "org.assertj:assertj-core" }
+logback-classic = { module = "ch.qos.logback:logback-classic" }
 
 [plugins]
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
