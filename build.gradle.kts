@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    `java-test-fixtures`
     `maven-publish`
     alias(libs.plugins.versions)
 }
@@ -41,6 +42,12 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)
     testRuntimeOnly(libs.logback.classic)
+    testImplementation(testFixtures(project(":")))
+
+    testFixturesImplementation(platform(libs.spring.boot.bom))
+    testFixturesImplementation(libs.junit.platform.launcher)
+    testFixturesImplementation(libs.slf4j.api)
+    testFixturesImplementation(libs.asm)
 }
 
 tasks.jar {
@@ -58,18 +65,10 @@ tasks.jar {
     }
 }
 
-val testJar by tasks.registering(Jar::class) {
-    archiveClassifier = "tests"
-    from(sourceSets.test.get().output)
-}
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-        }
-        create<MavenPublication>("mavenTests") {
-            artifact(testJar)
         }
     }
 }
