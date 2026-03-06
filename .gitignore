@@ -1,4 +1,7 @@
 .idea
 out
+
 .gradle
 build
+
+.claude
