@@ -1,14 +1,14 @@
 package org.serialthreads.agent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Type;
 import org.serialthreads.transformer.ITransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
