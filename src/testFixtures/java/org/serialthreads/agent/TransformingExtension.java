@@ -4,7 +4,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
@@ -64,21 +63,40 @@ public class TransformingExtension implements InvocationInterceptor {
      * creating it on first access and caching it for reuse by {@code @BeforeEach} / {@code @AfterEach}.
      */
     private Object getOrCreateInstance(ExtensionContext context) {
-        return context.getStore(NAMESPACE).computeIfAbsent(TRANSFORMED_INSTANCE, _ -> {
-            var testClass = context.getRequiredTestClass();
-            var transform = testClass.getAnnotation(Transform.class);
-            var classLoader = new TransformingClassLoader(
-                    testClass.getClassLoader(),
-                    new Strategy(transform.transformer()),
-                    transform.classPrefixes());
-            try {
-                var constructor = classLoader.loadClass(testClass.getName()).getDeclaredConstructor();
-                constructor.setAccessible(true);
-                return constructor.newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to create transformed test instance for " + testClass.getName(), e);
-            }
-        }, Object.class);
+        return context.getStore(NAMESPACE)
+                .computeIfAbsent(TRANSFORMED_INSTANCE, _ -> createInstance(context), Object.class);
+    }
+
+    private Object createInstance(ExtensionContext context) {
+        var testClass = context.getRequiredTestClass();
+        var classLoader = createTransformingClassLoader(testClass);
+        try {
+            var constructor = classLoader.loadClass(testClass.getName()).getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create transformed test instance for " + testClass.getName(), e);
+        }
+    }
+
+    private TransformingClassLoader createTransformingClassLoader(Class<?> testClass) {
+        var transform = testClass.getAnnotation(Transform.class);
+        return new TransformingClassLoader(
+                testClass.getClassLoader(),
+                classInfoCache -> createTransformer(transform.transformer(), classInfoCache),
+                transform.classPrefixes());
+    }
+
+    private ITransformer createTransformer(
+            Class<? extends ITransformer> transformerClass,
+            IClassInfoCache classInfoCache) {
+        try {
+            return transformerClass
+                    .getConstructor(IClassInfoCache.class)
+                    .newInstance(classInfoCache);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid transformer: " + transformerClass.getName(), e);
+        }
     }
 
     /**
@@ -95,8 +113,8 @@ public class TransformingExtension implements InvocationInterceptor {
         }
         // Fall back to name + arity match (parameter types may differ by classloader)
         for (var method : clazz.getDeclaredMethods()) {
-            if (method.getName().equals(original.getName())
-                    && method.getParameterCount() == original.getParameterCount()) {
+            if (method.getName().equals(original.getName()) &&
+                method.getParameterCount() == original.getParameterCount()) {
                 method.setAccessible(true);
                 return method;
             }
@@ -106,16 +124,5 @@ public class TransformingExtension implements InvocationInterceptor {
             return findMethod(superclass, original);
         }
         throw new IllegalStateException("Method not found in transformed class: " + original.getName());
-    }
-
-    private record Strategy(Class<? extends ITransformer> transformerClass) implements IStrategy {
-        @Override
-        public ITransformer getTransformer(IClassInfoCache classInfoCache) {
-            try {
-                return transformerClass.getConstructor(IClassInfoCache.class).newInstance(classInfoCache);
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Invalid transformer: " + transformerClass.getName(), e);
-            }
-        }
     }
 }
