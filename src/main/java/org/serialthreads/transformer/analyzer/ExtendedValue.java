@@ -109,6 +109,7 @@ public final class ExtendedValue extends BasicValue {
   private ExtendedValue(Type type, Object constant, Set<Integer> locals) {
     super(type);
 
+    assert type != null : "Precondition: type != null";
     assert locals != null : "Precondition: locals != null";
 
     this.constant = constant;
@@ -128,7 +129,7 @@ public final class ExtendedValue extends BasicValue {
   public Object getConstant() {
     assert isConstant() : "Precondition: isConstant()";
 
-    assert constant != NOT_CONSTANT : "Precondition: constant != NOT_CONSTANT";
+    assert constant != NOT_CONSTANT : "Postcondition: constant != NOT_CONSTANT";
     return constant;
   }
 
