@@ -2,6 +2,7 @@ plugins {
     `java-library`
     `java-test-fixtures`
     `maven-publish`
+    jacoco
     alias(libs.plugins.versions)
 }
 
@@ -80,6 +81,16 @@ tasks.test {
 
     // ignore failing tests
     ignoreFailures = true
+
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 sourceSets {
