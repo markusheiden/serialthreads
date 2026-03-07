@@ -11,8 +11,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import static java.lang.String.join;
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.joining;
 
 /**
  * JUnit 5 extension that loads the test class through a {@link TransformingClassLoader}
@@ -125,8 +125,8 @@ public class TransformingExtension implements InvocationInterceptor {
         // Search at super class, if any.
         var superclass = clazz.getSuperclass();
         if (superclass == null) {
-            throw new IllegalStateException("Method %s#%s not found.".formatted(
-                    original.getName(), parameterTypeNames.stream().collect(joining(", ", "(", ")"))));
+            throw new IllegalStateException("Method %s#(%s) not found.".formatted(
+                    original.getName(), join(", ", parameterTypeNames)));
         }
 
         return findMethod(superclass, original);
