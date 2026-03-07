@@ -47,9 +47,7 @@ dependencies {
     testImplementation(testFixtures(project(":")))
 
     testFixturesImplementation(platform(libs.spring.boot.bom))
-    testFixturesImplementation(libs.junit.platform.launcher)
-    testFixturesImplementation(libs.slf4j.api)
-    testFixturesImplementation(libs.asm)
+    testFixturesImplementation(libs.junit.jupiter)
 }
 
 tasks.withType<AbstractArchiveTask> {
