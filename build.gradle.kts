@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.versions)
 }
 
+tasks.wrapper {
+    gradleVersion = libs.versions.gradle.get()
+}
+
 repositories {
     mavenCentral()
 }
@@ -75,8 +79,9 @@ publishing {
         }
     }
 }
+
 tasks.build {
-    dependsOn(tasks.publishToMavenLocal)
+    // dependsOn(tasks.publishToMavenLocal)
 }
 
 tasks.test {
