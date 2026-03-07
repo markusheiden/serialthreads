@@ -9,12 +9,16 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
+
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 
 /**
  * JUnit 5 extension that loads the test class through a {@link TransformingClassLoader}
  * and executes each test method on the transformed instance.
- *
- * <p>Activated automatically via the {@link Transform} meta-annotation.
+ * <p>
+ * Activated automatically via the {@link Transform} meta-annotation.
  */
 public class TransformingExtension implements InvocationInterceptor {
     private static final Namespace NAMESPACE = Namespace.create(TransformingExtension.class);
@@ -53,6 +57,7 @@ public class TransformingExtension implements InvocationInterceptor {
         // Do NOT call the test method of the untransformed instance.
         invocation.skip();
         try {
+            // Invoke the transformed test method instead.
             method.invoke(instance);
         } catch (InvocationTargetException e) {
             throw e.getCause();
@@ -65,7 +70,8 @@ public class TransformingExtension implements InvocationInterceptor {
      */
     private Object getOrCreateInstance(ExtensionContext context) {
         return context.getStore(NAMESPACE)
-                .computeIfAbsent(TRANSFORMED_INSTANCE, _ -> createInstance(context), Object.class);
+                .computeIfAbsent(TRANSFORMED_INSTANCE, _ ->
+                        createInstance(context), Object.class);
     }
 
     private Object createInstance(ExtensionContext context) {
@@ -76,7 +82,7 @@ public class TransformingExtension implements InvocationInterceptor {
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create transformed test instance for " + testClass.getName(), e);
+            throw new IllegalStateException("Failed to create transformed test instance for " + testClass.getName(), e);
         }
     }
 
@@ -96,34 +102,39 @@ public class TransformingExtension implements InvocationInterceptor {
                     .getConstructor(IClassInfoCache.class)
                     .newInstance(classInfoCache);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid transformer: " + transformerClass.getName(), e);
+            throw new IllegalStateException("Invalid transformer " + transformerClass.getName(), e);
         }
     }
 
     /**
-     * Finds the method on the transformed class by name and arity.
+     * Finds the method on the transformed class by name and parameter type names.
+     * Comparing type names (rather than {@link Class} identity) handles the case where
+     * parameter types were loaded by different classloaders.
      * Walks up the class hierarchy to cover methods inherited from superclasses.
      */
     private Method findMethod(Class<?> clazz, Method original) {
-        // Try exact match first (parameter types from the same classloader)
-        try {
-            var method = clazz.getDeclaredMethod(original.getName(), original.getParameterTypes());
-            method.setAccessible(true);
-            return method;
-        } catch (NoSuchMethodException ignored) {
-        }
-        // Fall back to name + arity match (parameter types may differ by classloader)
+        var parameterTypeNames = parameterTypeNames(original);
         for (var method : clazz.getDeclaredMethods()) {
             if (method.getName().equals(original.getName()) &&
-                method.getParameterCount() == original.getParameterCount()) {
+                parameterTypeNames(method).equals(parameterTypeNames)) {
                 method.setAccessible(true);
                 return method;
             }
         }
+
+        // Search at super class, if any.
         var superclass = clazz.getSuperclass();
-        if (superclass != null) {
-            return findMethod(superclass, original);
+        if (superclass == null) {
+            throw new IllegalStateException("Method %s#%s not found.".formatted(
+                    original.getName(), parameterTypeNames.stream().collect(joining(", ", "(", ")"))));
         }
-        throw new IllegalStateException("Method not found in transformed class: " + original.getName());
+
+        return findMethod(superclass, original);
+    }
+
+    private List<String> parameterTypeNames(Method method) {
+        return stream(method.getParameterTypes())
+                .map(Class::getName)
+                .toList();
     }
 }
