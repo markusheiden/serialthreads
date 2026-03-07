@@ -102,13 +102,14 @@ tasks.jacocoTestReport {
 }
 
 sourceSets {
-    val main by getting
-    val test by getting
     create("performanceTest") {
         java {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
-            srcDir(file("src/test/performance/java"))
+            srcDir(file("src/test/performance"))
         }
     }
+}
+
+configurations {
+    getByName("performanceTestImplementation").extendsFrom(configurations.testImplementation.get())
+    getByName("performanceTestRuntimeOnly").extendsFrom(configurations.testRuntimeOnly.get())
 }
