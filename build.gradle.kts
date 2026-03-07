@@ -17,6 +17,9 @@ java {
         // Use Eclipse Temurin (provided by Adoptium).
         vendor = JvmVendorSpec.ADOPTIUM
     }
+
+    withSourcesJar()
+    withJavadocJar()
 }
 
 configurations.all {
