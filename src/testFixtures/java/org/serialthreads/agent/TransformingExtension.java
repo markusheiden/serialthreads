@@ -40,6 +40,8 @@ public class TransformingExtension implements InvocationInterceptor {
         runOnTransformed(invocation, invocationContext, context);
     }
 
+    // TODO markus 2026-03-07: Add support for dynamic tests?
+
     @Override
     public void interceptAfterEachMethod(
             Invocation<Void> invocation,
