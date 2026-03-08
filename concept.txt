@@ -14,8 +14,7 @@ remember method handles during serialize
 
   private void dynamicXXX(ClassNode clazz) {
     for (MethodNode method : clazz.methods) {
-      AbstractInsnNode[] instructions = method.instructions.toArray();
-      for (AbstractInsnNode instruction : instructions) {
+      for (AbstractInsnNode instruction : method.instructions) {
         if (instruction instanceof InvokeDynamicInsnNode dynamic) {
           System.err.println(">>> " + methodName(clazz, method) + ": " + dynamic.bsm + " [" + dynamic.bsmArgs.length + "]");
 //          dynamic.desc = changeDescXXX(dynamic.desc);

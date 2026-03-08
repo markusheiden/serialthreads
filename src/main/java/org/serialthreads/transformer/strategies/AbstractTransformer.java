@@ -3,7 +3,12 @@ package org.serialthreads.transformer.strategies;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
@@ -32,6 +37,7 @@ import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.tree.AbstractInsnNode.METHOD_INSN;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
@@ -165,8 +171,8 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method Method to check
    */
   private void check(ClassNode clazz, MethodNode method) {
-    for (var instruction : method.instructions.toArray()) {
-      if (instruction.getType() == AbstractInsnNode.METHOD_INSN) {
+    for (var instruction : method.instructions) {
+      if (instruction.getType() == METHOD_INSN) {
         var methodCall = (MethodInsnNode) instruction;
 
         if (!classInfoCache.isInterruptible(methodCall)) {
@@ -253,11 +259,9 @@ public abstract class AbstractTransformer implements ITransformer {
    * @param method method node to transform
    */
   protected boolean hasNoInterruptibleMethodCalls(MethodNode method) {
-    for (var instruction : method.instructions.toArray()) {
-      if (instruction instanceof MethodInsnNode methodCall) {
-        if (classInfoCache.isInterruptible(methodCall)) {
-          return false;
-        }
+    for (var instruction : method.instructions) {
+      if (instruction.getType() == METHOD_INSN && classInfoCache.isInterruptible((MethodInsnNode) instruction)) {
+        return false;
       }
     }
 

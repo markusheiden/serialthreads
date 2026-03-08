@@ -1,7 +1,12 @@
 package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.IRunnable;
@@ -12,7 +17,16 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Type.VOID_TYPE;
 
 /**
@@ -262,7 +276,7 @@ public final class MethodCode {
   public static List<AbstractInsnNode> returnInstructions(MethodNode method) {
     var result = new ArrayList<AbstractInsnNode>();
     // TODO markus 2023-05-12: Why toArray()?
-    for (var instruction : method.instructions.toArray()) {
+    for (var instruction : method.instructions) {
       if (isReturn(instruction)) {
         result.add(instruction);
       }

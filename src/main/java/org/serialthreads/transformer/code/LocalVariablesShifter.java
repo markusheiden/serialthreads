@@ -1,6 +1,8 @@
 package org.serialthreads.transformer.code;
 
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 /**
  * Shifts the local variables of a method.
@@ -16,7 +18,7 @@ public class LocalVariablesShifter {
    */
   public static void shift(int point, int shift, MethodNode method) {
     // Adopt instructions.
-    for (var instruction : method.instructions.toArray()) {
+    for (var instruction : method.instructions) {
       if (instruction instanceof VarInsnNode varInstruction) {
         varInstruction.var = remap(point, shift, varInstruction.var);
       } else if (instruction instanceof IincInsnNode incInstruction) {
