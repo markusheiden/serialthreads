@@ -26,6 +26,7 @@ import static java.util.Arrays.stream;
  * So {@link #interceptDynamicTest(Invocation, DynamicTestInvocationContext, ExtensionContext)}
  * does not need to be overridden.
  */
+@SuppressWarnings("NullableProblems")
 public class TransformingExtension implements InvocationInterceptor {
     private static final Namespace NAMESPACE = Namespace.create(TransformingExtension.class);
     private static final String TRANSFORMED_INSTANCE = "transformedInstance";
@@ -132,7 +133,7 @@ public class TransformingExtension implements InvocationInterceptor {
     /**
      * Finds the method on the transformed class by name and parameter type names.
      * Comparing type names (rather than {@link Class} identity) handles the case where
-     * parameter types were loaded by different classloaders.
+     * parameter types were loaded by different {@link ClassLoader}s.
      * Walks up the class hierarchy to cover methods inherited from superclasses.
      */
     private Method findMethod(Class<?> clazz, Method original) {
