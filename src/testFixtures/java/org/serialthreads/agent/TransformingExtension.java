@@ -40,7 +40,21 @@ public class TransformingExtension implements InvocationInterceptor {
         runOnTransformed(invocation, invocationContext, context);
     }
 
-    // TODO markus 2026-03-07: Add support for dynamic tests?
+    @Override
+    public <T> T interceptTestFactoryMethod(
+            Invocation<T> invocation,
+            ReflectiveInvocationContext<Method> invocationContext,
+            ExtensionContext context) throws Throwable {
+        return runOnTransformed(invocation, invocationContext, context);
+    }
+
+    @Override
+    public void interceptTestTemplateMethod(
+            Invocation<Void> invocation,
+            ReflectiveInvocationContext<Method> invocationContext,
+            ExtensionContext context) throws Throwable {
+        runOnTransformed(invocation, invocationContext, context);
+    }
 
     @Override
     public void interceptAfterEachMethod(
@@ -50,8 +64,9 @@ public class TransformingExtension implements InvocationInterceptor {
         runOnTransformed(invocation, invocationContext, context);
     }
 
-    private void runOnTransformed(
-            Invocation<Void> invocation,
+    @SuppressWarnings("unchecked")
+    private <T> T runOnTransformed(
+            Invocation<T> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext context) throws Throwable {
         var instance = getOrCreateInstance(context);
@@ -60,7 +75,7 @@ public class TransformingExtension implements InvocationInterceptor {
         invocation.skip();
         try {
             // Invoke the transformed test method instead.
-            method.invoke(instance);
+            return (T) method.invoke(instance);
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }
