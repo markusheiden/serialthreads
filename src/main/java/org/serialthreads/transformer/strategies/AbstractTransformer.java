@@ -172,9 +172,7 @@ public abstract class AbstractTransformer implements ITransformer {
    */
   private void check(ClassNode clazz, MethodNode method) {
     for (var instruction : method.instructions) {
-      if (instruction.getType() == METHOD_INSN) {
-        var methodCall = (MethodInsnNode) instruction;
-
+      if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall) {
         if (!classInfoCache.isInterruptible(methodCall)) {
           // nothing to check on not interruptible methods
           continue;
