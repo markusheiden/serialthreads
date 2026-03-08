@@ -136,9 +136,10 @@ public class TransformingExtension implements InvocationInterceptor {
      * Walks up the class hierarchy to cover methods inherited from superclasses.
      */
     private Method findMethod(Class<?> clazz, Method original) {
+        var name = original.getName();
         var parameterTypeNames = parameterTypeNames(original);
         for (var method : clazz.getDeclaredMethods()) {
-            if (method.getName().equals(original.getName()) &&
+            if (method.getName().equals(name) &&
                 parameterTypeNames(method).equals(parameterTypeNames)) {
                 method.setAccessible(true);
                 return method;
@@ -148,8 +149,8 @@ public class TransformingExtension implements InvocationInterceptor {
         // Search at super class, if any.
         var superclass = clazz.getSuperclass();
         if (superclass == null) {
-            throw new IllegalStateException("Method %s#(%s) not found.".formatted(
-                    original.getName(), join(", ", parameterTypeNames)));
+            throw new IllegalStateException("Method %s#%s(%s) not found.".formatted(
+                    clazz.getName(), name, join(", ", parameterTypeNames)));
         }
 
         return findMethod(superclass, original);
