@@ -4,6 +4,9 @@ import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import static org.objectweb.asm.tree.AbstractInsnNode.IINC_INSN;
+import static org.objectweb.asm.tree.AbstractInsnNode.VAR_INSN;
+
 /**
  * Shifts the local variables of a method.
  * Used for adding parameters.
@@ -19,9 +22,9 @@ public class LocalVariablesShifter {
   public static void shift(int point, int shift, MethodNode method) {
     // Adopt instructions.
     for (var instruction : method.instructions) {
-      if (instruction instanceof VarInsnNode varInstruction) {
+      if (instruction.getType() == VAR_INSN && instruction instanceof VarInsnNode varInstruction) {
         varInstruction.var = remap(point, shift, varInstruction.var);
-      } else if (instruction instanceof IincInsnNode incInstruction) {
+      } else if (instruction.getType() == IINC_INSN && instruction instanceof IincInsnNode incInstruction) {
         incInstruction.var = remap(point, shift, incInstruction.var);
       }
     }

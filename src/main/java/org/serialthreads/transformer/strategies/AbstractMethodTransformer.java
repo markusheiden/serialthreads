@@ -1,25 +1,55 @@
 package org.serialthreads.transformer.strategies;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.context.ThreadFinishedException;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
-import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.CompactingStackCode;
 import org.serialthreads.transformer.code.ThreadCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
-import static org.objectweb.asm.Opcodes.*;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ATHROW;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.tree.AbstractInsnNode.METHOD_INSN;
+import static org.serialthreads.transformer.code.MethodCode.firstLocal;
+import static org.serialthreads.transformer.code.MethodCode.firstParam;
+import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
+import static org.serialthreads.transformer.code.MethodCode.isReturn;
+import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
+import static org.serialthreads.transformer.code.MethodCode.isStatic;
+import static org.serialthreads.transformer.code.MethodCode.nextInstruction;
+import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPTIBLE;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
@@ -27,7 +57,7 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 /**
  * Base class for all method transformers.
  */
-@SuppressWarnings({"UnusedDeclaration", "UnusedAssignment", "UnnecessaryLocalVariable"})
+@SuppressWarnings("UnusedDeclaration")
 public abstract class AbstractMethodTransformer {
   /**
    * Logger.
@@ -103,18 +133,17 @@ public abstract class AbstractMethodTransformer {
    * @throws AnalyzerException on invalid byte code.
    */
   protected void analyze() throws AnalyzerException {
-    // Init meta information
+    // Init meta information.
     var frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
     var instructions = method.instructions;
     for (int i = 0, e = instructions.size(), last = e - 1; i < e; i++) {
-      metaInfos.put(instructions.get(i), new MetaInfo((ExtendedFrame) frames[i], i < last ? (ExtendedFrame) frames[i + 1] : null));
+      metaInfos.put(instructions.get(i), new MetaInfo(frames[i], i < last ? frames[i + 1] : null));
     }
 
-    // Tag special instructions
-    for (int i = 0, e = instructions.size(); i < e; i++) {
-      var instruction = instructions.get(i);
-      if (instruction instanceof MethodInsnNode methodCall) {
-        if (classInfoCache.isInterruptible(methodCall)) {
+    // Tag special instructions.
+    for (var instruction : instructions) {
+      if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall &&
+          classInfoCache.isInterruptible(methodCall)) {
           interruptibleMethodCalls.add(methodCall);
           tag(instruction, TAG_INTERRUPTIBLE);
           if (classInfoCache.isInterrupt(methodCall)) {
@@ -123,7 +152,6 @@ public abstract class AbstractMethodTransformer {
             // Tag (tail) method call.
             tag(instruction, TAG_TAIL_CALL);
           }
-        }
       }
     }
   }
