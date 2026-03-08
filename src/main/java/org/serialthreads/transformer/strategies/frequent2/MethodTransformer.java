@@ -1,7 +1,13 @@
 package org.serialthreads.transformer.strategies.frequent2;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
@@ -9,7 +15,11 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.IFEQ;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
+import static org.serialthreads.transformer.code.MethodCode.escapeForMethodName;
+import static org.serialthreads.transformer.code.MethodCode.firstLocal;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
+import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 
@@ -184,7 +194,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Introduce new local holding the return value
-      final int localReturnValue = method.maxLocals;
+      var localReturnValue = method.maxLocals;
 
       var restoreFrame = new LabelNode();
 
@@ -213,7 +223,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
       // restore stack "under" the returned value, if any
       // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
-      final boolean needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
+      var needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
       if (needToSaveReturnValue) {
         instructions.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
       }

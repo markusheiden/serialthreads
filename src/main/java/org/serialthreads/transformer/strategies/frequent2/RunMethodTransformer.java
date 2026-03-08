@@ -12,7 +12,6 @@ import java.util.List;
 /**
  * Method transformer for run methods.
  */
-
 @SuppressWarnings({"UnusedDeclaration"})
 class RunMethodTransformer extends MethodTransformer {
   /**

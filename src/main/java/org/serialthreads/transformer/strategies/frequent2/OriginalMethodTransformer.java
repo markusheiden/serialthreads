@@ -1,6 +1,11 @@
 package org.serialthreads.transformer.strategies.frequent2;
 
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
@@ -11,7 +16,6 @@ import static org.serialthreads.transformer.code.MethodCode.isStatic;
 /**
  * Method transformer for concrete methods.
  */
-@SuppressWarnings({"UnusedAssignment"})
 class OriginalMethodTransformer extends MethodTransformer {
   /**
    * Constructor.
@@ -54,7 +58,7 @@ class OriginalMethodTransformer extends MethodTransformer {
       // thread = SerialThreadManager.getThread();
       instructions.add(threadCode.getThread(localThread));
     } else {
-      LabelNode exist = new LabelNode();
+      var exist = new LabelNode();
       // thread = this.$$thread$$;
       instructions.add(threadCode.getRunThread(clazz.name, localThread));
       instructions.add(new VarInsnNode(ALOAD, localThread));

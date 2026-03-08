@@ -1,16 +1,38 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IFNE;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Type.BOOLEAN_TYPE;
 import static org.objectweb.asm.Type.VOID;
-import static org.serialthreads.transformer.code.MethodCode.*;
+import static org.serialthreads.transformer.code.MethodCode.escapeForMethodName;
+import static org.serialthreads.transformer.code.MethodCode.firstLocal;
+import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
+import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
+import static org.serialthreads.transformer.code.MethodCode.isStatic;
+import static org.serialthreads.transformer.code.MethodCode.methodName;
+import static org.serialthreads.transformer.code.MethodCode.previousInstruction;
+import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
@@ -18,7 +40,7 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer3}.
  */
-@SuppressWarnings({"UnusedAssignment", "UnusedDeclaration"})
+@SuppressWarnings("UnusedDeclaration")
 abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Local holding the thread.
