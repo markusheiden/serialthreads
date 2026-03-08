@@ -1,5 +1,6 @@
 package org.serialthreads.agent;
 
+import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
@@ -19,6 +20,11 @@ import static java.util.Arrays.stream;
  * and executes each test method on the transformed instance.
  * <p>
  * Activated automatically via the {@link Transform} meta-annotation.
+ * <p>
+ * Dynamic tests are lambdas already captured inside {@link #interceptTestFactoryMethod},
+ * which already runs on the transformed instance.
+ * So {@link #interceptDynamicTest(Invocation, DynamicTestInvocationContext, ExtensionContext)}
+ * does not need to be overridden.
  */
 public class TransformingExtension implements InvocationInterceptor {
     private static final Namespace NAMESPACE = Namespace.create(TransformingExtension.class);
