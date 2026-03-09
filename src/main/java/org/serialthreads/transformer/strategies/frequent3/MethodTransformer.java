@@ -9,11 +9,14 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
+
+import java.util.ArrayList;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ICONST_0;
@@ -234,8 +237,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     var normal = new LabelNode();
     var serializing = new LabelNode();
+    // originalEnd is placed immediately after methodCall in the instruction list.
+    // Exception handler ranges covering methodCall are narrowed to end here, so that
+    // restore code (including restoreLocals) is outside any handler range.
+    // This prevents uninitialized locals from appearing at the catch handler merge point.
+    var originalEnd = new LabelNode();
 
     var instructions = new InsnList();
+
+    instructions.add(originalEnd);
 
     // If not serializing "GOTO" normal.
     instructions.add(new JumpInsnNode(IFEQ, normal));
@@ -251,15 +261,31 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     // Restore code to continue.
     var restoreLabel = new LabelNode();
+    LabelNode copyStart = null;
+    LabelNode copyEnd = null;
     if (restore) {
       instructions.add(restoreLabel);
 
+      // Restore primitive (non-reference) locals before the copy method call.
+      // This initializes primitive locals in the frame so that exception handlers
+      // covering the copy method call see a definite type for those locals.
+      // Reference locals are intentionally NOT restored here: their frame fields use
+      // clear=true and would be nulled, breaking subsequent resumptions when the copy
+      // returns true (i.e., when there are multiple interrupts at deeper call levels).
+      instructions.add(threadCode.restorePrimitiveLocals(methodCall, metaInfo, localFrame));
+
+      // copyStart/copyEnd bracket the copy method call so that exceptions thrown
+      // by it are still dispatched to the correct user-defined catch handlers.
+      copyStart = new LabelNode();
+      copyEnd = new LabelNode();
+      instructions.add(copyStart);
       // Call interrupted method.
       instructions.add(callCopyMethod(methodCall, metaInfo));
+      instructions.add(copyEnd);
       // If serializing, return early, the frame already has been captured.
       instructions.add(new JumpInsnNode(IFNE, serializing));
 
-      // Restore stack "under" the returned value, if any.
+      // Restore frame (all locals and stack) after the copy completes normally.
       instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
       // Continue.
     }
@@ -274,7 +300,58 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // Insert capture code.
     method.instructions.insert(methodCall, instructions);
 
+    // Adjust exception table entries that previously covered the original method call:
+    // - Narrow them to end at originalEnd so restore code is outside handler ranges.
+    // - Add new entries covering the copy method call so exceptions propagate correctly.
+    if (restore) {
+      adjustExceptionTable(methodCall, originalEnd, copyStart, copyEnd);
+    }
+
     return restoreLabel;
+  }
+
+  /**
+   * Adjust exception table entries to account for inserted capture/restore code.
+   * <p>
+   * Entries that previously covered {@code methodCall} are narrowed to end at
+   * {@code originalEnd} (placed immediately after the method call), so that the
+   * restore code (including {@code restoreLocals}) is not inside any handler range.
+   * New entries are added covering {@code [copyStart, copyEnd)} so that exceptions
+   * thrown by the copy method call are still dispatched to the correct handlers.
+   *
+   * @param methodCall  The original interruptible method call.
+   * @param originalEnd Label placed immediately after {@code methodCall} in the instruction list.
+   * @param copyStart   Label placed before the copy method call.
+   * @param copyEnd     Label placed after the copy method call.
+   */
+  private void adjustExceptionTable(MethodInsnNode methodCall, LabelNode originalEnd, LabelNode copyStart, LabelNode copyEnd) {
+    var newEntries = new ArrayList<TryCatchBlockNode>();
+    for (var tryCatch : method.tryCatchBlocks) {
+      if (covers(tryCatch.start, tryCatch.end, methodCall)) {
+        // Narrow the original entry to end before the inserted restore code.
+        tryCatch.end = originalEnd;
+        // Add a new entry so the copy method call is still covered by this handler.
+        newEntries.add(new TryCatchBlockNode(copyStart, copyEnd, tryCatch.handler, tryCatch.type));
+      }
+    }
+    method.tryCatchBlocks.addAll(newEntries);
+  }
+
+  /**
+   * Check whether {@code insn} is inside the exception handler range {@code [start, end)}.
+   *
+   * @param start Start label of the range (inclusive).
+   * @param end   End label of the range (exclusive).
+   * @param insn  Instruction to check.
+   * @return {@code true} if {@code insn} is within the range.
+   */
+  private boolean covers(LabelNode start, LabelNode end, AbstractInsnNode insn) {
+    for (var node = start.getNext(); node != null && node != end; node = node.getNext()) {
+      if (node == insn) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

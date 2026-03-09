@@ -4,7 +4,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.slf4j.Logger;
@@ -12,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
@@ -85,7 +82,7 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    @Override
-   public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList restorePrimitiveLocals(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       var instructions = new InsnList();
 
       if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
@@ -94,7 +91,72 @@ public class CompactingStackCode extends AbstractStackCode {
 
       var frameAfter = metaInfo.frameAfter;
       final boolean isMethodNotStatic = isNotStatic(methodCall);
-      final boolean isCallNotVoid = isNotVoid(methodCall);
+
+      // Restore only primitive (non-reference) locals by type.
+      // Reference locals are intentionally skipped: their frame fields use clear=true, which would
+      // null the frame slots. Since this method is called on every resumption of an interrupt point
+      // (even when the copy method returns true and the caller must resume again later), clearing
+      // would leave the frame invalid for the next resumption.
+      for (var code : ValueCodeFactory.CODES) {
+         if (code.isReference()) {
+            continue;
+         }
+
+         var popLocals = new ArrayList<Integer>();
+         var copyLocals = new InsnList();
+
+         // Do not restore local 0 for non-static methods, because it always contains "this".
+         for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
+            var value = frameAfter.getLocal(local);
+            if (code.isResponsibleFor(value.getType())) {
+               var extendedValue = (ExtendedValue) value;
+               // Ignore not needed locals.
+               int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+               if (local == lowestLocal) {
+                  // Normal case -> Pop local from frame.
+                  popLocals.add(local);
+               } else if (lowestLocal >= 0) {
+                  // The value of the local is held in a lower local too -> copy.
+                  logger.debug("        Detected codes with the same value: {}/{}", lowestLocal, local);
+                  copyLocals.add(code(extendedValue).load(lowestLocal));
+                  copyLocals.add(code(extendedValue).store(local));
+               }
+               // else: The local is not needed -> No restore needed.
+            }
+         }
+
+         // First restore not duplicated locals, if any.
+         var iter = popLocals.iterator();
+         for (int i = 0; iter.hasNext(); i++) {
+            int local = iter.next();
+            var localCode = code(frameAfter.getLocal(local));
+            instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
+         }
+
+         // Then restore duplicated locals.
+         instructions.add(copyLocals);
+      }
+
+      return instructions;
+   }
+
+   @Override
+   public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+      var instructions = new InsnList();
+      instructions.add(restoreLocals(methodCall, metaInfo, localFrame));
+      instructions.add(restoreStack(methodCall, metaInfo, localFrame));
+      return instructions;
+   }
+
+   private InsnList restoreLocals(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+      var instructions = new InsnList();
+
+      if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         return instructions;
+      }
+
+      var frameAfter = metaInfo.frameAfter;
+      final boolean isMethodNotStatic = isNotStatic(methodCall);
 
       // Restore locals by type.
       for (var code : ValueCodeFactory.CODES) {
@@ -132,6 +194,19 @@ public class CompactingStackCode extends AbstractStackCode {
          // then restore duplicated locals
          instructions.add(copyLocals);
       }
+
+      return instructions;
+   }
+
+   private InsnList restoreStack(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+      var instructions = new InsnList();
+
+      if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         return instructions;
+      }
+
+      var frameAfter = metaInfo.frameAfter;
+      final boolean isCallNotVoid = isNotVoid(methodCall);
 
       // restore stack
       // the topmost element is a dummy return value, if the called method is not a void method

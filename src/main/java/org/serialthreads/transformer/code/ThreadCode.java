@@ -239,4 +239,26 @@ public interface ThreadCode {
    * @return Generated code.
    */
   InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+
+  /**
+   * Restore primitive (non-reference) local variables from the frame before calling a copy method.
+   * <p>
+   * Unlike {@link #restoreLocals} this does not clear reference-type frame fields,
+   * so the frame remains valid for subsequent resumptions of the same interrupt point
+   * (i.e., when the copy method returns {@code true} and the caller returns early,
+   * and is then invoked again by the executor).
+   * <p>
+   * This is used to ensure that primitive locals are initialized before the copy method
+   * call site, so that exception handlers covering that site see a definite type for
+   * those locals and the bytecode verifier does not reject the transformed class.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @param localFrame
+   *           number of local containing the frame.
+   * @return Generated code.
+   */
+  InsnList restorePrimitiveLocals(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 }

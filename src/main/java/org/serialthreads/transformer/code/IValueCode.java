@@ -25,6 +25,12 @@ public interface IValueCode {
     */
    boolean isResponsibleFor(Type type);
 
+   /**
+    * Is this code responsible for reference (object/array) types?.
+    * Reference-type frame fields use {@code clear=true}, meaning they are nulled after reading.
+    */
+   boolean isReference();
+
    //
    // Stack.
    //
