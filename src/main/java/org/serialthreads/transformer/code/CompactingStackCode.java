@@ -60,33 +60,38 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    /**
-    * Save locals.
+    * Save locals (by type).
     */
-   private void saveLocals(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
-      var isMethodNotStatic = isNotStatic(methodCall);
-
-      // Save locals separated by type.
+   private void saveLocals(
+           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame,
+           InsnList instructions) {
       for (var code : ValueCodeFactory.CODES) {
-         var pushLocals = new ArrayList<Integer>(frameAfter.getLocals());
+         saveLocals(methodCall, frameAfter, localFrame, code, instructions);
+      }
+   }
 
-         // Do not store local 0 for non-static methods, because it always contains "this".
-         for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-            var value = frameAfter.getLocal(local);
-            if (code.isResponsibleFor(value.getType())) {
-               var extendedValue = (ExtendedValue) value;
-               var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
-               if (local == lowestLocal) {
-                  // Only store value, if it is not stored in a lower needed local.
-                  pushLocals.add(local);
-               }
+   private void saveLocals(
+           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, IValueCode code,
+           InsnList instructions) {
+      var isMethodNotStatic = isNotStatic(methodCall);
+      var pushLocals = new ArrayList<Integer>(frameAfter.getLocals());
+      // Do not store local 0 for non-static methods, because it always contains "this".
+      for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
+         var value = frameAfter.getLocal(local);
+         if (code.isResponsibleFor(value.getType())) {
+            var extendedValue = (ExtendedValue) value;
+            var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+            if (local == lowestLocal) {
+               // Only store value, if it is not stored in a lower needed local.
+               pushLocals.add(local);
             }
          }
+      }
 
-         for (int i = 0, last = pushLocals.size() - 1; i <= last; i++) {
-            var local = pushLocals.get(i);
-            var localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.pushLocal(local, i, i < last, localFrame));
-         }
+      for (int i = 0, last = pushLocals.size() - 1; i <= last; i++) {
+         var local = pushLocals.get(i);
+         var localCode = code(frameAfter.getLocal(local));
+         instructions.add(localCode.pushLocal(local, i, i < last, localFrame));
       }
    }
 
@@ -102,52 +107,59 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    /**
-    * Restore locals.
+    * Restore locals (by type).
     */
-   private void restoreLocals(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
-      var isMethodNotStatic = isNotStatic(methodCall);
-
-      // Restore locals by type.
+   private void restoreLocals(
+           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame,
+           InsnList instructions) {
       for (var code : ValueCodeFactory.CODES) {
-         var popLocals = new ArrayList<Integer>();
-         var copyLocals = new InsnList();
-
-         // Do not restore local 0 for non-static methods, because it always contains "this".
-         for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
-            var value = frameAfter.getLocal(local);
-            if (code.isResponsibleFor(value.getType())) {
-               var extendedValue = (ExtendedValue) value;
-               // Ignore not needed locals.
-               var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
-               if (local == lowestLocal) {
-                  // Normal case -> Pop local from frameAfter.
-                  popLocals.add(local);
-               } else if (lowestLocal >= 0) {
-                  // The value of the local is hold in a lower local too -> copy.
-                  logger.debug("        Detected codes with the same value: {}/{}", lowestLocal, local);
-                  copyLocals.add(code(extendedValue).load(lowestLocal));
-                  copyLocals.add(code(extendedValue).store(local));
-               }
-               // else: The local is not needed -> No restore needed.
-            }
-         }
-
-         // First restore not duplicated locals, if any.
-         for (int i = 0, last = popLocals.size() - 1; i <= last; i++) {
-            var local = popLocals.get(i);
-            var localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.popLocal(local, i, i < last, localFrame));
-         }
-
-         // Then restore duplicated locals.
-         instructions.add(copyLocals);
+         restoreLocals(methodCall, frameAfter, localFrame, code, instructions);
       }
+   }
+
+   private void restoreLocals(
+           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, IValueCode code,
+           InsnList instructions) {
+      var isMethodNotStatic = isNotStatic(methodCall);
+      var popLocals = new ArrayList<Integer>();
+      var copyLocals = new InsnList();
+      // Do not restore local 0 for non-static methods, because it always contains "this".
+      for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
+         var value = frameAfter.getLocal(local);
+         if (code.isResponsibleFor(value.getType())) {
+            var extendedValue = (ExtendedValue) value;
+            // Ignore not needed locals.
+            var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+            if (local == lowestLocal) {
+               // Normal case -> Pop local from frameAfter.
+               popLocals.add(local);
+            } else if (lowestLocal >= 0) {
+               // The value of the local is hold in a lower local too -> copy.
+               logger.debug("        Detected codes with the same value: {}/{}", lowestLocal, local);
+               copyLocals.add(code(extendedValue).load(lowestLocal));
+               copyLocals.add(code(extendedValue).store(local));
+            }
+            // else: The local is not needed -> No restore needed.
+         }
+      }
+
+      // First restore not duplicated locals, if any.
+      for (int i = 0, last = popLocals.size() - 1; i <= last; i++) {
+         var local = popLocals.get(i);
+         var localCode = code(frameAfter.getLocal(local));
+         instructions.add(localCode.popLocal(local, i, i < last, localFrame));
+      }
+
+      // Then restore duplicated locals.
+      instructions.add(copyLocals);
    }
 
    /**
     * Restore stack.
     */
-   private void restoreStack(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
+   private void restoreStack(
+           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame,
+           InsnList instructions) {
       var isCallNotVoid = isNotVoid(methodCall);
 
       var stackIndexes = stackIndexes(frameAfter);
