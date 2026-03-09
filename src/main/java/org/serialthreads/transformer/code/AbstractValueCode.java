@@ -105,13 +105,12 @@ public abstract class AbstractValueCode implements IValueCode {
     this.type = type;
     if (type.getSort() == OBJECT || type.getSort() == ARRAY) {
       this.baseType = Type.getType(Object.class);
-      this.size = 1;
       this.clear = true;
     } else {
       this.baseType = type;
-      this.size = type.getSize();
       this.clear = false;
     }
+    this.size = type.getSize();
     this.methodName = methodName;
     this.load = load;
     this.store = store;
