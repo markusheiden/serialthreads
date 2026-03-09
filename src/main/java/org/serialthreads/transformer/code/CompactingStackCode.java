@@ -40,7 +40,7 @@ public class CompactingStackCode extends AbstractStackCode {
       var isCallNotVoid = isNotVoid(methodCall);
 
       // Save stack.
-      // the topmost element is a dummy return value, if the called method returns one
+      // The topmost element is a dummy return value, if the called method returns one.
       var stackIndexes = stackIndexes(frameAfter);
       for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
          var value = (ExtendedValue) frameAfter.getStack(stack);
@@ -118,7 +118,7 @@ public class CompactingStackCode extends AbstractStackCode {
             }
          }
 
-         // first restore not duplicated locals, if any
+         // First restore not duplicated locals, if any.
          var iter = popLocals.iterator();
          for (var i = 0; iter.hasNext(); i++) {
             var local = iter.next();
@@ -126,12 +126,12 @@ public class CompactingStackCode extends AbstractStackCode {
             instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
          }
 
-         // then restore duplicated locals
+         // Then restore duplicated locals.
          instructions.add(copyLocals);
       }
 
-      // restore stack
-      // the topmost element is a dummy return value, if the called method is not a void method
+      // Restore stack.
+      // The topmost element is a dummy return value, if the called method is not a void method.
       var stackIndexes = stackIndexes(frameAfter);
       for (int stack = 0, end = isCallNotVoid ? frameAfter.getStackSize() - 1 : frameAfter.getStackSize(); stack < end; stack++) {
          var value = (ExtendedValue) frameAfter.getStack(stack);
