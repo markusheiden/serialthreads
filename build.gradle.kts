@@ -85,9 +85,6 @@ tasks.build {
 tasks.test {
     useJUnitPlatform()
 
-    // ignore failing tests
-    ignoreFailures = true
-
     finalizedBy(tasks.jacocoTestReport)
 }
 
