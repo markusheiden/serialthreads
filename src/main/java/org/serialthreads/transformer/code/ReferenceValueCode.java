@@ -33,7 +33,8 @@ public class ReferenceValueCode extends AbstractValueCode {
   public boolean isCompatibleWith(Type type) {
     assert type != null : "Precondition: type != null.";
 
-    return super.isCompatibleWith(type) && type.getInternalName().equals(type.getInternalName());
+    return super.isCompatibleWith(type) &&
+           this.concreteType.getInternalName().equals(type.getInternalName());
   }
 
   @Override
