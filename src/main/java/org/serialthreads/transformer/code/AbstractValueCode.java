@@ -8,7 +8,14 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.DUP_X2;
+import static org.objectweb.asm.Opcodes.GETFIELD;
+import static org.objectweb.asm.Opcodes.POP;
+import static org.objectweb.asm.Opcodes.POP2;
+import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.objectweb.asm.Opcodes.SWAP;
 import static org.objectweb.asm.Type.ARRAY;
 import static org.objectweb.asm.Type.OBJECT;
 
@@ -43,7 +50,7 @@ public abstract class AbstractValueCode implements IValueCode {
   protected final int size;
 
   /**
-   * Clear restore elements from stack frame?
+   * Clear restored elements from stack frame?
    */
   protected final boolean clear;
 
