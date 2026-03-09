@@ -4,6 +4,7 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
+import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.slf4j.Logger;
@@ -83,14 +84,19 @@ public class CompactingStackCode extends AbstractStackCode {
    @Override
    public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       var instructions = new InsnList();
-
-      if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
-         return instructions;
+      if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         var frameAfter = metaInfo.frameAfter;
+         restoreLocals(methodCall, frameAfter, localFrame, instructions);
+         restoreStack(methodCall, frameAfter, localFrame, instructions);
       }
+      return instructions;
+   }
 
-      var frameAfter = metaInfo.frameAfter;
+   /**
+    * Restore locals.
+    */
+   private void restoreLocals(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
       var isMethodNotStatic = isNotStatic(methodCall);
-      var isCallNotVoid = isNotVoid(methodCall);
 
       // Restore locals by type.
       for (var code : ValueCodeFactory.CODES) {
@@ -127,10 +133,16 @@ public class CompactingStackCode extends AbstractStackCode {
          // Then restore duplicated locals.
          instructions.add(copyLocals);
       }
+   }
 
-      // Restore stack.
-      // The topmost element is a dummy return value, if the called method is not a void method.
+   /**
+    * Restore stack.
+    */
+   private void restoreStack(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
+      var isCallNotVoid = isNotVoid(methodCall);
+
       var stackIndexes = stackIndexes(frameAfter);
+      // The topmost element is a dummy return value, if the called method is not a void method.
       for (int stack = 0, end = isCallNotVoid ? frameAfter.getStackSize() - 1 : frameAfter.getStackSize(); stack < end; stack++) {
          var value = (ExtendedValue) frameAfter.getStack(stack);
          var lowestLocal = frameAfter.getLowestNeededLocal(value);
@@ -147,8 +159,6 @@ public class CompactingStackCode extends AbstractStackCode {
             instructions.add(code(value).popStack(stackIndexes[stack], localFrame));
          }
       }
-
-      return instructions;
    }
 
    /**
