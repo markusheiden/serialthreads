@@ -60,6 +60,7 @@ class CopyMethodTransformer extends MethodTransformer {
 
       replaceReturns();
       var restores = insertCaptureAndRestoreCode(true);
+      // updateExceptionTableForCaptureCode(restores);  // TODO: May not be needed
       createRestoreHandlerCopy(restores);
       addThreadAndFrame();
       fixMaxs();

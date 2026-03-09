@@ -1,7 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SerialThreadManager;
@@ -148,7 +147,6 @@ public abstract class TransformerIntegration_AbstractTest {
   /**
    * Test exception handling.
    */
-  @Disabled // TODO markus 2018-01-04: Implement exception handling.
   @Test
   void testException() {
     var test = new TestException();

@@ -198,6 +198,15 @@ public abstract class AbstractTransformer implements ITransformer {
    */
   private void reanalyzeMethods(ClassNode clazz, List<MethodNode> methods) throws NotTransformableException {
     for (var method : methods) {
+      // Skip reanalysis for methods with exception handlers.
+      // After LocalVariablesShifter.shift() is called, the frame information at exception
+      // handler entry points becomes stale, causing the analyzer to fail.
+      // The frames will be properly recomputed when the class is written with COMPUTE_FRAMES.
+      if (method.tryCatchBlocks != null && !method.tryCatchBlocks.isEmpty()) {
+        logger.debug("Skipping reanalysis of {} due to exception handlers", methodName(clazz, method));
+        continue;
+      }
+
       try {
         ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
       } catch (Exception e) {

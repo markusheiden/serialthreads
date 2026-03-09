@@ -1,7 +1,10 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -42,6 +45,7 @@ class OriginalMethodTransformer extends MethodTransformer {
 
       replaceReturns();
       insertCaptureCode();
+      // updateExceptionTableForOriginalMethod();  // TODO: May not be needed
       createRestoreHandlerMethod();
       addThreadAndFrame();
       fixMaxs();
@@ -51,6 +55,99 @@ class OriginalMethodTransformer extends MethodTransformer {
     method.desc = changeDesc(method.desc);
 
     return method;
+  }
+
+  /**
+   * Update exception table to cover inserted capture code in original method.
+   * When an interruptible method call is inside a try-catch block, the capture code
+   * inserted after the call must also be covered by the same exception handler.
+   */
+  private void updateExceptionTableForOriginalMethod() {
+    if (method.tryCatchBlocks == null || method.tryCatchBlocks.isEmpty()) {
+      return;
+    }
+
+    logger.debug("      Updating exception table for original method");
+
+    // For each exception handler, extend it to cover capture code
+    for (var tryCatchBlock : method.tryCatchBlocks) {
+      var start = tryCatchBlock.start;
+      var end = tryCatchBlock.end;
+
+      // Find the last interruptible method call within this try block
+      MethodInsnNode lastCallInBlock = null;
+      for (var methodCall : interruptibleMethodCalls) {
+        if (isInstructionInRange(methodCall, start, end)) {
+          lastCallInBlock = methodCall;
+        }
+      }
+
+      // If we found calls in this block, extend the end to cover capture code
+      if (lastCallInBlock != null) {
+        // Find the "normal" label which marks the end of capture code
+        var normalLabel = findNormalLabel(lastCallInBlock);
+        if (normalLabel != null) {
+          tryCatchBlock.end = normalLabel;
+          logger.debug("        Extended exception handler to cover capture code for {}", lastCallInBlock.name);
+        }
+      }
+    }
+  }
+
+  /**
+   * Find the "normal" execution label after capture code for a method call.
+   *
+   * @param methodCall Method call instruction.
+   * @return Normal execution label, or null if not found.
+   */
+  private LabelNode findNormalLabel(MethodInsnNode methodCall) {
+    // After a method call in original method (without restore), the pattern is:
+    // methodCall -> IFEQ -> (capture code) -> serializing label -> RETURN -> normal label -> (restore return value)
+    // We want to find the "normal" label
+    var current = methodCall.getNext();
+    int seenReturns = 0;
+    while (current != null && seenReturns < 2) {
+      // Look for the pattern: after we see a return, the next label is likely "normal"
+      if (current.getOpcode() == org.objectweb.asm.Opcodes.IRETURN ||
+          current.getOpcode() == org.objectweb.asm.Opcodes.RETURN) {
+        seenReturns++;
+        // After the return(s), look for the next label
+        if (seenReturns == 1) {
+          var next = current.getNext();
+          while (next != null) {
+            if (next instanceof LabelNode label) {
+              return label;
+            }
+            next = next.getNext();
+            // Stop if we hit another real instruction
+            if (next != null && next.getOpcode() >= 0) {
+              break;
+            }
+          }
+        }
+      }
+      current = current.getNext();
+    }
+    return null;
+  }
+
+  /**
+   * Check if an instruction is within the range defined by start and end labels.
+   *
+   * @param instruction Instruction to check.
+   * @param start Start label of the range.
+   * @param end End label of the range.
+   * @return True if instruction is in range.
+   */
+  private boolean isInstructionInRange(AbstractInsnNode instruction, LabelNode start, LabelNode end) {
+    var current = start.getNext();
+    while (current != null && current != end) {
+      if (current == instruction) {
+        return true;
+      }
+      current = current.getNext();
+    }
+    return false;
   }
 
   /**

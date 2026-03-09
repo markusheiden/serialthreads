@@ -15,6 +15,8 @@ import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
+import java.util.List;
+
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
@@ -421,5 +423,114 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     method.maxLocals += 1;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
+  }
+
+  /**
+   * Update exception table to cover inserted capture and restore code.
+   * When an interruptible method call is inside a try-catch block, the capture code
+   * inserted after the call must also be covered by the same exception handler.
+   *
+   * @param restores Labels pointing to the generated restore codes for method calls.
+   */
+  protected void updateExceptionTableForCaptureCode(List<LabelNode> restores) {
+    if (method.tryCatchBlocks == null || method.tryCatchBlocks.isEmpty()) {
+      return;
+    }
+
+    logger.debug("      Updating exception table for capture code");
+
+    // Build a map from method calls to their restore labels for quick lookup
+    var callToRestore = new java.util.HashMap<MethodInsnNode, LabelNode>();
+    int index = 0;
+    for (var methodCall : interruptibleMethodCalls) {
+      if (index < restores.size() && restores.get(index) != null) {
+        callToRestore.put(methodCall, restores.get(index));
+      }
+      index++;
+    }
+
+    // For each exception handler, check if it needs to be extended
+    for (var tryCatchBlock : method.tryCatchBlocks) {
+      var start = tryCatchBlock.start;
+      var end = tryCatchBlock.end;
+
+      // Find the last interruptible method call within this try block
+      MethodInsnNode lastCallInBlock = null;
+      for (var methodCall : interruptibleMethodCalls) {
+        if (isInstructionInRange(methodCall, start, end)) {
+          lastCallInBlock = methodCall;
+        }
+      }
+
+      // If we found calls in this block, extend the end to cover restore code
+      if (lastCallInBlock != null) {
+        var restoreLabel = callToRestore.get(lastCallInBlock);
+        if (restoreLabel != null) {
+          // The restore label marks where execution continues after restoring
+          // We need to move the end label to after the restore code
+          // Find the "normal" label which marks the end of capture/restore code
+          var normalLabel = findNormalLabel(lastCallInBlock);
+          if (normalLabel != null) {
+            tryCatchBlock.end = normalLabel;
+            logger.debug("        Extended exception handler to cover capture code for {}", lastCallInBlock.name);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Find the "normal" execution label after capture code for a method call.
+   * This label marks where normal (non-serializing) execution continues.
+   *
+   * @param methodCall Method call instruction.
+   * @return Normal execution label, or null if not found.
+   */
+  private LabelNode findNormalLabel(MethodInsnNode methodCall) {
+    // After a method call, the capture code structure includes a "normal" label
+    // that marks where execution continues in the non-serializing case
+    // Scan forward from the method call to find this label
+    var current = methodCall.getNext();
+    int labelCount = 0;
+    while (current != null && labelCount < 3) {
+      if (current instanceof LabelNode label) {
+        // The pattern in createCaptureAndRestoreCodeForMethod creates:
+        // - First: serializing label
+        // - Second: restore label (if restore == true)
+        // - Third: normal label
+        // We want the "normal" label which is typically after the restore label
+        labelCount++;
+        if (labelCount >= 2) {
+          // Return the label after serializing/restore
+          return label;
+        }
+      }
+      current = current.getNext();
+      // Don't scan too far
+      if (current != null && current.getOpcode() >= 0) {
+        // Hit a real instruction, might have found our label already
+        break;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Check if an instruction is within the range defined by start and end labels.
+   *
+   * @param instruction Instruction to check.
+   * @param start Start label of the range.
+   * @param end End label of the range.
+   * @return True if instruction is in range.
+   */
+  private boolean isInstructionInRange(AbstractInsnNode instruction, LabelNode start, LabelNode end) {
+    var current = start.getNext();
+    while (current != null && current != end) {
+      if (current == instruction) {
+        return true;
+      }
+      current = current.getNext();
+    }
+    return false;
   }
 }
