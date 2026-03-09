@@ -42,7 +42,9 @@ public class CompactingStackCode extends AbstractStackCode {
    /**
     * Save stack.
     */
-   private void saveStack(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
+   private void saveStack(
+           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame,
+           InsnList instructions) {
       var isCallNotVoid = isNotVoid(methodCall);
 
       var stackIndexes = stackIndexes(frameAfter);
