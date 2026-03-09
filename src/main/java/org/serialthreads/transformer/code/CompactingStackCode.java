@@ -70,11 +70,10 @@ public class CompactingStackCode extends AbstractStackCode {
             }
          }
 
-         var iter = pushLocals.iterator();
-         for (int i = 0; iter.hasNext(); i++) {
-            int local = iter.next();
+         for (int i = 0, last = pushLocals.size() - 1; i <= last; i++) {
+            int local = pushLocals.get(i);
             var localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.pushLocal(local, i, iter.hasNext(), localFrame));
+            instructions.add(localCode.pushLocal(local, i, i < last, localFrame));
          }
       }
 
@@ -119,11 +118,10 @@ public class CompactingStackCode extends AbstractStackCode {
          }
 
          // First restore not duplicated locals, if any.
-         var iter = popLocals.iterator();
-         for (var i = 0; iter.hasNext(); i++) {
-            var local = iter.next();
+         for (int i = 0, last = popLocals.size() - 1; i <= last; i++) {
+            var local = popLocals.get(i);
             var localCode = code(frameAfter.getLocal(local));
-            instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
+            instructions.add(localCode.popLocal(local, i, i < last, localFrame));
          }
 
          // Then restore duplicated locals.
@@ -160,7 +158,7 @@ public class CompactingStackCode extends AbstractStackCode {
     *           Frame.
     * @return array stack element -> stack element index.
     */
-   private int[] stackIndexes(Frame frame) {
+   private int[] stackIndexes(Frame<?> frame) {
       var result = new int[frame.getStackSize()];
       Arrays.fill(result, -1);
       for (var code : ValueCodeFactory.CODES) {
