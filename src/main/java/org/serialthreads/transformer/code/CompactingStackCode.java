@@ -74,6 +74,7 @@ public class CompactingStackCode extends AbstractStackCode {
            MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, IValueCode code,
            InsnList instructions) {
       var isMethodNotStatic = isNotStatic(methodCall);
+
       var pushLocals = new ArrayList<Integer>(frameAfter.getLocals());
       // Do not store local 0 for non-static methods, because it always contains "this".
       for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
@@ -121,6 +122,7 @@ public class CompactingStackCode extends AbstractStackCode {
            MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, IValueCode code,
            InsnList instructions) {
       var isMethodNotStatic = isNotStatic(methodCall);
+
       var popLocals = new ArrayList<Integer>();
       var copyLocals = new InsnList();
       // Do not restore local 0 for non-static methods, because it always contains "this".
