@@ -1,9 +1,19 @@
 package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.AALOAD;
+import static org.objectweb.asm.Opcodes.AASTORE;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Type.ARRAY;
 import static org.objectweb.asm.Type.OBJECT;
 
@@ -28,7 +38,13 @@ public class ReferenceValueCode extends AbstractValueCode {
 
   @Override
   public boolean isResponsibleFor(Type type) {
-    return type != null && (type.getSort() == OBJECT || type.getSort() == ARRAY);
+    if (type == null) {
+      return false;
+    }
+    return switch (type.getSort()) {
+      case OBJECT, ARRAY -> true;
+      default -> false;
+    };
   }
 
   @Override
