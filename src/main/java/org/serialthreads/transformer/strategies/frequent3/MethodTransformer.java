@@ -256,13 +256,27 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     if (restore) {
       instructions.add(restoreLabel);
 
+      // If this method call is inside a try-catch block, restore locals BEFORE calling the copy
+      // method. This ensures that if the copy method throws an exception caught by an enclosing
+      // try-catch, the locals have their saved values rather than type defaults.
+      // Note: RunMethodTransformer also inserts a pre-init redirect (defaultInitLocals + GOTO)
+      // outside the try-catch range so that the ASM verifier sees initialized locals at the
+      // restore label's entry (see redirectRestoreLabelsOutsideTryCatch).
+      var insideTryCatch = isInsideTryCatch(methodCall);
+      if (insideTryCatch) {
+        instructions.add(threadCode.restoreLocalsFromFrame(methodCall, metaInfo, localFrame));
+      }
       // Call interrupted method.
       instructions.add(callCopyMethod(methodCall, metaInfo));
       // If serializing, return early, the frame already has been captured.
       instructions.add(new JumpInsnNode(IFNE, serializing));
 
-      // Restore stack "under" the returned value, if any.
-      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
+      // Restore frame (locals + stack, or just stack if locals were already restored above).
+      if (insideTryCatch) {
+        instructions.add(threadCode.restoreStackFromFrame(methodCall, metaInfo, localFrame));
+      } else {
+        instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
+      }
       // Continue.
     }
 
@@ -423,6 +437,20 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     method.maxLocals += 1;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
+  }
+
+  /**
+   * Check if an instruction is inside any try-catch block range of the current method.
+   *
+   * @param instruction Instruction to check.
+   * @return True if the instruction is inside a try-catch block.
+   */
+  private boolean isInsideTryCatch(AbstractInsnNode instruction) {
+    if (method.tryCatchBlocks == null || method.tryCatchBlocks.isEmpty()) {
+      return false;
+    }
+    return method.tryCatchBlocks.stream()
+      .anyMatch(tcb -> isInstructionInRange(instruction, tcb.start, tcb.end));
   }
 
   /**
