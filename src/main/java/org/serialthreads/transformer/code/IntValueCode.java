@@ -6,7 +6,20 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.BIPUSH;
+import static org.objectweb.asm.Opcodes.IALOAD;
+import static org.objectweb.asm.Opcodes.IASTORE;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ICONST_2;
+import static org.objectweb.asm.Opcodes.ICONST_3;
+import static org.objectweb.asm.Opcodes.ICONST_4;
+import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.SIPUSH;
 import static org.objectweb.asm.Type.BOOLEAN;
 import static org.objectweb.asm.Type.BYTE;
 import static org.objectweb.asm.Type.CHAR;
@@ -24,13 +37,13 @@ public class IntValueCode extends AbstractValueCode {
 
   @Override
   public boolean isResponsibleFor(Type type) {
-    return
-      type != null &&
-        (type.getSort() == BOOLEAN ||
-         type.getSort() == CHAR ||
-         type.getSort() == BYTE ||
-         type.getSort() == SHORT ||
-         type.getSort() == INT);
+    if (type == null) {
+      return false;
+    }
+    return switch (type.getSort()) {
+      case BOOLEAN, CHAR, BYTE, SHORT, INT -> true;
+      default -> false;
+    };
   }
 
   @Override
