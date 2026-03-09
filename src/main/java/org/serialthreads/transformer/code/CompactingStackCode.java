@@ -31,18 +31,22 @@ public class CompactingStackCode extends AbstractStackCode {
    @Override
    public InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       var instructions = new InsnList();
-
-      if (metaInfo.tags.contains(TAG_TAIL_CALL)) {
-         return instructions;
+      if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         var frameAfter = metaInfo.frameAfter;
+         saveStack(methodCall, frameAfter, localFrame, instructions);
+         saveLocals(methodCall, frameAfter, localFrame, instructions);
       }
+      return instructions;
+   }
 
-      var frameAfter = metaInfo.frameAfter;
-      var isMethodNotStatic = isNotStatic(methodCall);
+   /**
+    * Save stack.
+    */
+   private void saveStack(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
       var isCallNotVoid = isNotVoid(methodCall);
 
-      // Save stack.
-      // The topmost element is a dummy return value, if the called method returns one.
       var stackIndexes = stackIndexes(frameAfter);
+      // The topmost element is a dummy return value, if the called method returns one.
       for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
          var value = (ExtendedValue) frameAfter.getStack(stack);
          int lowestLocal = frameAfter.getLowestNeededLocal(value);
@@ -53,6 +57,13 @@ public class CompactingStackCode extends AbstractStackCode {
             instructions.add(code(value).pushStack(stackIndexes[stack], localFrame));
          }
       }
+   }
+
+   /**
+    * Save locals.
+    */
+   private void saveLocals(MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, InsnList instructions) {
+      var isMethodNotStatic = isNotStatic(methodCall);
 
       // Save locals separated by type.
       for (var code : ValueCodeFactory.CODES) {
@@ -63,7 +74,7 @@ public class CompactingStackCode extends AbstractStackCode {
             var value = frameAfter.getLocal(local);
             if (code.isResponsibleFor(value.getType())) {
                var extendedValue = (ExtendedValue) value;
-               int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+               var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
                if (local == lowestLocal) {
                   // Only store value, if it is not stored in a lower needed local.
                   pushLocals.add(local);
@@ -72,13 +83,11 @@ public class CompactingStackCode extends AbstractStackCode {
          }
 
          for (int i = 0, last = pushLocals.size() - 1; i <= last; i++) {
-            int local = pushLocals.get(i);
+            var local = pushLocals.get(i);
             var localCode = code(frameAfter.getLocal(local));
             instructions.add(localCode.pushLocal(local, i, i < last, localFrame));
          }
       }
-
-      return instructions;
    }
 
    @Override
