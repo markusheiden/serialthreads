@@ -150,7 +150,7 @@ public abstract class TransformerIntegration_AbstractTest {
    */
   @Disabled // TODO markus 2018-01-04: Implement exception handling.
   @Test
-  void testException() {
+  protected void testException() {
     var test = new TestException();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);

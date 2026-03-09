@@ -70,6 +70,13 @@ tasks.jar {
     }
 }
 
+// TODO markus 2026-03-09: Remove ASAP.
+tasks.javadoc {
+    options {
+        (this as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
