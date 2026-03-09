@@ -4,7 +4,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
-import org.serialthreads.transformer.analyzer.ExtendedFrame;
 import org.serialthreads.transformer.analyzer.ExtendedValue;
 import org.serialthreads.transformer.strategies.MetaInfo;
 import org.slf4j.Logger;
@@ -12,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
@@ -39,10 +36,10 @@ public class CompactingStackCode extends AbstractStackCode {
       }
 
       var frameAfter = metaInfo.frameAfter;
-      final boolean isMethodNotStatic = isNotStatic(methodCall);
-      final boolean isCallNotVoid = isNotVoid(methodCall);
+      var isMethodNotStatic = isNotStatic(methodCall);
+      var isCallNotVoid = isNotVoid(methodCall);
 
-      // save stack
+      // Save stack.
       // the topmost element is a dummy return value, if the called method returns one
       var stackIndexes = stackIndexes(frameAfter);
       for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
@@ -56,7 +53,7 @@ public class CompactingStackCode extends AbstractStackCode {
          }
       }
 
-      // save locals separated by type
+      // Save locals separated by type.
       for (var code : ValueCodeFactory.CODES) {
          var pushLocals = new ArrayList<Integer>(frameAfter.getLocals());
 
@@ -93,8 +90,8 @@ public class CompactingStackCode extends AbstractStackCode {
       }
 
       var frameAfter = metaInfo.frameAfter;
-      final boolean isMethodNotStatic = isNotStatic(methodCall);
-      final boolean isCallNotVoid = isNotVoid(methodCall);
+      var isMethodNotStatic = isNotStatic(methodCall);
+      var isCallNotVoid = isNotVoid(methodCall);
 
       // Restore locals by type.
       for (var code : ValueCodeFactory.CODES) {
@@ -107,7 +104,7 @@ public class CompactingStackCode extends AbstractStackCode {
             if (code.isResponsibleFor(value.getType())) {
                var extendedValue = (ExtendedValue) value;
                // Ignore not needed locals.
-               int lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+               var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
                if (local == lowestLocal) {
                   // Normal case -> Pop local from frameAfter.
                   popLocals.add(local);
@@ -123,8 +120,8 @@ public class CompactingStackCode extends AbstractStackCode {
 
          // first restore not duplicated locals, if any
          var iter = popLocals.iterator();
-         for (int i = 0; iter.hasNext(); i++) {
-            int local = iter.next();
+         for (var i = 0; iter.hasNext(); i++) {
+            var local = iter.next();
             var localCode = code(frameAfter.getLocal(local));
             instructions.add(localCode.popLocal(local, i, iter.hasNext(), localFrame));
          }
