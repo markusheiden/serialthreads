@@ -17,7 +17,7 @@ repositories {
 java {
     // https://docs.gradle.org/current/userguide/toolchains.html
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(26)
         // Use Eclipse Temurin (provided by Adoptium).
         vendor = JvmVendorSpec.ADOPTIUM
     }
