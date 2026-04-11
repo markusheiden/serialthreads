@@ -33,21 +33,21 @@ configurations.all {
 dependencies {
     implementation(platform(libs.spring.boot.bom))
 
-    implementation(libs.slf4j.api)
+    implementation("org.slf4j:slf4j-api")
 
     implementation(libs.asm)
     implementation(libs.asm.analysis)
     implementation(libs.asm.tree)
     implementation(libs.asm.util)
 
-    testImplementation(libs.junit.platform.launcher)
-    testImplementation(libs.junit.jupiter)
-    testImplementation(libs.assertj.core)
-    testRuntimeOnly(libs.logback.classic)
+    testImplementation("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.assertj:assertj-core")
+    testRuntimeOnly("ch.qos.logback:logback-classic")
     testImplementation(testFixtures(project(":")))
 
     testFixturesImplementation(platform(libs.spring.boot.bom))
-    testFixturesImplementation(libs.junit.jupiter)
+    testFixturesImplementation("org.junit.jupiter:junit-jupiter")
 }
 
 tasks.withType<AbstractArchiveTask> {
