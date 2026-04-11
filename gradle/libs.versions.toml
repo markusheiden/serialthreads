@@ -1,7 +1,7 @@
 [versions]
-asm = "9.8"
-gradle = "9.4.0"
-spring-boot = "4.0.3"
+asm = "9.9.1"
+gradle = "9.4.1"
+spring-boot = "4.0.5"
 
 # Gradle plugins
 versions-plugin = "0.53.0"
