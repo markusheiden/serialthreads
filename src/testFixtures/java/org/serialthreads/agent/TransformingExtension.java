@@ -78,11 +78,12 @@ public class TransformingExtension implements InvocationInterceptor {
             ExtensionContext context) throws Throwable {
         var instance = getOrCreateInstance(context);
         var method = findMethod(instance.getClass(), invocationContext.getExecutable());
+        var args = invocationContext.getArguments().toArray();
         // Do NOT call the test method of the untransformed instance.
         invocation.skip();
         try {
             // Invoke the transformed test method instead.
-            return (T) method.invoke(instance);
+            return (T) method.invoke(instance, args);
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }

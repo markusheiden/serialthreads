@@ -99,6 +99,49 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    @Override
+   public InsnList defaultInitLocals(MethodInsnNode methodCall, MetaInfo metaInfo) {
+      var instructions = new InsnList();
+      if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         var frameAfter = metaInfo.frameAfter;
+         var isMethodNotStatic = isNotStatic(methodCall);
+         for (var code : ValueCodeFactory.CODES) {
+            for (int local = isMethodNotStatic ? 1 : 0, end = frameAfter.getLocals() - 1; local <= end; local++) {
+               var value = frameAfter.getLocal(local);
+               if (code.isResponsibleFor(value.getType())) {
+                  var extendedValue = (ExtendedValue) value;
+                  var lowestLocal = frameAfter.getLowestNeededLocal(extendedValue);
+                  if (local == lowestLocal) {
+                     // Pre-initialize with type default to satisfy verifier when GETFIELD can throw.
+                     var localCode = code(extendedValue);
+                     instructions.add(localCode.pushNull());
+                     instructions.add(localCode.store(local));
+                  }
+               }
+            }
+         }
+      }
+      return instructions;
+   }
+
+   @Override
+   public InsnList restoreLocalsFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+      var instructions = new InsnList();
+      if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         restoreLocals(methodCall, metaInfo.frameAfter, localFrame, instructions);
+      }
+      return instructions;
+   }
+
+   @Override
+   public InsnList restoreStackFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+      var instructions = new InsnList();
+      if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
+         restoreStack(methodCall, metaInfo.frameAfter, localFrame, instructions);
+      }
+      return instructions;
+   }
+
+   @Override
    public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       var instructions = new InsnList();
       if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {

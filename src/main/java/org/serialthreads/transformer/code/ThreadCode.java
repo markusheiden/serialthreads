@@ -228,6 +228,48 @@ public interface ThreadCode {
   InsnList pushMethod(int localFrame);
 
   /**
+   * Initialize local variables to their type-default values (0 for primitives, null for references).
+   * Must be called before {@link #restoreLocalsFromFrame} to ensure locals are defined at exception
+   * handlers even if a GETFIELD in restoreLocalsFromFrame throws before all stores complete.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @return Generated code.
+   */
+  InsnList defaultInitLocals(MethodInsnNode methodCall, MetaInfo metaInfo);
+
+  /**
+   * Restore local variables from the current frame before resuming the method call.
+   * Must be called before the copy method call so that locals are initialized even
+   * if the copy method throws an exception caught by an enclosing try-catch block.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @param localFrame
+   *           number of local containing the frame.
+   * @return Generated code.
+   */
+  InsnList restoreLocalsFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+
+  /**
+   * Restore operand stack values from the current frame after resuming the method call.
+   * Must be called after the copy method returns normally.
+   *
+   * @param methodCall
+   *           method call to process.
+   * @param metaInfo
+   *           Meta information about method call.
+   * @param localFrame
+   *           number of local containing the frame.
+   * @return Generated code.
+   */
+  InsnList restoreStackFromFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+
+  /**
    * Restore current frame before resuming the method call.
    *
    * @param methodCall
