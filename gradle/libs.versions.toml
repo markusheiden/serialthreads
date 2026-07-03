@@ -6,6 +6,9 @@ spring-boot = "4.1.0"
 # Gradle plugins
 versions-plugin = "0.54.0"
 
+[plugins]
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
+
 [libraries]
 # BOM — provides versions for slf4j, logback, junit, assertj
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
@@ -15,6 +18,3 @@ asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asm-analysis = { module = "org.ow2.asm:asm-analysis", version.ref = "asm" }
 asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
-
-[plugins]
-versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
