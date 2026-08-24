@@ -5,10 +5,7 @@ import org.objectweb.asm.Type;
 import org.serialthreads.transformer.NotTransformableException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -115,7 +112,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
         var name = method.getName();
         var desc = Type.getMethodDescriptor(method);
         var annotations = stream(method.getAnnotations())
-          .map(Annotation::getClass)
+          .map(Annotation::annotationType)
           .map(Type::getType)
           .collect(toSet());
 
