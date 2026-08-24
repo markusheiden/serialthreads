@@ -44,6 +44,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   protected final int localFrame;
 
   /**
+   * Maximum size of a return value stored in the local holding the return value.
+   */
+  private int maxReturnValueSize = 0;
+
+  /**
    * Constructor.
    *
    * @param clazz class to transform
@@ -223,13 +228,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
       // restore stack "under" the returned value, if any
       // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
+      var returnType = Type.getReturnType(clonedCall.desc);
       var needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
       if (needToSaveReturnValue) {
-        instructions.add(code(Type.getReturnType(clonedCall.desc)).store(localReturnValue));
+        instructions.add(code(returnType).store(localReturnValue));
+        maxReturnValueSize = Math.max(maxReturnValueSize, returnType.getSize());
       }
       instructions.add(threadCode.restoreFrame(clonedCall, metaInfo, localFrame));
       if (needToSaveReturnValue) {
-        instructions.add(code(Type.getReturnType(clonedCall.desc)).load(localReturnValue));
+        instructions.add(code(returnType).load(localReturnValue));
       }
     }
 
@@ -268,7 +275,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
    */
   protected void fixMaxs() {
-    method.maxLocals += 1;
+    // Reserve space for the local holding the return value, if needed.
+    method.maxLocals += maxReturnValueSize;
     // TODO 2009-10-11 mh: recalculate minimum maxs
     method.maxStack = Math.max(method.maxStack + 2, 5);
   }

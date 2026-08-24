@@ -43,6 +43,13 @@ input; **Medium** = wrong on plausible input, resource issue, or missing validat
 
 ### H1. Capturing a long/double stack value generates invalid bytecode (`SWAP` on category-2)
 
+**Status: FIXED (2026-08-24).** `pushStackFast`/`pushStackSlow` now use `DUP_X2; POP` for
+category-2 values, mirroring `pushReturnValue`. Covered by new integration tests
+(`TestStackLong`/`TestStackDouble`, fast and slow storage) which fail without the fix in
+all four strategies. Note: the operand-stack value must not be a compile-time constant —
+javac inlines constant variables (including final instance fields with constant
+initializers), and the analyzer's constant tracking skips capture for them.
+
 `transformer/code/AbstractValueCode.java:158-176` (`pushStackFast`, `pushStackSlow`)
 
 ```java
@@ -294,6 +301,12 @@ statements. Delete the owner/argument-push instructions of the replaced call, or
 that interrupt methods are static and parameterless.
 
 ### M6. `fixMaxs` under-allocates one slot for long/double return values (frequent/frequent2)
+
+**Status: FIXED (2026-08-24).** The transformer now tracks the maximum size of the
+return values actually stored in the return-value local (`maxReturnValueSize`) and
+`fixMaxs` reserves exactly that many slots. Found in practice: the new H1 tests failed
+reanalysis in frequent/frequent2 with "Trying to set an inexistant local variable"
+until this was fixed.
 
 `frequent/MethodTransformer.java:176, 245-249`; `frequent2/MethodTransformer.java:197, 266-274`
 

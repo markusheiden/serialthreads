@@ -159,7 +159,15 @@ public abstract class AbstractValueCode implements IValueCode {
     var instructions = new InsnList();
     // frame.stack.stackXXX0 = stack;
     instructions.add(new VarInsnNode(ALOAD, localFrame));
-    instructions.add(new InsnNode(SWAP));
+    if (size == 1) {
+      // Put frame before value onto stack.
+      instructions.add(new InsnNode(SWAP));
+    } else {
+      // Put frame before value (2 words) onto stack.
+      instructions.add(new InsnNode(DUP_X2));
+      // Remove duplicated frame from top of stack.
+      instructions.add(new InsnNode(POP));
+    }
     instructions.add(new FieldInsnNode(PUTFIELD, FRAME_IMPL_NAME, "stack" + methodName + index, type.getDescriptor()));
     return instructions;
   }
@@ -168,9 +176,23 @@ public abstract class AbstractValueCode implements IValueCode {
     var instructions = new InsnList();
     // frame.stack.stackXXXs[index] = stack;
     instructions.add(getStacks(localFrame));
-    instructions.add(new InsnNode(SWAP));
-    instructions.add(IntValueCode.push(index));
-    instructions.add(new InsnNode(SWAP));
+    if (size == 1) {
+      // Put array before value onto stack.
+      instructions.add(new InsnNode(SWAP));
+      instructions.add(IntValueCode.push(index));
+      // Put index before value onto stack.
+      instructions.add(new InsnNode(SWAP));
+    } else {
+      // Put array before value (2 words) onto stack.
+      instructions.add(new InsnNode(DUP_X2));
+      // Remove duplicated array from top of stack.
+      instructions.add(new InsnNode(POP));
+      instructions.add(IntValueCode.push(index));
+      // Put index before value (2 words) onto stack.
+      instructions.add(new InsnNode(DUP_X2));
+      // Remove duplicated index from top of stack.
+      instructions.add(new InsnNode(POP));
+    }
     instructions.add(new InsnNode(astore));
     return instructions;
   }

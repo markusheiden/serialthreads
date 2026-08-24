@@ -133,6 +133,42 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Test capture and restore of operand stack values of type {@link long}.
+   */
+  @Test
+  void testStackStorage_long() {
+    var test = new TestStackLong();
+
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
+    assertEquals(-1L, test.value);
+    assertEquals(-1L, test.valueDeep);
+    manager.execute(1);
+    assertEquals(42L, test.value);
+    assertEquals(-1L, test.valueDeep);
+    manager.execute(1);
+    assertEquals(122L, test.valueDeep);
+  }
+
+  /**
+   * Test capture and restore of operand stack values of type {@link double}.
+   */
+  @Test
+  void testStackStorage_double() {
+    var test = new TestStackDouble();
+
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
+    assertEquals(-1D, test.value);
+    assertEquals(-1D, test.valueDeep);
+    manager.execute(1);
+    assertEquals(42.25D, test.value);
+    assertEquals(-1D, test.valueDeep);
+    manager.execute(1);
+    assertEquals(126.25D, test.valueDeep);
+  }
+
+  /**
    * Test that tail calls return the correct value.
    */
   @Test
