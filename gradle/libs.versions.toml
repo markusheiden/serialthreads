@@ -7,7 +7,7 @@ spring-boot = "4.1.1"
 versions-plugin = "0.61.0"
 
 [plugins]
-versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
+versions = { id = "io.github.ben-manes.versions", version.ref = "versions-plugin" }
 
 [libraries]
 # BOM — provides versions for slf4j, logback, junit, assertj
