@@ -433,6 +433,12 @@ original class loader.
 
 ### M13. `DebugPrinter` misses `visitInvokeDynamicInsn` — debug output desyncs after any indy
 
+**Status: FIXED (2026-08-24).** `visitInvokeDynamicInsn` is now overridden like all other
+instruction visitors, so the instruction counter (and thereby the frame annotations)
+stays in sync. Covered by the new `DebuggerTest`, which debugs a lambda-containing
+fixture and asserts the `INVOKEDYNAMIC` line is indexed and all instruction indexes are
+consecutive; fails without the fix.
+
 `transformer/debug/DebugPrinter.java:74-156`
 
 Every instruction visitor bumps the instruction counter except `visitInvokeDynamicInsn`.

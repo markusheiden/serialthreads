@@ -1,12 +1,12 @@
 package org.serialthreads.transformer.debug;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.util.Textifier;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
+
+import java.util.ArrayList;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
@@ -110,6 +110,13 @@ class DebugPrinter extends Textifier {
   public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
     int lastSize = text.size();
     super.visitMethodInsn(opcode, owner, name, desc, itf);
+    addByteCodeIndex(lastSize);
+  }
+
+  @Override
+  public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
+    int lastSize = text.size();
+    super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
     addByteCodeIndex(lastSize);
   }
 
