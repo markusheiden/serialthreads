@@ -217,6 +217,11 @@ Fails intermittently in any multithreaded application run with the agent.
 
 ### H7. `Stack.reset()` never resets the first frame — restarting a finished thread is broken
 
+**Status: FIXED (2026-08-24).** `reset()` now resets the first frame too, points `frame`
+back to `first`, and clears `serializing` and the return-value registers — restoring the
+post-constructor state. Covered by a new `testRestart` integration test (run → finish →
+restart) which fails in all four strategies without the fix.
+
 `context/Stack.java:146-157`
 
 ```java

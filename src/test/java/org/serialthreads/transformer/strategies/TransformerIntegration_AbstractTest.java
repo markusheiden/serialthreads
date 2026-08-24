@@ -133,6 +133,28 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Test that a finished serial thread is reset, so that it can be restarted.
+   */
+  @Test
+  void testRestart() {
+    var test = new TestRestart();
+
+    manager = new SimpleSerialThreadManager(test);
+    // Run until the interrupt.
+    manager.execute(1);
+    assertEquals(1, test.runs);
+    assertEquals(1, test.value);
+    // Finish the thread: it gets reset to be able to run again.
+    manager.execute(1);
+    assertEquals(1, test.runs);
+    assertEquals(2, test.value);
+    // Restart the thread: it runs from the beginning until the interrupt again.
+    manager.execute(1);
+    assertEquals(2, test.runs);
+    assertEquals(1, test.value);
+  }
+
+  /**
    * Test capture and restore of operand stack values of type {@link long}.
    */
   @Test

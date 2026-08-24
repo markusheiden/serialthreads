@@ -150,10 +150,20 @@ public final class Stack implements SerialThread {
   }
 
   /**
-   * Resets the complete stack.
+   * Resets the complete stack, so that the thread can be started again.
    */
   public void reset() {
+    // Reset the first frame too, so that the run() method starts from the beginning again.
+    first.reset();
     resetTo(first);
+    frame = first;
+
+    serializing = false;
+    returnObject = null;
+    returnInt = 0;
+    returnLong = 0;
+    returnFloat = 0;
+    returnDouble = 0;
   }
 
   @Override
