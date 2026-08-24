@@ -170,6 +170,13 @@ the restored frame contains a wrong value on the other path.
 
 ### H5. Reflection scan uses `Annotation::getClass` — annotations are never detected
 
+**Status: FIXED (2026-08-24).** Changed to `Annotation::annotationType`. Covered by a new
+test in `ClassInfoCacheReflectionTest` that forces the reflection scan via a class loader
+hiding all class-file resources; the test fails without the fix. The test class also no
+longer overrides (and thereby disables) the inherited cache test. Correction to the
+original finding: the bug did *not* repeat for constructors — the constructor loop uses
+`emptySet()`, which is fine since the serialthreads annotations have `@Target({METHOD})`.
+
 `transformer/classcache/ClassInfoCacheReflection.java:117-120`
 
 ```java
@@ -184,8 +191,7 @@ class (the fallback path when no class-file resource is available). Interruptibl
 inherited from such a class are treated as plain methods; if an ASM-scanned subclass
 overrides an annotated method of a reflection-scanned superclass, `ClassInfo.merge`
 throws a spurious `NotTransformableException` ("Interruptible status ... does not match
-its definition in the super class") because the two scans disagree. The same bug repeats
-for constructors a few lines below.
+its definition in the super class") because the two scans disagree.
 
 **Fix:** `.map(Annotation::annotationType)`.
 
