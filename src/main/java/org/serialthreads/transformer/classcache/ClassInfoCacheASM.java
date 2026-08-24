@@ -3,7 +3,6 @@ package org.serialthreads.transformer.classcache;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Deque;
 
 /**
@@ -37,7 +36,11 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
 
-    var classFile = classLoader.getResourceAsStream(className + ".class");
-    return scan(read(new ClassReader(classFile)), toProcess);
+    try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
+      if (classFile == null) {
+        throw new IOException("Class file for class " + className + " not found");
+      }
+      return scan(read(new ClassReader(classFile)), toProcess);
+    }
   }
 }

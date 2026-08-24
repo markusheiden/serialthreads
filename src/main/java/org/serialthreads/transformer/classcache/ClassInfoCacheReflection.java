@@ -78,10 +78,11 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
       return scan(classInfoVisitor, toProcess);
     }
 
-    var classFile = classLoader.getResourceAsStream(className + ".class");
-    if (classFile != null) {
-      logger.debug("  Class file based ASM scan of {}", className);
-      return scan(read(new ClassReader(classFile)), toProcess);
+    try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
+      if (classFile != null) {
+        logger.debug("  Class file based ASM scan of {}", className);
+        return scan(read(new ClassReader(classFile)), toProcess);
+      }
     }
 
     logger.error("  Reflection scan of {}", className);

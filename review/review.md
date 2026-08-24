@@ -341,6 +341,13 @@ where `SimpleVerifier` would succeed.
 
 ### M8. Unclosed `InputStream`s from `getResourceAsStream`
 
+**Status: FIXED (2026-08-24).** Both `scan` methods now open the class-file stream in a
+try-with-resources; `ClassInfoCacheASM` additionally throws a descriptive `IOException`
+("Class file for class X not found") instead of ASM's bare "Class not found" when the
+resource is missing. Covered by a `testClassFileStreamsClosed` test in the shared
+`ClassInfoCacheAbstractTest` (close-tracking class loader), running against both cache
+implementations; both fail without the fix.
+
 `transformer/classcache/ClassInfoCacheASM.java:40-41`,
 `ClassInfoCacheReflection.java:84-88`
 

@@ -1,6 +1,5 @@
 package org.serialthreads.transformer.classcache;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 import org.serialthreads.Interruptible;
@@ -14,10 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test for ClassInfoCacheReflection.
  */
 class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
-  @BeforeEach
-  void setUp() {
-    cache = new ClassInfoCacheReflection();
-    ((ClassInfoCacheReflection) cache).setClassLoader(getClass().getClassLoader());
+  @Override
+  protected IClassInfoCache createCache(ClassLoader classLoader) {
+    var reflectionCache = new ClassInfoCacheReflection();
+    reflectionCache.setClassLoader(classLoader);
+    return reflectionCache;
   }
 
   /**

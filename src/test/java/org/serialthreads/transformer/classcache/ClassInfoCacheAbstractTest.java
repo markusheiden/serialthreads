@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 
@@ -13,6 +14,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 abstract class ClassInfoCacheAbstractTest {
   protected IClassInfoCache cache;
+
+  @BeforeEach
+  void setUp() {
+    cache = createCache(getClass().getClassLoader());
+  }
+
+  /**
+   * Create the cache to test.
+   *
+   * @param classLoader Class loader to load class files with.
+   */
+  protected abstract IClassInfoCache createCache(ClassLoader classLoader);
 
   @Test
   void testIsInterruptible() {
