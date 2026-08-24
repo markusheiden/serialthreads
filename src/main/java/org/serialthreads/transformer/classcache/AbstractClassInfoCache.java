@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.asList;
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
@@ -35,15 +35,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
   /**
    * Classes with their information.
+   * Concurrent, because classes may be loaded (and thus scanned) by concurrent threads.
    */
-  private final Map<String, ClassInfo> classes;
-
-  /**
-   * Constructor.
-   */
-  public AbstractClassInfoCache() {
-    this.classes = new TreeMap<>();
-  }
+  private final Map<String, ClassInfo> classes = new ConcurrentHashMap<>();
 
   @Override
   public boolean isInterface(String className) {
@@ -176,8 +170,14 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   protected ClassInfo getClassInfo(String className) {
     var classInfo = classes.get(className);
     if (classInfo == null) {
+      // Concurrent threads may process the same class at once.
+      // That just wastes some cycles, but is safe, because the resulting class infos are equivalent.
+      // The first one wins.
       classInfo = process(className);
-      classes.put(className, classInfo);
+      var existing = classes.putIfAbsent(className, classInfo);
+      if (existing != null) {
+        classInfo = existing;
+      }
     }
 
     assert classInfo != null : "Postcondition: classInfo != null";
@@ -191,7 +191,6 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    */
   protected ClassInfo process(String owner) {
     assert owner != null : "Precondition: owner != null";
-    assert !classes.containsKey(owner) : "Check: !classes.containsKey(owner)";
 
     logger.debug("Computing interruptible status for class {}", owner);
 
@@ -208,11 +207,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
         }
       }
 
-      classes.put(owner, result);
-
       return result;
     } catch (IOException e) {
-      throw new NotTransformableException("Referenced class " + className + " not found", e);
+      throw new NotTransformableException("Referenced class " + (className != null ? className : owner) + " not found", e);
     }
   }
 
