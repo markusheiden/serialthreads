@@ -155,6 +155,20 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Test that classes whose frames need the computation of a common super class transform correctly.
+   */
+  @Test
+  void testTypeMerge() {
+    var test = new TestTypeMerge();
+
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
+    assertEquals("", test.value);
+    manager.execute(1);
+    assertEquals("a", test.value);
+  }
+
+  /**
    * Test capture and restore of operand stack values of type {@link long}.
    */
   @Test

@@ -272,6 +272,15 @@ runs without capture support and continues with dummy values).
 
 ### M3. `new ClassWriter(COMPUTE_FRAMES)` without a `getCommonSuperClass` override
 
+**Status: FIXED (2026-08-24).** The transformer now writes classes with the new
+`ClassInfoCacheClassWriter`, whose `getCommonSuperClass` is based on the
+`IClassInfoCache`, which reads class files as resources — no classes are loaded during
+frame computation, and the hierarchy is resolved against the correct loader. Covered by
+unit tests (`ClassInfoCacheClassWriterTest`: classes, interfaces, arrays) and an
+integration fixture (`TestTypeMerge`) that forces a frame merge of two sibling classes
+across an interrupt — verified (via temporary instrumentation) to route through the
+override during transformation.
+
 `strategies/AbstractTransformer.java:109`
 
 No `ClassWriter` subclass exists in the project. The default `getCommonSuperClass`

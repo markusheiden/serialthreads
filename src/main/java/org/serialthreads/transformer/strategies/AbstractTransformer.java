@@ -1,7 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
@@ -32,7 +31,6 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
@@ -106,7 +104,7 @@ public abstract class AbstractTransformer implements ITransformer {
     }
 
     // Write class.
-    var writer = new ClassWriter(COMPUTE_FRAMES);
+    var writer = new ClassInfoCacheClassWriter(classInfoCache);
     clazz.accept(check? new CheckClassAdapter(writer) : writer);
 
     // Log transformed byte code.
