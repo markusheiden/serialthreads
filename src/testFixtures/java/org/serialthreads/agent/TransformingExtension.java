@@ -81,8 +81,10 @@ public class TransformingExtension implements InvocationInterceptor {
         // Do NOT call the test method of the untransformed instance.
         invocation.skip();
         try {
-            // Invoke the transformed test method instead.
-            return (T) method.invoke(instance);
+            // Invoke the transformed test method instead, passing the arguments along, e.g. for parameterized tests.
+            // Arguments of types loaded by the transforming class loader are not supported,
+            // because the arguments have been resolved with the original class loader.
+            return (T) method.invoke(instance, invocationContext.getArguments().toArray());
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }

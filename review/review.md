@@ -395,6 +395,17 @@ transformation with a false-positive `NotTransformableException`.
 
 ### M12. `TransformingExtension` drops test-method arguments
 
+**Status: FIXED (2026-08-24).** The transformed test method is now invoked with
+`invocationContext.getArguments()`. Covered by the new `TransformingExtensionTest`
+(parameterized tests with one and multiple arguments; fails with
+`IllegalArgumentException: wrong number of arguments` without the fix), which also tests
+the extension's other behaviors: test methods run on the transformed instance,
+`@BeforeEach`/`@AfterEach` share that instance, `@TestFactory` dynamic tests, inherited
+test methods, per-test-method class-loader isolation of static state, and end-to-end
+transformed execution. Documented limitation: argument values of types loaded by the
+transforming class loader are not supported, because JUnit resolves them with the
+original class loader.
+
 `src/testFixtures/.../agent/TransformingExtension.java:74-89`
 
 `method.invoke(instance)` ignores `invocationContext.getArguments()`, so any
