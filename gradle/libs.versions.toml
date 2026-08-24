@@ -1,10 +1,10 @@
 [versions]
 asm = "9.10.1"
-gradle = "9.6.1"
-spring-boot = "4.1.0"
+gradle = "9.7.1"
+spring-boot = "4.1.1"
 
 # Gradle plugins
-versions-plugin = "0.54.0"
+versions-plugin = "0.61.0"
 
 [plugins]
 versions = { id = "com.github.ben-manes.versions", version.ref = "versions-plugin" }
