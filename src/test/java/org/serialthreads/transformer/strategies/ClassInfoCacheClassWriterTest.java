@@ -3,7 +3,7 @@ package org.serialthreads.transformer.strategies;
 import org.junit.jupiter.api.Test;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link ClassInfoCacheClassWriter}.
@@ -17,14 +17,14 @@ class ClassInfoCacheClassWriterTest {
   @Test
   void testCommonSuperClass_classes() {
     // Same class.
-    assertEquals("java/util/ArrayList", writer.getCommonSuperClass("java/util/ArrayList", "java/util/ArrayList"));
+    assertThat(writer.getCommonSuperClass("java/util/ArrayList", "java/util/ArrayList")).isEqualTo("java/util/ArrayList");
     // Direct super class, both directions.
-    assertEquals("java/util/AbstractList", writer.getCommonSuperClass("java/util/AbstractList", "java/util/ArrayList"));
-    assertEquals("java/util/AbstractList", writer.getCommonSuperClass("java/util/ArrayList", "java/util/AbstractList"));
+    assertThat(writer.getCommonSuperClass("java/util/AbstractList", "java/util/ArrayList")).isEqualTo("java/util/AbstractList");
+    assertThat(writer.getCommonSuperClass("java/util/ArrayList", "java/util/AbstractList")).isEqualTo("java/util/AbstractList");
     // Sibling classes with a common super class.
-    assertEquals("java/util/AbstractList", writer.getCommonSuperClass("java/util/ArrayList", "java/util/LinkedList"));
+    assertThat(writer.getCommonSuperClass("java/util/ArrayList", "java/util/LinkedList")).isEqualTo("java/util/AbstractList");
     // Unrelated classes.
-    assertEquals("java/lang/Object", writer.getCommonSuperClass("java/lang/String", "java/lang/Integer"));
+    assertThat(writer.getCommonSuperClass("java/lang/String", "java/lang/Integer")).isEqualTo("java/lang/Object");
   }
 
   /**
@@ -33,12 +33,12 @@ class ClassInfoCacheClassWriterTest {
   @Test
   void testCommonSuperClass_interfaces() {
     // Class and implemented interface, both directions.
-    assertEquals("java/util/List", writer.getCommonSuperClass("java/util/List", "java/util/ArrayList"));
-    assertEquals("java/util/List", writer.getCommonSuperClass("java/util/ArrayList", "java/util/List"));
+    assertThat(writer.getCommonSuperClass("java/util/List", "java/util/ArrayList")).isEqualTo("java/util/List");
+    assertThat(writer.getCommonSuperClass("java/util/ArrayList", "java/util/List")).isEqualTo("java/util/List");
     // Interface and super interface.
-    assertEquals("java/util/Collection", writer.getCommonSuperClass("java/util/List", "java/util/Collection"));
+    assertThat(writer.getCommonSuperClass("java/util/List", "java/util/Collection")).isEqualTo("java/util/Collection");
     // Unrelated interfaces.
-    assertEquals("java/lang/Object", writer.getCommonSuperClass("java/util/List", "java/util/Map"));
+    assertThat(writer.getCommonSuperClass("java/util/List", "java/util/Map")).isEqualTo("java/lang/Object");
   }
 
   /**
@@ -47,13 +47,13 @@ class ClassInfoCacheClassWriterTest {
   @Test
   void testCommonSuperClass_arrays() {
     // Array and array of super class, both directions.
-    assertEquals("[Ljava/lang/Number;", writer.getCommonSuperClass("[Ljava/lang/Number;", "[Ljava/lang/Integer;"));
-    assertEquals("[Ljava/lang/Number;", writer.getCommonSuperClass("[Ljava/lang/Integer;", "[Ljava/lang/Number;"));
+    assertThat(writer.getCommonSuperClass("[Ljava/lang/Number;", "[Ljava/lang/Integer;")).isEqualTo("[Ljava/lang/Number;");
+    assertThat(writer.getCommonSuperClass("[Ljava/lang/Integer;", "[Ljava/lang/Number;")).isEqualTo("[Ljava/lang/Number;");
     // Arrays of unrelated classes.
-    assertEquals("java/lang/Object", writer.getCommonSuperClass("[Ljava/lang/String;", "[Ljava/lang/Integer;"));
+    assertThat(writer.getCommonSuperClass("[Ljava/lang/String;", "[Ljava/lang/Integer;")).isEqualTo("java/lang/Object");
     // Array and Object.
-    assertEquals("java/lang/Object", writer.getCommonSuperClass("java/lang/Object", "[Ljava/lang/String;"));
+    assertThat(writer.getCommonSuperClass("java/lang/Object", "[Ljava/lang/String;")).isEqualTo("java/lang/Object");
     // Array and unrelated class.
-    assertEquals("java/lang/Object", writer.getCommonSuperClass("[Ljava/lang/String;", "java/lang/String"));
+    assertThat(writer.getCommonSuperClass("[Ljava/lang/String;", "java/lang/String")).isEqualTo("java/lang/Object");
   }
 }

@@ -16,8 +16,7 @@ import org.serialthreads.transformer.strategies.frequent4.FrequentInterruptsTran
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
@@ -41,7 +40,7 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
   @AfterEach
   void tearDown() {
     // The after each method runs on the same transformed instance as the before each method.
-    assertEquals(42, beforeEachValue);
+    assertThat(beforeEachValue).isEqualTo(42);
   }
 
   /**
@@ -49,7 +48,7 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
    */
   @Test
   void testRunsOnTransformedInstance() {
-    assertEquals(TransformingClassLoader.class.getName(), getClass().getClassLoader().getClass().getName());
+    assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
   }
 
   /**
@@ -57,7 +56,7 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
    */
   @Test
   void testBeforeEachSharesInstance() {
-    assertEquals(42, beforeEachValue);
+    assertThat(beforeEachValue).isEqualTo(42);
   }
 
   /**
@@ -68,9 +67,9 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
     var runnable = new TestRunnable();
     try (var manager = new SimpleSerialThreadManager(runnable)) {
       manager.execute(1);
-      assertEquals(1, runnable.value);
+      assertThat(runnable.value).isEqualTo(1);
       manager.execute(1);
-      assertEquals(2, runnable.value);
+      assertThat(runnable.value).isEqualTo(2);
     }
   }
 
@@ -80,9 +79,9 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
   @ParameterizedTest
   @ValueSource(ints = {1, 2})
   void testParameterized(int value) {
-    assertTrue(value == 1 || value == 2);
+    assertThat(value).isIn(1, 2);
     // The before each method has been run on the same transformed instance too.
-    assertEquals(42, beforeEachValue);
+    assertThat(beforeEachValue).isEqualTo(42);
   }
 
   /**
@@ -91,7 +90,7 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
   @ParameterizedTest
   @CsvSource({"1, one", "2, two"})
   void testParameterized_multipleArguments(int number, String name) {
-    assertEquals(number == 1 ? "one" : "two", name);
+    assertThat(name).isEqualTo(number == 1 ? "one" : "two");
   }
 
   /**
@@ -102,9 +101,9 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
   List<DynamicTest> testFactory() {
     return List.of(
       dynamicTest("factory runs on transformed instance", () ->
-        assertEquals(TransformingClassLoader.class.getName(), getClass().getClassLoader().getClass().getName())),
+        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName())),
       dynamicTest("factory shares instance with before each method", () ->
-        assertEquals(42, beforeEachValue)));
+        assertThat(beforeEachValue).isEqualTo(42)));
   }
 
   /**
@@ -114,7 +113,7 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
    */
   @Test
   void testStaticStateIsolation1() {
-    assertEquals(1, ++StaticCounter.count);
+    assertThat(++StaticCounter.count).isEqualTo(1);
   }
 
   /**
@@ -124,7 +123,7 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
    */
   @Test
   void testStaticStateIsolation2() {
-    assertEquals(1, ++StaticCounter.count);
+    assertThat(++StaticCounter.count).isEqualTo(1);
   }
 
   /**
@@ -166,6 +165,6 @@ abstract class TransformingExtensionAbstractTest {
    */
   @Test
   void testInheritedRunsOnTransformedInstance() {
-    assertEquals(TransformingClassLoader.class.getName(), getClass().getClassLoader().getClass().getName());
+    assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
   }
 }

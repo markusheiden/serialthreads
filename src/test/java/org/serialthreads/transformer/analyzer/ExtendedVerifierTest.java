@@ -4,11 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.objectweb.asm.Type.INT_TYPE;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
-import static org.serialthreads.transformer.analyzer.ExtendedValue.*;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.constantValue;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.value;
+import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocal;
 import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqualsValue;
 
 /**
@@ -25,13 +26,13 @@ class ExtendedVerifierTest {
     var const1Int = constantValue(INT_TYPE, 1);
 
     // test handling of uninitialized value
-    assertEquals(UNINITIALIZED_VALUE, verifier.merge(UNINITIALIZED_VALUE, UNINITIALIZED_VALUE));
-    assertEquals(UNINITIALIZED_VALUE, verifier.merge(UNINITIALIZED_VALUE, valueInLocal(INT_TYPE, 1)));
-    assertEquals(UNINITIALIZED_VALUE, verifier.merge(local1Int, UNINITIALIZED_VALUE));
+    assertThat(verifier.merge(UNINITIALIZED_VALUE, UNINITIALIZED_VALUE)).isEqualTo(UNINITIALIZED_VALUE);
+    assertThat(verifier.merge(UNINITIALIZED_VALUE, valueInLocal(INT_TYPE, 1))).isEqualTo(UNINITIALIZED_VALUE);
+    assertThat(verifier.merge(local1Int, UNINITIALIZED_VALUE)).isEqualTo(UNINITIALIZED_VALUE);
 
     // test same values
-    assertSame(local1Int, verifier.merge(local1Int, valueInLocal(INT_TYPE, 1)));
-    assertSame(const1Int, verifier.merge(const1Int, constantValue(INT_TYPE, 1)));
+    assertThat(verifier.merge(local1Int, valueInLocal(INT_TYPE, 1))).isSameAs(local1Int);
+    assertThat(verifier.merge(const1Int, constantValue(INT_TYPE, 1))).isSameAs(const1Int);
 
     // test compatible merge locals only
     assertEqualsValue(local1Int, verifier.merge(local1Int, local12Int));

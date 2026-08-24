@@ -9,7 +9,7 @@ import org.serialthreads.context.SimpleSerialThreadManager;
 
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for transformer.
@@ -124,11 +124,11 @@ public abstract class TransformerIntegration_AbstractTest {
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
     for (int i = 0; i < 9; i++) {
-      assertEquals(parser.apply("-1"), field(test, "value" + i));
+      assertThat(field(test, "value" + i)).isEqualTo(parser.apply("-1"));
     }
     manager.execute(1);
     for (int i = 0; i < 9; i++) {
-      assertEquals(parser.apply("" + i), field(test, "value" + i));
+      assertThat(field(test, "value" + i)).isEqualTo(parser.apply("" + i));
     }
   }
 
@@ -142,16 +142,16 @@ public abstract class TransformerIntegration_AbstractTest {
     manager = new SimpleSerialThreadManager(test);
     // Run until the interrupt.
     manager.execute(1);
-    assertEquals(1, test.runs);
-    assertEquals(1, test.value);
+    assertThat(test.runs).isEqualTo(1);
+    assertThat(test.value).isEqualTo(1);
     // Finish the thread: it gets reset to be able to run again.
     manager.execute(1);
-    assertEquals(1, test.runs);
-    assertEquals(2, test.value);
+    assertThat(test.runs).isEqualTo(1);
+    assertThat(test.value).isEqualTo(2);
     // Restart the thread: it runs from the beginning until the interrupt again.
     manager.execute(1);
-    assertEquals(2, test.runs);
-    assertEquals(1, test.value);
+    assertThat(test.runs).isEqualTo(2);
+    assertThat(test.value).isEqualTo(1);
   }
 
   /**
@@ -163,9 +163,9 @@ public abstract class TransformerIntegration_AbstractTest {
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertEquals("", test.value);
+    assertThat(test.value).isEmpty();
     manager.execute(1);
-    assertEquals("a", test.value);
+    assertThat(test.value).isEqualTo("a");
   }
 
   /**
@@ -177,13 +177,13 @@ public abstract class TransformerIntegration_AbstractTest {
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertEquals(-1L, test.value);
-    assertEquals(-1L, test.valueDeep);
+    assertThat(test.value).isEqualTo(-1L);
+    assertThat(test.valueDeep).isEqualTo(-1L);
     manager.execute(1);
-    assertEquals(42L, test.value);
-    assertEquals(-1L, test.valueDeep);
+    assertThat(test.value).isEqualTo(42L);
+    assertThat(test.valueDeep).isEqualTo(-1L);
     manager.execute(1);
-    assertEquals(122L, test.valueDeep);
+    assertThat(test.valueDeep).isEqualTo(122L);
   }
 
   /**
@@ -195,13 +195,13 @@ public abstract class TransformerIntegration_AbstractTest {
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertEquals(-1D, test.value);
-    assertEquals(-1D, test.valueDeep);
+    assertThat(test.value).isEqualTo(-1D);
+    assertThat(test.valueDeep).isEqualTo(-1D);
     manager.execute(1);
-    assertEquals(42.25D, test.value);
-    assertEquals(-1D, test.valueDeep);
+    assertThat(test.value).isEqualTo(42.25D);
+    assertThat(test.valueDeep).isEqualTo(-1D);
     manager.execute(1);
-    assertEquals(126.25D, test.valueDeep);
+    assertThat(test.valueDeep).isEqualTo(126.25D);
   }
 
   /**
@@ -212,9 +212,9 @@ public abstract class TransformerIntegration_AbstractTest {
     var test = new TestTailCall();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertEquals(-1, test.value);
+    assertThat(test.value).isEqualTo(-1);
     manager.execute(1);
-    assertEquals(1, test.value);
+    assertThat(test.value).isEqualTo(1);
   }
 
   /**
@@ -226,9 +226,9 @@ public abstract class TransformerIntegration_AbstractTest {
     var test = new TestException();
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertEquals(-1, test.value);
+    assertThat(test.value).isEqualTo(-1);
     manager.execute(1);
-    assertEquals(1, test.value);
+    assertThat(test.value).isEqualTo(1);
   }
 
   //

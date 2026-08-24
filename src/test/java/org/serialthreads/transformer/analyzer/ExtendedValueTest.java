@@ -1,13 +1,11 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Value;
 
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.objectweb.asm.Type.INT_TYPE;
 
 /**
@@ -17,43 +15,43 @@ class ExtendedValueTest {
   @Test
   void testValue() {
     var value = ExtendedValue.value(INT_TYPE);
-    assertEquals(INT_TYPE, value.getType());
-    assertFalse(value.isConstant());
+    assertThat(value.getType()).isEqualTo(INT_TYPE);
+    assertThat(value.isConstant()).isFalse();
     assertThat(value.getLocals()).isEmpty();
   }
 
   @Test
   void testValueInLocal() {
     var value = ExtendedValue.valueInLocal(INT_TYPE, 1);
-    assertEquals(INT_TYPE, value.getType());
-    assertFalse(value.isConstant());
-    assertThat(value.getLocals()).containsExactly(1);
+    assertThat(value.getType()).isEqualTo(INT_TYPE);
+    assertThat(value.isConstant()).isFalse();
+    assertThat(value.getLocals()).containsOnly(1);
   }
 
   @Test
   void testValueInLocals() {
     var value = ExtendedValue.valueInLocal(INT_TYPE, 1).addLocal(2);
-    assertEquals(INT_TYPE, value.getType());
-    assertFalse(value.isConstant());
-    assertThat(value.getLocals()).containsExactly(1, 2);
+    assertThat(value.getType()).isEqualTo(INT_TYPE);
+    assertThat(value.isConstant()).isFalse();
+    assertThat(value.getLocals()).containsOnly(1, 2);
   }
 
   @Test
   void testConstantValue() {
     var value = ExtendedValue.constantValue(INT_TYPE, 1);
-    assertEquals(INT_TYPE, value.getType());
-    assertTrue(value.isConstant());
-    assertEquals(1, value.getConstant());
+    assertThat(value.getType()).isEqualTo(INT_TYPE);
+    assertThat(value.isConstant()).isTrue();
+    assertThat(value.getConstant()).isEqualTo(1);
     assertThat(value.getLocals()).isEmpty();
   }
 
   @Test
   void testConstantInLocals() {
     var value = ExtendedValue.constantInLocals(INT_TYPE, 1, Set.of(1, 2));
-    assertEquals(INT_TYPE, value.getType());
-    assertTrue(value.isConstant());
-    assertEquals(1, value.getConstant());
-    assertThat(value.getLocals()).containsExactly(1, 2);
+    assertThat(value.getType()).isEqualTo(INT_TYPE);
+    assertThat(value.isConstant()).isTrue();
+    assertThat(value.getConstant()).isEqualTo(1);
+    assertThat(value.getLocals()).containsOnly(1, 2);
   }
 
   @Test
@@ -77,16 +75,16 @@ class ExtendedValueTest {
     assertEqualsValue(const1Local1A, const1Local1B);
 
     var const1Local12 = ExtendedValue.constantValue(INT_TYPE, 1).addLocal(1).addLocal(2);
-    assertFalse(const1Local1A.equalsValue(const1Local12));
-    assertFalse(const1Local12.equalsValue(const1Local1A));
+    assertThat(const1Local1A.equalsValue(const1Local12)).isFalse();
+    assertThat(const1Local12.equalsValue(const1Local1A)).isFalse();
 
     var const2Local1 = ExtendedValue.constantValue(INT_TYPE, 2).addLocal(1);
-    assertFalse(const1Local1A.equalsValue(const2Local1));
-    assertFalse(const2Local1.equalsValue(const1Local1A));
+    assertThat(const1Local1A.equalsValue(const2Local1)).isFalse();
+    assertThat(const2Local1.equalsValue(const1Local1A)).isFalse();
 
     var local1 = ExtendedValue.value(INT_TYPE).addLocal(1);
-    assertFalse(const1Local1A.equalsValue(local1));
-    assertFalse(local1.equalsValue(const1Local1A));
+    assertThat(const1Local1A.equalsValue(local1)).isFalse();
+    assertThat(local1.equalsValue(const1Local1A)).isFalse();
   }
 
   /**
@@ -97,18 +95,16 @@ class ExtendedValueTest {
    * @param value value
    */
   static void assertEqualsValue(ExtendedValue expected, Value value) {
-    assertTrue(value instanceof ExtendedValue, "expected ExtendedValue but was: <" + value.getClass().getName() + ">");
+    assertThat(value).isInstanceOf(ExtendedValue.class);
     var ev = (ExtendedValue) value;
-    assertNotSame(expected, ev);
+    assertThat(ev).isNotSameAs(expected);
     if (expected.isConstant()) {
-      assertTrue(ev.isConstant(), "expected a constant value: <" + expected.getConstant() + "> but was: none");
-      assertEquals(expected.getConstant(), ev.getConstant(),
-              "expected constant: <" + expected.getConstant() + "> but was: <" + ev.getConstant() + ">");
+      assertThat(ev.isConstant()).as("constant value expected").isTrue();
+      assertThat(ev.getConstant()).as("constant").isEqualTo(expected.getConstant());
     } else {
-      assertFalse(ev.isConstant(), "expected no constant value");
+      assertThat(ev.isConstant()).as("no constant value expected").isFalse();
     }
-    assertEquals(expected.getLocals(), ev.getLocals(),
-            "expected locals: <" + expected.getLocals() + "> but was: <" + ev.getLocals() + ">");
-    assertTrue(expected.equalsValue((ExtendedValue) value));
+    assertThat(ev.getLocals()).as("locals").isEqualTo(expected.getLocals());
+    assertThat(expected.equalsValue(ev)).isTrue();
   }
 }

@@ -2,7 +2,7 @@ package org.serialthreads.transformer.code;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link MethodCode}.
@@ -13,7 +13,7 @@ class MethodCodeTest {
    */
   @Test
   void testEscapeForMethodName() throws Exception {
-    assertEquals("org_serialthreads_Test_test__Lorg_serialthreads_Test__V",
-      MethodCode.escapeForMethodName("org/serialthreads/Test/test([Lorg/serialthreads/Test;)V"));
+    assertThat(MethodCode.escapeForMethodName("org/serialthreads/Test/test([Lorg/serialthreads/Test;)V"))
+      .isEqualTo("org_serialthreads_Test_test__Lorg_serialthreads_Test__V");
   }
 }

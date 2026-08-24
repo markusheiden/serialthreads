@@ -4,7 +4,7 @@ import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test runnable for transformer integration tests.
@@ -58,6 +58,6 @@ public class TestRunMultiInterruptible implements IRunnable {
    */
   public void assertExpectedResult() {
     // 2 * 3 * 5 * 7 * 11.
-    assertEquals(2310, i);
+    assertThat(i).isEqualTo(2310);
   }
 }

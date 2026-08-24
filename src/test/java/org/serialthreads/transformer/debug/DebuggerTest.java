@@ -2,7 +2,7 @@ package org.serialthreads.transformer.debug;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link Debugger} and {@link DebugPrinter}.
@@ -30,8 +30,8 @@ class DebuggerTest {
 
       // All indexed lines of a method are numbered consecutively.
       var index = Integer.parseInt(line.substring(0, 4));
-      assertTrue(index == expectedIndex || index == expectedIndex - 1,
-        "Consecutive instruction index in line: " + line);
+      assertThat(index).as("Consecutive instruction index in line: %s", line)
+        .isIn(expectedIndex - 1, expectedIndex);
       expectedIndex = index + 1;
 
       if (line.contains("INVOKEDYNAMIC")) {
@@ -39,7 +39,7 @@ class DebuggerTest {
       }
     }
 
-    assertTrue(indexedInvokeDynamic, "The invoke dynamic instruction has an instruction index");
+    assertThat(indexedInvokeDynamic).as("The invoke dynamic instruction has an instruction index").isTrue();
   }
 
   /**

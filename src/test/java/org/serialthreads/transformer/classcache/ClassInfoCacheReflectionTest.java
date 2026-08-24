@@ -6,8 +6,7 @@ import org.serialthreads.Interruptible;
 
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for ClassInfoCacheReflection.
@@ -29,8 +28,8 @@ class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
     ((ClassInfoCacheReflection) cache).setClassLoader(new ResourceHidingClassLoader());
 
     var className = Type.getType(TestClass.class).getInternalName();
-    assertTrue(cache.isInterruptible(className, "interruptible", "()V"));
-    assertFalse(cache.isInterruptible(className, "notInterruptible", "()V"));
+    assertThat(cache.isInterruptible(className, "interruptible", "()V")).isTrue();
+    assertThat(cache.isInterruptible(className, "notInterruptible", "()V")).isFalse();
   }
 
   /**

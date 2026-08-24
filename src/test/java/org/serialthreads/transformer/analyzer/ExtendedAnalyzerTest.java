@@ -1,19 +1,22 @@
 package org.serialthreads.transformer.analyzer;
 
 import org.junit.jupiter.api.Test;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
-import org.objectweb.asm.tree.analysis.BasicValue;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Frame;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.objectweb.asm.Opcodes.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.objectweb.asm.Opcodes.GOTO;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Type.DOUBLE_TYPE;
 import static org.objectweb.asm.Type.INT_TYPE;
 import static org.objectweb.asm.Type.LONG_TYPE;
@@ -40,22 +43,19 @@ class ExtendedAnalyzerTest {
 
     frame.setLocal(0, UNINITIALIZED_VALUE);
     frame.setLocal(1, INT_VALUE);
-    assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
-    assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
-    assertEquals(2, frame.getLocals());
+    assertThat(frame.getLocal(0)).isEqualTo(UNINITIALIZED_VALUE);
+    assertThat(frame.getLocal(1)).isEqualTo(ExtendedValue.valueInLocal(INT_TYPE, 1));
+    assertThat(frame.getLocals()).isEqualTo(2);
 
     frame.push(LONG_VALUE);
     frame.push(DOUBLE_VALUE);
-    assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));
-    assertEquals(ExtendedValue.value(DOUBLE_TYPE), frame.getStack(1));
-    assertEquals(2, frame.getStackSize());
+    assertThat(frame.getStack(0)).isEqualTo(ExtendedValue.value(LONG_TYPE));
+    assertThat(frame.getStack(1)).isEqualTo(ExtendedValue.value(DOUBLE_TYPE));
+    assertThat(frame.getStackSize()).isEqualTo(2);
 
-    try {
-      frame.push(INT_VALUE);
-      fail("Expected max stack = 2");
-    } catch (IndexOutOfBoundsException e) {
-      // expected
-    }
+    assertThatExceptionOfType(IndexOutOfBoundsException.class)
+      .as("Expected max stack = 2")
+      .isThrownBy(() -> frame.push(INT_VALUE));
   }
 
   /**
@@ -71,20 +71,17 @@ class ExtendedAnalyzerTest {
 
     var frame = analyzer.newFrame(src);
 
-    assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
-    assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
-    assertEquals(2, frame.getLocals());
+    assertThat(frame.getLocal(0)).isEqualTo(UNINITIALIZED_VALUE);
+    assertThat(frame.getLocal(1)).isEqualTo(ExtendedValue.valueInLocal(INT_TYPE, 1));
+    assertThat(frame.getLocals()).isEqualTo(2);
 
-    assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));
-    assertEquals(ExtendedValue.value(DOUBLE_TYPE), frame.getStack(1));
-    assertEquals(2, frame.getStackSize());
+    assertThat(frame.getStack(0)).isEqualTo(ExtendedValue.value(LONG_TYPE));
+    assertThat(frame.getStack(1)).isEqualTo(ExtendedValue.value(DOUBLE_TYPE));
+    assertThat(frame.getStackSize()).isEqualTo(2);
 
-    try {
-      frame.push(INT_VALUE);
-      fail("Expected max stack = 2");
-    } catch (IndexOutOfBoundsException e) {
-      // expected
-    }
+    assertThatExceptionOfType(IndexOutOfBoundsException.class)
+      .as("Expected max stack = 2")
+      .isThrownBy(() -> frame.push(INT_VALUE));
   }
 
   /**
@@ -130,14 +127,14 @@ class ExtendedAnalyzerTest {
     var frames = analyzer.analyze("Test", method);
 
     // Check that at instruction 15 just local 1 is declared as needed for the remaining code
-    assertEquals(set(1), frames[15].neededLocals);
+    assertThat(frames[15].neededLocals).containsOnly(1);
     // Check that at instruction 8 just locals 1 & 2 are declared as needed for the remaining code
-    assertEquals(set(1, 2), frames[8].neededLocals);
+    assertThat(frames[8].neededLocals).containsOnly(1, 2);
     // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code
-    assertEquals(set(1, 3), frames[12].neededLocals);
+    assertThat(frames[12].neededLocals).containsOnly(1, 3);
 
     // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
-    assertEquals(set(1, 2, 3), frames[7].neededLocals);
+    assertThat(frames[7].neededLocals).containsOnly(1, 2, 3);
   }
 
   /**
@@ -167,7 +164,7 @@ class ExtendedAnalyzerTest {
     var frames = analyzer.analyze("Test", method);
 
     // Check that at instruction 5 locals 1 is declared as needed for the remaining code
-    assertEquals(set(1), frames[5].neededLocals);
+    assertThat(frames[5].neededLocals).containsOnly(1);
   }
 
   /**
@@ -192,17 +189,8 @@ class ExtendedAnalyzerTest {
     // Before ISTORE 1: Local 1 is overwritten -> Local 1 is not needed here and before.
     assertThat(frames[1].neededLocals).isEmpty();
     // Before ILOAD 1: Local 1 is used -> Local 1 is needed.
-    assertThat(frames[2].neededLocals).containsExactly(1);
+    assertThat(frames[2].neededLocals).containsOnly(1);
     // Before IRETURN.
     assertThat(frames[3].neededLocals).isEmpty();
-  }
-
-  /**
-   * Create set of Integers.
-   *
-   * @param ints Integers
-   */
-  private static Set<Integer> set(Integer... ints) {
-    return new HashSet<>(asList(ints));
   }
 }

@@ -3,8 +3,7 @@ package org.serialthreads.performance;
 import org.junit.jupiter.api.Test;
 import org.serialthreads.context.IRunnable;
 
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base performance test.
@@ -28,14 +27,14 @@ public abstract class AbstractPerformanceTest {
 
     long count = counters[0].getCount();
     // Check that counters have run at all.
-    assertTrue(count > 1, "Counters did not block");
+    assertThat(count).as("Counters did not block").isGreaterThan(1);
 
     for (int i = 1; i < counters.length; i++) {
       // check that all counters differ only by max 1, due to different stop time
-      assertTrue(count - 1 <= counters[i].getCount(), "Counters are consistent: " + count + " / " + counters[i].getCount());
-      assertTrue(counters[i].getCount() <= count + 1, "Counters are consistent: " + count + " / " + counters[i].getCount());
+      assertThat(counters[i].getCount()).as("Counters are consistent: %d / %d", count, counters[i].getCount())
+        .isBetween(count - 1, count + 1);
       // just to be sure check that not all counters are the same
-      assertNotSame(counters[0], counters[i]);
+      assertThat(counters[i]).isNotSameAs(counters[0]);
     }
   }
 

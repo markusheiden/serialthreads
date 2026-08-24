@@ -2,8 +2,7 @@ package org.serialthreads.context;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link StackFrame}.
@@ -26,14 +25,14 @@ class StackFrameTest {
 
     frame.reset();
 
-    assertNull(frame.owner);
-    assertEquals(-1, frame.method);
-    assertNull(frame.stackObject0);
-    assertNull(frame.stackObject7);
-    assertNull(frame.localObject0);
-    assertNull(frame.localObject7);
-    assertNull(frame.stackObjects[0]);
-    assertNull(frame.localObjects[0]);
+    assertThat(frame.owner).isNull();
+    assertThat(frame.method).isEqualTo(-1);
+    assertThat(frame.stackObject0).isNull();
+    assertThat(frame.stackObject7).isNull();
+    assertThat(frame.localObject0).isNull();
+    assertThat(frame.localObject7).isNull();
+    assertThat(frame.stackObjects[0]).isNull();
+    assertThat(frame.localObjects[0]).isNull();
   }
 
   /**
@@ -46,17 +45,17 @@ class StackFrameTest {
     for (int i = 0; i < 17; i++) {
       frame.pushStackObject("object" + i);
     }
-    assertEquals(32, frame.stackObjects.length);
+    assertThat(frame.stackObjects).hasSize(32);
 
     frame.resize(10);
 
     // The grown array has not been shrunk.
-    assertEquals(32, frame.stackObjects.length);
+    assertThat(frame.stackObjects).hasSize(32);
     // The other arrays have been resized.
-    assertEquals(16, frame.stackInts.length);
+    assertThat(frame.stackInts).hasSize(16);
     // The pushed values are still there.
     for (int i = 16; i >= 0; i--) {
-      assertEquals("object" + i, frame.popStackObject());
+      assertThat(frame.popStackObject()).isEqualTo("object" + i);
     }
   }
 
@@ -69,15 +68,15 @@ class StackFrameTest {
 
     frame.resize(20);
 
-    assertEquals(32, frame.stackObjects.length);
-    assertEquals(32, frame.stackInts.length);
-    assertEquals(32, frame.stackLongs.length);
-    assertEquals(32, frame.stackFloats.length);
-    assertEquals(32, frame.stackDoubles.length);
-    assertEquals(32, frame.localObjects.length);
-    assertEquals(32, frame.localInts.length);
-    assertEquals(32, frame.localLongs.length);
-    assertEquals(32, frame.localFloats.length);
-    assertEquals(32, frame.localDoubles.length);
+    assertThat(frame.stackObjects).hasSize(32);
+    assertThat(frame.stackInts).hasSize(32);
+    assertThat(frame.stackLongs).hasSize(32);
+    assertThat(frame.stackFloats).hasSize(32);
+    assertThat(frame.stackDoubles).hasSize(32);
+    assertThat(frame.localObjects).hasSize(32);
+    assertThat(frame.localInts).hasSize(32);
+    assertThat(frame.localLongs).hasSize(32);
+    assertThat(frame.localFloats).hasSize(32);
+    assertThat(frame.localDoubles).hasSize(32);
   }
 }

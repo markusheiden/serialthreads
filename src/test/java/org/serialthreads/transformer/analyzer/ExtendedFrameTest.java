@@ -2,14 +2,40 @@ package org.serialthreads.transformer.analyzer;
 
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.tree.analysis.Interpreter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.objectweb.asm.Opcodes.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.BIPUSH;
+import static org.objectweb.asm.Opcodes.DCONST_0;
+import static org.objectweb.asm.Opcodes.DCONST_1;
+import static org.objectweb.asm.Opcodes.DSTORE;
+import static org.objectweb.asm.Opcodes.FCONST_0;
+import static org.objectweb.asm.Opcodes.FCONST_1;
+import static org.objectweb.asm.Opcodes.FCONST_2;
+import static org.objectweb.asm.Opcodes.FSTORE;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ICONST_2;
+import static org.objectweb.asm.Opcodes.ICONST_3;
+import static org.objectweb.asm.Opcodes.ICONST_4;
+import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.ICONST_M1;
+import static org.objectweb.asm.Opcodes.ISTORE;
+import static org.objectweb.asm.Opcodes.LCONST_0;
+import static org.objectweb.asm.Opcodes.LCONST_1;
+import static org.objectweb.asm.Opcodes.LSTORE;
+import static org.objectweb.asm.Opcodes.SIPUSH;
 import static org.objectweb.asm.Type.DOUBLE_TYPE;
 import static org.objectweb.asm.Type.FLOAT_TYPE;
 import static org.objectweb.asm.Type.INT_TYPE;
@@ -33,22 +59,19 @@ class ExtendedFrameTest {
 
     frame.setLocal(0, UNINITIALIZED_VALUE);
     frame.setLocal(1, INT_VALUE);
-    assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
-    assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
-    assertEquals(2, frame.getLocals());
+    assertThat(frame.getLocal(0)).isEqualTo(UNINITIALIZED_VALUE);
+    assertThat(frame.getLocal(1)).isEqualTo(ExtendedValue.valueInLocal(INT_TYPE, 1));
+    assertThat(frame.getLocals()).isEqualTo(2);
 
     frame.push(LONG_VALUE);
     frame.push(DOUBLE_VALUE);
-    assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));
-    assertEquals(ExtendedValue.value(DOUBLE_TYPE), frame.getStack(1));
-    assertEquals(2, frame.getStackSize());
+    assertThat(frame.getStack(0)).isEqualTo(ExtendedValue.value(LONG_TYPE));
+    assertThat(frame.getStack(1)).isEqualTo(ExtendedValue.value(DOUBLE_TYPE));
+    assertThat(frame.getStackSize()).isEqualTo(2);
 
-    try {
-      frame.push(INT_VALUE);
-      fail("Expected max stack = 2");
-    } catch (IndexOutOfBoundsException e) {
-      // expected
-    }
+    assertThatExceptionOfType(IndexOutOfBoundsException.class)
+      .as("Expected max stack = 2")
+      .isThrownBy(() -> frame.push(INT_VALUE));
   }
 
   /**
@@ -64,20 +87,17 @@ class ExtendedFrameTest {
 
     var frame = new ExtendedFrame(src);
 
-    assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
-    assertEquals(ExtendedValue.valueInLocal(INT_TYPE, 1), frame.getLocal(1));
-    assertEquals(2, frame.getLocals());
+    assertThat(frame.getLocal(0)).isEqualTo(UNINITIALIZED_VALUE);
+    assertThat(frame.getLocal(1)).isEqualTo(ExtendedValue.valueInLocal(INT_TYPE, 1));
+    assertThat(frame.getLocals()).isEqualTo(2);
 
-    assertEquals(ExtendedValue.value(LONG_TYPE), frame.getStack(0));
-    assertEquals(ExtendedValue.value(DOUBLE_TYPE), frame.getStack(1));
-    assertEquals(2, frame.getStackSize());
+    assertThat(frame.getStack(0)).isEqualTo(ExtendedValue.value(LONG_TYPE));
+    assertThat(frame.getStack(1)).isEqualTo(ExtendedValue.value(DOUBLE_TYPE));
+    assertThat(frame.getStackSize()).isEqualTo(2);
 
-    try {
-      frame.push(INT_VALUE);
-      fail("Expected max stack = 2");
-    } catch (IndexOutOfBoundsException e) {
-      // expected
-    }
+    assertThatExceptionOfType(IndexOutOfBoundsException.class)
+      .as("Expected max stack = 2")
+      .isThrownBy(() -> frame.push(INT_VALUE));
   }
 
   /**
@@ -113,7 +133,7 @@ class ExtendedFrameTest {
 
     var frame = new ExtendedFrame(0, 1);
     frame.execute(instruction, interpreter);
-    assertEquals(1, frame.getStackSize());
+    assertThat(frame.getStackSize()).isEqualTo(1);
     assertEqualsValue(ExtendedValue.constantValue(type, constant), frame.getStack(0));
   }
 
@@ -157,7 +177,7 @@ class ExtendedFrameTest {
     var frame = new ExtendedFrame(1, 0);
 
     frame.setLocal(0, UNINITIALIZED_VALUE);
-    assertEquals(UNINITIALIZED_VALUE, frame.getLocal(0));
+    assertThat(frame.getLocal(0)).isEqualTo(UNINITIALIZED_VALUE);
     frame.setLocal(0, INT_VALUE);
     assertEqualsValue(ExtendedValue.valueInLocal(INT_TYPE, 0), frame.getLocal(0));
     frame.setLocal(0, ExtendedValue.value(INT_TYPE));
@@ -183,12 +203,8 @@ class ExtendedFrameTest {
     assertEqualsValue(ExtendedValue.valueInLocal(INT_TYPE, 0), frame.getStack(0));
     frame.clearStack();
 
-    try {
-      frame.push(UNINITIALIZED_VALUE);
-      fail("IllegalArgumentException expected");
-    } catch (IllegalArgumentException e) {
-      // expected
-    }
+    assertThatExceptionOfType(IllegalArgumentException.class)
+      .isThrownBy(() -> frame.push(UNINITIALIZED_VALUE));
   }
 
   /**
@@ -210,12 +226,12 @@ class ExtendedFrameTest {
     var value4 = ExtendedValue.valueInLocal(INT_TYPE, 4).addLocal(1).addLocal(3);
 
     // Local 3 is the lowest local that is needed and holds the value.
-    assertEquals(3, frame.getLowestNeededLocal(value4));
+    assertThat(frame.getLowestNeededLocal(value4)).isEqualTo(3);
 
     // Local 3 is the lowest local that is needed and holds the value.
-    assertEquals(3, frame.getLowestNeededLocal(value3));
+    assertThat(frame.getLowestNeededLocal(value3)).isEqualTo(3);
 
     // Local 1 is not needed.
-    assertEquals(-1, frame.getLowestNeededLocal(value1));
+    assertThat(frame.getLowestNeededLocal(value1)).isEqualTo(-1);
   }
 }

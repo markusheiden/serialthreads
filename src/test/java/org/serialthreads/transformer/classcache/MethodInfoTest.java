@@ -6,7 +6,8 @@ import org.objectweb.asm.Type;
 import java.util.HashSet;
 
 import static java.util.Collections.singleton;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.objectweb.asm.Type.INT_TYPE;
 
 /**
@@ -17,32 +18,32 @@ class MethodInfoTest {
   void testDefault() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
 
-    assertEquals("namedesc", info.getId());
-    assertEquals("name", info.getName());
-    assertEquals("desc", info.getDesc());
-    assertEquals(1, info.getAnnotations().size());
-    assertEquals(INT_TYPE, info.getAnnotations().iterator().next());
+    assertThat(info.getId()).isEqualTo("namedesc");
+    assertThat(info.getName()).isEqualTo("name");
+    assertThat(info.getDesc()).isEqualTo("desc");
+    assertThat(info.getAnnotations()).containsOnly(INT_TYPE);
   }
 
   @Test
   void testToString() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
 
-    assertEquals("Method info namedesc", info.toString());
+    assertThat(info).hasToString("Method info namedesc");
   }
 
   @Test
   void testHasAnnotation() {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
 
-    assertTrue(info.hasAnnotation(INT_TYPE));
+    assertThat(info.hasAnnotation(INT_TYPE)).isTrue();
   }
 
   @Test
   void testGetAnnotations_immutable() {
     var info = new MethodInfo("name", "desc", new HashSet<>(singleton(INT_TYPE)));
 
-    assertThrows(UnsupportedOperationException.class, () -> info.getAnnotations().add(Type.getType(getClass())));
+    assertThatExceptionOfType(UnsupportedOperationException.class)
+      .isThrownBy(() -> info.getAnnotations().add(Type.getType(getClass())));
   }
 
   @Test
@@ -50,9 +51,9 @@ class MethodInfoTest {
     var info = new MethodInfo("name", "desc", singleton(INT_TYPE));
     var copy = info.copy();
 
-    assertEquals(info.getId(), copy.getId());
-    assertEquals(info.getName(), copy.getName());
-    assertEquals(info.getDesc(), copy.getDesc());
-    assertEquals(info.getAnnotations(), copy.getAnnotations());
+    assertThat(copy.getId()).isEqualTo(info.getId());
+    assertThat(copy.getName()).isEqualTo(info.getName());
+    assertThat(copy.getDesc()).isEqualTo(info.getDesc());
+    assertThat(copy.getAnnotations()).isEqualTo(info.getAnnotations());
   }
 }

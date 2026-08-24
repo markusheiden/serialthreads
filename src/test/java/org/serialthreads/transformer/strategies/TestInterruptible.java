@@ -4,7 +4,8 @@ import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * Test runnable for transformer integration tests.
@@ -136,16 +137,16 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
    * Check expected results of calling {@link TestInterruptible#run()} once.
    */
   public void assertExpectedResult() {
-    assertEquals(false, z); // !true
-    assertEquals((char) 2, c); // 1++
-    assertEquals((byte) 4, b); // 3++
-    assertEquals((short) 6, s); // 5++
-    assertEquals(8, i); // 7++ + 3
-    assertEquals(12L, j); // 11++
+    assertThat(z).isFalse(); // !true
+    assertThat(c).isEqualTo((char) 2); // 1++
+    assertThat(b).isEqualTo((byte) 4); // 3++
+    assertThat(s).isEqualTo((short) 6); // 5++
+    assertThat(i).isEqualTo(8); // 7++ + 3
+    assertThat(j).isEqualTo(12L); // 11++
 
-    assertEquals(14.0F, f, 0.1); // 13++
-    assertEquals(18.0D, d, 0.1); // 17++
+    assertThat(f).isCloseTo(14.0F, within(0.1F)); // 13++
+    assertThat(d).isCloseTo(18.0D, within(0.1D)); // 17++
 
-    assertEquals(53L, test); // 11++ + 3 + 17++ + 19++
+    assertThat(test).isEqualTo(53); // 11++ + 3 + 17++ + 19++
   }
 }

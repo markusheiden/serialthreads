@@ -7,7 +7,7 @@ import org.objectweb.asm.Type;
 import java.util.Map;
 import java.util.SortedMap;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for ClassInfoCache.
@@ -32,8 +32,8 @@ abstract class ClassInfoCacheAbstractTest {
     var mapName = Type.getType(Map.class).getInternalName();
     var sortedMapName = Type.getType(SortedMap.class).getInternalName();
     var objectDesc = Type.getType(Object.class).getDescriptor();
-    assertFalse(cache.isInterruptible(sortedMapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc));
-    assertFalse(cache.isInterruptible(mapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc));
-    assertFalse(cache.isInterruptible(sortedMapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc));
+    assertThat(cache.isInterruptible(sortedMapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc)).isFalse();
+    assertThat(cache.isInterruptible(mapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc)).isFalse();
+    assertThat(cache.isInterruptible(sortedMapName, "put", "(" + objectDesc + objectDesc + ")" + objectDesc)).isFalse();
   }
 }
