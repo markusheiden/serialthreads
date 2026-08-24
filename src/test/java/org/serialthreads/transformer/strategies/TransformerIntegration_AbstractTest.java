@@ -177,13 +177,13 @@ public abstract class TransformerIntegration_AbstractTest {
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertThat(test.value).isEqualTo(-1L);
-    assertThat(test.valueDeep).isEqualTo(-1L);
+    assertThat(test.value).isEqualTo(-1);
+    assertThat(test.valueDeep).isEqualTo(-1);
     manager.execute(1);
-    assertThat(test.value).isEqualTo(42L);
-    assertThat(test.valueDeep).isEqualTo(-1L);
+    assertThat(test.value).isEqualTo(42);
+    assertThat(test.valueDeep).isEqualTo(-1);
     manager.execute(1);
-    assertThat(test.valueDeep).isEqualTo(122L);
+    assertThat(test.valueDeep).isEqualTo(122);
   }
 
   /**
@@ -195,13 +195,13 @@ public abstract class TransformerIntegration_AbstractTest {
 
     manager = new SimpleSerialThreadManager(test);
     manager.execute(1);
-    assertThat(test.value).isEqualTo(-1D);
-    assertThat(test.valueDeep).isEqualTo(-1D);
+    assertThat(test.value).isEqualTo(-1);
+    assertThat(test.valueDeep).isEqualTo(-1);
     manager.execute(1);
-    assertThat(test.value).isEqualTo(42.25D);
-    assertThat(test.valueDeep).isEqualTo(-1D);
+    assertThat(test.value).isEqualTo(42.25);
+    assertThat(test.valueDeep).isEqualTo(-1);
     manager.execute(1);
-    assertThat(test.valueDeep).isEqualTo(126.25D);
+    assertThat(test.valueDeep).isEqualTo(126.25);
   }
 
   /**

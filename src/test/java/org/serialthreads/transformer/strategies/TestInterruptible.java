@@ -142,10 +142,10 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     assertThat(b).isEqualTo((byte) 4); // 3++
     assertThat(s).isEqualTo((short) 6); // 5++
     assertThat(i).isEqualTo(8); // 7++ + 3
-    assertThat(j).isEqualTo(12L); // 11++
+    assertThat(j).isEqualTo(12); // 11++
 
     assertThat(f).isCloseTo(14.0F, within(0.1F)); // 13++
-    assertThat(d).isCloseTo(18.0D, within(0.1D)); // 17++
+    assertThat(d).isCloseTo(18.0, within(0.1)); // 17++
 
     assertThat(test).isEqualTo(53); // 11++ + 3 + 17++ + 19++
   }
