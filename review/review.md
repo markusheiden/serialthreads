@@ -391,6 +391,16 @@ transformation with a false-positive `NotTransformableException`.
 
 ### M11. `StackFrame` size bookkeeping desyncs on growth; `reset()` leaks fast-slot references
 
+**Status: FIXED (2026-08-24).**
+- The fixed-size `resize(T[])` copy methods now return arrays unchanged that already grew
+  to at least `size` via pushes, so `resize(int max)` can no longer shrink a grown array
+  and throw `ArrayIndexOutOfBoundsException`.
+- `reset()` now clears the 16 fast object slots (`stackObject0..7`, `localObject0..7`) in
+  addition to the arrays, resolving the 2010 TODOs; stale primitives are left as is,
+  because they neither leak memory nor are read before being written.
+- Covered by the new `StackFrameTest` (reset clearing, grow-then-resize, plain resize);
+  the first two fail without the fix.
+
 `context/StackFrame.java:255-261, 387-393, 431-460` and `:229-249`
 
 - `resize(Object[] old, Object object)` doubles the array but never updates `size`; a

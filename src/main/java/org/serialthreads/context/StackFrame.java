@@ -231,8 +231,17 @@ public final class StackFrame implements Serializable {
     method = -1;
     methodHandle = null;
 
+    // Just the object slots need to be cleared to avoid memory leaks.
+    // Stale primitive values are always written before being read again.
     stackObjectPtr = 0;
-    // TODO 2010-03-18 mh: reset fast stack too
+    stackObject0 = null;
+    stackObject1 = null;
+    stackObject2 = null;
+    stackObject3 = null;
+    stackObject4 = null;
+    stackObject5 = null;
+    stackObject6 = null;
+    stackObject7 = null;
     Arrays.fill(stackObjects, null);
     stackIntPtr = 0;
     stackLongPtr = 0;
@@ -240,7 +249,14 @@ public final class StackFrame implements Serializable {
     stackDoublePtr = 0;
 
     localObjectPtr = 0;
-    // TODO 2010-03-18 mh: reset fast locals too
+    localObject0 = null;
+    localObject1 = null;
+    localObject2 = null;
+    localObject3 = null;
+    localObject4 = null;
+    localObject5 = null;
+    localObject6 = null;
+    localObject7 = null;
     Arrays.fill(localObjects, null);
     localIntPtr = 0;
     localLongPtr = 0;
@@ -381,7 +397,7 @@ public final class StackFrame implements Serializable {
   }
 
   //
-  // resize support
+  // Resize support.
   //
 
   protected Object[] resize(Object[] old, Object object) {
@@ -450,34 +466,59 @@ public final class StackFrame implements Serializable {
   }
 
   //
-  // resize support
+  // Resize support.
   //
 
   protected Object[] resize(Object[] old) {
+    if (old.length >= size) {
+      // The array already has grown to at least the needed size.
+      return old;
+    }
+
     final var result = new Object[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
   protected int[] resize(int[] old) {
+    if (old.length >= size) {
+      // The array already has grown to at least the needed size.
+      return old;
+    }
+
     final var result = new int[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
   protected long[] resize(long[] old) {
+    if (old.length >= size) {
+      // The array already has grown to at least the needed size.
+      return old;
+    }
+
     final var result = new long[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
   protected float[] resize(float[] old) {
+    if (old.length >= size) {
+      // The array already has grown to at least the needed size.
+      return old;
+    }
+
     final var result = new float[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
   }
 
   protected double[] resize(double[] old) {
+    if (old.length >= size) {
+      // The array already has grown to at least the needed size.
+      return old;
+    }
+
     final var result = new double[size];
     System.arraycopy(old, 0, result, 0, old.length);
     return result;
