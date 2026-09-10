@@ -6,9 +6,13 @@
 Findings were verified against the actual source; the ASM-related claims were checked
 against the ASM 9.x sources.
 
-Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, all fixed 2026-08-24)
-have been removed from this document; the numbering of the remaining findings is
-unchanged, so it has gaps.
+Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
+L11, fixed by "Fix concurrency") have been removed from this document; the numbering of
+the remaining findings is unchanged, so it has gaps.
+
+**Re-verified 2026-09-10** against the current code: all remaining findings below were
+confirmed still present. H6 was downgraded to partially fixed (the abstract cache's map
+is now concurrent), and C6/C20 were trimmed where recent commits addressed sub-points.
 
 ---
 
@@ -139,21 +143,24 @@ the restored frame contains a wrong value on the other path.
 
 ### H6. Class-info caches and Agent are not safe for concurrent/re-entrant class loading
 
-`agent/Agent.java:48-83`, `transformer/classcache/ClassInfoCacheReflection.java:28-59`,
-`transformer/classcache/AbstractClassInfoCache.java:39-46, 176-185`
+`agent/Agent.java:47-83`, `transformer/classcache/ClassInfoCacheReflection.java:25-56`
 
-The JVM invokes `ClassFileTransformer.transform` concurrently (parallel-capable class
-loaders) and re-entrantly. The caches use unsynchronized `HashMap`/`TreeMap` plus a
-single shared mutable `classLoader` field:
+*Partially fixed:* `AbstractClassInfoCache.classes` is now a `ConcurrentHashMap` with a
+race-tolerant `putIfAbsent` in `getClassInfo` ("Fix concurrency"). The remaining
+mechanisms are untouched:
 
-- **Re-entrancy on one thread:** `scanReflection` calls `Class.forName(..., false,
-  classLoader)`, which loads the class and re-enters `Agent.transform` → the inner
-  `start()` overwrites `classLoader`, the inner `stop()` sets it to `null`
-  (`ClassInfoCacheReflection.java:57`) — the *outer* transform then NPEs at
+- **Re-entrancy on one thread:** `ClassInfoCacheReflection` still has the single shared
+  mutable `classLoader` field (`start()` overwrites it, `stop()` nulls it). `scanReflection`
+  calls `Class.forName(..., false, classLoader)`, which loads the class and re-enters
+  `Agent.transform` → the inner `start()` overwrites `classLoader`, the inner `stop()`
+  sets it to `null` — the *outer* transform then NPEs at
   `classLoader.getResourceAsStream(...)` on its next superclass scan.
-- **Concurrency:** unsynchronized map mutation from multiple threads (corruption,
-  infinite loops); `classLoader` is whichever `start()` ran last. The cache is also
-  keyed by class name only, so identically-named classes from different loaders collide.
+- **Concurrency:** `ClassInfoCacheReflection.classes` (the pending-visitor map) is still
+  a plain unsynchronized `HashMap` mutated from `start()`, `stop()` and `scan()`;
+  `classLoader` is whichever `start()` ran last. The caches are also keyed by class name
+  only, so identically-named classes from different loaders collide.
+- `Agent.transform` still brackets the work with unguarded `start(...)`/`stop(...)` with
+  no per-thread or per-loader isolation.
 
 Fails intermittently in any multithreaded application run with the agent.
 
@@ -277,8 +284,8 @@ transformation with a false-positive `NotTransformableException`.
   designed for repeated invocation, and clobbers a thread set by a different manager on
   the same OS thread. Inconsistent with `SerialThreadExecutor`, which never closes.
 - **L7.** `context/ChainedRunnable.java:36` — empty input throws raw
-  `ArrayIndexOutOfBoundsException`; the callers' guards are `assert`s (inactive without
-  `-ea`).
+  `NoSuchElementException` (from `iterator.next()`); the callers' guards are `assert`s
+  (inactive without `-ea`).
 - **L8.** `agent/TransformingClassLoader.java:27-33, 58, 86` — not registered as
   parallel-capable; whole-method `synchronized loadClass` instead of
   `getClassLoadingLock(name)`; `defineClass` without `ProtectionDomain`/package
@@ -290,9 +297,6 @@ transformation with a false-positive `NotTransformableException`.
 - **L10.** `transformer/classcache/ClassInfo.java:101-130` — `isInterruptible`/`isInterrupt`/
   `isExecutor` NPE for unknown method ids (reachable via signature-polymorphic
   `MethodHandle.invoke` call sites) instead of a diagnostic exception.
-- **L11.** `transformer/classcache/AbstractClassInfoCache.java:176-216` — if the initial
-  `scan` throws, the error message reads "Referenced class null not found" (`className`
-  still null); `process` and its only caller both `put` the same entry.
 - **L12.** `transformer/analyzer/ExtendedFrame.java:83-118` — `removeLocalFromStack`
   doesn't mirror ASM's two-slot invalidation on `LSTORE`/`DSTORE` (stale "also in local
   var±1" annotations). Latent — no failing case constructed — but the asymmetry with
@@ -339,8 +343,12 @@ transformation with a false-positive `NotTransformableException`.
   `resize` families, `isEmpty`, `logSizes`, `getOwner`, `getMethod`, the never-read
   `last` field, and `methodHandle` + `METHOD_TYPE` (leftovers of the unimplemented
   method-handle design in `concept.txt`). Generated code only uses `addFrame`,
-  `getThread`, `setThread` and direct field access. Removing this reveals the real,
-  much smaller contract between generated code and runtime.
+  `getThread`, `setThread` and direct field access. Caveats: `pushStackObject`,
+  `popStackObject` and `resize(int)` now have *test-only* callers (`StackFrameTest`,
+  added with "Fix stack resize"), and `METHOD_TYPE` is referenced by the method-handle
+  test targets — no production or generated-code callers exist for any listed member.
+  Removing this reveals the real, much smaller contract between generated code and
+  runtime.
 - **C7 (low).** `context/Stack.java:88-138` — `addFrame`, `enterMethod`,
   `enterFirstMethod`, all three `leaveMethod` overloads: no callers anywhere.
 - **C8 (low).** `transformer/code/` — `MethodNodeCopier.copyEmpty` (also lossier than
@@ -401,7 +409,7 @@ transformation with a false-positive `NotTransformableException`.
   answered questions (`MethodCode.java:278`) should be resolved or deleted;
   `ClassInfoCacheReflection.classes` shadows the superclass cache's name with different
   semantics (pending visitors vs finished infos); unused imports in
-  `ClassInfoCacheASM`, `ClassInfoCacheReflection`, `ExtendedFrame`, `ClassInfoVisitor`;
+  `ExtendedFrame`, `ClassInfoVisitor` (both an unused plain `Opcodes` import);
   wildcard import in `frequent4/CopyMethodTransformer`; `DebugPrinter`'s
   `index.toUpperCase()` is a no-op on digits; `StackFrame.DEFAULT_FRAME_SIZE` is a
   mutable `public static` non-final; `TransformingClassLoader.loadByteCode` hand-rolls
