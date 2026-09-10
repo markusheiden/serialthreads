@@ -10,6 +10,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -27,7 +28,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   /**
    * Classes with their visitors.
    */
-  private final Map<String, ClassInfoVisitor> classes = new HashMap<>();
+  private final Map<String, ClassInfoVisitor> classes = new ConcurrentHashMap<>();
 
   /**
    * Start processing for a given class.
@@ -100,7 +101,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    */
   private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess) {
     try {
-      // scan all other classes via reflection, because not all other classes have class files
+      // Scan all other classes via reflection, because not all other classes have class files.
       var clazz = Class.forName(className.replace('/', '.'), false, classLoader);
 
       String superClassName = null;
