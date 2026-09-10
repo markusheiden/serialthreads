@@ -23,7 +23,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   /**
    * Class loader to load class files.
    */
-  private ClassLoader classLoader;
+  private final ClassLoader classLoader;
 
   /**
    * Classes with their visitors.
@@ -34,6 +34,8 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    * Cosntructor.
    */
   public ClassInfoCacheReflection(ClassLoader classLoader) {
+    assert classLoader != null : "Precondition: classLoader != null";
+
     this.classLoader = classLoader;
   }
 
@@ -44,11 +46,9 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    * @param byteCode byte code of class
    */
   public void start(String className, byte[] byteCode) {
-    assert classLoader != null : "Precondition: classLoader != null";
     assert className != null : "Precondition: className != null";
     assert byteCode != null : "Precondition: byteCode != null";
 
-    this.classLoader = classLoader;
     classes.put(className, read(new ClassReader(byteCode)));
   }
 
@@ -58,19 +58,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    * @param className internal name of class
    */
   public void stop(String className) {
-    classLoader = null;
     classes.remove(className);
-  }
-
-  /**
-   * Set class loader for tests.
-   *
-   * @param classLoader class loader to use
-   */
-  protected void setClassLoader(ClassLoader classLoader) {
-    assert classLoader != null : "Precondition: classLoader != null";
-
-    this.classLoader = classLoader;
   }
 
   @Override

@@ -14,9 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
   @Override
   protected IClassInfoCache createCache(ClassLoader classLoader) {
-    var reflectionCache = new ClassInfoCacheReflection(classLoader);
-    reflectionCache.setClassLoader(classLoader);
-    return reflectionCache;
+    return new ClassInfoCacheReflection(classLoader);
   }
 
   /**
@@ -25,7 +23,7 @@ class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
    */
   @Test
   void testIsInterruptible_reflection() {
-    ((ClassInfoCacheReflection) cache).setClassLoader(new ResourceHidingClassLoader());
+    cache = new ClassInfoCacheReflection(new ResourceHidingClassLoader());
 
     var className = Type.getType(TestClass.class).getInternalName();
     assertThat(cache.isInterruptible(className, "interruptible", "()V")).isTrue();
