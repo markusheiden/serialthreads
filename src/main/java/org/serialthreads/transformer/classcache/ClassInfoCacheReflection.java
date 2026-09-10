@@ -28,7 +28,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   /**
    * Classes with their visitors.
    */
-  private final Map<String, ClassInfoVisitor> classes = new ConcurrentHashMap<>();
+  private final Map<String, ClassInfoVisitor> classVisitors = new ConcurrentHashMap<>();
 
   /**
    * Cosntructor.
@@ -49,7 +49,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     assert className != null : "Precondition: className != null";
     assert byteCode != null : "Precondition: byteCode != null";
 
-    classes.put(className, read(new ClassReader(byteCode)));
+    classVisitors.put(className, read(new ClassReader(byteCode)));
   }
 
   /**
@@ -58,17 +58,17 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    * @param className internal name of class
    */
   public void stop(String className) {
-    classes.remove(className);
+    classVisitors.remove(className);
   }
 
   @Override
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
 
-    // remove class info visitor, because we scan a class at max once
-    var classInfoVisitor = classes.remove(className);
+    // Remove class info visitor, because we scan a class at max once.
+    var classInfoVisitor = classVisitors.remove(className);
     if (classInfoVisitor != null) {
-      // scan not yet loaded class with asm to avoid circular class loading
+      // Scan not yet loaded class with asm to avoid circular class loading.
       logger.debug("  Direct ASM scan of {}", className);
       return scan(classInfoVisitor, toProcess);
     }
