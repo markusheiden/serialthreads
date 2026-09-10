@@ -37,7 +37,7 @@ public class Agent implements ClassFileTransformer {
   /**
    * Transformers per class loader.
    */
-  private final Map<ClassLoader, ITransformer> transformers = new ConcurrentHashMap<ClassLoader, ITransformer>();
+  private final Map<ClassLoader, ITransformer> transformers = new ConcurrentHashMap<>();
 
   /**
    * Creates a new class file transformer.
