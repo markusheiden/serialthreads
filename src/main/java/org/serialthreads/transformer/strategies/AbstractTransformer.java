@@ -79,8 +79,8 @@ public abstract class AbstractTransformer implements ITransformer {
   }
 
   @Override
-  public void check() {
-    this.check = true;
+  public IClassInfoCache getClassInfoCache() {
+    return classInfoCache;
   }
 
   @Override
