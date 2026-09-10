@@ -1,6 +1,9 @@
 package org.serialthreads.agent;
 
-import org.serialthreads.transformer.*;
+import org.serialthreads.transformer.IStrategy;
+import org.serialthreads.transformer.ITransformer;
+import org.serialthreads.transformer.LoadUntransformedException;
+import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheReflection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +12,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.serialthreads.transformer.Strategies.DEFAULT;
 
@@ -25,14 +30,14 @@ public class Agent implements ClassFileTransformer {
   private static final Logger logger = LoggerFactory.getLogger(Agent.class);
 
   /**
-   * Information about all classes.
+   * Strategy.
    */
-  private final ClassInfoCacheReflection classInfoCache;
+  private final IStrategy strategy;
 
   /**
-   * Class transformer.
+   * Transformers per class loader.
    */
-  private final ITransformer transformer;
+  private final Map<ClassLoader, ITransformer> transformers = new ConcurrentHashMap<ClassLoader, ITransformer>();
 
   /**
    * Creates a new class file transformer.
@@ -40,8 +45,7 @@ public class Agent implements ClassFileTransformer {
    * @param strategy strategy to use
    */
   public Agent(IStrategy strategy) {
-    classInfoCache = new ClassInfoCacheReflection();
-    transformer = strategy.getTransformer(classInfoCache);
+    this.strategy = strategy;
   }
 
   @Override
@@ -54,7 +58,10 @@ public class Agent implements ClassFileTransformer {
     boolean failure = true;
     try {
       logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
-      classInfoCache.start(loader, className, classfileBuffer);
+      var transformer = transformers.computeIfAbsent(loader, this::getTransformer);
+      // TODO markus 2026-09-10: Extract interface to avoid cast.
+      var classInfoCache = (ClassInfoCacheReflection) transformer.getClassInfoCache();
+      classInfoCache.start(className, classfileBuffer);
 
       var result = transformer.transform(classfileBuffer);
       failure = false;
@@ -110,6 +117,10 @@ public class Agent implements ClassFileTransformer {
 
   @Override
   public String toString() {
-    return transformer.toString() + " via agent.";
+    return getTransformer(getClass().getClassLoader()).toString() + " via agent.";
+  }
+
+  private ITransformer getTransformer(ClassLoader classLoader) {
+    return strategy.getTransformer(new ClassInfoCacheReflection(classLoader));
   }
 }

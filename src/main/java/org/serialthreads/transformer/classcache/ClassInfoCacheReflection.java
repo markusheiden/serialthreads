@@ -31,13 +31,19 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   private final Map<String, ClassInfoVisitor> classes = new ConcurrentHashMap<>();
 
   /**
+   * Cosntructor.
+   */
+  public ClassInfoCacheReflection(ClassLoader classLoader) {
+    this.classLoader = classLoader;
+  }
+
+  /**
    * Start processing for a given class.
    *
-   * @param classLoader class loader to use
    * @param className internal name of class
    * @param byteCode byte code of class
    */
-  public void start(ClassLoader classLoader, String className, byte[] byteCode) {
+  public void start(String className, byte[] byteCode) {
     assert classLoader != null : "Precondition: classLoader != null";
     assert className != null : "Precondition: className != null";
     assert byteCode != null : "Precondition: byteCode != null";

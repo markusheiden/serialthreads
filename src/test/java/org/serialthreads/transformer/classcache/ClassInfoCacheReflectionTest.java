@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
   @Override
   protected IClassInfoCache createCache(ClassLoader classLoader) {
-    var reflectionCache = new ClassInfoCacheReflection();
+    var reflectionCache = new ClassInfoCacheReflection(classLoader);
     reflectionCache.setClassLoader(classLoader);
     return reflectionCache;
   }
