@@ -6,6 +6,10 @@
 Findings were verified against the actual source; the ASM-related claims were checked
 against the ASM 9.x sources.
 
+Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, all fixed 2026-08-24)
+have been removed from this document; the numbering of the remaining findings is
+unchanged, so it has gaps.
+
 ---
 
 ## Summary
@@ -18,11 +22,10 @@ well-commented where it matters.
 
 The problems cluster in four places:
 
-1. **Untested edges of the bytecode model.** Capturing a `long`/`double` operand-stack
-   value emits illegal bytecode (H1); locals capture keys "skip local 0" on the *callee's*
-   staticness instead of the caller's (H2); tail-call detection reasons by instruction
-   adjacency instead of control flow (H3). All are silent on the happy path the test
-   suite covers and corrupt data or fail verification just outside it.
+1. **Untested edges of the bytecode model.** Locals capture keys "skip local 0" on the
+   *callee's* staticness instead of the caller's (H2); tail-call detection reasons by
+   instruction adjacency instead of control flow (H3). Both are silent on the happy path
+   the test suite covers and corrupt data or fail verification just outside it.
 2. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
    fixpoint merge silently discards the very annotations (`locals`, `constant`) the whole
    compacting-capture optimization depends on (H4).
@@ -40,40 +43,6 @@ input; **Medium** = wrong on plausible input, resource issue, or missing validat
 ---
 
 ## Correctness — High
-
-### H1. Capturing a long/double stack value generates invalid bytecode (`SWAP` on category-2)
-
-**Status: FIXED (2026-08-24).** `pushStackFast`/`pushStackSlow` now use `DUP_X2; POP` for
-category-2 values, mirroring `pushReturnValue`. Covered by new integration tests
-(`TestStackLong`/`TestStackDouble`, fast and slow storage) which fail without the fix in
-all four strategies. Note: the operand-stack value must not be a compile-time constant —
-javac inlines constant variables (including final instance fields with constant
-initializers), and the analyzer's constant tracking skips capture for them.
-
-`transformer/code/AbstractValueCode.java:158-176` (`pushStackFast`, `pushStackSlow`)
-
-```java
-instructions.add(new VarInsnNode(ALOAD, localFrame));
-instructions.add(new InsnNode(SWAP));   // value may be long/double → illegal
-instructions.add(new FieldInsnNode(PUTFIELD, ...));
-```
-
-`pushStack` is called with the value to save on top of the operand stack. The JVM spec
-forbids `SWAP` unless both operands are category 1, and `LongValueCode`/`DoubleValueCode`
-do **not** override `pushStack`. Any interruptible call with a non-constant,
-non-local-mirrored `long`/`double` beneath it on the operand stack — e.g.
-`long r = this.f + interruptibleLong();` or `foo(a * b, interruptibleCall())` with
-`long a, b` — produces a `VerifyError` at load time. The path is reachable:
-`CompactingStackCode.saveStack` dispatches such values to `pushStack`, and
-`stackIndexes` explicitly computes indexes for `LONG`/`DOUBLE` stack values.
-
-Tellingly, `pushReturnValue()` in the same class (lines 339–353) handles category 2
-correctly with `DUP_X2; POP`, and the restore direction (`popStackFast/Slow`) is fine —
-only capture is broken. The tests (e.g. `TestLong`) exercise category-2 *locals*, never
-stack captures, which is why this lies dormant.
-
-**Fix:** use the `DUP_X2`/`POP` pattern (or store to a temp local) for `size == 2`,
-mirroring `pushReturnValue`.
 
 ### H2. Local 0 skipped based on the *callee's* staticness, not the transformed method's
 
@@ -168,33 +137,6 @@ the restored frame contains a wrong value on the other path.
 **Fix:** override `equals`/`hashCode` to include `constant` and `locals`; delete
 `equalsValue`.
 
-### H5. Reflection scan uses `Annotation::getClass` — annotations are never detected
-
-**Status: FIXED (2026-08-24).** Changed to `Annotation::annotationType`. Covered by a new
-test in `ClassInfoCacheReflectionTest` that forces the reflection scan via a class loader
-hiding all class-file resources; the test fails without the fix. The test class also no
-longer overrides (and thereby disables) the inherited cache test. Correction to the
-original finding: the bug did *not* repeat for constructors — the constructor loop uses
-`emptySet()`, which is fine since the serialthreads annotations have `@Target({METHOD})`.
-
-`transformer/classcache/ClassInfoCacheReflection.java:117-120`
-
-```java
-var annotations = stream(method.getAnnotations())
-  .map(Annotation::getClass)   // JDK proxy class, e.g. jdk.proxy2.$Proxy8
-  .map(Type::getType)
-```
-
-`getClass()` on an annotation instance returns the proxy class, not the annotation type,
-so `@Interruptible`/`@Interrupt`/`@Executor` are invisible on every reflection-scanned
-class (the fallback path when no class-file resource is available). Interruptible methods
-inherited from such a class are treated as plain methods; if an ASM-scanned subclass
-overrides an annotated method of a reflection-scanned superclass, `ClassInfo.merge`
-throws a spurious `NotTransformableException` ("Interruptible status ... does not match
-its definition in the super class") because the two scans disagree.
-
-**Fix:** `.map(Annotation::annotationType)`.
-
 ### H6. Class-info caches and Agent are not safe for concurrent/re-entrant class loading
 
 `agent/Agent.java:48-83`, `transformer/classcache/ClassInfoCacheReflection.java:28-59`,
@@ -214,34 +156,6 @@ single shared mutable `classLoader` field:
   keyed by class name only, so identically-named classes from different loaders collide.
 
 Fails intermittently in any multithreaded application run with the agent.
-
-### H7. `Stack.reset()` never resets the first frame — restarting a finished thread is broken
-
-**Status: FIXED (2026-08-24).** `reset()` now resets the first frame too, points `frame`
-back to `first`, and clears `serializing` and the return-value registers — restoring the
-post-constructor state. Covered by a new `testRestart` integration test (run → finish →
-restart) which fails in all four strategies without the fix.
-
-`context/Stack.java:146-157`
-
-```java
-public void resetTo(StackFrame resetTo) {
-  for (StackFrame frame = resetTo.next; frame != null; frame = frame.next) { frame.reset(); }
-}
-public void reset() { resetTo(first); }
-```
-
-`resetTo` starts at `resetTo.next`, so `reset()` leaves `first.method`, `first.owner`
-and `first`'s locals/stack populated, and never resets `this.frame` or `serializing` —
-despite the javadoc "Resets the complete stack". The generated `run()` dispatcher treats
-`method == -1` as "fresh start" (`StackFrame` constructor: "has to be -1 for dummy
-startup restore!"). `SimpleSerialThreadManager.execute()` / `SerialThreadExecutor.execute()`
-call `reset()` on the finished thread precisely so it can be re-run — but on the next
-`run()` the dispatcher reads the stale `first.method >= 0` and jumps into a restore label
-with an emptied frame (null owner, cleared locals).
-
-**Fix:** also reset `resetTo` itself (or `first.reset(); frame = first;` in `reset()`),
-and reset `serializing`.
 
 ---
 
@@ -270,29 +184,6 @@ method — exactly what `check()` exists to reject for normal methods — passes
 transform time and fails at runtime (changed callee descriptor → `NoSuchMethodError`, or
 runs without capture support and continues with dummy values).
 
-### M3. `new ClassWriter(COMPUTE_FRAMES)` without a `getCommonSuperClass` override
-
-**Status: FIXED (2026-08-24).** The transformer now writes classes with the new
-`ClassInfoCacheClassWriter`, whose `getCommonSuperClass` is based on the
-`IClassInfoCache`, which reads class files as resources — no classes are loaded during
-frame computation, and the hierarchy is resolved against the correct loader. Covered by
-unit tests (`ClassInfoCacheClassWriterTest`: classes, interfaces, arrays) and an
-integration fixture (`TestTypeMerge`) that forces a frame merge of two sibling classes
-across an interrupt — verified (via temporary instrumentation) to route through the
-override during transformation.
-
-`strategies/AbstractTransformer.java:109`
-
-No `ClassWriter` subclass exists in the project. The default `getCommonSuperClass`
-resolves types via `Class.forName` on the ClassWriter's own loader. The generated restore
-dispatchers jump into the middle of methods, so frame merging at those targets can require
-common-superclass computation over *application* classes. Inside the agent or
-`TransformingClassLoader` this (a) loads application classes mid-transform
-(`ClassCircularityError` risk, classes loaded untransformed or by the wrong loader) and
-(b) fails with `TypeNotPresentException` when the transformed class lives in a child
-loader invisible to the serialthreads loader. Classic ASM pitfall — override
-`getCommonSuperClass` to use the defining loader (or the class-info cache).
-
 ### M4. Interruptible calls to `run()` generate invalid bytecode instead of a clear error (frequent3/4)
 
 `frequent3/MethodTransformer.java:133-139`, `frequent4/MethodTransformer.java:126-131`
@@ -320,22 +211,6 @@ Works today only because `@Interrupt` methods are void and called as standalone
 statements. Delete the owner/argument-push instructions of the replaced call, or validate
 that interrupt methods are static and parameterless.
 
-### M6. `fixMaxs` under-allocates one slot for long/double return values (frequent/frequent2)
-
-**Status: FIXED (2026-08-24).** The transformer now tracks the maximum size of the
-return values actually stored in the return-value local (`maxReturnValueSize`) and
-`fixMaxs` reserves exactly that many slots. Found in practice: the new H1 tests failed
-reanalysis in frequent/frequent2 with "Trying to set an inexistant local variable"
-until this was fixed.
-
-`frequent/MethodTransformer.java:176, 245-249`; `frequent2/MethodTransformer.java:197, 266-274`
-
-`localReturnValue = method.maxLocals` and `fixMaxs()` does `maxLocals += 1` — but a
-`long`/`double` return stored there occupies two slots. The emitted class is rescued by
-`COMPUTE_FRAMES` (implies `COMPUTE_MAXS`), but `reanalyzeMethods`
-(`AbstractTransformer.java:199-210`, active with debug logging) analyzes with the stated
-`maxLocals` and fails with `AnalyzerException`. Should be sized from the return type.
-
 ### M7. `ExtendedVerifier.isAssignableFrom` drops interface handling
 
 `transformer/analyzer/ExtendedVerifier.java:126-128`
@@ -347,24 +222,6 @@ analyzed is an interface (relevant: interruptible `default` methods are transfor
 a value of an implementing class merges with a value of the interface type, the recursion
 never finds the interface and returns false — the merge degrades toward `Object` or fails
 where `SimpleVerifier` would succeed.
-
-### M8. Unclosed `InputStream`s from `getResourceAsStream`
-
-**Status: FIXED (2026-08-24).** Both `scan` methods now open the class-file stream in a
-try-with-resources; `ClassInfoCacheASM` additionally throws a descriptive `IOException`
-("Class file for class X not found") instead of ASM's bare "Class not found" when the
-resource is missing. Covered by a `testClassFileStreamsClosed` test in the shared
-`ClassInfoCacheAbstractTest` (close-tracking class loader), running against both cache
-implementations; both fail without the fix.
-
-`transformer/classcache/ClassInfoCacheASM.java:40-41`,
-`ClassInfoCacheReflection.java:84-88`
-
-ASM's `ClassReader(InputStream)` does not close the stream, and neither does this code —
-one leaked jar/file stream per scanned class (including all transitively scanned
-superclasses). Wrap in try-with-resources. `ClassInfoCacheASM` also lacks a null check —
-a missing resource surfaces as ASM's bare `IOException("Class not found")` without the
-class name.
 
 ### M9. Method-info merge conflates non-virtual methods across the hierarchy
 
@@ -388,62 +245,6 @@ transformation with a false-positive `NotTransformableException`.
 - `classInfoCache.stop(className)` runs only on the success path; on
   `LoadUntransformedException` (very common) and error paths, entries and the retained
   `classLoader` reference accumulate for the life of the agent.
-
-### M11. `StackFrame` size bookkeeping desyncs on growth; `reset()` leaks fast-slot references
-
-**Status: FIXED (2026-08-24).**
-- The fixed-size `resize(T[])` copy methods now return arrays unchanged that already grew
-  to at least `size` via pushes, so `resize(int max)` can no longer shrink a grown array
-  and throw `ArrayIndexOutOfBoundsException`.
-- `reset()` now clears the 16 fast object slots (`stackObject0..7`, `localObject0..7`) in
-  addition to the arrays, resolving the 2010 TODOs; stale primitives are left as is,
-  because they neither leak memory nor are read before being written.
-- Covered by the new `StackFrameTest` (reset clearing, grow-then-resize, plain resize);
-  the first two fail without the fix.
-
-`context/StackFrame.java:255-261, 387-393, 431-460` and `:229-249`
-
-- `resize(Object[] old, Object object)` doubles the array but never updates `size`; a
-  later `resize(int max)` computes from stale `size` and `System.arraycopy(old, 0,
-  result, 0, old.length)` throws `ArrayIndexOutOfBoundsException`. Currently only dead
-  public API (see C2), but a trap.
-- `reset()` nulls only the array parts; `stackObject0..7`/`localObject0..7` keep their
-  references (generated capture code *does* store references there). After a thread
-  finishes with captured state, up to 16 object references per frame stay reachable,
-  preventing GC. The 15-year-old TODOs ("reset fast stack too") acknowledge it.
-
-### M12. `TransformingExtension` drops test-method arguments
-
-**Status: FIXED (2026-08-24).** The transformed test method is now invoked with
-`invocationContext.getArguments()`. Covered by the new `TransformingExtensionTest`
-(parameterized tests with one and multiple arguments; fails with
-`IllegalArgumentException: wrong number of arguments` without the fix), which also tests
-the extension's other behaviors: test methods run on the transformed instance,
-`@BeforeEach`/`@AfterEach` share that instance, `@TestFactory` dynamic tests, inherited
-test methods, per-test-method class-loader isolation of static state, and end-to-end
-transformed execution. Documented limitation: argument values of types loaded by the
-transforming class loader are not supported, because JUnit resolves them with the
-original class loader.
-
-`src/testFixtures/.../agent/TransformingExtension.java:74-89`
-
-`method.invoke(instance)` ignores `invocationContext.getArguments()`, so any
-`@ParameterizedTest` routed through the transforming extension fails with
-`IllegalArgumentException: wrong number of arguments`.
-
-### M13. `DebugPrinter` misses `visitInvokeDynamicInsn` — debug output desyncs after any indy
-
-**Status: FIXED (2026-08-24).** `visitInvokeDynamicInsn` is now overridden like all other
-instruction visitors, so the instruction counter (and thereby the frame annotations)
-stays in sync. Covered by the new `DebuggerTest`, which debugs a lambda-containing
-fixture and asserts the `INVOKEDYNAMIC` line is indexed and all instruction indexes are
-consecutive; fails without the fix.
-
-`transformer/debug/DebugPrinter.java:74-156`
-
-Every instruction visitor bumps the instruction counter except `visitInvokeDynamicInsn`.
-With Java 9+ string concatenation and lambdas compiling to `invokedynamic`, every printed
-frame/index after the first indy is attached to the wrong instruction. Debug-only.
 
 ---
 
@@ -523,7 +324,7 @@ frame/index after the first indy is attached to the wrong instruction. Debug-onl
   `afterTransformation` are duplicated verbatim (frequent2's log line 72 even lost the
   class-name argument). A shared intermediate base with one hook ("emit the resume
   invocation") would eliminate ~200 lines here and ~500 across all four packages, and
-  make fixes for H1–H3, M5, M6 single-site.
+  make fixes for H2, H3 and M5 single-site.
 - **C3 (low).** `SimpleSerialThreadManager` and `SerialThreadExecutor` `execute()` bodies
   are near-verbatim duplicates (differing in the `close()` call, see L6).
 - **C4 (low).** `AbstractTransformer` and `AbstractMethodTransformer` both hardwire
@@ -591,12 +392,12 @@ frame/index after the first indy is attached to the wrong instruction. Debug-onl
   mapping `Label → LabelNode` directly is simpler (the override itself is necessary and
   correct).
 - **C20 (low).** Stale docs/typos worth a sweep: `IValueCode.pushStack/popStack` javadoc
-  describes an older calling convention ("frame ... already on top of the stack" — false,
-  and actively misleading next to H1); `changeCopyDesc(String desc)` ignores its
+  describes an older calling convention ("frame ... already on top of the stack" — false);
+  `changeCopyDesc(String desc)` ignores its
   parameter in frequent3/4 and frequent4's javadoc still claims it inserts *thread and*
   frame; `FrequentInterruptsTransformer2` class javadoc is self-contradictory;
   `pushOwner` javadoc says "Restore owner."; "needs to transformation", "may not not
-  implement"; TODOs from 2009/2010/2013/2018 that document known bugs (M11, M1) or
+  implement"; TODOs from 2009/2010/2013/2018 that document known bugs (M1) or
   answered questions (`MethodCode.java:278`) should be resolved or deleted;
   `ClassInfoCacheReflection.classes` shadows the superclass cache's name with different
   semantics (pending visitors vs finished infos); unused imports in
@@ -617,22 +418,19 @@ frame/index after the first indy is attached to the wrong instruction. Debug-onl
 
 ## Recommended priorities
 
-1. **Fix the analyzer contract (H4) and the reflection scan (H5)** — small, mechanical,
-   high impact, easy to unit-test.
-2. **Fix the category-2 stack capture (H1) and the caller-staticness confusion (H2)**,
-   adding targeted transformation tests: static interruptible callers, long/double
-   values on the operand stack across an interrupt, merged returns (ternary) for
-   reference-returning methods (H3). These are exactly the untested regions where all
-   the high-severity bugs live.
-3. **Fix `Stack.reset()` (H7)** if restarting finished threads is a supported use case
-   (jem relies on the managers).
-4. **Decide on the concurrency story (H6, M10, L4, L8)**: either document
+1. **Fix the analyzer contract (H4)** — small, mechanical, high impact, easy to
+   unit-test.
+2. **Fix the caller-staticness confusion (H2)**, adding targeted transformation tests:
+   static interruptible callers, merged returns (ternary) for reference-returning
+   methods (H3). These are exactly the untested regions where all the high-severity
+   bugs live.
+3. **Decide on the concurrency story (H6, M10, L4, L8)**: either document
    single-threaded class loading as a hard requirement or synchronize the caches and
    make the agent/loader parallel-capable.
-5. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
+4. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
    corrections become single-site.
-6. **Delete the dead weight (C5–C12)** — roughly 800 lines; it materially clarifies the
+5. **Delete the dead weight (C5–C12)** — roughly 800 lines; it materially clarifies the
    real contract between generated code and the runtime.
-7. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
+6. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
    `frequent4`) strategies outright if only one is used in practice — that alone removes
    more code than every other suggestion combined.
