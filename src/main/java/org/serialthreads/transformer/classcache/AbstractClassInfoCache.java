@@ -269,4 +269,15 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     return result;
   }
+
+  protected ClassInfo scanClass(String className, Deque<String> toProcess) throws IOException {
+    try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
+      if (classFile == null) {
+        return null;
+      }
+
+      logger.debug("  Class file based ASM scan of {}", className);
+      return scan(read(new ClassReader(classFile)), toProcess);
+    }
+  }
 }
