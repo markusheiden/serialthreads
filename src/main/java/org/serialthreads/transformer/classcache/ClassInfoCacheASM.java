@@ -25,13 +25,6 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
     this.classLoader = classLoader;
   }
 
-  /**
-   * Scan a given class for interruptible methods.
-   * Does NOT do a deep scan!
-   *
-   * @param className name of class to scan
-   * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
-   */
   @Override
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
