@@ -1,6 +1,5 @@
 package org.serialthreads.transformer.classcache;
 
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 import org.serialthreads.transformer.NotTransformableException;
 
@@ -8,9 +7,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -21,50 +18,15 @@ import static java.util.stream.Collectors.toSet;
  */
 public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   /**
-   * Classes with their visitors.
-   */
-  private final Map<String, ClassInfoVisitor> classVisitors = new ConcurrentHashMap<>();
-
-  /**
    * Cosntructor.
    */
   public ClassInfoCacheReflection(ClassLoader classLoader) {
     super(classLoader);
   }
 
-  /**
-   * Start processing for a given class.
-   *
-   * @param className internal name of class
-   * @param byteCode byte code of class
-   */
-  public void start(String className, byte[] byteCode) {
-    assert className != null : "Precondition: className != null";
-    assert byteCode != null : "Precondition: byteCode != null";
-
-    classVisitors.put(className, read(new ClassReader(byteCode)));
-  }
-
-  /**
-   * Stop processing of a given class.
-   *
-   * @param className internal name of class
-   */
-  public void stop(String className) {
-    classVisitors.remove(className);
-  }
-
   @Override
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
-
-    // Remove class info visitor, because we scan a class at max once.
-    var classInfoVisitor = classVisitors.remove(className);
-    if (classInfoVisitor != null) {
-      // Scan not yet loaded class with asm to avoid circular class loading.
-      logger.debug("  Direct ASM scan of {}", className);
-      return scanClass(classInfoVisitor, toProcess);
-    }
 
     var classInfo = scanClassFile(className, toProcess);
     if (classInfo != null) {

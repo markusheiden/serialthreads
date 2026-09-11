@@ -200,6 +200,19 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     return classInfo;
   }
 
+  @Override
+  public void addClassInfo(String className, byte[] byteCode) {
+    assert className != null : "Precondition: className != null";
+    assert byteCode != null : "Precondition: byteCode != null";
+
+    // Scan not yet loaded class with asm to avoid circular class loading.
+    logger.debug("  Direct ASM scan of {}", className);
+    var toProcess = new LinkedList<String>();
+    var classInfo = scanClass(read(new ClassReader(byteCode)), toProcess);
+    process(classInfo, toProcess);
+    classes.putIfAbsent(className, classInfo);
+  }
+
   /**
    * Parse class and extract methods which are interruptible.
    *
@@ -210,22 +223,24 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     logger.debug("Computing interruptible status for class {}", owner);
 
-    String className = null;
     try {
       var toProcess = new LinkedList<String>();
       var result = scan(owner, toProcess);
-
-      while (!toProcess.isEmpty()) {
-        className = toProcess.pollFirst();
-        if (!result.hasSuperClass(className)) {
-          result.addSuperClass(className);
-          result.merge(getClassInfo(className));
-        }
-      }
+      process(result, toProcess);
 
       return result;
     } catch (IOException e) {
-      throw new NotTransformableException("Referenced class " + (className != null ? className : owner) + " not found", e);
+      throw new NotTransformableException("Referenced class " + owner + " not found", e);
+    }
+  }
+
+  private void process(ClassInfo result, LinkedList<String> toProcess) {
+    while (!toProcess.isEmpty()) {
+      var className = toProcess.pollFirst();
+      if (!result.hasSuperClass(className)) {
+        result.addSuperClass(className);
+        result.merge(getClassInfo(className));
+      }
     }
   }
 

@@ -11,6 +11,14 @@ import org.objectweb.asm.tree.MethodNode;
  */
 public interface IClassInfoCache {
   /**
+   * Add class info for the given class.
+   *
+   * @param className internal name of class
+   * @param byteCode byte code of class
+   */
+  void addClassInfo(String className, byte[] byteCode);
+
+  /**
    * Is the class an interface.
    *
    * @param clazz class

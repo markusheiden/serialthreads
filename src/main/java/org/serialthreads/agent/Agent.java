@@ -59,17 +59,13 @@ public class Agent implements ClassFileTransformer {
     try {
       logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
       var transformer = transformers.computeIfAbsent(loader, this::getTransformer);
-      // TODO markus 2026-09-10: Extract interface to avoid cast.
-      var classInfoCache = (ClassInfoCacheReflection) transformer.getClassInfoCache();
-      classInfoCache.start(className, classfileBuffer);
-
-      var result = transformer.transform(classfileBuffer);
+      transformer.getClassInfoCache().addClassInfo(className, classfileBuffer);
+      var transformed = transformer.transform(classfileBuffer);
       failure = false;
 
       logger.info("Successfully transformed class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
-      classInfoCache.stop(className);
 
-      return result;
+      return transformed;
     } catch (LoadUntransformedException e) {
       // No need to transform byte code
       failure = false;
