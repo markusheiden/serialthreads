@@ -17,7 +17,7 @@ import java.util.Set;
  * Checks correct usage of {@link Interruptible} annotations.
  */
 @SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
-@SupportedSourceVersion(SourceVersion.RELEASE_20)
+@SupportedSourceVersion(SourceVersion.RELEASE_26)
 public class InterruptibleProcessor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
