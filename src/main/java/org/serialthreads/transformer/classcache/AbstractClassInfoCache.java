@@ -177,6 +177,19 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     return getClassInfo(type.getInternalName()).isInterruptible();
   }
 
+  @Override
+  public void addClassInfo(String className, byte[] byteCode) {
+    assert className != null : "Precondition: className != null";
+    assert byteCode != null : "Precondition: byteCode != null";
+
+    // Scan not yet loaded class with ASM to avoid circular class loading.
+    logger.debug("  Direct ASM scan of {}", className);
+    var toProcess = new LinkedList<String>();
+    var classInfo = scanClass(read(new ClassReader(byteCode)), toProcess);
+    process(classInfo, toProcess);
+    classes.putIfAbsent(className, classInfo);
+  }
+
   /**
    * Get class info for a class
    *
@@ -198,19 +211,6 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     assert classInfo != null : "Postcondition: classInfo != null";
     return classInfo;
-  }
-
-  @Override
-  public void addClassInfo(String className, byte[] byteCode) {
-    assert className != null : "Precondition: className != null";
-    assert byteCode != null : "Precondition: byteCode != null";
-
-    // Scan not yet loaded class with asm to avoid circular class loading.
-    logger.debug("  Direct ASM scan of {}", className);
-    var toProcess = new LinkedList<String>();
-    var classInfo = scanClass(read(new ClassReader(byteCode)), toProcess);
-    process(classInfo, toProcess);
-    classes.putIfAbsent(className, classInfo);
   }
 
   /**
