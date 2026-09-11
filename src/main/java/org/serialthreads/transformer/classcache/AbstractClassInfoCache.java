@@ -34,10 +34,26 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   /**
+   * Class loader to load class files.
+   */
+  protected final ClassLoader classLoader;
+
+  /**
    * Classes with their information.
    * Concurrent, because classes may be loaded (and thus scanned) by concurrent threads.
    */
   private final Map<String, ClassInfo> classes = new ConcurrentHashMap<>();
+
+  /**
+   * Constructor.
+   *
+   * @param classLoader class loader for loading classes.
+   */
+  protected AbstractClassInfoCache(ClassLoader classLoader) {
+    assert classLoader != null : "Precondition: classLoader != null";
+
+    this.classLoader = classLoader;
+  }
 
   @Override
   public boolean isInterface(String className) {

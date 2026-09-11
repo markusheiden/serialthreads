@@ -10,19 +10,12 @@ import java.util.Deque;
  */
 public class ClassInfoCacheASM extends AbstractClassInfoCache {
   /**
-   * Class loader to load class files.
-   */
-  private final ClassLoader classLoader;
-
-  /**
    * Constructor.
    *
    * @param classLoader class loader for loading classes.
    */
   public ClassInfoCacheASM(ClassLoader classLoader) {
-    assert classLoader != null : "Precondition: classLoader != null";
-
-    this.classLoader = classLoader;
+    super(classLoader);
   }
 
   @Override

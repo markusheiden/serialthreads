@@ -21,11 +21,6 @@ import static java.util.stream.Collectors.toSet;
  */
 public class ClassInfoCacheReflection extends AbstractClassInfoCache {
   /**
-   * Class loader to load class files.
-   */
-  private final ClassLoader classLoader;
-
-  /**
    * Classes with their visitors.
    */
   private final Map<String, ClassInfoVisitor> classVisitors = new ConcurrentHashMap<>();
@@ -34,9 +29,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
    * Cosntructor.
    */
   public ClassInfoCacheReflection(ClassLoader classLoader) {
-    assert classLoader != null : "Precondition: classLoader != null";
-
-    this.classLoader = classLoader;
+    super(classLoader);
   }
 
   /**
