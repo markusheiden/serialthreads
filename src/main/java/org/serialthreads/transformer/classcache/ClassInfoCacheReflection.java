@@ -63,10 +63,10 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     if (classInfoVisitor != null) {
       // Scan not yet loaded class with asm to avoid circular class loading.
       logger.debug("  Direct ASM scan of {}", className);
-      return scan(classInfoVisitor, toProcess);
+      return scanClass(classInfoVisitor, toProcess);
     }
 
-    var classInfo = scanClass(className, toProcess);
+    var classInfo = scanClassFile(className, toProcess);
     if (classInfo != null) {
       return classInfo;
     }

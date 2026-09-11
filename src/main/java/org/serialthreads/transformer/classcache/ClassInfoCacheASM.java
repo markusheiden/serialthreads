@@ -20,7 +20,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
   protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
     logger.debug("Scanning class {}", className);
 
-    var classInfo = scanClass(className, toProcess);
+    var classInfo = scanClassFile(className, toProcess);
     if (classInfo == null) {
         throw new IOException("Class file for class " + className + " not found");
     }

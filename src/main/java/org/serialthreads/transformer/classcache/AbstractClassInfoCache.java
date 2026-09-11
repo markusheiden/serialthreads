@@ -251,7 +251,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   }
 
   /**
-   * Scan class.
+   * Scan class byte code.
    * Does NOT do a deep scan!
    * Uses ASM.
    *
@@ -259,7 +259,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
    * @param toProcess classes to process
    * @return ClassInfo
    */
-  protected ClassInfo scan(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
+  protected ClassInfo scanClass(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
     var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
     if (classInfoVisitor.getSuperClassName() != null) {
       // check super classes always first
@@ -270,14 +270,23 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     return result;
   }
 
-  protected ClassInfo scanClass(String className, Deque<String> toProcess) throws IOException {
+  /**
+   * Scan class file.
+   * Does NOT do a deep scan!
+   * Uses ASM.
+   *
+   * @param className name of class to scan
+   * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
+   * @return ClassInfo or {@code null}, if no class file could be found.
+   */
+  protected ClassInfo scanClassFile(String className, Deque<String> toProcess) throws IOException {
     try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
       if (classFile == null) {
         return null;
       }
 
       logger.debug("  Class file based ASM scan of {}", className);
-      return scan(read(new ClassReader(classFile)), toProcess);
+      return scanClass(read(new ClassReader(classFile)), toProcess);
     }
   }
 }
