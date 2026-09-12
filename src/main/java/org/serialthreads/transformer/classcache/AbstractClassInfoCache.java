@@ -66,8 +66,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   public Type getSuperClass(String className) {
     assert className != null : "Precondition: className != null";
 
-    var superClassName = getClassInfo(className).superClassName();
-    return superClassName == null ? null : Type.getObjectType(superClassName);
+    return getClassInfo(className).superType();
   }
 
   @Override
