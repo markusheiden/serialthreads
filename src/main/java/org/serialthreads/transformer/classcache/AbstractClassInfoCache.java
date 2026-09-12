@@ -66,7 +66,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   public Type getSuperClass(String className) {
     assert className != null : "Precondition: className != null";
 
-    var superClassName = getClassInfo(className).getSuperClassName();
+    var superClassName = getClassInfo(className).superClassName();
     return superClassName == null ? null : Type.getObjectType(superClassName);
   }
 
@@ -174,7 +174,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
   @Override
   public boolean isInterruptible(Type type) {
-    return getClassInfo(type.getInternalName()).isInterruptible();
+    return getClassInfo(type.getInternalName()).interruptible();
   }
 
   @Override
@@ -185,8 +185,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     // Scan not yet loaded class with ASM to avoid circular class loading.
     logger.debug("  Direct ASM scan of {}", className);
     var toProcess = new LinkedList<String>();
-    var classInfo = scanClass(read(new ClassReader(byteCode)), toProcess);
-    process(classInfo, toProcess);
+    var classInfo = process(scanClass(read(new ClassReader(byteCode)), toProcess), toProcess);
     classes.putIfAbsent(className, classInfo);
   }
 
@@ -225,23 +224,21 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     try {
       var toProcess = new LinkedList<String>();
-      var result = scan(owner, toProcess);
-      process(result, toProcess);
-
-      return result;
+      return process(scan(owner, toProcess), toProcess);
     } catch (IOException e) {
       throw new NotTransformableException("Referenced class " + owner + " not found", e);
     }
   }
 
-  private void process(ClassInfo result, LinkedList<String> toProcess) {
+  private ClassInfo process(ClassInfo result, LinkedList<String> toProcess) {
     while (!toProcess.isEmpty()) {
       var className = toProcess.pollFirst();
       if (!result.hasSuperClass(className)) {
-        result.addSuperClass(className);
-        result.merge(getClassInfo(className));
+        result = result.merge(getClassInfo(className));
       }
     }
+
+    return result;
   }
 
   /**

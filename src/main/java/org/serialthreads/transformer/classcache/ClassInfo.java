@@ -15,24 +15,31 @@ import java.util.TreeSet;
 
 /**
  * Class info for scanned classes.
+ *
+ * @param isInterface The class is an interface.
+ * @param type ASM type representation fpr this class.
+ * @param className (Internal) name of this class.
+ * @param superClassName (Internal) name of direct super class. {@code null} for {@link Object}.
+ * @param classes All super classes or interfaces this class extends or implements.
+ * @param methods All methods of this class and its super classes.
+ * @param interruptible The class has at least one interruptible method.
  */
-public class ClassInfo {
+public record ClassInfo(
+        boolean isInterface,
+        Type type,
+        String className,
+        String superClassName,
+        Set<String> classes,
+        Map<String, MethodInfo> methods,
+        boolean interruptible) {
   /**
    * Logger.
    */
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private static final Logger logger = LoggerFactory.getLogger(ClassInfo.class);
 
   private static final Type TYPE_EXECUTOR = Type.getType(Executor.class);
   private static final Type TYPE_INTERRUPTIBLE = Type.getType(Interruptible.class);
   private static final Type TYPE_INTERRUPT = Type.getType(Interrupt.class);
-
-  private final boolean isInterface;
-  private final Type type;
-  private final String className;
-  private final String superClassName;
-  private final Set<String> superClasses;
-  private final Map<String, MethodInfo> methods;
-  private boolean interruptible;
 
   /**
    * Constructor.
@@ -43,16 +50,19 @@ public class ClassInfo {
    * @param methods Methods directly defined in the class and their interruptible status
    */
   public ClassInfo(boolean isInterface, String className, String superClassName, Map<String, MethodInfo> methods) {
-    this.isInterface = isInterface;
-    this.type = Type.getObjectType(className);
-    this.className = className;
-    this.superClassName = superClassName;
-    this.superClasses = new TreeSet<>();
-    this.methods = new TreeMap<>(methods);
-    this.interruptible = methods.values().stream()
-      .anyMatch(method -> method.hasAnnotation(TYPE_INTERRUPT) || method.hasAnnotation(TYPE_INTERRUPTIBLE));
-
-    superClasses.add(className);
+    var allClasses = new TreeSet<String>();
+    allClasses.add(className);
+    var allMethods = new TreeMap<>(methods);
+    var anyMethodIsInterruptible = methods.values().stream()
+            .anyMatch(method -> method.hasAnnotation(TYPE_INTERRUPT) || method.hasAnnotation(TYPE_INTERRUPTIBLE));
+    this(
+            isInterface,
+            Type.getObjectType(className),
+            className,
+            superClassName,
+            allClasses,
+            allMethods,
+            anyMethodIsInterruptible);
 
     for (var method : methods.values()) {
       if (method.hasAnnotation(TYPE_INTERRUPT) && !method.getDesc().equals("()V")) {
@@ -61,36 +71,6 @@ public class ClassInfo {
             " must not have parameters nor a return value");
       }
     }
-  }
-
-  /**
-   * Is the class an interface?.
-   */
-  public boolean isInterface() {
-    return isInterface;
-  }
-
-  /**
-   * Get ASM type representation fpr this class.
-   */
-  public Type getType() {
-    return type;
-  }
-
-  /**
-   * (Internal) name of this class.
-   */
-  public String getClassName() {
-    return className;
-  }
-
-  /**
-   * (Internal) name of direct super class.
-   *
-   * @return internal of super or null for java/lang/Object
-   */
-  public String getSuperClassName() {
-    return superClassName;
   }
 
   /**
@@ -116,7 +96,7 @@ public class ClassInfo {
    *
    * @param methodId method ID = name + desc
    */
-  public final boolean isInterrupt(String methodId) {
+  public boolean isInterrupt(String methodId) {
     return getMethodInfo(methodId).hasAnnotation(TYPE_INTERRUPT);
   }
 
@@ -125,22 +105,8 @@ public class ClassInfo {
    *
    * @param methodId method ID = name + desc
    */
-  protected MethodInfo getMethodInfo(String methodId) {
+  MethodInfo getMethodInfo(String methodId) {
     return methods.get(methodId);
-  }
-
-  /**
-   * All methods ids of this class.
-   */
-  protected Set<String> getMethods() {
-    return methods.keySet();
-  }
-
-  /**
-   * Has this class at least one interruptible method?.
-   */
-  public boolean isInterruptible() {
-    return interruptible;
   }
 
   /**
@@ -149,23 +115,7 @@ public class ClassInfo {
    * @param superClassName name of super class to check
    */
   public boolean hasSuperClass(String superClassName) {
-    return superClasses.contains(superClassName);
-  }
-
-  /**
-   * Add a super class or interface this class extends or implements.
-   *
-   * @param superClassName name of super class
-   */
-  protected void addSuperClass(String superClassName) {
-    superClasses.add(superClassName);
-  }
-
-  /**
-   * All super classes or interfaces this class extends or implements.
-   */
-  public Set<String> getSuperClasses() {
-    return superClasses;
+    return classes.contains(superClassName);
   }
 
   /**
@@ -173,29 +123,39 @@ public class ClassInfo {
    *
    * @param classInfo interruptible status of superclass
    */
-  protected void merge(ClassInfo classInfo) {
-    logger.debug("Merging interruptible status of class {} into status of class {}", classInfo.getClassName(), getClassName());
+  ClassInfo merge(ClassInfo classInfo) {
+    logger.debug("Merging interruptible status of class {} into status of class {}", classInfo.className(), className());
 
-    superClasses.addAll(classInfo.getSuperClasses());
-    for (var methodId : classInfo.getMethods()) {
-      var method = classInfo.getMethodInfo(methodId);
+    var allClasses = new TreeSet<>(classes);
+    allClasses.addAll(classInfo.classes());
+
+    var allMethods = new TreeMap<>(methods);
+    classInfo.methods().forEach((methodId, method) -> {
       var ownerMethod = getMethodInfo(methodId);
       if (ownerMethod == null) {
-        // copy inherited method info to this class
+        // Copy inherited method info to this class.
         ownerMethod = method.copy();
-        methods.put(methodId, ownerMethod);
+        allMethods.put(methodId, ownerMethod);
       } else if (method.hasAnnotation(TYPE_INTERRUPTIBLE) != ownerMethod.hasAnnotation(TYPE_INTERRUPTIBLE)) {
         throw new NotTransformableException(
-          "Interruptible status of method " + methodId + " in class " + getClassName() +
-            " does not match its definition in the super class or interface " + classInfo.getClassName());
+          "Interruptible status of method " + methodId + " in class " + className() +
+            " does not match its definition in the super class or interface " + classInfo.className());
       } else if (method.hasAnnotation(TYPE_INTERRUPT) != ownerMethod.hasAnnotation(TYPE_INTERRUPT)) {
         throw new NotTransformableException(
-          "Interrupt status of method " + methodId + " in class " + getClassName() +
-            " does not match its definition in the super class or interface " + classInfo.getClassName());
+          "Interrupt status of method " + methodId + " in class " + className() +
+            " does not match its definition in the super class or interface " + classInfo.className());
       }
-      interruptible |= classInfo.interruptible;
 
       // executor status need not be checked
-    }
+    });
+
+    return new ClassInfo(
+            isInterface,
+            type,
+            className,
+            superClassName,
+            allClasses,
+            allMethods,
+            interruptible || classInfo.interruptible());
   }
 }
