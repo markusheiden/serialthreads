@@ -262,26 +262,6 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
   }
 
   /**
-   * Scan class byte code.
-   * Does NOT do a deep scan!
-   * Uses ASM.
-   *
-   * @param classInfoVisitor class info visitor with information about the class
-   * @param toProcess classes to process
-   * @return ClassInfo
-   */
-  protected ClassInfo scanClass(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
-    var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
-    if (classInfoVisitor.getSuperClassName() != null) {
-      // check super classes always first
-      toProcess.addFirst(classInfoVisitor.getSuperClassName());
-    }
-    toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));
-
-    return result;
-  }
-
-  /**
    * Scan class file.
    * Does NOT do a deep scan!
    * Uses ASM.
@@ -299,5 +279,25 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       logger.debug("  Class file based ASM scan of {}", className);
       return scanClass(read(new ClassReader(classFile)), toProcess);
     }
+  }
+
+  /**
+   * Scan class byte code.
+   * Does NOT do a deep scan!
+   * Uses ASM.
+   *
+   * @param classInfoVisitor class info visitor with information about the class
+   * @param toProcess classes to process
+   * @return ClassInfo
+   */
+  protected ClassInfo scanClass(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
+    var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
+    if (classInfoVisitor.getSuperClassName() != null) {
+      // check super classes always first
+      toProcess.addFirst(classInfoVisitor.getSuperClassName());
+    }
+    toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));
+
+    return result;
   }
 }
