@@ -10,6 +10,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.String.join;
@@ -20,6 +21,7 @@ import static java.util.Arrays.stream;
  * and executes each test method on the transformed instance.
  * <p>
  * Activated automatically via the {@link Transform} meta-annotation.
+ * {@code @Nested} test classes are supported, they use the {@link Transform} of their enclosing class by default.
  * <p>
  * Dynamic tests are lambdas already captured inside {@link #interceptTestFactoryMethod},
  * which already runs on the transformed instance.
@@ -29,54 +31,54 @@ import static java.util.Arrays.stream;
 @SuppressWarnings("NullableProblems")
 public class TransformingExtension implements InvocationInterceptor {
     private static final Namespace NAMESPACE = Namespace.create(TransformingExtension.class);
-    private static final String TRANSFORMED_INSTANCE = "transformedInstance";
+    private static final String TRANSFORMED_INSTANCES = "transformedInstances";
 
     @Override
     public void interceptBeforeEachMethod(
             Invocation<Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext context) throws Throwable {
-        runOnTransformed(invocation, invocationContext, context);
+            ExtensionContext extensionContext) throws Throwable {
+        runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @Override
     public void interceptTestMethod(
             Invocation<Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext context) throws Throwable {
-        runOnTransformed(invocation, invocationContext, context);
+            ExtensionContext extensionContext) throws Throwable {
+        runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @Override
     public <T> T interceptTestFactoryMethod(
             Invocation<T> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext context) throws Throwable {
-        return runOnTransformed(invocation, invocationContext, context);
+            ExtensionContext extensionContext) throws Throwable {
+        return runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @Override
     public void interceptTestTemplateMethod(
             Invocation<Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext context) throws Throwable {
-        runOnTransformed(invocation, invocationContext, context);
+            ExtensionContext extensionContext) throws Throwable {
+        runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @Override
     public void interceptAfterEachMethod(
             Invocation<Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext context) throws Throwable {
-        runOnTransformed(invocation, invocationContext, context);
+            ExtensionContext extensionContext) throws Throwable {
+        runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @SuppressWarnings("unchecked")
     private <T> T runOnTransformed(
             Invocation<T> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext context) throws Throwable {
-        var instance = getOrCreateInstance(context);
+            ExtensionContext extensionContext) throws Throwable {
+        var instance = getOrCreateInstance(invocationContext, extensionContext);
         var method = findMethod(instance.getClass(), invocationContext.getExecutable());
         // Do NOT call the test method of the untransformed instance.
         invocation.skip();
@@ -93,31 +95,81 @@ public class TransformingExtension implements InvocationInterceptor {
     /**
      * Returns the transformed test instance for the current test method execution,
      * creating it on first access and caching it for reuse by {@code @BeforeEach} / {@code @AfterEach}.
+     * <p>
+     * For {@code @Nested} test classes the transformed instance of the class is returned, the method is invoked on:
+     * The lifecycle methods of the enclosing classes are invoked on the enclosing instances.
      */
-    private Object getOrCreateInstance(ExtensionContext context) {
-        return context.getStore(NAMESPACE)
-                .computeIfAbsent(TRANSFORMED_INSTANCE, _ ->
-                        createInstance(context), Object.class);
+    private Object getOrCreateInstance(
+            ReflectiveInvocationContext<Method> invocationContext,
+            ExtensionContext extensionContext) {
+        var testClass = extensionContext.getRequiredTestClass();
+        var originals = extensionContext.getRequiredTestInstances().getAllInstances();
+        var instances = extensionContext
+                .getStore(NAMESPACE)
+                .computeIfAbsent(TRANSFORMED_INSTANCES, _ -> createInstances(testClass, originals), List.class);
+        var target = invocationContext.getTarget().orElse(null);
+        for (var i = 0; i < originals.size(); i++) {
+            if (originals.get(i) == target) {
+                return instances.get(i);
+            }
+        }
+
+        return instances.getLast();
     }
 
-    private Object createInstance(ExtensionContext context) {
-        var testClass = context.getRequiredTestClass();
-        var classLoader = createTransformingClassLoader(testClass);
+    /**
+     * Creates the transformed test instances: The enclosing instances of {@code @Nested} test classes first,
+     * the instance of the test class itself last. All are loaded by the same transforming class loader.
+     */
+    private List<Object> createInstances(Class<?> testClass, List<Object> originals) {
         try {
-            var constructor = classLoader.loadClass(testClass.getName()).getDeclaredConstructor();
-            constructor.setAccessible(true);
-            return constructor.newInstance();
+            var classLoader = createTransformingClassLoader(testClass);
+            var instances = new ArrayList<>();
+            for (var original : originals) {
+                createInstance(original, classLoader, instances);
+            }
+            return instances;
         } catch (Exception e) {
             throw new IllegalStateException("Failed to create transformed test instance for " + testClass.getName(), e);
         }
     }
 
+    private void createInstance(Object original, TransformingClassLoader classLoader, List<Object> instances)
+            throws ReflectiveOperationException {
+        var clazz = classLoader.loadClass(original.getClass().getName());
+        if (instances.isEmpty()) {
+            var constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            instances.add(constructor.newInstance());
+        } else {
+            // The constructor of an inner class takes its enclosing instance.
+            var constructor = clazz.getDeclaredConstructor(clazz.getEnclosingClass());
+            constructor.setAccessible(true);
+            instances.add(constructor.newInstance(instances.getLast()));
+        }
+    }
+
     private TransformingClassLoader createTransformingClassLoader(Class<?> testClass) {
-        var transform = testClass.getAnnotation(Transform.class);
+        var transform = findTransform(testClass);
         return new TransformingClassLoader(
                 testClass.getClassLoader(),
                 classInfoCache -> createTransformer(transform.transformer(), classInfoCache),
                 transform.classPrefixes());
+    }
+
+    /**
+     * Finds the transformation parameters at the test class or, for {@code @Nested} test classes,
+     * at one of its enclosing classes.
+     */
+    private Transform findTransform(Class<?> testClass) {
+        for (var clazz = testClass; clazz != null; clazz = clazz.getEnclosingClass()) {
+            var transform = clazz.getAnnotation(Transform.class);
+            if (transform != null) {
+                return transform;
+            }
+        }
+
+        throw new IllegalStateException("No @Transform found for " + testClass.getName());
     }
 
     private ITransformer createTransformer(

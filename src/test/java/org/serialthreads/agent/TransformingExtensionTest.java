@@ -3,6 +3,7 @@ package org.serialthreads.agent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -124,6 +125,79 @@ class TransformingExtensionTest extends TransformingExtensionAbstractTest {
   @Test
   void testStaticStateIsolation2() {
     assertThat(++StaticCounter.count).isEqualTo(1);
+  }
+
+  /**
+   * Test that nested test classes run on transformed instances too.
+   */
+  @Nested
+  class NestedTest {
+    /**
+     * Value set by {@link #setUpNested()} to check that all lifecycle methods run on the same transformed instance.
+     */
+    private int nestedBeforeEachValue = 0;
+
+    @BeforeEach
+    void setUpNested() {
+      // The before each method of the enclosing class has been run on the transformed enclosing instance before.
+      assertThat(beforeEachValue).isEqualTo(42);
+      nestedBeforeEachValue = 43;
+    }
+
+    @AfterEach
+    void tearDownNested() {
+      assertThat(nestedBeforeEachValue).isEqualTo(43);
+    }
+
+    /**
+     * Test that test methods of nested test classes run on an instance loaded by the transforming class loader.
+     */
+    @Test
+    void testRunsOnTransformedInstance() {
+      assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
+      assertThat(getClass().getName()).isEqualTo(TransformingExtensionTest.class.getName() + "$NestedTest");
+    }
+
+    /**
+     * Test that the before each methods of the nested test class and its enclosing class
+     * run on the transformed instance and its transformed enclosing instance.
+     */
+    @Test
+    void testBeforeEachSharesInstances() {
+      assertThat(nestedBeforeEachValue).isEqualTo(43);
+      assertThat(beforeEachValue).isEqualTo(42);
+    }
+
+    /**
+     * Test that the enclosing instance has been loaded by the same transforming class loader.
+     */
+    @Test
+    void testEnclosingInstanceSharesClassLoader() {
+      assertThat(TransformingExtensionTest.this.getClass().getClassLoader()).isSameAs(getClass().getClassLoader());
+    }
+
+    /**
+     * Test that the argument of a parameterized test is passed to the transformed test method.
+     */
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2})
+    void testParameterized(int value) {
+      assertThat(value).isIn(1, 2);
+      assertThat(nestedBeforeEachValue).isEqualTo(43);
+    }
+
+    /**
+     * Test that test classes nested in nested test classes run on transformed instances too.
+     */
+    @Nested
+    class DeeplyNestedTest {
+      @Test
+      void testBeforeEachSharesInstances() {
+        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
+        assertThat(nestedBeforeEachValue).isEqualTo(43);
+        assertThat(beforeEachValue).isEqualTo(42);
+      }
+    }
   }
 
   /**
