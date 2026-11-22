@@ -39,7 +39,7 @@ public class ClassInfoVisitor extends ClassVisitor {
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-    return new MethodInfoVisitor(name, desc, methods);
+    return new MethodInfoVisitor(access, name, desc, methods);
   }
 
   public boolean isInterface() {

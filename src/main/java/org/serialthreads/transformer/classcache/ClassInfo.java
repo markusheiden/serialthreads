@@ -141,11 +141,17 @@ public record ClassInfo(
 
     var allMethods = new HashMap<>(methods);
     classInfo.methods().forEach((methodId, method) -> {
+      if (method.isPrivate() || method.isInitializer()) {
+        // Private methods, constructors and class initializers are not inherited.
+        return;
+      }
+
       var ownerMethod = getMethodInfo(methodId);
       if (ownerMethod == null) {
         // Copy inherited method info to this class.
-        ownerMethod = method.copy();
-        allMethods.put(methodId, ownerMethod);
+        allMethods.put(methodId, method.copy());
+      } else if (method.isStatic() || ownerMethod.isStatic() || ownerMethod.isPrivate()) {
+        // The method of this class does not override the method of the super class, it just hides it.
       } else if (isInterruptible(method) != isInterruptible(ownerMethod)) {
         throw new NotTransformableException(
           "Interruptible status of method " + methodId + " in class " + className() +

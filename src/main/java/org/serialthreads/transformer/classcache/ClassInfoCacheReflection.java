@@ -12,6 +12,7 @@ import java.util.Set;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
 /**
  * Checks and caches which methods are marked as interruptible.
@@ -65,7 +66,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
           .map(Type::getType)
           .collect(toSet());
 
-        var info = new MethodInfo(name, desc, annotations);
+        var info = new MethodInfo(method.getModifiers(), name, desc, annotations);
         methodInfos.put(info.getId(), info);
       }
 
@@ -75,7 +76,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
         var desc = Type.getConstructorDescriptor(constructor);
         Set<Type> annotations = emptySet();
 
-        var info = new MethodInfo(name, desc, annotations);
+        var info = new MethodInfo(constructor.getModifiers(), name, desc, annotations);
         methodInfos.put(info.getId(), info);
       }
 
@@ -83,7 +84,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
       var desc = "()V";
       Set<Type> annotations = emptySet();
 
-      var info = new MethodInfo(name, desc, annotations);
+      var info = new MethodInfo(ACC_STATIC, name, desc, annotations);
       methodInfos.put(info.getId(), info);
 
       var classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);

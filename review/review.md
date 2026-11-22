@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1, M2, M4, M5 and M7, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1, M2, M4, M5, M7 and M9, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -43,17 +43,6 @@ All high severity findings have been fixed.
 ---
 
 ## Correctness — Medium
-
-### M9. Method-info merge conflates non-virtual methods across the hierarchy
-
-`transformer/classcache/ClassInfo.java:136-160`
-
-`merge` copies **all** superclass methods (private, static, constructors —
-`ClassInfoVisitor.visitMethod` ignores access flags) into the subclass map keyed by
-`name + desc`, then throws on annotation mismatch. Private/static methods don't
-override, yet an unrelated same-signature pair (e.g. a private `@Interruptible step()V`
-in the superclass, an unannotated private `step()V` in the subclass) fails the whole
-transformation with a false-positive `NotTransformableException`.
 
 ### M10. Agent error handling: exceptions swallowed by the JVM
 

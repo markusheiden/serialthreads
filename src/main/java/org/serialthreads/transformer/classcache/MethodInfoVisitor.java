@@ -14,15 +14,17 @@ import static org.objectweb.asm.Opcodes.ASM9;
  * Visitor which checks all methods for the presence of the @Interruptible annotation.
  */
 public class MethodInfoVisitor extends MethodVisitor {
+  private final int methodAccess;
   private final String methodName;
   private final String methodDesc;
   private final Set<Type> methodAnnotations = new HashSet<>();
 
   private final Map<String, MethodInfo> methods;
 
-  public MethodInfoVisitor(String name, String desc, Map<String, MethodInfo> methods) {
+  public MethodInfoVisitor(int access, String name, String desc, Map<String, MethodInfo> methods) {
     super(ASM9);
 
+    methodAccess = access;
     methodName = name;
     methodDesc = desc;
     this.methods = methods;
@@ -36,7 +38,7 @@ public class MethodInfoVisitor extends MethodVisitor {
 
   @Override
   public void visitEnd() {
-    var method = new MethodInfo(methodName, methodDesc, methodAnnotations);
+    var method = new MethodInfo(methodAccess, methodName, methodDesc, methodAnnotations);
     methods.put(method.getId(), method);
   }
 }
