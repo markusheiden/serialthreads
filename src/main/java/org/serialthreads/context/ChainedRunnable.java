@@ -27,9 +27,13 @@ public final class ChainedRunnable {
    * Create linked chain array.
    *
    * @param runnables Runnables
+   * @throws IllegalArgumentException if there are no runnables
    */
   public static ChainedRunnable[] chain(Collection<? extends IRunnable> runnables) {
     int count = runnables.size();
+    if (count == 0) {
+      throw new IllegalArgumentException("At least one runnable is needed");
+    }
 
     var result = new ChainedRunnable[count];
     var iterator = runnables.iterator();

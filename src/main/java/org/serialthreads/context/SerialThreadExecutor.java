@@ -14,10 +14,9 @@ public class SerialThreadExecutor {
    * Constructor.
    *
    * @param runnables runnables
+   * @throws IllegalArgumentException if there are no runnables
    */
   public SerialThreadExecutor(IRunnable... runnables) {
-    assert runnables.length > 0 : "Precondition: runnables.length > 0";
-
     chains = ChainedRunnable.chain(runnables);
     lastExecuted = chains[chains.length - 1];
   }

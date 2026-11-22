@@ -13,10 +13,9 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
    * Constructor.
    *
    * @param runnables runnables
+   * @throws IllegalArgumentException if there are no runnables
    */
   public SimpleSerialThreadManager(IRunnable... runnables) {
-    assert runnables.length > 0 : "Precondition: runnables.length > 0";
-
     chains = ChainedRunnable.chain(runnables);
     lastExecuted = chains[chains.length - 1];
   }

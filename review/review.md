@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, M1, M2, M4, M5, M7, M9
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, L7, L8, M1, M2, M4, M5, M7, M9
 and M10, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
@@ -79,17 +79,8 @@ All medium severity findings have been fixed.
   (clearing the static ThreadLocal) on first thread finish although the manager is
   designed for repeated invocation, and clobbers a thread set by a different manager on
   the same OS thread. Inconsistent with `SerialThreadExecutor`, which never closes.
-- **L7.** `context/ChainedRunnable.java:36` — empty input throws raw
-  `NoSuchElementException` (from `iterator.next()`); the callers' guards are `assert`s
-  (inactive without `-ea`).
-- **L8.** `agent/TransformingClassLoader.java:27-33, 58, 86` — not registered as
-  parallel-capable; whole-method `synchronized loadClass` instead of
-  `getClassLoadingLock(name)`; `defineClass` without `ProtectionDomain`/package
-  definition; javadoc says "system class loader as parent" but the code uses the context
-  classloader.
-- **L9.** `compiler/InterruptibleProcessor.java:20, 67, 72` — pinned to `RELEASE_26`
-  (toolchain is Java 27) and findings emitted only as `Kind.NOTE`, so the check can
-  neither fail nor visibly warn.
+- **L9.** `compiler/InterruptibleProcessor.java:67, 72` — findings are emitted only as
+  `Kind.NOTE`, so the check can neither fail nor visibly warn.
 - **L10.** `transformer/classcache/ClassInfo.java:92-129` — `isInterruptible`/`isInterrupt`/
   `isExecutor` NPE for unknown method ids (reachable via signature-polymorphic
   `MethodHandle.invoke` call sites) instead of a diagnostic exception.
@@ -192,9 +183,7 @@ All medium severity findings have been fixed.
   `ExtendedFrame`, `ClassInfoVisitor` (both an unused plain `Opcodes` import);
   wildcard import in `frequent4/CopyMethodTransformer`; `DebugPrinter`'s
   `index.toUpperCase()` is a no-op on digits; `StackFrame.DEFAULT_FRAME_SIZE` is a
-  mutable `public static` non-final; `TransformingClassLoader.loadByteCode` hand-rolls
-  what `InputStream.readAllBytes()` + try-with-resources does in two lines (plus a
-  commented-out debug line at :76).
+  mutable `public static` non-final.
 - **C21 (low).** Analyzer/classcache micro-cleanups: `MethodInfo.copy()` is pointless
   (deeply immutable class);
   `ExtendedAnalyzer` duplicates array-copy logic in `getFrames()`/`analyze()`;
@@ -205,11 +194,9 @@ All medium severity findings have been fixed.
 
 ## Recommended priorities
 
-1. **Finish the concurrency story (L8)**: the caches are per class loader and
-   concurrent now; what remains is making the class loader parallel-capable.
-2. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
+1. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
    corrections become single-site.
-3. **Delete the remaining dead weight (C8, C9, C12).**
-4. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
+2. **Delete the remaining dead weight (C8, C9, C12).**
+3. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
    `frequent4`) strategies outright if only one is used in practice — that alone removes
    more code than every other suggestion combined.
