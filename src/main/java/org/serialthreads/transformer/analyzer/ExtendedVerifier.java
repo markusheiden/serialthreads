@@ -2,6 +2,7 @@ package org.serialthreads.transformer.analyzer;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -82,12 +83,11 @@ public class ExtendedVerifier extends SimpleVerifier {
 
     var ev = (ExtendedValue) v;
     var ew = (ExtendedValue) w;
-    if (ev != result || !ev.equalsValue(ew)) {
-      // the type has been changed -> create new value with merged constant and locals or
-      // the type has not been changed, but the constant or the locals have to be merged
+    if (!ev.equals(ew)) {
+      // the types differ -> create new value with merged constant and locals or
+      // the types are the same, but the constant or the locals have to be merged
 
-      boolean isConstant = ev.isConstant() && ew.isConstant() &&
-        (ev.getConstant() == ew.getConstant() || ev.getConstant() != null && ev.getConstant().equals(ew.getConstant()));
+      boolean isConstant = ev.isConstant() && ew.isConstant() && Objects.equals(ev.getConstant(), ew.getConstant());
 
       var mergedLocals = new HashSet<>(ev.getLocals());
       mergedLocals.retainAll(ew.getLocals());

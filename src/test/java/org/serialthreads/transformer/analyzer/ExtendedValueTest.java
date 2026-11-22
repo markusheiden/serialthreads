@@ -69,27 +69,27 @@ class ExtendedValueTest {
   }
 
   @Test
-  void testEqualsValue() {
+  void testEquals() {
     var const1Local1A = ExtendedValue.constantValue(INT_TYPE, 1).addLocal(1);
     var const1Local1B = ExtendedValue.constantValue(INT_TYPE, 1).addLocal(1);
     assertEqualsValue(const1Local1A, const1Local1B);
 
     var const1Local12 = ExtendedValue.constantValue(INT_TYPE, 1).addLocal(1).addLocal(2);
-    assertThat(const1Local1A.equalsValue(const1Local12)).isFalse();
-    assertThat(const1Local12.equalsValue(const1Local1A)).isFalse();
+    assertThat(const1Local1A).isNotEqualTo(const1Local12);
+    assertThat(const1Local12).isNotEqualTo(const1Local1A);
 
     var const2Local1 = ExtendedValue.constantValue(INT_TYPE, 2).addLocal(1);
-    assertThat(const1Local1A.equalsValue(const2Local1)).isFalse();
-    assertThat(const2Local1.equalsValue(const1Local1A)).isFalse();
+    assertThat(const1Local1A).isNotEqualTo(const2Local1);
+    assertThat(const2Local1).isNotEqualTo(const1Local1A);
 
     var local1 = ExtendedValue.value(INT_TYPE).addLocal(1);
-    assertThat(const1Local1A.equalsValue(local1)).isFalse();
-    assertThat(local1.equalsValue(const1Local1A)).isFalse();
+    assertThat(const1Local1A).isNotEqualTo(local1);
+    assertThat(local1).isNotEqualTo(const1Local1A);
   }
 
   /**
    * Assert that an extended value is not the same as the expected value,
-   * but is "equalsValue".
+   * but equals it.
    *
    * @param expected expected value
    * @param value value
@@ -105,6 +105,7 @@ class ExtendedValueTest {
       assertThat(ev.isConstant()).as("no constant value expected").isFalse();
     }
     assertThat(ev.getLocals()).as("locals").isEqualTo(expected.getLocals());
-    assertThat(expected.equalsValue(ev)).isTrue();
+    assertThat(ev).isEqualTo(expected);
+    assertThat(ev).hasSameHashCodeAs(expected);
   }
 }

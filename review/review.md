@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2 and H3, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3 and H4, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -26,14 +26,9 @@ original-method capture and copy-method dispatch, and the backward `neededLocals
 dataflow in `ExtendedAnalyzer` all check out under close tracing. The code is clean and
 well-commented where it matters.
 
-The problems cluster in two places:
-
-1. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
-   fixpoint merge silently discards the very annotations (`locals`, `constant`) the whole
-   compacting-capture optimization depends on (H4).
-2. **Dead weight.** Dead code (dead value-code methods, unused label helpers) and
-   near-total duplication between the four strategy packages (~500–700 duplicated lines),
-   which doubles or quadruples the surface on which every fix must land.
+The remaining problem is dead weight: dead code (dead value-code methods, unused label
+helpers) and near-total duplication between the four strategy packages (~500–700
+duplicated lines), which doubles or quadruples the surface on which every fix must land.
 
 Severity legend: **High** = produces wrong behavior or invalid bytecode on realistic
 input; **Medium** = wrong on plausible input, resource issue, or missing validation;
@@ -43,33 +38,7 @@ input; **Medium** = wrong on plausible input, resource issue, or missing validat
 
 ## Correctness — High
 
-### H4. `ExtendedValue` breaks ASM's `equals()` merge contract — annotations silently discarded
-
-`transformer/analyzer/ExtendedValue.java` (whole class), interacting with
-`ExtendedVerifier.java:85-98`
-
-ASM's `Frame.merge` decides whether a merged value must be stored via `equals()`:
-
-```java
-V v = interpreter.merge(values[i], frame.values[i]);
-if (!v.equals(values[i])) { values[i] = v; changed = true; }
-```
-
-`ExtendedValue` inherits type-only equality from `BasicValue`. `ExtendedVerifier.merge`
-correctly computes the intersection of `locals` and drops non-matching constants — but
-when the type is unchanged, the new value `equals()` the old one, so `Frame.merge`
-neither stores it nor iterates: the first-seen (larger) locals set / stale constant
-survives at every control-flow join. The class even contains `equalsValue()`
-("equals() replacement which additionally checks the extended attributes") — but ASM
-calls `equals()`, which nobody overrode.
-
-This is not cosmetic: `CompactingStackCode.saveStack/restoreStack` uses
-`getLowestNeededLocal` to *skip saving* a stack slot and reload it from a local instead.
-With a stale "value is also in local N" annotation that only holds on one inbound path,
-the restored frame contains a wrong value on the other path.
-
-**Fix:** override `equals`/`hashCode` to include `constant` and `locals`; delete
-`equalsValue`.
+All high severity findings have been fixed.
 
 ---
 
@@ -307,7 +276,7 @@ class javadoc TODO admits this is unresolved.
   what `InputStream.readAllBytes()` + try-with-resources does in two lines (plus a
   commented-out debug line at :76).
 - **C21 (low).** Analyzer/classcache micro-cleanups: `MethodInfo.copy()` is pointless
-  (deeply immutable class); `ExtendedVerifier.merge` hand-rolls `Objects.equals`;
+  (deeply immutable class);
   `ExtendedAnalyzer` duplicates array-copy logic in `getFrames()`/`analyze()`;
   `ExtendedFrame.removeLocalFromStack` copies the whole frame though only the stack
   needs snapshotting.
@@ -316,14 +285,12 @@ class javadoc TODO admits this is unresolved.
 
 ## Recommended priorities
 
-1. **Fix the analyzer contract (H4)** — small, mechanical, high impact, easy to
-   unit-test.
-2. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
+1. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
    concurrent now; what remains is the agent's error handling and making the class
    loader parallel-capable.
-3. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
+2. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
    corrections become single-site.
-4. **Delete the remaining dead weight (C8–C12).**
-5. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
+3. **Delete the remaining dead weight (C8–C12).**
+4. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
    `frequent4`) strategies outright if only one is used in practice — that alone removes
    more code than every other suggestion combined.

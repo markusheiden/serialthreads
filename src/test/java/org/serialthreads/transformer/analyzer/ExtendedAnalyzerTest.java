@@ -10,6 +10,7 @@ import org.objectweb.asm.tree.analysis.Frame;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
@@ -192,5 +193,52 @@ class ExtendedAnalyzerTest {
     assertThat(frames[2].neededLocals).containsOnly(1);
     // Before IRETURN.
     assertThat(frames[3].neededLocals).isEmpty();
+  }
+
+  /**
+   * Test that the locals and the constant of a value are merged at control flow joins,
+   * even if the type of the value does not change.
+   */
+  @Test
+  void testMerge_localsAndConstant() throws Exception {
+    var method = new MethodNode(ACC_STATIC, "test", "(I)I", null, new String[0]);
+    method.maxLocals = 3;
+    method.maxStack = 1;
+    var instructions = method.instructions;
+
+    var label = new LabelNode();
+
+    // 0: local1 = 1, local2 = local1 -> the value of local 2 is constant and hold in local 1 too
+    instructions.add(new InsnNode(ICONST_1));
+    instructions.add(new VarInsnNode(ISTORE, 1));
+    instructions.add(new VarInsnNode(ILOAD, 1));
+    instructions.add(new VarInsnNode(ISTORE, 2));
+
+    // 4: conditional branch
+    instructions.add(new VarInsnNode(ILOAD, 0));
+    instructions.add(new JumpInsnNode(IFEQ, label));
+
+    // 6: modify local 1 and local 2 -> local 2 is no more constant and no more hold in local 1
+    instructions.add(new VarInsnNode(ILOAD, 0));
+    instructions.add(new VarInsnNode(ISTORE, 2));
+    instructions.add(new VarInsnNode(ILOAD, 0));
+    instructions.add(new VarInsnNode(ISTORE, 1));
+
+    instructions.add(label);
+    // 11: return local2
+    instructions.add(new VarInsnNode(ILOAD, 2));
+    instructions.add(new InsnNode(IRETURN));
+
+    var frames = analyzer.analyze("Test", method);
+
+    // Before the branch the value of local 2 is the constant 1 and hold in local 1 too.
+    var before = (ExtendedValue) frames[4].getLocal(2);
+    assertThat(before.isConstant()).isTrue();
+    assertThat(before.getLocals()).containsOnly(1, 2);
+
+    // At the merge point this is just true for one of the two paths.
+    var merged = (ExtendedValue) frames[11].getLocal(2);
+    assertThat(merged.isConstant()).isFalse();
+    assertThat(merged.getLocals()).containsOnly(2);
   }
 }

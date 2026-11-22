@@ -11,6 +11,7 @@ import java.util.TreeSet;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSortedSet;
+import static java.util.Objects.hash;
 
 /**
  * Extended value.
@@ -175,35 +176,23 @@ public final class ExtendedValue extends BasicValue {
   }
 
   /**
-   * equals() replacement which additionally checks, that the extended attributes are equal too.
-   *
-   * @param value value to compare against
+   * {@inheritDoc}
+   * <p>
+   * Additionally checks, that the extended attributes are equal too.
+   * This is needed, because the analyzer detects changes of merged values via equals().
+   * So an extended value never equals a basic value, though a basic value equals an extended value of the same type.
    */
-  public boolean equalsValue(ExtendedValue value) {
-    assert value != null : "Precondition: value != null";
-
-    return equals(value) && equalsConstant(value) && equalsLocals(value);
+  @Override
+  public boolean equals(Object value) {
+    return value == this ||
+      value instanceof ExtendedValue other &&
+      super.equals(other) &&
+      Objects.equals(constant, other.constant) &&
+      locals.equals(other.locals);
   }
 
-  /**
-   * Check that the constant value is the same, if any.
-   *
-   * @param value value to compare against
-   */
-  private boolean equalsConstant(ExtendedValue value) {
-    assert value != null : "Precondition: value != null";
-
-    return Objects.equals(constant, value.constant);
-  }
-
-  /**
-   * Check that the locals are identical.
-   *
-   * @param value value to compare against
-   */
-  private boolean equalsLocals(ExtendedValue value) {
-    assert value != null : "Precondition: value != null";
-
-    return locals.equals(value.locals);
+  @Override
+  public int hashCode() {
+    return hash(getType(), constant, locals);
   }
 }
