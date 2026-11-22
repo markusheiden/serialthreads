@@ -9,7 +9,7 @@ import org.serialthreads.Executor;
 /**
  * Linked list element for runnables.
  */
-public class ChainedRunnable {
+public final class ChainedRunnable {
   public final ITransformedRunnable runnable;
   public final SerialThread thread;
   public ChainedRunnable next;
@@ -54,14 +54,6 @@ public class ChainedRunnable {
     this.thread = this.runnable.getThread();
 
     // thread.first.method == -1 -> dummy restore -> start normal execution of run()
-  }
-
-  /**
-   * Constructor.
-   */
-  protected ChainedRunnable() {
-    this.runnable = null;
-    this.thread = null;
   }
 
   /**
