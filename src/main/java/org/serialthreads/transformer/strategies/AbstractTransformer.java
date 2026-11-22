@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -164,6 +163,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
   /**
    * Checks not interruptible method to contain no calls of interruptible methods.
+   * Executors are the only exception, they may call run().
    *
    * @param clazz Clazz to check
    * @param method Method to check
@@ -218,9 +218,9 @@ public abstract class AbstractTransformer implements ITransformer {
     logger.debug("  Transforming method {}", methodName(clazz, method));
 
     if (classInfoCache.isExecutor(clazz, method)) {
-      // TODO 2009-12-11 mh: check executor
-      // bypass check()
-      return singletonList(method);
+      // Executors start interruptible code by calling run(), but are not interruptible itself.
+      logger.debug("    Executor -> abort transformation of method");
+      return null;
     }
 
     if (!classInfoCache.isInterruptible(clazz, method)) {

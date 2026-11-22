@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3 and H4, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4 and M1, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -43,19 +43,6 @@ All high severity findings have been fixed.
 ---
 
 ## Correctness — Medium
-
-### M1. Executor validation is unreachable — `@Executor` methods are never checked
-
-`strategies/AbstractTransformer.java:179-185` (with 140-144, 220-224)
-
-`check()` contains the rule "an executor may only call run", but `check()` runs only when
-`transformMethod()` returned null — and `transformMethod()` returns
-`singletonList(method)` for executors ("bypass check()"). So inside `check()`,
-`isExecutor` is always false: the executor rule is dead code (consistent with the stale
-`// TODO 2009-12-11 mh: check executor`). An executor calling an interruptible non-run
-method transforms fine and breaks at runtime. Side effect: the untransformed executor
-lands in `allTransformedMethods`, so a class whose only special method is an executor
-never gets the `LoadUntransformedException` fast path.
 
 ### M2. Constructors bypass the interruptible-call check entirely
 
@@ -266,7 +253,7 @@ class javadoc TODO admits this is unresolved.
   parameter in frequent3/4 and frequent4's javadoc still claims it inserts *thread and*
   frame; `FrequentInterruptsTransformer2` class javadoc is self-contradictory;
   `pushOwner` javadoc says "Restore owner."; "needs to transformation", "may not not
-  implement"; TODOs from 2009/2010/2013/2018 that document known bugs (M1) or
+  implement"; TODOs from 2009/2010/2013 and
   answered questions (`MethodCode.java:278`) should be resolved or deleted;
   unused imports in
   `ExtendedFrame`, `ClassInfoVisitor` (both an unused plain `Opcodes` import);
