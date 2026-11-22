@@ -123,9 +123,6 @@ public class ExtendedVerifier extends SimpleVerifier {
     if (t.equals(u)) {
       return true;
     }
-    if (t.equals(currentClass)) {
-      return getSuperClass(u) != null && isAssignableFrom(t, getSuperClass(u));
-    }
     if (u.equals(currentClass)) {
       if (isAssignableFrom(t, currentSuperClass)) {
         return true;

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.objectweb.asm.Type.INT_TYPE;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
@@ -51,5 +53,36 @@ class ExtendedVerifierTest {
     var numberClass = value(Type.getType(Number.class));
     var integerClass = value(Type.getType(Integer.class)); // Integer extends Number
     assertEqualsValue(numberClass, verifier.merge(numberClass, integerClass));
+  }
+
+  /**
+   * Test that values of classes implementing the verified interface are assignable to it.
+   */
+  @Test
+  void testIsAssignableFrom_currentInterface() {
+    var objectType = Type.getType(Object.class);
+    var interfaceType = Type.getType(TestInterface.class);
+    var implType = Type.getType(TestImpl.class);
+    var subImplType = Type.getType(TestSubImpl.class);
+    var verifier = new ExtendedVerifier(
+      new ClassInfoCacheASM(getClass().getClassLoader()), interfaceType, objectType, List.of(), true);
+
+    assertThat(verifier.isAssignableFrom(interfaceType, implType)).isTrue();
+    assertThat(verifier.isAssignableFrom(interfaceType, subImplType)).isTrue();
+    assertThat(verifier.isAssignableFrom(interfaceType, Type.getType(String.class))).isFalse();
+    assertThat(verifier.isAssignableFrom(implType, interfaceType)).isFalse();
+
+    // The merge of the interface with an implementation is the interface.
+    assertEqualsValue(value(interfaceType), verifier.merge(value(interfaceType), value(implType)));
+    assertEqualsValue(value(interfaceType), verifier.merge(value(subImplType), value(interfaceType)));
+  }
+
+  interface TestInterface {
+  }
+
+  static class TestImpl implements TestInterface {
+  }
+
+  static class TestSubImpl extends TestImpl {
   }
 }
