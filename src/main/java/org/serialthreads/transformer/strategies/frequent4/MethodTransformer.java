@@ -192,7 +192,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     var instructions = new InsnList();
 
     // Capture frame and return early.
-    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
+    instructions.add(threadCode.captureFrame(method, methodCall, metaInfo, localFrame));
     // frame.method = position;
     instructions.add(setMethod(localFrame, position));
     // We are serializing.
@@ -204,7 +204,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(restoreLabel);
 
       // Restore frame.
-      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
+      instructions.add(threadCode.restoreFrame(method, methodCall, metaInfo, localFrame));
       // Continue.
     }
 
@@ -235,7 +235,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     instructions.add(new JumpInsnNode(IFEQ, normal));
 
     // Capture frame and return early.
-    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
+    instructions.add(threadCode.captureFrame(method, methodCall, metaInfo, localFrame));
     // frame.method = position;
     instructions.add(setMethod(localFrame, position));
 
@@ -254,7 +254,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       instructions.add(new JumpInsnNode(IFNE, serializing));
 
       // Restore stack "under" the returned value, if any.
-      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
+      instructions.add(threadCode.restoreFrame(method, methodCall, metaInfo, localFrame));
       // Continue.
     }
 
@@ -359,7 +359,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     var methodCall = interruptibleMethodCalls.iterator().next();
     var metaInfo = metaInfos.get(methodCall);
     return
-      !(isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) ||
+      !(isSelfCall(method, methodCall, metaInfo) || isStatic(methodCall)) ||
       !isTailCall(metaInfo);
   }
 

@@ -69,10 +69,15 @@ public final class MethodCode {
   /**
    * Is the call a call to a method on the same object (this)?
    *
+   * @param method method containing the method call
    * @param methodCall method call
    * @param metaInfo Meta information about method call
    */
-  public static boolean isSelfCall(MethodInsnNode methodCall, MetaInfo metaInfo) {
+  public static boolean isSelfCall(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo) {
+    if (isStatic(method)) {
+      // static methods have no this, their local 0 is a normal local
+      return false;
+    }
     if (methodCall.getOpcode() == INVOKESTATIC) {
       // static methods have no owner
       return false;

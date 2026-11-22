@@ -218,6 +218,23 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Test that static interruptible methods calling interruptible instance methods keep their local 0.
+   */
+  @Test
+  void testStaticCaller() {
+    var test = new TestStaticCaller();
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
+    assertThat(test.valueLocal).isEqualTo(-1);
+    assertThat(test.valueOwner).isEqualTo(-1);
+    manager.execute(1);
+    assertThat(test.valueLocal).isEqualTo(44);
+    assertThat(test.valueOwner).isEqualTo(-1);
+    manager.execute(1);
+    assertThat(test.valueOwner).isEqualTo(15);
+  }
+
+  /**
    * Test exception handling.
    */
   @Disabled // TODO markus 2018-01-04: Implement exception handling.

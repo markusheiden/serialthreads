@@ -301,18 +301,16 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
-   * Push owner onto frame.
+   * Push owner (this) of the transformed method onto the frame of its caller.
+   * The caller needs it to call the transformed method again when restoring.
    *
-   * @param methodCall
-   *           Method call to generate capturing code for
-   * @param metaInfo
-   *           Meta information about method call
    * @param localPreviousFrame
    *           Number of local containing the previous frame.
    * @return generated capture code.
    */
-  protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame) {
-    if (suppressOwner() || isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) {
+  protected InsnList setOwner(int localPreviousFrame) {
+    if (suppressOwner() || isStatic(method)) {
+      // Static methods have no owner.
       return new InsnList();
     }
 
@@ -333,7 +331,7 @@ public abstract class AbstractMethodTransformer {
   protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
     var instructions = new InsnList();
 
-    if (isSelfCall(methodCall, metaInfo)) {
+    if (isSelfCall(method, methodCall, metaInfo)) {
       // self call: owner == this
       instructions.add(new VarInsnNode(ALOAD, 0));
     } else if (isNotStatic(methodCall)) {

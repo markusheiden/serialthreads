@@ -3,6 +3,7 @@ package org.serialthreads.transformer.code;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.transformer.strategies.MetaInfo;
@@ -137,6 +138,8 @@ public interface ThreadCode {
   /**
    * Save current frameAfter after returning from a method call.
    *
+   * @param method
+   *           method containing the method call.
    * @param methodCall
    *           method call to process.
    * @param metaInfo
@@ -145,7 +148,7 @@ public interface ThreadCode {
    *           Number of local containing the current frame.
    * @return Generated code.
    */
-  InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+  InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 
   /**
    * Set position as {@link StackFrame#method}.
@@ -230,6 +233,8 @@ public interface ThreadCode {
   /**
    * Restore current frame before resuming the method call.
    *
+   * @param method
+   *           method containing the method call.
    * @param methodCall
    *           method call to process.
    * @param metaInfo
@@ -238,5 +243,5 @@ public interface ThreadCode {
    *           number of local containing the frame.
    * @return Generated code.
    */
-  InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
+  InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);
 }

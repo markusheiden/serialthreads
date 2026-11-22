@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10 and H2, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -28,10 +28,9 @@ well-commented where it matters.
 
 The problems cluster in three places:
 
-1. **Untested edges of the bytecode model.** Locals capture keys "skip local 0" on the
-   *callee's* staticness instead of the caller's (H2); tail-call detection reasons by
-   instruction adjacency instead of control flow (H3). Both are silent on the happy path
-   the test suite covers and corrupt data or fail verification just outside it.
+1. **Untested edges of the bytecode model.** Tail-call detection reasons by
+   instruction adjacency instead of control flow (H3). This is silent on the happy path
+   the test suite covers and corrupts data just outside it.
 2. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
    fixpoint merge silently discards the very annotations (`locals`, `constant`) the whole
    compacting-capture optimization depends on (H4).
@@ -46,46 +45,6 @@ input; **Medium** = wrong on plausible input, resource issue, or missing validat
 ---
 
 ## Correctness — High
-
-### H2. Local 0 skipped based on the *callee's* staticness, not the transformed method's
-
-`transformer/code/CompactingStackCode.java:78-82` (`saveLocals`) and `:126-131`
-(`restoreLocals`); related: `transformer/code/MethodCode.java:75-89` (`isSelfCall`) and
-`strategies/AbstractMethodTransformer.java:311-343` (`setOwner`/`pushOwner`)
-
-```java
-var isMethodNotStatic = isNotStatic(methodCall);   // tests the CALLEE (INVOKESTATIC)
-// Do not store local 0 for non-static methods, because it always contains "this".
-for (int local = isMethodNotStatic ? 1 : 0, ...
-```
-
-The locals being captured belong to the **containing** (transformed) method, but the
-predicate tests the **called** method's opcode. When a *static* interruptible method
-calls an *instance* interruptible method, local 0 of the static caller holds its first
-real parameter, yet the loop starts at 1 — local 0 is never captured. On resume the
-copy/original is re-entered with dummy arguments, so local 0 comes back as 0/null:
-silent data corruption or NPE. `ExtendedFrame.getLowestNeededLocal` confirms local 0
-can be a needed local, and nothing upstream excludes static callers.
-
-The same confusion is systemic:
-
-- `MethodCode.isSelfCall` treats "owner value lives in local 0" as a self call without
-  checking whether the *transformed* method is static. In a static interruptible method
-  `m(Foo o)` calling `o.bar()`, `o` sits in local 0 → `setOwner` suppresses saving the
-  owner and `pushOwner` emits `ALOAD 0`. On restore, frequent re-invokes with null dummy
-  arguments (NPE), and in a frequent2/3/4 static copy local 0 is the `Stack`/`StackFrame`
-  parameter (`VerifyError`).
-- The inverse direction (instance caller, static callee) merely wastes a slot saving
-  `this` redundantly — harmless only because capture and restore share the same wrong
-  predicate.
-
-It works in the existing tests only because there `interrupt()` is static and all
-callers are instance methods.
-
-**Fix:** `CompactingStackCode` never receives the transformed `MethodNode`, so it
-*cannot* compute this correctly today — pass the containing method's access flags (or
-the method itself) into `captureFrame`/`restoreFrame`, and give `isSelfCall` the same
-information.
 
 ### H3. Tail-call return replacement corrupts merged returns (frequent3/frequent4)
 
@@ -308,7 +267,7 @@ class javadoc TODO admits this is unresolved.
   `afterTransformation` are duplicated verbatim (frequent2's log line 72 even lost the
   class-name argument). A shared intermediate base with one hook ("emit the resume
   invocation") would eliminate ~200 lines here and ~500 across all four packages, and
-  make fixes for H2, H3 and M5 single-site.
+  make fixes for H3 and M5 single-site.
 - **C3 (low).** `SimpleSerialThreadManager` and `SerialThreadExecutor` `execute()` bodies
   are near-verbatim duplicates (differing in the `close()` call, see L6).
 - **C4 (low).** `AbstractTransformer` and `AbstractMethodTransformer` both hardwire
@@ -387,10 +346,8 @@ class javadoc TODO admits this is unresolved.
 
 1. **Fix the analyzer contract (H4)** — small, mechanical, high impact, easy to
    unit-test.
-2. **Fix the caller-staticness confusion (H2)**, adding targeted transformation tests:
-   static interruptible callers, merged returns (ternary) for reference-returning
-   methods (H3). These are exactly the untested regions where all the high-severity
-   bugs live.
+2. **Fix the tail-call detection (H3)**, adding a targeted transformation test: merged
+   returns (ternary) for reference-returning methods.
 3. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
    concurrent now; what remains is the agent's error handling and making the class
    loader parallel-capable.

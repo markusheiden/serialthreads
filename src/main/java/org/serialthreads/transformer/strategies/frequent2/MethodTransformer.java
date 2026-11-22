@@ -129,11 +129,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     var instructions = new InsnList();
 
     // Capture frame and return early.
-    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
+    instructions.add(threadCode.captureFrame(method, methodCall, metaInfo, localFrame));
     // frame.method = position;
     instructions.add(setMethod(localFrame, position));
     // previousFrame.owner = this;
-    instructions.add(setOwner(methodCall, metaInfo, localPreviousFrame));
+    instructions.add(setOwner(localPreviousFrame));
     // thread.serializing = true;
     instructions.add(threadCode.setSerializing(localThread, true));
     // return;
@@ -147,7 +147,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
       // Stop deserializing.
       instructions.add(threadCode.setSerializing(localThread, false));
       // Restore frame.
-      instructions.add(threadCode.restoreFrame(methodCall, metaInfo, localFrame));
+      instructions.add(threadCode.restoreFrame(method, methodCall, metaInfo, localFrame));
       // Continue.
     }
 
@@ -183,11 +183,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     }
 
     // Capture frame and return early.
-    instructions.add(threadCode.captureFrame(methodCall, metaInfo, localFrame));
+    instructions.add(threadCode.captureFrame(method, methodCall, metaInfo, localFrame));
     // frame.method = position;
     instructions.add(setMethod(localFrame, position));
     // previousFrame.owner = this;
-    instructions.add(setOwner(methodCall, metaInfo, localPreviousFrame));
+    instructions.add(setOwner(localPreviousFrame));
     // return;
     instructions.add(dummyReturnStatement(method));
 
@@ -232,7 +232,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         instructions.add(code(returnType).store(localReturnValue));
         maxReturnValueSize = Math.max(maxReturnValueSize, returnType.getSize());
       }
-      instructions.add(threadCode.restoreFrame(clonedCall, metaInfo, localFrame));
+      instructions.add(threadCode.restoreFrame(method, clonedCall, metaInfo, localFrame));
       if (needToSaveReturnValue) {
         instructions.add(code(returnType).load(localReturnValue));
       }

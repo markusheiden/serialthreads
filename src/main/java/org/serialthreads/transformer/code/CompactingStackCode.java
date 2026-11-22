@@ -2,6 +2,7 @@ package org.serialthreads.transformer.code;
 
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
@@ -29,12 +30,12 @@ public class CompactingStackCode extends AbstractStackCode {
    private static final Logger logger = LoggerFactory.getLogger(CompactingStackCode.class);
 
    @Override
-   public InsnList captureFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       var instructions = new InsnList();
       if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
          var frameAfter = metaInfo.frameAfter;
          saveStack(methodCall, frameAfter, localFrame, instructions);
-         saveLocals(methodCall, frameAfter, localFrame, instructions);
+         saveLocals(method, frameAfter, localFrame, instructions);
       }
       return instructions;
    }
@@ -65,17 +66,17 @@ public class CompactingStackCode extends AbstractStackCode {
     * Save locals (by type).
     */
    private void saveLocals(
-           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame,
+           MethodNode method, ExtendedFrame frameAfter, int localFrame,
            InsnList instructions) {
       for (var code : ValueCodeFactory.CODES) {
-         saveLocals(methodCall, frameAfter, localFrame, code, instructions);
+         saveLocals(method, frameAfter, localFrame, code, instructions);
       }
    }
 
    private void saveLocals(
-           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, IValueCode code,
+           MethodNode method, ExtendedFrame frameAfter, int localFrame, IValueCode code,
            InsnList instructions) {
-      var isMethodNotStatic = isNotStatic(methodCall);
+      var isMethodNotStatic = isNotStatic(method);
 
       var pushLocals = new ArrayList<Integer>(frameAfter.getLocals());
       // Do not store local 0 for non-static methods, because it always contains "this".
@@ -99,11 +100,11 @@ public class CompactingStackCode extends AbstractStackCode {
    }
 
    @Override
-   public InsnList restoreFrame(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+   public InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
       var instructions = new InsnList();
       if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
          var frameAfter = metaInfo.frameAfter;
-         restoreLocals(methodCall, frameAfter, localFrame, instructions);
+         restoreLocals(method, frameAfter, localFrame, instructions);
          restoreStack(methodCall, frameAfter, localFrame, instructions);
       }
       return instructions;
@@ -113,17 +114,17 @@ public class CompactingStackCode extends AbstractStackCode {
     * Restore locals (by type).
     */
    private void restoreLocals(
-           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame,
+           MethodNode method, ExtendedFrame frameAfter, int localFrame,
            InsnList instructions) {
       for (var code : ValueCodeFactory.CODES) {
-         restoreLocals(methodCall, frameAfter, localFrame, code, instructions);
+         restoreLocals(method, frameAfter, localFrame, code, instructions);
       }
    }
 
    private void restoreLocals(
-           MethodInsnNode methodCall, ExtendedFrame frameAfter, int localFrame, IValueCode code,
+           MethodNode method, ExtendedFrame frameAfter, int localFrame, IValueCode code,
            InsnList instructions) {
-      var isMethodNotStatic = isNotStatic(methodCall);
+      var isMethodNotStatic = isNotStatic(method);
 
       var popLocals = new ArrayList<Integer>();
       var copyLocals = new InsnList();
