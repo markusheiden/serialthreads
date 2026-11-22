@@ -7,7 +7,6 @@ import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
 import java.io.IOException;
-import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.security.CodeSource;
@@ -112,25 +111,16 @@ public class TransformingClassLoader extends SecureClassLoader {
   }
 
   /**
-   * Code source of a class: The jar or the directory containing its class file.
+   * Code source of a class: The location of its class file without the name of the class file.
    *
    * @param resource class file
    * @param resourceName name of class file relative to its code source
-   * @return code source, its location is null, if it could not be determined
-   * @throws IOException in case of IO exception while accessing the class file
+   * @throws IOException if the location is no valid URL
    */
   private CodeSource codeSource(URL resource, String resourceName) throws IOException {
-    URL location = null;
-    if (resource.openConnection() instanceof JarURLConnection jar) {
-      location = jar.getJarFileURL();
-    } else {
-      var url = resource.toExternalForm();
-      if (url.endsWith(resourceName)) {
-        location = URI.create(url.substring(0, url.length() - resourceName.length())).toURL();
-      }
-    }
-
-    return new CodeSource(location, (Certificate[]) null);
+    var url = resource.toExternalForm();
+    var location = url.substring(0, url.length() - resourceName.length());
+    return new CodeSource(URI.create(location).toURL(), (Certificate[]) null);
   }
 
   /**
