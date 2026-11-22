@@ -393,6 +393,8 @@ public abstract class AbstractValueCode implements IValueCode {
     instructions.add(cast());
     if (clear) {
       // thread.returnXXX = null;
+      // Put thread before return value onto stack. Just references (1 word) are cleared.
+      instructions.add(new InsnNode(SWAP));
       instructions.add(pushNull());
       instructions.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "return" + methodName, type.getDescriptor()));
     }
