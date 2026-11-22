@@ -1,7 +1,6 @@
 package org.serialthreads.transformer.strategies.frequent3;
 
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -31,7 +30,6 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 import static org.serialthreads.transformer.code.MethodCode.isStatic;
 import static org.serialthreads.transformer.code.MethodCode.methodName;
-import static org.serialthreads.transformer.code.MethodCode.previousInstruction;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
@@ -148,21 +146,15 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     var returnType = Type.getReturnType(method.desc);
     for (var returnInstruction : returnInstructions(method)) {
-      var previous = previousInstruction(returnInstruction);
+      // A return after a tail call needs no special handling:
+      // The capture code of the tail call returns on its own, the return value has already been saved into the thread.
+      // So this return will only be reached by other method calls or instructions, if at all.
       var replacement = new InsnList();
-      if (isTailCall(previous)) {
-        // Tail call optimization:
-        // The return value has already been saved into the thread by the capture code of the called method.
-        replacement.add(methodReturn(false));
-        logger.debug("        Optimized tail call to {}", methodName((MethodInsnNode) previous));
-      } else {
-        if (returnType.getSort() != VOID) {
-          // Default case:
-          // Save return value into the thread.
-          replacement.add(code(returnType).pushReturnValue(localThread));
-        }
-        replacement.add(methodReturn(false));
+      if (returnType.getSort() != VOID) {
+        // Save return value into the thread.
+        replacement.add(code(returnType).pushReturnValue(localThread));
       }
+      replacement.add(methodReturn(false));
 
       replace(returnInstruction, replacement);
     }
@@ -367,16 +359,6 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     return
       !(isSelfCall(method, methodCall, metaInfo) || isStatic(methodCall)) ||
       !isTailCall(metaInfo);
-  }
-
-  /**
-   * Check if the given instruction is a tail call.
-   *
-   * @param instruction Instruction
-   */
-  protected final boolean isTailCall(AbstractInsnNode instruction) {
-    var metaInfo = metaInfos.get(instruction);
-    return metaInfo != null && isTailCall(metaInfo);
   }
 
   /**

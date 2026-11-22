@@ -218,6 +218,23 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Test that a return shared by a tail call and another interruptible method call returns the correct value.
+   */
+  @Test
+  void testMergedReturn() {
+    var test = new TestMergedReturn();
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
+    assertThat(test.valueFirst).isEmpty();
+    assertThat(test.valueSecond).isEmpty();
+    manager.execute(1);
+    assertThat(test.valueFirst).isEqualTo("first");
+    assertThat(test.valueSecond).isEmpty();
+    manager.execute(1);
+    assertThat(test.valueSecond).isEqualTo("second");
+  }
+
+  /**
    * Test that static interruptible methods calling interruptible instance methods keep their local 0.
    */
   @Test

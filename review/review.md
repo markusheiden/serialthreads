@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10 and H2, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2 and H3, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -26,15 +26,12 @@ original-method capture and copy-method dispatch, and the backward `neededLocals
 dataflow in `ExtendedAnalyzer` all check out under close tracing. The code is clean and
 well-commented where it matters.
 
-The problems cluster in three places:
+The problems cluster in two places:
 
-1. **Untested edges of the bytecode model.** Tail-call detection reasons by
-   instruction adjacency instead of control flow (H3). This is silent on the happy path
-   the test suite covers and corrupts data just outside it.
-2. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
+1. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
    fixpoint merge silently discards the very annotations (`locals`, `constant`) the whole
    compacting-capture optimization depends on (H4).
-3. **Dead weight.** Dead code (dead value-code methods, unused label helpers) and
+2. **Dead weight.** Dead code (dead value-code methods, unused label helpers) and
    near-total duplication between the four strategy packages (~500–700 duplicated lines),
    which doubles or quadruples the surface on which every fix must land.
 
@@ -45,31 +42,6 @@ input; **Medium** = wrong on plausible input, resource issue, or missing validat
 ---
 
 ## Correctness — High
-
-### H3. Tail-call return replacement corrupts merged returns (frequent3/frequent4)
-
-`strategies/frequent3/MethodTransformer.java:146-169` (`replaceReturns`), same at
-`frequent4/MethodTransformer.java:142-161`; tagging at
-`strategies/AbstractMethodTransformer.java:151-154`
-
-`TAG_TAIL_CALL` is assigned by *list adjacency* (`isReturn(nextInstruction(methodCall))`),
-and `replaceReturns` applies tail-call treatment based on the return's *list predecessor*
-(`previousInstruction(returnInstruction)`). Neither considers control flow. For
-`return c ? foo() : bar();` javac emits a single shared `IRETURN`
-(`foo(); GOTO L; ... bar(); L: IRETURN`). `bar` is tail-tagged, so the shared return is
-replaced *without* `pushReturnValue` — but the `foo` path also reaches `L`. After foo's
-capture code, the `normal:` path executes `popReturnValue(localThread)`, which for
-reference types reads **and clears** `thread.returnObject`
-(`AbstractValueCode.popReturnValue()`: `pushNull(); PUTFIELD`). foo's value is then
-discarded by the `ICONST_0; IRETURN`, and the enclosing caller pops
-`thread.returnObject == null`. Any interruptible reference-returning method whose merged
-return has one interruptible-call inflow (ternary, switch expression) silently returns
-`null`. Primitives survive only by accident (primitive `popReturnValue` doesn't clear
-the field).
-
-**Fix:** tag tail calls using the analyzer's control-flow information (successor frames),
-not list adjacency — or verify at replacement time that *all* predecessors of the return
-are tail-tagged calls.
 
 ### H4. `ExtendedValue` breaks ASM's `equals()` merge contract — annotations silently discarded
 
@@ -267,7 +239,7 @@ class javadoc TODO admits this is unresolved.
   `afterTransformation` are duplicated verbatim (frequent2's log line 72 even lost the
   class-name argument). A shared intermediate base with one hook ("emit the resume
   invocation") would eliminate ~200 lines here and ~500 across all four packages, and
-  make fixes for H3 and M5 single-site.
+  make fixes like the one for M5 single-site.
 - **C3 (low).** `SimpleSerialThreadManager` and `SerialThreadExecutor` `execute()` bodies
   are near-verbatim duplicates (differing in the `close()` call, see L6).
 - **C4 (low).** `AbstractTransformer` and `AbstractMethodTransformer` both hardwire
@@ -346,14 +318,12 @@ class javadoc TODO admits this is unresolved.
 
 1. **Fix the analyzer contract (H4)** — small, mechanical, high impact, easy to
    unit-test.
-2. **Fix the tail-call detection (H3)**, adding a targeted transformation test: merged
-   returns (ternary) for reference-returning methods.
-3. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
+2. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
    concurrent now; what remains is the agent's error handling and making the class
    loader parallel-capable.
-4. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
+3. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
    corrections become single-site.
-5. **Delete the remaining dead weight (C8–C12).**
-6. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
+4. **Delete the remaining dead weight (C8–C12).**
+5. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
    `frequent4`) strategies outright if only one is used in practice — that alone removes
    more code than every other suggestion combined.
