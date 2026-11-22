@@ -6,7 +6,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.serialthreads.transformer.NotTransformableException;
+import org.serialthreads.transformer.MissingClassException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -225,7 +225,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
       var toProcess = new LinkedList<String>();
       return process(scan(owner, toProcess), toProcess);
     } catch (IOException e) {
-      throw new NotTransformableException("Referenced class " + owner + " not found", e);
+      throw new MissingClassException("Referenced class " + owner + " not found", e);
     }
   }
 

@@ -1,7 +1,7 @@
 package org.serialthreads.transformer.classcache;
 
 import org.objectweb.asm.Type;
-import org.serialthreads.transformer.NotTransformableException;
+import org.serialthreads.transformer.MissingClassException;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -97,7 +97,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
 
       return classInfo;
     } catch (ClassNotFoundException e) {
-      throw new NotTransformableException("Class not found", e);
+      throw new MissingClassException("Class " + className + " not found", e);
     }
   }
 }

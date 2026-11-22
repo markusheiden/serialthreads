@@ -6,13 +6,11 @@ import org.serialthreads.Interrupt;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
 import org.serialthreads.context.SimpleSerialThreadManager;
-import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheReflection;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.lang.instrument.IllegalClassFormatException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -82,15 +80,16 @@ class AgentTest {
    * Test that classes loaded by the bootstrap class loader are not transformed.
    */
   @Test
-  void testBootstrapClassesAreNotTransformed() throws IllegalClassFormatException {
+  void testBootstrapClassesAreNotTransformed() {
     var agent = new Agent(DEFAULT);
 
     assertThat(agent.transform(null, "java/lang/Object", null, null, new byte[0])).isNull();
   }
 
   /**
-   * Test that transformation fails, if a referenced class can neither be scanned via its class file resource
-   * (because there is none) nor via reflection (because the class does not exist).
+   * Test that a class is loaded untransformed, if a referenced class can neither be scanned via its class file
+   * resource (because there is none) nor via reflection (because the class does not exist).
+   * The agent sees all classes, so classes referencing missing (optional) classes must not break.
    */
   @Test
   void testClassNotFound() {
@@ -102,8 +101,20 @@ class AgentTest {
     writer.visitEnd();
     var byteCode = writer.toByteArray();
 
-    assertThatThrownBy(() -> agent.transform(getClass().getClassLoader(), "org/serialthreads/agent/Broken", null, null, byteCode))
-      .isInstanceOf(NotTransformableException.class);
+    assertThat(agent.transform(getClass().getClassLoader(), "org/serialthreads/agent/Broken", null, null, byteCode))
+      .isNull();
+  }
+
+  /**
+   * Test that the load of a class violating the rules for interruptible code fails,
+   * instead of loading the class untransformed.
+   */
+  @Test
+  void testNotTransformable() {
+    var loader = new AgentSimulatingClassLoader();
+
+    assertThatThrownBy(() -> loader.loadClass(NotTransformable.class.getName()))
+      .isInstanceOf(ClassFormatError.class);
   }
 
   /**
@@ -167,15 +178,11 @@ class AgentTest {
         return null;
       }
 
-      try {
-        var transformedByteCode = agent.transform(this, internalName, null, null, byteCode);
-        transformed.put(internalName, transformedByteCode != null);
-        // The agent returns null, if the class needs no transformation -> define the original byte code.
-        var definedByteCode = transformedByteCode != null ? transformedByteCode : byteCode;
-        return defineClass(name, definedByteCode, 0, definedByteCode.length);
-      } catch (IllegalClassFormatException e) {
-        throw new IllegalStateException("Invalid class " + name, e);
-      }
+      var transformedByteCode = agent.transform(this, internalName, null, null, byteCode);
+      transformed.put(internalName, transformedByteCode != null);
+      // The agent returns null, if the class needs no transformation -> define the original byte code.
+      var definedByteCode = transformedByteCode != null ? transformedByteCode : byteCode;
+      return defineClass(name, definedByteCode, 0, definedByteCode.length);
     }
 
     /**
@@ -227,6 +234,21 @@ class AgentTest {
     @Interrupt
     void interrupt() {
       // Method call will be redirected to interrupt code.
+    }
+  }
+
+  /**
+   * Class violating the rules for interruptible code:
+   * A not interruptible method calls an interruptible method.
+   */
+  public static class NotTransformable {
+    public void notInterruptible() {
+      interruptible();
+    }
+
+    @Interruptible
+    public void interruptible() {
+      // Nothing to do.
     }
   }
 

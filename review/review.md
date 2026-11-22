@@ -8,12 +8,13 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1, M2, M4, M5, M7 and M9, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, M1, M2, M4, M5, M7, M9
+and M10, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
 **Re-verified 2026-11-22** against the current code: all remaining findings below were
-confirmed still present. M10, L4, L9, C20 and C21 were trimmed or updated where recent
+confirmed still present. L4, L9, C20 and C21 were trimmed or updated where recent
 commits addressed sub-points. A second pass the same day (after the fixes listed above)
 found no further finding fixed completely; C12 was trimmed and stale line references were
 updated (L1–L4, C9, C15, C16, C20).
@@ -46,14 +47,7 @@ All high severity findings have been fixed.
 
 ## Correctness — Medium
 
-### M10. Agent error handling: exceptions swallowed by the JVM
-
-`agent/Agent.java:73-80`
-
-Per the `ClassFileTransformer` contract, exceptions thrown from `transform` are caught
-and ignored by the JVM and the class loads *untransformed* — so `throw e` for
-`NotTransformableException` doesn't fail the load; the app fails obscurely later. The
-class javadoc TODO admits this is unresolved.
+All medium severity findings have been fixed.
 
 ---
 
@@ -155,8 +149,6 @@ class javadoc TODO admits this is unresolved.
   instructions. `AbstractTransformer.logDebug(Frame)` likewise uncalled. The blanket
   class-level `@SuppressWarnings("UnusedDeclaration")` on most transformer classes is
   what lets dead code accumulate unnoticed — consider removing the suppressions.
-- **C11 (low).** `agent/Agent.java:58, 81-85` — the `failure` flag: every path sets it
-  to `false` before exiting, so the `finally` log is unreachable.
 - **C12 (low).** `context/ChainedRunnable.java` — `run()` (executors inline
   `chain.runnable.run()`), never-read `thread` field, unused `Iterator` import.
 
@@ -213,12 +205,11 @@ class javadoc TODO admits this is unresolved.
 
 ## Recommended priorities
 
-1. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
-   concurrent now; what remains is the agent's error handling and making the class
-   loader parallel-capable.
+1. **Finish the concurrency story (L8)**: the caches are per class loader and
+   concurrent now; what remains is making the class loader parallel-capable.
 2. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
    corrections become single-site.
-3. **Delete the remaining dead weight (C8–C12).**
+3. **Delete the remaining dead weight (C8, C9, C12).**
 4. Consider deleting the `frequent`/`frequent2` (and possibly one of `frequent3`/
    `frequent4`) strategies outright if only one is used in practice — that alone removes
    more code than every other suggestion combined.
