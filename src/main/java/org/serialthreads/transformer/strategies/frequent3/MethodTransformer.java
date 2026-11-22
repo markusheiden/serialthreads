@@ -129,7 +129,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     var instructions = method.instructions;
 
     for (var methodCall : interruptibleMethodCalls) {
-      if (!isRun(methodCall, classInfoCache) && !classInfoCache.isInterrupt(methodCall)) {
+      if (!classInfoCache.isInterrupt(methodCall)) {
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localThread));
         instructions.insertBefore(methodCall, new VarInsnNode(ALOAD, localFrame));
         methodCall.desc = changeDesc(methodCall.desc);

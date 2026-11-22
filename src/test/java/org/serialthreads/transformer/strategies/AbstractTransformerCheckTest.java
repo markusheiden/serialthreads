@@ -65,6 +65,17 @@ class AbstractTransformerCheckTest {
       .hasMessageContaining("#<init>(");
   }
 
+  /**
+   * An interruptible method may not call run(), just executors may do that.
+   */
+  @Test
+  void testInterruptible_run() throws Exception {
+    var byteCode = byteCode(InterruptibleRun.class);
+    assertThatThrownBy(() -> transformer.transform(byteCode))
+      .isInstanceOf(NotTransformableException.class)
+      .hasMessageContaining("may not call run");
+  }
+
   //
   // Helper.
   //
@@ -99,6 +110,13 @@ class AbstractTransformerCheckTest {
   static class InterruptibleConstructor {
     InterruptibleConstructor(Worker worker) {
       worker.work();
+    }
+  }
+
+  static class InterruptibleRun {
+    @Interruptible
+    void test(IRunnable runnable) {
+      runnable.run();
     }
   }
 

@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1 and M2, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1, M2 and M4, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -43,20 +43,6 @@ All high severity findings have been fixed.
 ---
 
 ## Correctness — Medium
-
-### M4. Interruptible calls to `run()` generate invalid bytecode instead of a clear error (frequent3/4)
-
-`frequent3/MethodTransformer.java:133-139`, `frequent4/MethodTransformer.java:126-131`
-
-`IRunnable.run()` is `@Interruptible`, so a `run()` call inside an interruptible method
-gets standard capture code (an `IFEQ` expecting a boolean result) — but the descriptor
-exclusion (`!isRun(...)`) leaves it `()V`, so `IFEQ` operates on an empty stack; the
-restore path would additionally call `run$$__V$$(...)`, which is never generated.
-The result is an opaque verifier/frames error. frequent2 has the inverse problem: it
-renames *every* interruptible call (`copyMethodCall`,
-`frequent2/MethodTransformer.java:254-260`) with no `isRun` exclusion at all, so a nested
-`run()` call yields `NoSuchMethodError` on the first resume through that site. Either
-support the pattern or raise `NotTransformableException` during transform.
 
 ### M5. Interrupt-call replacement leaves the owner push on the stack (frequent/frequent2)
 

@@ -18,6 +18,7 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 import org.serialthreads.context.ThreadFinishedException;
+import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.analyzer.ExtendedAnalyzer;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 import org.serialthreads.transformer.code.CompactingStackCode;
@@ -46,8 +47,10 @@ import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 import static org.serialthreads.transformer.code.MethodCode.firstParam;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isReturn;
+import static org.serialthreads.transformer.code.MethodCode.isRun;
 import static org.serialthreads.transformer.code.MethodCode.isSelfCall;
 import static org.serialthreads.transformer.code.MethodCode.isStatic;
+import static org.serialthreads.transformer.code.MethodCode.methodName;
 import static org.serialthreads.transformer.code.MethodCode.nextInstruction;
 import static org.serialthreads.transformer.code.MethodCode.returnInstructions;
 import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
@@ -131,6 +134,7 @@ public abstract class AbstractMethodTransformer {
    * Extract all interruptible method calls.
    *
    * @throws AnalyzerException on invalid byte code.
+   * @throws NotTransformableException if the method calls run().
    */
   protected void analyze() throws AnalyzerException {
     // Init meta information.
@@ -144,6 +148,12 @@ public abstract class AbstractMethodTransformer {
     for (var instruction : instructions) {
       if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall &&
           classInfoCache.isInterruptible(methodCall)) {
+          if (isRun(methodCall, classInfoCache)) {
+            // run() is the entry point of a serial thread, it never returns normally.
+            throw new NotTransformableException(
+              "Interruptible method %s may not call run, just executors may do that"
+                      .formatted(methodName(clazz, method)));
+          }
           interruptibleMethodCalls.add(methodCall);
           tag(instruction, TAG_INTERRUPTIBLE);
           if (classInfoCache.isInterrupt(methodCall)) {
