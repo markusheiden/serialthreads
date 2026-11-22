@@ -7,12 +7,13 @@ Findings were verified against the actual source; the ASM-related claims were ch
 against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
-L11, fixed by "Fix concurrency") have been removed from this document; the numbering of
-the remaining findings is unchanged, so it has gaps.
+L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches)
+have been removed from this document; the numbering of the remaining findings is
+unchanged, so it has gaps.
 
-**Re-verified 2026-09-10** against the current code: all remaining findings below were
-confirmed still present. H6 was downgraded to partially fixed (the abstract cache's map
-is now concurrent), and C6/C20 were trimmed where recent commits addressed sub-points.
+**Re-verified 2026-11-22** against the current code: all remaining findings below were
+confirmed still present. M10, L4, L9, C20 and C21 were trimmed or updated where recent
+commits addressed sub-points.
 
 ---
 
@@ -24,7 +25,7 @@ original-method capture and copy-method dispatch, and the backward `neededLocals
 dataflow in `ExtendedAnalyzer` all check out under close tracing. The code is clean and
 well-commented where it matters.
 
-The problems cluster in four places:
+The problems cluster in three places:
 
 1. **Untested edges of the bytecode model.** Locals capture keys "skip local 0" on the
    *callee's* staticness instead of the caller's (H2); tail-call detection reasons by
@@ -33,9 +34,7 @@ The problems cluster in four places:
 2. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
    fixpoint merge silently discards the very annotations (`locals`, `constant`) the whole
    compacting-capture optimization depends on (H4).
-3. **Concurrency.** The class-info caches and the agent share mutable state across what
-   the JVM guarantees to be concurrent and re-entrant class loading (H6).
-4. **Dead weight.** Roughly 800+ lines of dead code (all of `Maxs`, ~230 lines of unused
+3. **Dead weight.** Roughly 800+ lines of dead code (all of `Maxs`, ~230 lines of unused
    `StackFrame` API, dead `Stack` navigation methods, dead value-code methods) and
    near-total duplication between the four strategy packages (~500–700 duplicated lines),
    which doubles or quadruples the surface on which every fix must land.
@@ -141,36 +140,13 @@ the restored frame contains a wrong value on the other path.
 **Fix:** override `equals`/`hashCode` to include `constant` and `locals`; delete
 `equalsValue`.
 
-### H6. Class-info caches and Agent are not safe for concurrent/re-entrant class loading
-
-`agent/Agent.java:47-83`, `transformer/classcache/ClassInfoCacheReflection.java:25-56`
-
-*Partially fixed:* `AbstractClassInfoCache.classes` is now a `ConcurrentHashMap` with a
-race-tolerant `putIfAbsent` in `getClassInfo` ("Fix concurrency"). The remaining
-mechanisms are untouched:
-
-- **Re-entrancy on one thread:** `ClassInfoCacheReflection` still has the single shared
-  mutable `classLoader` field (`start()` overwrites it, `stop()` nulls it). `scanReflection`
-  calls `Class.forName(..., false, classLoader)`, which loads the class and re-enters
-  `Agent.transform` → the inner `start()` overwrites `classLoader`, the inner `stop()`
-  sets it to `null` — the *outer* transform then NPEs at
-  `classLoader.getResourceAsStream(...)` on its next superclass scan.
-- **Concurrency:** `ClassInfoCacheReflection.classes` (the pending-visitor map) is still
-  a plain unsynchronized `HashMap` mutated from `start()`, `stop()` and `scan()`;
-  `classLoader` is whichever `start()` ran last. The caches are also keyed by class name
-  only, so identically-named classes from different loaders collide.
-- `Agent.transform` still brackets the work with unguarded `start(...)`/`stop(...)` with
-  no per-thread or per-loader isolation.
-
-Fails intermittently in any multithreaded application run with the agent.
-
 ---
 
 ## Correctness — Medium
 
 ### M1. Executor validation is unreachable — `@Executor` methods are never checked
 
-`strategies/AbstractTransformer.java:181-187` (with 142-145, 222-226)
+`strategies/AbstractTransformer.java:179-185` (with 140-144, 220-224)
 
 `check()` contains the rule "an executor may only call run", but `check()` runs only when
 `transformMethod()` returned null — and `transformMethod()` returns
@@ -183,7 +159,7 @@ never gets the `LoadUntransformedException` fast path.
 
 ### M2. Constructors bypass the interruptible-call check entirely
 
-`strategies/AbstractTransformer.java:129-154`
+`strategies/AbstractTransformer.java:127-152`
 
 `transform(ClassNode)` splits `<init>` methods out before the method loop; they are
 neither transformed nor passed through `check()`. A constructor calling an interruptible
@@ -232,7 +208,7 @@ where `SimpleVerifier` would succeed.
 
 ### M9. Method-info merge conflates non-virtual methods across the hierarchy
 
-`transformer/classcache/ClassInfo.java:180-196`
+`transformer/classcache/ClassInfo.java:136-160`
 
 `merge` copies **all** superclass methods (private, static, constructors —
 `ClassInfoVisitor.visitMethod` ignores access flags) into the subclass map keyed by
@@ -241,17 +217,14 @@ override, yet an unrelated same-signature pair (e.g. a private `@Interruptible s
 in the superclass, an unannotated private `step()V` in the subclass) fails the whole
 transformation with a false-positive `NotTransformableException`.
 
-### M10. Agent error handling: exceptions swallowed by the JVM, `stop()` skipped
+### M10. Agent error handling: exceptions swallowed by the JVM
 
-`agent/Agent.java:57-83`
+`agent/Agent.java:73-80`
 
-- Per the `ClassFileTransformer` contract, exceptions thrown from `transform` are caught
-  and ignored by the JVM and the class loads *untransformed* — so `throw e` for
-  `NotTransformableException` doesn't fail the load; the app fails obscurely later. The
-  class javadoc TODO admits this is unresolved.
-- `classInfoCache.stop(className)` runs only on the success path; on
-  `LoadUntransformedException` (very common) and error paths, entries and the retained
-  `classLoader` reference accumulate for the life of the agent.
+Per the `ClassFileTransformer` contract, exceptions thrown from `transform` are caught
+and ignored by the JVM and the class loads *untransformed* — so `throw e` for
+`NotTransformableException` doesn't fail the load; the app fails obscurely later. The
+class javadoc TODO admits this is unresolved.
 
 ---
 
@@ -273,9 +246,9 @@ transformation with a false-positive `NotTransformableException`.
   instance); the `ITRANSFORMED_RUNNABLE_NAME` guard checks only *direct* interfaces, so
   a transformed runnable extending a transformed runnable gets shadowing fields and a
   duplicate `getThread()` (user-declared `getThread()` → `ClassFormatError`).
-- **L4.** `strategies/AbstractTransformer.java:67, 83-86` — mutable non-volatile
-  `check` flag on a transformer shared across concurrent class loads; verification also
-  depends on the log level at construction time.
+- **L4.** `strategies/AbstractTransformer.java:65` — whether the generated byte code is
+  verified (`check`) depends on the log level at construction time; the field is never
+  written again, but not `final`.
 - **L5.** `context/SimpleSerialThreadManager.java:50,58` /
   `SerialThreadExecutor.java:55,63` — `int loops = interrupts * chains.length` can
   overflow negative; `do { } while (--loops != 0)` then runs ~2^32 iterations.
@@ -291,10 +264,10 @@ transformation with a false-positive `NotTransformableException`.
   `getClassLoadingLock(name)`; `defineClass` without `ProtectionDomain`/package
   definition; javadoc says "system class loader as parent" but the code uses the context
   classloader.
-- **L9.** `compiler/InterruptibleProcessor.java:20, 67, 72` — pinned to `RELEASE_20`
-  (toolchain is Java 26) and findings emitted only as `Kind.NOTE`, so the check can
+- **L9.** `compiler/InterruptibleProcessor.java:20, 67, 72` — pinned to `RELEASE_26`
+  (toolchain is Java 27) and findings emitted only as `Kind.NOTE`, so the check can
   neither fail nor visibly warn.
-- **L10.** `transformer/classcache/ClassInfo.java:101-130` — `isInterruptible`/`isInterrupt`/
+- **L10.** `transformer/classcache/ClassInfo.java:92-129` — `isInterruptible`/`isInterrupt`/
   `isExecutor` NPE for unknown method ids (reachable via signature-polymorphic
   `MethodHandle.invoke` call sites) instead of a diagnostic exception.
 - **L12.** `transformer/analyzer/ExtendedFrame.java:83-118` — `removeLocalFromStack`
@@ -365,7 +338,7 @@ transformation with a false-positive `NotTransformableException`.
   it; return values go to `thread.returnXXX`, so the 2018 TODO's rationale is false;
   frequent4's parallel handler omits the block). The `suppressOwner` parameter of
   `createCaptureAndRestoreCode` is likewise dead in frequent3/frequent4.
-- **C11 (low).** `agent/Agent.java:54, 78-82` — the `failure` flag: every path sets it
+- **C11 (low).** `agent/Agent.java:58, 81-85` — the `failure` flag: every path sets it
   to `false` before exiting, so the `finally` log is unreachable.
 - **C12 (low).** `context/ChainedRunnable.java` — protected no-arg constructor (no
   subclasses), `run()` (executors inline `chain.runnable.run()`), never-read `thread`
@@ -407,8 +380,7 @@ transformation with a false-positive `NotTransformableException`.
   `pushOwner` javadoc says "Restore owner."; "needs to transformation", "may not not
   implement"; TODOs from 2009/2010/2013/2018 that document known bugs (M1) or
   answered questions (`MethodCode.java:278`) should be resolved or deleted;
-  `ClassInfoCacheReflection.classes` shadows the superclass cache's name with different
-  semantics (pending visitors vs finished infos); unused imports in
+  unused imports in
   `ExtendedFrame`, `ClassInfoVisitor` (both an unused plain `Opcodes` import);
   wildcard import in `frequent4/CopyMethodTransformer`; `DebugPrinter`'s
   `index.toUpperCase()` is a no-op on digits; `StackFrame.DEFAULT_FRAME_SIZE` is a
@@ -416,8 +388,7 @@ transformation with a false-positive `NotTransformableException`.
   what `InputStream.readAllBytes()` + try-with-resources does in two lines (plus a
   commented-out debug line at :76).
 - **C21 (low).** Analyzer/classcache micro-cleanups: `MethodInfo.copy()` is pointless
-  (deeply immutable class); `ClassInfo.merge` runs `interruptible |= ...` inside the
-  per-method loop; `ExtendedVerifier.merge` hand-rolls `Objects.equals`;
+  (deeply immutable class); `ExtendedVerifier.merge` hand-rolls `Objects.equals`;
   `ExtendedAnalyzer` duplicates array-copy logic in `getFrames()`/`analyze()`;
   `ExtendedFrame.removeLocalFromStack` copies the whole frame though only the stack
   needs snapshotting.
@@ -432,9 +403,9 @@ transformation with a false-positive `NotTransformableException`.
    static interruptible callers, merged returns (ternary) for reference-returning
    methods (H3). These are exactly the untested regions where all the high-severity
    bugs live.
-3. **Decide on the concurrency story (H6, M10, L4, L8)**: either document
-   single-threaded class loading as a hard requirement or synchronize the caches and
-   make the agent/loader parallel-capable.
+3. **Finish the concurrency story (M10, L8)**: the caches are per class loader and
+   concurrent now; what remains is the agent's error handling and making the class
+   loader parallel-capable.
 4. **Collapse the strategy duplication (C1/C2)** before further fixes — most remaining
    corrections become single-site.
 5. **Delete the dead weight (C5–C12)** — roughly 800 lines; it materially clarifies the
