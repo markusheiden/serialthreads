@@ -5,26 +5,29 @@ import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.JarURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.SecureClassLoader;
+import java.security.cert.Certificate;
 
 /**
  * ClassLoader which applies a transformer to the loaded classes.
  */
-public class TransformingClassLoader extends ClassLoader {
-  /**
-   * Logger.
-   */
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+public class TransformingClassLoader extends SecureClassLoader {
+  static {
+    // Classes are loaded with a lock per class name instead of a lock for the whole class loader.
+    registerAsParallelCapable();
+  }
 
   private final String[] classPrefixes;
   private final ITransformer transformer;
 
   /**
-   * Constructor using the system class loader as parent.
+   * Constructor using the context class loader of the current thread as parent.
    *
    * @param strategy transformation strategy
    * @param classPrefixes prefixes of class to transform
@@ -55,81 +58,79 @@ public class TransformingClassLoader extends ClassLoader {
    * Tries to transform class first, if possible.
    */
   @Override
-  protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    var result = findLoadedClass(name);
-    if (result == null) {
-      byte[] byteCode = null;
+  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    if (!shouldBeTransformed(name)) {
+      // Use the default behaviour for all classes not directly marked as interruptible.
+      return super.loadClass(name, resolve);
+    }
 
-      try {
-        if (!shouldBeTransformed(name)) {
-          // Use the default behaviour for all classes not directly marked as interruptible.
-          return super.loadClass(name, resolve);
-        }
-
-        byteCode = loadByteCode(name);
-        if (byteCode == null) {
+    synchronized (getClassLoadingLock(name)) {
+      var result = findLoadedClass(name);
+      if (result == null) {
+        var resourceName = name.replace('.', '/') + ".class";
+        var resource = getResource(resourceName);
+        if (resource == null) {
           // use default behaviour for all classes that could not be loaded directly
           return super.loadClass(name, resolve);
         }
 
-        byteCode = transformer.transform(byteCode);
-//        FileCopyUtils.copy(byteCode, new File("./" + name + ".class"));
+        try {
+          var byteCode = loadByteCode(resource);
+          try {
+            byteCode = transformer.transform(byteCode);
+          } catch (LoadUntransformedException e) {
+            // load class, because class should use this classloader to load referenced classes
+          }
 
-      } catch (LoadUntransformedException e) {
-        // load class, because class should use this classloader to load referenced classes
-      } catch (NotTransformableException e) {
-        throw new ClassNotFoundException("Class " + name + " has transformation errors", e);
-      } catch (IOException e) {
-        throw new ClassNotFoundException("Class file for " + name + " could not be read", e);
+          result = defineClass(name, byteCode, 0, byteCode.length, codeSource(resource, resourceName));
+        } catch (NotTransformableException e) {
+          throw new ClassNotFoundException("Class " + name + " has transformation errors", e);
+        } catch (IOException e) {
+          throw new ClassNotFoundException("Class file for " + name + " could not be read", e);
+        }
       }
 
-      result = defineClass(name, byteCode, 0, byteCode.length);
-    }
+      if (resolve) {
+        resolveClass(result);
+      }
 
-    if (resolve) {
-      resolveClass(result);
+      return result;
     }
-
-    return result;
   }
 
   /**
    * Load byte code of the given class.
    *
-   * @param name name of class
-   * @return byte code or null, if class file does not exist
+   * @param resource class file
+   * @return byte code
    * @throws IOException in case of IO exception while reading the class file
    */
-  private byte[] loadByteCode(String name) throws IOException {
-    // class content
-    var in = getResourceAsStream(name.replace('.', '/') + ".class");
-    if (in == null) {
-      return null;
+  private byte[] loadByteCode(URL resource) throws IOException {
+    try (var in = resource.openStream()) {
+      return in.readAllBytes();
+    }
+  }
+
+  /**
+   * Code source of a class: The jar or the directory containing its class file.
+   *
+   * @param resource class file
+   * @param resourceName name of class file relative to its code source
+   * @return code source, its location is null, if it could not be determined
+   * @throws IOException in case of IO exception while accessing the class file
+   */
+  private CodeSource codeSource(URL resource, String resourceName) throws IOException {
+    URL location = null;
+    if (resource.openConnection() instanceof JarURLConnection jar) {
+      location = jar.getJarFileURL();
+    } else {
+      var url = resource.toExternalForm();
+      if (url.endsWith(resourceName)) {
+        location = URI.create(url.substring(0, url.length() - resourceName.length())).toURL();
+      }
     }
 
-    // byte buffer
-    var out = new ByteArrayOutputStream();
-
-    // try to load the byte code
-    try {
-      var buffer = new byte[16384];
-      for (int bytesRead; (bytesRead = in.read(buffer)) != -1; ) {
-        out.write(buffer, 0, bytesRead);
-      }
-      out.flush();
-      return out.toByteArray();
-    } finally {
-      try {
-        in.close();
-      } catch (IOException e) {
-        logger.warn("Unable to close InputStream", e);
-      }
-      try {
-        out.close();
-      } catch (IOException e) {
-        logger.warn("Unable to close OutputStream", e);
-      }
-    }
+    return new CodeSource(location, (Certificate[]) null);
   }
 
   /**
