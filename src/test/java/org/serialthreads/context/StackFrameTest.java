@@ -36,27 +36,21 @@ class StackFrameTest {
   }
 
   /**
-   * Test that a resize does not shrink arrays which already have grown beyond the frame size due to pushes.
+   * Test that a resize does not shrink arrays which already are bigger than the needed size.
    */
   @Test
-  void testResize_afterGrow() {
+  void testResize_noShrink() {
     var frame = new StackFrame(null, null, 8);
-    // Grow the object stack from 8 via 16 to 32 elements.
-    for (int i = 0; i < 17; i++) {
-      frame.pushStackObject("object" + i);
-    }
-    assertThat(frame.stackObjects).hasSize(32);
+    frame.resize(20);
+    frame.stackObjects[31] = "object";
 
     frame.resize(10);
 
-    // The grown array has not been shrunk.
+    // The arrays have not been shrunk.
     assertThat(frame.stackObjects).hasSize(32);
-    // The other arrays have been resized.
-    assertThat(frame.stackInts).hasSize(16);
-    // The pushed values are still there.
-    for (int i = 16; i >= 0; i--) {
-      assertThat(frame.popStackObject()).isEqualTo("object" + i);
-    }
+    assertThat(frame.stackInts).hasSize(32);
+    // The values are still there.
+    assertThat(frame.stackObjects[31]).isEqualTo("object");
   }
 
   /**

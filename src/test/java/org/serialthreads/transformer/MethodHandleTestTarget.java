@@ -5,13 +5,16 @@ import org.serialthreads.context.StackFrame;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
+
+import static java.lang.invoke.MethodType.methodType;
 
 /**
  * Test target for method handle test in {@link InvokeDynamicTest}.
  */
 class MethodHandleTestTarget {
+  static final MethodType METHOD_TYPE = methodType(void.class, Stack.class, StackFrame.class);
+
   public static MethodHandle overrideHandle;
   public static MethodHandle privateHandle;
   public static MethodHandle privateStaticHandle;
@@ -20,10 +23,10 @@ class MethodHandleTestTarget {
   static {
     try {
       var lookup = MethodHandles.lookup();
-      overrideHandle = lookup.findVirtual(MethodHandleTestTarget.class, "test", StackFrame.METHOD_TYPE);
-      privateHandle = lookup.findVirtual(MethodHandleTestTarget.class, "privateTest", StackFrame.METHOD_TYPE);
-      privateStaticHandle = lookup.findStatic(MethodHandleTestTarget.class, "privateStaticTest", StackFrame.METHOD_TYPE);
-      varargsHandle = lookup.findVirtual(MethodHandleTestTarget.class, "varargsTest", MethodType.methodType(void.class, String[].class));
+      overrideHandle = lookup.findVirtual(MethodHandleTestTarget.class, "test", METHOD_TYPE);
+      privateHandle = lookup.findVirtual(MethodHandleTestTarget.class, "privateTest", METHOD_TYPE);
+      privateStaticHandle = lookup.findStatic(MethodHandleTestTarget.class, "privateStaticTest", METHOD_TYPE);
+      varargsHandle = lookup.findVirtual(MethodHandleTestTarget.class, "varargsTest", methodType(void.class, String[].class));
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -10,11 +10,6 @@ public final class Stack implements SerialThread {
   private final String name;
 
   /**
-   * Default frame size.
-   */
-  private final int frameSize;
-
-  /**
    * The first frame.
    */
   public StackFrame first;
@@ -62,7 +57,6 @@ public final class Stack implements SerialThread {
    */
   public Stack(Object runnable, int frameSize) {
     this.name = runnable.getClass().getSimpleName();
-    this.frameSize = frameSize;
     this.first = new StackFrame(this, null, frameSize);
     this.frame = first;
 
@@ -77,64 +71,6 @@ public final class Stack implements SerialThread {
   @Override
   public String getName() {
     return name;
-  }
-
-  /**
-   * Increase the stack by one frame.
-   *
-   * @param lastFrame Last frame of the stack
-   * @return Added frame
-   */
-  public StackFrame addFrame(StackFrame lastFrame) {
-    return new StackFrame(this, lastFrame, frameSize);
-  }
-
-  /**
-   * Enter a method.
-   *
-   * @return the frame for the method
-   */
-  public StackFrame enterMethod() {
-    return frame = frame.next;
-  }
-
-  /**
-   * Enter the first method (IRunnable.run()).
-   * Resets the current frame to the first.
-   *
-   * @return the frame for the method
-   */
-  public StackFrame enterFirstMethod() {
-    return frame = first;
-  }
-
-  /**
-   * Leave non-static method, and the caller contains more than one interruptible method call.
-   *
-   * @param owner Owner of the called method == this in the called method. for the frame one level above
-   * @param method Index of method which will be left
-   */
-  public void leaveMethod(Object owner, int method) {
-    frame.method = method;
-    frame.previous.owner = owner;
-  }
-
-  /**
-   * Leave non-static method, and the caller contains exactly one interruptible method call.
-   *
-   * @param owner Owner of the called method == this in the called method. for the frame one level above
-   */
-  public void leaveMethod(Object owner) {
-    frame.previous.owner = owner;
-  }
-
-  /**
-   * Leave static method, and the caller contains more than one interruptible method call.
-   *
-   * @param method Index of method which will be left
-   */
-  public void leaveMethod(int method) {
-    frame.method = method;
   }
 
   /**
