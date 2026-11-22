@@ -25,6 +25,11 @@ class RunMethodTransformer extends MethodTransformer {
     super(clazz, method, classInfoCache);
   }
 
+  @Override
+  protected boolean suppressOwner() {
+    return true;
+  }
+
   /**
    * Transform method.
    *
@@ -36,7 +41,7 @@ class RunMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceRunReturns();
-    var restores = insertCaptureAndRestoreCode(true);
+    var restores = insertCaptureAndRestoreCode();
     createRestoreHandlerRun(restores);
     fixMaxs();
     nameLocals();

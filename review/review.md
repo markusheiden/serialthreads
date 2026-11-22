@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -35,8 +35,7 @@ The problems cluster in three places:
 2. **A broken analyzer contract.** `ExtendedValue` never overrides `equals()`, so ASM's
    fixpoint merge silently discards the very annotations (`locals`, `constant`) the whole
    compacting-capture optimization depends on (H4).
-3. **Dead weight.** Dead code (dead value-code methods, unused label helpers, a dead
-   capture block) and
+3. **Dead weight.** Dead code (dead value-code methods, unused label helpers) and
    near-total duplication between the four strategy packages (~500–700 duplicated lines),
    which doubles or quadruples the surface on which every fix must land.
 
@@ -327,11 +326,6 @@ class javadoc TODO admits this is unresolved.
   instructions. `AbstractTransformer.logDebug(Frame)` likewise uncalled. The blanket
   class-level `@SuppressWarnings("UnusedDeclaration")` on most transformer classes is
   what lets dead code accumulate unnoticed — consider removing the suppressions.
-- **C10 (low).** `frequent3/CopyMethodTransformer.java:101-106` — the
-  `localPreviousFrame` copy block is dead (nothing in frequent3 copy-method paths reads
-  it; return values go to `thread.returnXXX`, so the 2018 TODO's rationale is false;
-  frequent4's parallel handler omits the block). The `suppressOwner` parameter of
-  `createCaptureAndRestoreCode` is likewise dead in frequent3/frequent4.
 - **C11 (low).** `agent/Agent.java:58, 81-85` — the `failure` flag: every path sets it
   to `false` before exiting, so the `finally` log is unreachable.
 - **C12 (low).** `context/ChainedRunnable.java` — protected no-arg constructor (no

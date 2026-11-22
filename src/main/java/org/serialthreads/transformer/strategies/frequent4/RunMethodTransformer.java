@@ -36,7 +36,7 @@ class RunMethodTransformer extends MethodTransformer {
     analyze();
 
     replaceRunReturns();
-    var restores = insertCaptureAndRestoreCode(true);
+    var restores = insertCaptureAndRestoreCode();
     createRestoreHandlerRun(restores);
     addFrame();
     fixMaxs();

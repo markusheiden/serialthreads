@@ -37,7 +37,7 @@ class OriginalMethodTransformer extends MethodTransformer {
     shiftLocals();
     analyze();
 
-    var restores = insertCaptureAndRestoreCode(false);
+    var restores = insertCaptureAndRestoreCode();
     createRestoreHandlerMethod(restores);
     fixMaxs();
     nameLocals();

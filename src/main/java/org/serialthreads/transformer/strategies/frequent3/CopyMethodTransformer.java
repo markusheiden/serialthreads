@@ -59,7 +59,7 @@ class CopyMethodTransformer extends MethodTransformer {
       analyze();
 
       replaceReturns();
-      var restores = insertCaptureAndRestoreCode(true);
+      var restores = insertCaptureAndRestoreCode();
       createRestoreHandlerCopy(restores);
       addThreadAndFrame();
       fixMaxs();
@@ -96,13 +96,6 @@ class CopyMethodTransformer extends MethodTransformer {
       // frame = previousFrame;
       instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
       instructions.add(new VarInsnNode(ASTORE, localFrame));
-    }
-
-    // TODO 2018-02-01 markus: Just needed, because the return value will now be stored in the previous frame.
-    if (paramPreviousFrame != localPreviousFrame) {
-      // previousFrame = previousFrame;
-      instructions.add(new VarInsnNode(ALOAD, paramPreviousFrame));
-      instructions.add(new VarInsnNode(ASTORE, localPreviousFrame));
     }
 
     if (paramThread != localThread) {

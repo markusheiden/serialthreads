@@ -106,11 +106,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
-      return createCaptureAndRestoreCodeForInterrupt(methodCall, metaInfo, position, suppressOwner, restore);
+      return createCaptureAndRestoreCodeForInterrupt(methodCall, metaInfo, position, restore);
     } else {
-      return createCaptureAndRestoreCodeForMethod(methodCall, metaInfo, position, suppressOwner, restore);
+      return createCaptureAndRestoreCodeForMethod(methodCall, metaInfo, position, restore);
     }
   }
 
@@ -120,11 +120,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param methodCall method call to generate capturing code for
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected LabelNode createCaptureAndRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureAndRestoreCodeForInterrupt(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for interrupt");
 
     var instructions = new InsnList();
@@ -134,7 +133,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // frame.method = position;
     instructions.add(setMethod(localFrame, position));
     // previousFrame.owner = this;
-    instructions.add(setOwner(methodCall, metaInfo, suppressOwner, localPreviousFrame));
+    instructions.add(setOwner(methodCall, metaInfo, localPreviousFrame));
     // thread.serializing = true;
     instructions.add(threadCode.setSerializing(localThread, true));
     // return;
@@ -164,11 +163,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
    * @param methodCall method call to generate capturing code for
    * @param metaInfo Meta information about method call
    * @param position position of method call in method
-   * @param suppressOwner suppress capturing of owner?
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureAndRestoreCodeForMethod(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     logger.debug("      Creating capture code for method call to {}", methodName(methodCall));
 
     var normal = new LabelNode();
@@ -189,7 +187,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     // frame.method = position;
     instructions.add(setMethod(localFrame, position));
     // previousFrame.owner = this;
-    instructions.add(setOwner(methodCall, metaInfo, suppressOwner, localPreviousFrame));
+    instructions.add(setOwner(methodCall, metaInfo, localPreviousFrame));
     // return;
     instructions.add(dummyReturnStatement(method));
 

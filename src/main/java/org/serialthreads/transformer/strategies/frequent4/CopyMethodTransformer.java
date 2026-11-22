@@ -49,7 +49,7 @@ class CopyMethodTransformer extends MethodTransformer {
       analyze();
 
       replaceReturns();
-      var restores = insertCaptureAndRestoreCode(true);
+      var restores = insertCaptureAndRestoreCode();
       createRestoreHandlerCopy(restores);
       addFrame();
       fixMaxs();

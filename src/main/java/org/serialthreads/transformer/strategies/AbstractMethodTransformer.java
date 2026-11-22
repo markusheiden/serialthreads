@@ -215,7 +215,7 @@ public abstract class AbstractMethodTransformer {
     int methodCallIndex = 0;
     for (var methodCall : interruptibleMethodCalls) {
       var metaInfo = metaInfos.get(methodCall);
-      createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false, false);
+      createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false);
     }
   }
 
@@ -223,15 +223,14 @@ public abstract class AbstractMethodTransformer {
    * Inserts capture and restore code after method calls.
    * Mainly used for copied concrete methods.
    *
-   * @param suppressOwner suppress capturing of owner?
    * @return Labels pointing to the generated restore codes for method calls.
    */
-  protected List<LabelNode> insertCaptureAndRestoreCode(boolean suppressOwner) {
+  protected List<LabelNode> insertCaptureAndRestoreCode() {
     var restores = new ArrayList<LabelNode>(interruptibleMethodCalls.size());
     int methodCallIndex = 0;
     for (var methodCall : interruptibleMethodCalls) {
       var metaInfo = metaInfos.get(methodCall);
-      restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, suppressOwner, true));
+      restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, true));
     }
 
     return restores;
@@ -243,11 +242,10 @@ public abstract class AbstractMethodTransformer {
    * @param methodCall Method call to generate capturing code for.
    * @param metaInfo Meta information about method call.
    * @param position Position of method call in method.
-   * @param suppressOwner Suppress capturing of owner?.
    * @param restore Generate restore code too?.
    * @return Label to restore code, or null, if no restore code has been generated.
    */
-  protected abstract LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore);
+  protected abstract LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore);
 
   /**
    * Replace all return instructions by ThreadFinishedException.
@@ -296,20 +294,25 @@ public abstract class AbstractMethodTransformer {
   }
 
   /**
+   * Suppress capturing of owner?.
+   */
+  protected boolean suppressOwner() {
+    return false;
+  }
+
+  /**
    * Push owner onto frame.
    *
    * @param methodCall
    *           Method call to generate capturing code for
    * @param metaInfo
    *           Meta information about method call
-   * @param suppressOwner
-   *           Suppress saving the owner?.
    * @param localPreviousFrame
    *           Number of local containing the previous frame.
    * @return generated capture code.
    */
-  protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, boolean suppressOwner, int localPreviousFrame) {
-    if (suppressOwner || isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) {
+  protected InsnList setOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localPreviousFrame) {
+    if (suppressOwner() || isSelfCall(methodCall, metaInfo) || isStatic(methodCall)) {
       return new InsnList();
     }
 

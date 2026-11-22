@@ -167,7 +167,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
   //
 
   @Override
-  protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean suppressOwner, boolean restore) {
+  protected LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore) {
     if (metaInfo.tags.contains(TAG_INTERRUPT)) {
       return createCaptureAndRestoreCodeForInterrupt(methodCall, metaInfo, position, restore);
     } else if (isTailCall(metaInfo)) {

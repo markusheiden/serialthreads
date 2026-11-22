@@ -43,6 +43,11 @@ class CopyMethodTransformer extends MethodTransformer {
     this.paramPreviousFrame = param(1);
   }
 
+  @Override
+  protected boolean suppressOwner() {
+    return true;
+  }
+
   /**
    * Transform method.
    *
@@ -56,7 +61,7 @@ class CopyMethodTransformer extends MethodTransformer {
       analyze();
 
       // create copy of method with shortened signature
-      var restores = insertCaptureAndRestoreCode(true);
+      var restores = insertCaptureAndRestoreCode();
       createRestoreHandlerCopy(restores);
       fixMaxs();
       nameLocals();
