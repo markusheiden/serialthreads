@@ -183,6 +183,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     var instructions = new InsnList();
 
+    // Remove the owner of the replaced interrupt method call, if any.
+    instructions.add(popOwner(methodCall));
     // Capture frame and return early.
     instructions.add(threadCode.captureFrame(method, methodCall, metaInfo, localFrame));
     // frame.method = position;

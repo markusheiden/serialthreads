@@ -235,6 +235,19 @@ public abstract class TransformerIntegration_AbstractTest {
   }
 
   /**
+   * Test that the operand stack below the owner of a non-static interrupt method is captured and restored correctly.
+   */
+  @Test
+  void testInterruptStack() {
+    var test = new TestInterruptStack();
+    manager = new SimpleSerialThreadManager(test);
+    manager.execute(1);
+    assertThat(test.value).isEqualTo(-1);
+    manager.execute(1);
+    assertThat(test.value).isEqualTo(42);
+  }
+
+  /**
    * Test that static interruptible methods calling interruptible instance methods keep their local 0.
    */
   @Test

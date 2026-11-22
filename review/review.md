@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1, M2 and M4, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1, M2, M4 and M5, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -43,19 +43,6 @@ All high severity findings have been fixed.
 ---
 
 ## Correctness — Medium
-
-### M5. Interrupt-call replacement leaves the owner push on the stack (frequent/frequent2)
-
-`frequent/MethodTransformer.java:99-131`, `frequent2/MethodTransformer.java:122-154`
-
-`replace(methodCall, instructions)` removes only the `INVOKE*` node. For *instance*
-interrupt methods, the preceding `ALOAD 0` remains on the stack through the capture path.
-Worse, `captureFrame` saves the stack against `metaInfo.frameAfter`, which excludes the
-replaced call's owner/arguments — if the operand stack is ever non-empty at an interrupt
-call, `saveStack` would save the leftover owner in place of the real top-of-stack value.
-Works today only because `@Interrupt` methods are void and called as standalone
-statements. Delete the owner/argument-push instructions of the replaced call, or validate
-that interrupt methods are static and parameterless.
 
 ### M7. `ExtendedVerifier.isAssignableFrom` drops interface handling
 
@@ -171,7 +158,7 @@ class javadoc TODO admits this is unresolved.
   `afterTransformation` are duplicated verbatim (frequent2's log line 72 even lost the
   class-name argument). A shared intermediate base with one hook ("emit the resume
   invocation") would eliminate ~200 lines here and ~500 across all four packages, and
-  make fixes like the one for M5 single-site.
+  make fixes single-site.
 - **C3 (low).** `SimpleSerialThreadManager` and `SerialThreadExecutor` `execute()` bodies
   are near-verbatim duplicates (differing in the `close()` call, see L6).
 - **C4 (low).** `AbstractTransformer` and `AbstractMethodTransformer` both hardwire

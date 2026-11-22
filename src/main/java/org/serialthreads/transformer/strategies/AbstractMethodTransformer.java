@@ -42,6 +42,7 @@ import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.tree.AbstractInsnNode.METHOD_INSN;
 import static org.serialthreads.transformer.code.MethodCode.firstLocal;
 import static org.serialthreads.transformer.code.MethodCode.firstParam;
@@ -325,6 +326,22 @@ public abstract class AbstractMethodTransformer {
     }
 
     return threadCode.setOwner(localPreviousFrame);
+  }
+
+  /**
+   * Remove the owner of a replaced interrupt method call from the stack.
+   * Interrupt methods have no parameters, so the owner is the only remainder of the call.
+   *
+   * @param methodCall
+   *           interrupt method call, which will be replaced.
+   * @return generated code.
+   */
+  protected InsnList popOwner(MethodInsnNode methodCall) {
+    var instructions = new InsnList();
+    if (isNotStatic(methodCall)) {
+      instructions.add(new InsnNode(POP));
+    }
+    return instructions;
   }
 
   /**
