@@ -134,6 +134,11 @@ public abstract class AbstractTransformer implements ITransformer {
       }
     }
 
+    // constructors are never transformed -> check that they contain no calls of interruptible methods
+    for (var constructor : constructors) {
+      check(clazz, constructor);
+    }
+
     var allTransformedMethods = new ArrayList<MethodNode>(methods.size() * 2);
     for (var method : methods) {
       var transformedMethods = transformMethod(clazz, method);

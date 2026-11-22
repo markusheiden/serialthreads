@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4 and M1, fixed 2026-11-22)
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, H2, H3, H4, M1 and M2, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -43,16 +43,6 @@ All high severity findings have been fixed.
 ---
 
 ## Correctness — Medium
-
-### M2. Constructors bypass the interruptible-call check entirely
-
-`strategies/AbstractTransformer.java:127-152`
-
-`transform(ClassNode)` splits `<init>` methods out before the method loop; they are
-neither transformed nor passed through `check()`. A constructor calling an interruptible
-method — exactly what `check()` exists to reject for normal methods — passes silently at
-transform time and fails at runtime (changed callee descriptor → `NoSuchMethodError`, or
-runs without capture support and continues with dummy values).
 
 ### M4. Interruptible calls to `run()` generate invalid bytecode instead of a clear error (frequent3/4)
 

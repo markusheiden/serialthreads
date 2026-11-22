@@ -15,9 +15,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.serialthreads.transformer.Strategies.DEFAULT;
 
 /**
- * Test for the check of executors in {@link AbstractTransformer}.
+ * Test for the check of not interruptible methods in {@link AbstractTransformer}.
  */
-class ExecutorCheckTest {
+class AbstractTransformerCheckTest {
   private final ITransformer transformer = DEFAULT.getTransformer(new ClassInfoCacheASM(getClass().getClassLoader()));
 
   /**
@@ -41,6 +41,30 @@ class ExecutorCheckTest {
       .hasMessageContaining("may only call run");
   }
 
+  /**
+   * A not interruptible method may not call interruptible methods.
+   */
+  @Test
+  void testMethod_interruptible() throws Exception {
+    var byteCode = byteCode(InterruptibleMethod.class);
+    assertThatThrownBy(() -> transformer.transform(byteCode))
+      .isInstanceOf(NotTransformableException.class)
+      .hasMessageContaining("Not interruptible method")
+      .hasMessageContaining("#test(");
+  }
+
+  /**
+   * A constructor may not call interruptible methods.
+   */
+  @Test
+  void testConstructor_interruptible() throws Exception {
+    var byteCode = byteCode(InterruptibleConstructor.class);
+    assertThatThrownBy(() -> transformer.transform(byteCode))
+      .isInstanceOf(NotTransformableException.class)
+      .hasMessageContaining("Not interruptible method")
+      .hasMessageContaining("#<init>(");
+  }
+
   //
   // Helper.
   //
@@ -62,6 +86,18 @@ class ExecutorCheckTest {
   static class InterruptibleExecutor {
     @Executor
     void execute(Worker worker) {
+      worker.work();
+    }
+  }
+
+  static class InterruptibleMethod {
+    void test(Worker worker) {
+      worker.work();
+    }
+  }
+
+  static class InterruptibleConstructor {
+    InterruptibleConstructor(Worker worker) {
       worker.work();
     }
   }
