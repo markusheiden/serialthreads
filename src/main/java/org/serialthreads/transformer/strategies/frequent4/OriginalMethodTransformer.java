@@ -61,7 +61,9 @@ class OriginalMethodTransformer extends MethodTransformer {
 
     var instructions = new InsnList();
 
-    if (isNotStatic(method)) {
+    if (isNotStatic(method) && !interruptibleMethodCalls.isEmpty()) {
+      // The caller needs the owner to call this method again when restoring.
+      // Methods without interruptible method calls never capture, so they are never restored.
       // previousFrame.owner = this;
       instructions.add(threadCode.setOwner(localPreviousFrame));
     }

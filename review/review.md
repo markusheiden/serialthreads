@@ -8,7 +8,7 @@ against the ASM 9.x sources.
 
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
-C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, L7, L8, M1, M2, M4, M5, M7, M9
+C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, L7, L8, L13, M1, M2, M4, M5, M7, M9
 and M10, fixed 2026-11-22)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
@@ -95,10 +95,6 @@ All medium severity findings have been fixed.
   reading the code, not reproduced). `StackFrame.resize(int)` was kept as the hook for
   that, but still has no caller outside `StackFrameTest`; conversely every frame
   allocates all ten arrays at full size although most methods fit in the fast fields.
-- **L13.** `frequent3/OriginalMethodTransformer.java:64-67` (same in frequent4) —
-  `previousFrame.owner` is written on every invocation even for methods that can never
-  capture (`hasNoInterruptibleMethodCalls` path). Pure per-call overhead on the hot path
-  of the jem emulator.
 
 ---
 
