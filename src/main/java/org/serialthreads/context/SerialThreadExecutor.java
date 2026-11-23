@@ -51,7 +51,8 @@ public class SerialThreadExecutor {
   public void execute(int interrupts) {
     assert interrupts > 0 : "Precondition: interrupts > 0";
 
-    int loops = interrupts * chains.length;
+    // long, because the product may overflow an int.
+    long loops = (long) interrupts * chains.length;
 
     // loop until a chain finishes
     var chain = lastExecuted;
@@ -59,7 +60,7 @@ public class SerialThreadExecutor {
       do {
         chain = chain.next;
         chain.runnable.run();
-      } while (--loops != 0);
+      } while (--loops > 0);
 
       // execution finished, because the given number of interrupts have been processed
     } catch (ThreadFinishedException e) {
