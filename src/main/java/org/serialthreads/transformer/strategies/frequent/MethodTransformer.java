@@ -24,7 +24,6 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_INTERRUPT;
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer}.
  */
-@SuppressWarnings({ "UnusedAssignment", "UnusedDeclaration" })
 abstract class MethodTransformer extends AbstractMethodTransformer {
     /**
      * Local holding the thread.

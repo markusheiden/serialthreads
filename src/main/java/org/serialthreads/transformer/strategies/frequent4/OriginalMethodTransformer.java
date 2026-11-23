@@ -15,7 +15,6 @@ import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 /**
  * Method transformer for original methods.
  */
-@SuppressWarnings({ "UnusedAssignment" })
 class OriginalMethodTransformer extends MethodTransformer {
     /**
      * Constructor.

@@ -21,7 +21,6 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 /**
  * Method transformer for copied methods.
  */
-@SuppressWarnings({ "UnusedAssignment" })
 class CopyMethodTransformer extends MethodTransformer {
     /**
      * Parameter holding the previous frame in copied methods.

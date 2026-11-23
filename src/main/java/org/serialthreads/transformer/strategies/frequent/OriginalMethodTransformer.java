@@ -20,7 +20,6 @@ import static org.serialthreads.transformer.code.MethodCode.isStatic;
 /**
  * Method transformer for concrete methods.
  */
-@SuppressWarnings({ "UnusedAssignment" })
 class OriginalMethodTransformer extends MethodTransformer {
     /**
      * Constructor.

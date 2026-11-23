@@ -21,7 +21,6 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
 /**
  * Method transformer for copies of concrete methods.
  */
-@SuppressWarnings({ "UnusedAssignment" })
 class CopyMethodTransformer extends MethodTransformer {
     /**
      * Parameter holding the thread.
