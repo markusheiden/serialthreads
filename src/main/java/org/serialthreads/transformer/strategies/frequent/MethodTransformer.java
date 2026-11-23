@@ -259,7 +259,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     /**
      * Fix maxs of method.
-     * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
+     * These do not have to be exact (but may not be too small!), because it is just for debugging purposes.
      */
     protected void fixMaxs() {
         // Reserve space for the local holding the return value, if needed.

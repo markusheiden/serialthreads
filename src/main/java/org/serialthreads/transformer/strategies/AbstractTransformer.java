@@ -232,7 +232,7 @@ public abstract class AbstractTransformer implements ITransformer {
         logger.debug("  Transforming method {}", methodName(clazz, method));
 
         if (classInfoCache.isExecutor(clazz, method)) {
-            // Executors start interruptible code by calling run(), but are not interruptible itself.
+            // Executors start interruptible code by calling run(), but are not interruptible themselves.
             logger.debug("    Executor -> abort transformation of method");
             return null;
         }

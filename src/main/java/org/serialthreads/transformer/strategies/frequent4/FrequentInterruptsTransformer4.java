@@ -46,7 +46,7 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
         }
 
         if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
-            // Copied method not needed, because it will be called never.
+            // Copied method not needed, because it will never be called.
             // Original method needs to be transformed though, because callers don't know about this fact.
             return singletonList(
                     new OriginalMethodTransformer(clazz, method, classInfoCache).transform());

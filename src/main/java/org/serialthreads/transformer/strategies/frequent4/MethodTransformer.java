@@ -84,7 +84,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     /**
      * Change the name of a copied method.
-     * Computes an unique name based on the name and the descriptor.
+     * Computes a unique name based on the name and the descriptor.
      *
      * @param name
      *         Name of method.
@@ -298,7 +298,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         var instructions = new InsnList();
 
         // Early exit for tail calls.
-        // The return value needs not to be restored, because it has already been stored by the method call.
+        // The return value does not need to be restored, because it has already been stored by the method call.
 
         // frame.method = position;
         instructions.add(setMethod(localFrame, position));
@@ -314,7 +314,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
             // Call interrupted method.
             instructions.add(callCopyMethod(methodCall, metaInfo));
             // Early exit for tail calls.
-            // The return value needs not to be restored, because it has already been stored by the cloned call.
+            // The return value does not need to be restored, because it has already been stored by the cloned call.
             // The serializing flag is already on the stack from the cloned call.
             instructions.add(methodReturn(null));
         }
@@ -414,7 +414,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
 
     /**
      * Fix maxs of method.
-     * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
+     * These do not have to be exact (but may not be too small!), because it is just for debugging purposes.
      */
     protected void fixMaxs() {
         method.maxLocals += 1;

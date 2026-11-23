@@ -169,7 +169,7 @@ public interface ThreadCode {
      *         Number of local containing the thread.
      * @param serializing
      *         Start serializing at interrupt (true) or
-     *         Stop de-serializing when interrupt location has been reached (false).
+     *         stop de-serializing when interrupt location has been reached (false).
      * @return Generated code.
      */
     InsnList setSerializing(int localThread, boolean serializing);

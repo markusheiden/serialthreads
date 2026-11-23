@@ -157,9 +157,9 @@ class ExtendedFrameTest {
         var frame = new ExtendedFrame(4, 4);
         // Value which will be changed.
         frame.setLocal(0, ExtendedValue.value(type));
-        // Local which locals will be updated.
+        // Local whose locals will be updated.
         frame.setLocal(type.getSize(), ExtendedValue.value(type).addLocal(0).addLocal(type.getSize()));
-        // Stack which locals will be updated.
+        // Stack value whose locals will be updated.
         frame.push(ExtendedValue.value(type).addLocal(0).addLocal(type.getSize()));
         // Stack which may be changed.
         frame.push(ExtendedValue.value(type));

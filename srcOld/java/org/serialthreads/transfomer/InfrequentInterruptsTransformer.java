@@ -76,13 +76,13 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
   /**
    * Fix maxs of method.
-   * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
+   * These do not have to be exact (but may not be too small!), because it is just for debugging purposes.
    *
    * @param method Method to alter.
    */
   protected void fixMaxs(MethodNode method) {
     method.maxLocals++;
-    // 2 extra stack elements + 1 extra element due to possible dup2 to optimization overhead.
+    // 2 extra stack elements + 1 extra element due to possible dup2 optimization overhead.
     method.maxStack = Math.max(method.maxStack + 2 + 1, 5);
   }
 

@@ -2,7 +2,7 @@ package org.serialthreads.context;
 
 /**
  * Interface for frames.
- * Used for context which capture java stack frames.
+ * Used for contexts which capture Java stack frames.
  */
 public interface IFrame {
   /**

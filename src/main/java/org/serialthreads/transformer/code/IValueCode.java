@@ -77,7 +77,7 @@ public interface IValueCode {
      * @param index
      *         Index of local among locals of the same type.
      * @param more
-     *         Are there any more values to capture?
+     *         Are there any more values to restore?
      * @param localFrame
      *         Frame to pop from.
      */

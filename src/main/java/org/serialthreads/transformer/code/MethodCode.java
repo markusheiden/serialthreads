@@ -40,7 +40,7 @@ public final class MethodCode {
     //
 
     /**
-     * Is a static method been called?.
+     * Has a static method been called?.
      *
      * @param methodCall
      *         Method call.
@@ -50,7 +50,7 @@ public final class MethodCode {
     }
 
     /**
-     * Is a not static method been called?.
+     * Has a non-static method been called?.
      *
      * @param methodCall
      *         Method call.
@@ -60,7 +60,7 @@ public final class MethodCode {
     }
 
     /**
-     * Is a not void method been called?.
+     * Has a non-void method been called?.
      *
      * @param methodCall
      *         Method call.
@@ -262,7 +262,7 @@ public final class MethodCode {
      */
     public static boolean isCompatible(MethodNode method, Frame<?> frame) {
         var arguments = Type.getArgumentTypes(method.desc);
-        // Condition "l < frame.getLocals()" holds  always, because each argument is stored in a local.
+        // Condition "l < frame.getLocals()" always holds, because each argument is stored in a local.
         for (int l = isNotStatic(method) ? 1 : 0, a = 0; a < arguments.length; a++) {
             var local = (BasicValue) frame.getLocal(l);
             if (BasicValue.UNINITIALIZED_VALUE.equals(local)) {
