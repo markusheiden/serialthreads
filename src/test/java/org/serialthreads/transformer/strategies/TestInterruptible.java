@@ -37,7 +37,7 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
      *         Check, if byte code transformation was successful?.
      */
     public TestInterruptible(boolean checkTransformation) {
-        this.checkTransformation = checkTransformation;
+        TestInterruptible.checkTransformation = checkTransformation;
     }
 
     /**
