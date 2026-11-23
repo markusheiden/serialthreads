@@ -9,7 +9,7 @@ against the ASM 9.x sources.
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
 C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, L7, L8, L13, M1, M2, M4, M5, M7, M9
-and M10, fixed 2026-11-22; L1, L5 and L9, fixed 2026-11-23)
+and M10, fixed 2026-11-22; C12, L1, L5 and L9, fixed 2026-11-23)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -127,8 +127,6 @@ All medium severity findings have been fixed.
   instructions. `AbstractTransformer.logDebug(Frame)` likewise uncalled. The blanket
   class-level `@SuppressWarnings("UnusedDeclaration")` on most transformer classes is
   what lets dead code accumulate unnoticed — consider removing the suppressions.
-- **C12 (low).** `context/ChainedRunnable.java` — `run()` (executors inline
-  `chain.runnable.run()`), never-read `thread` field, unused `Iterator` import.
 
 ### Simplification / hygiene
 
