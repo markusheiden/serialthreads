@@ -8,27 +8,27 @@ import org.serialthreads.context.IRunnable;
  * Test object for exception handling.
  */
 public class TestException implements IRunnable {
-  public int value = -1;
+    public int value = -1;
 
-  @Interruptible
-  public void run() {
-    int v = Math.round(1.1F);
-    try {
-      throwException();
-    } catch (Exception e) {
-      // ignore
+    @Interruptible
+    public void run() {
+        int v = Math.round(1.1F);
+        try {
+            throwException();
+        } catch (Exception e) {
+            // ignore
+        }
+        value = v;
     }
-    value = v;
-  }
 
-  @Interruptible
-  private void throwException() {
-    interrupt();
-    throw new RuntimeException();
-  }
+    @Interruptible
+    private void throwException() {
+        interrupt();
+        throw new RuntimeException();
+    }
 
-  @Interrupt
-  private void interrupt() {
-    throw new UnsupportedOperationException("Method calls should be replaced by interrupt code");
-  }
+    @Interrupt
+    private void interrupt() {
+        throw new UnsupportedOperationException("Method calls should be replaced by interrupt code");
+    }
 }

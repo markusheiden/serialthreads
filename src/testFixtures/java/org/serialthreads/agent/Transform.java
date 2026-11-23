@@ -18,13 +18,13 @@ import java.lang.annotation.Target;
 @Inherited
 @ExtendWith(TransformingExtension.class)
 public @interface Transform {
-  /**
-   * Transformer class.
-   */
-  Class<? extends ITransformer> transformer() default FrequentInterruptsTransformer3.class;
+    /**
+     * Transformer class.
+     */
+    Class<? extends ITransformer> transformer() default FrequentInterruptsTransformer3.class;
 
-  /**
-   * Prefixes of classes to transform. "org.serialthreads." will always be added.
-   */
-  String[] classPrefixes() default {};
+    /**
+     * Prefixes of classes to transform. "org.serialthreads." will always be added.
+     */
+    String[] classPrefixes() default {};
 }

@@ -15,69 +15,73 @@ import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 /**
  * Method transformer for original methods.
  */
-@SuppressWarnings({"UnusedAssignment"})
+@SuppressWarnings({ "UnusedAssignment" })
 class OriginalMethodTransformer extends MethodTransformer {
-  /**
-   * Constructor.
-   *
-   * @param clazz class to transform
-   * @param method method to transform
-   * @param classInfoCache class cache to use
-   */
-  protected OriginalMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-    super(clazz, method, classInfoCache);
-  }
-
-  /**
-   * Transform method.
-   *
-   * @return Transformed method
-   * @throws AnalyzerException In case of incorrect byte code of the original method
-   */
-  public MethodNode transform() throws AnalyzerException {
-    boolean concrete = !isAbstract(method);
-    if (concrete) {
-      shiftLocals();
-      analyze();
-
-      replaceReturns();
-      insertCaptureCode();
-      createRestoreHandlerMethod();
-      addThreadAndFrame();
-      fixMaxs();
-      nameLocals();
+    /**
+     * Constructor.
+     *
+     * @param clazz
+     *         class to transform
+     * @param method
+     *         method to transform
+     * @param classInfoCache
+     *         class cache to use
+     */
+    protected OriginalMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
+        super(clazz, method, classInfoCache);
     }
 
-    method.desc = changeDesc(method.desc);
+    /**
+     * Transform method.
+     *
+     * @return Transformed method
+     * @throws AnalyzerException
+     *         In case of incorrect byte code of the original method
+     */
+    public MethodNode transform() throws AnalyzerException {
+        boolean concrete = !isAbstract(method);
+        if (concrete) {
+            shiftLocals();
+            analyze();
 
-    return method;
-  }
+            replaceReturns();
+            insertCaptureCode();
+            createRestoreHandlerMethod();
+            addThreadAndFrame();
+            fixMaxs();
+            nameLocals();
+        }
 
-  /**
-   * Insert frame restoring code at the begin of an interruptible method.
-   */
-  private void createRestoreHandlerMethod() {
-    logger.debug("    Creating restore handler for method");
+        method.desc = changeDesc(method.desc);
 
-    var instructions = new InsnList();
-
-    if (isNotStatic(method) && !interruptibleMethodCalls.isEmpty()) {
-      // The caller needs the owner to call this method again when restoring.
-      // Methods without interruptible method calls never capture, so they are never restored.
-      // previousFrame.owner = this;
-      instructions.add(threadCode.setOwner(localPreviousFrame));
+        return method;
     }
 
-    if (needsFrame()) {
-      // frame = previousFrame.next; // etc.
-      instructions.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
-    } else {
-      // Reuse previousFrame for return value.
-      // frame = previousFrame;
-      instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
-      instructions.add(new VarInsnNode(ASTORE, localFrame));
-    }
+    /**
+     * Insert frame restoring code at the begin of an interruptible method.
+     */
+    private void createRestoreHandlerMethod() {
+        logger.debug("    Creating restore handler for method");
 
-    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-  }
+        var instructions = new InsnList();
+
+        if (isNotStatic(method) && !interruptibleMethodCalls.isEmpty()) {
+            // The caller needs the owner to call this method again when restoring.
+            // Methods without interruptible method calls never capture, so they are never restored.
+            // previousFrame.owner = this;
+            instructions.add(threadCode.setOwner(localPreviousFrame));
+        }
+
+        if (needsFrame()) {
+            // frame = previousFrame.next; // etc.
+            instructions.add(threadCode.getNextFrame(localPreviousFrame, localFrame, true));
+        } else {
+            // Reuse previousFrame for return value.
+            // frame = previousFrame;
+            instructions.add(new VarInsnNode(ALOAD, localPreviousFrame));
+            instructions.add(new VarInsnNode(ASTORE, localFrame));
+        }
+
+        method.instructions.insertBefore(method.instructions.getFirst(), instructions);
+    }
 }

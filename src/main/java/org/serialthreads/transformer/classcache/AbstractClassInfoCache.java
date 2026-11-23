@@ -28,276 +28,286 @@ import static org.serialthreads.transformer.code.MethodCode.methodName;
  * Abstract implementation of a class info cache.
  */
 public abstract class AbstractClassInfoCache implements IClassInfoCache {
-  /**
-   * Logger.
-   */
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * Logger.
+     */
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-  /**
-   * Class loader to load class files.
-   */
-  protected final ClassLoader classLoader;
+    /**
+     * Class loader to load class files.
+     */
+    protected final ClassLoader classLoader;
 
-  /**
-   * Classes with their information.
-   * Concurrent, because classes may be loaded (and thus scanned) by concurrent threads.
-   */
-  private final Map<String, ClassInfo> classes = new ConcurrentHashMap<>();
+    /**
+     * Classes with their information.
+     * Concurrent, because classes may be loaded (and thus scanned) by concurrent threads.
+     */
+    private final Map<String, ClassInfo> classes = new ConcurrentHashMap<>();
 
-  /**
-   * Constructor.
-   *
-   * @param classLoader class loader for loading classes.
-   */
-  protected AbstractClassInfoCache(ClassLoader classLoader) {
-    assert classLoader != null : "Precondition: classLoader != null";
+    /**
+     * Constructor.
+     *
+     * @param classLoader
+     *         class loader for loading classes.
+     */
+    protected AbstractClassInfoCache(ClassLoader classLoader) {
+        assert classLoader != null : "Precondition: classLoader != null";
 
-    this.classLoader = classLoader;
-  }
-
-  @Override
-  public boolean isInterface(String className) {
-    assert className != null : "Precondition: className != null";
-
-    return getClassInfo(className).isInterface();
-  }
-
-  @Override
-  public Type getSuperClass(String className) {
-    assert className != null : "Precondition: className != null";
-
-    return getClassInfo(className).superType();
-  }
-
-  @Override
-  public boolean hasSuperClass(String className, String superClassName) {
-    assert className != null : "Precondition: className != null";
-    assert superClassName != null : "Precondition: superClassName != null";
-
-    var classType = Type.getObjectType(className);
-    if (classType.getSort() == ARRAY) {
-      return hasSuperClassArray(className, superClassName);
+        this.classLoader = classLoader;
     }
 
-    return getClassInfo(className).hasSuperClass(superClassName);
-  }
+    @Override
+    public boolean isInterface(String className) {
+        assert className != null : "Precondition: className != null";
 
-  private boolean hasSuperClassArray(String className, String superClassName) {
-    var classType = Type.getObjectType(className);
-    var superClassType = Type.getObjectType(superClassName);
-
-    if (superClassType.getSort() != ARRAY) {
-      // only possible non array super class is Object
-      return superClassType.equals(Type.getType(Object.class));
+        return getClassInfo(className).isInterface();
     }
 
-    if (classType.getDimensions() != superClassType.getDimensions()) {
-      // arrays dimension mismatch
-      return false;
+    @Override
+    public Type getSuperClass(String className) {
+        assert className != null : "Precondition: className != null";
+
+        return getClassInfo(className).superType();
     }
 
-    if (classType.getElementType().getSort() != OBJECT) {
-      // primitive arrays -> no inheritance
-      return classType.getElementType().equals(superClassType.getElementType());
+    @Override
+    public boolean hasSuperClass(String className, String superClassName) {
+        assert className != null : "Precondition: className != null";
+        assert superClassName != null : "Precondition: superClassName != null";
+
+        var classType = Type.getObjectType(className);
+        if (classType.getSort() == ARRAY) {
+            return hasSuperClassArray(className, superClassName);
+        }
+
+        return getClassInfo(className).hasSuperClass(superClassName);
     }
 
-    // Non-primitive arrays with same dimension -> check inheritance relationship of element types.
-    return hasSuperClass(classType.getElementType().getInternalName(), superClassType.getElementType().getInternalName());
-  }
+    private boolean hasSuperClassArray(String className, String superClassName) {
+        var classType = Type.getObjectType(className);
+        var superClassType = Type.getObjectType(superClassName);
 
-  @Override
-  public boolean isExecutor(ClassNode clazz, MethodNode method) {
-    return isExecutor(clazz.name, method.name, method.desc);
-  }
+        if (superClassType.getSort() != ARRAY) {
+            // only possible non array super class is Object
+            return superClassType.equals(Type.getType(Object.class));
+        }
 
-  protected boolean isExecutor(String owner, String name, String desc) {
-    if (owner.startsWith("[")) {
-      // Arrays are no executors
-      return false;
+        if (classType.getDimensions() != superClassType.getDimensions()) {
+            // arrays dimension mismatch
+            return false;
+        }
+
+        if (classType.getElementType().getSort() != OBJECT) {
+            // primitive arrays -> no inheritance
+            return classType.getElementType().equals(superClassType.getElementType());
+        }
+
+        // Non-primitive arrays with same dimension -> check inheritance relationship of element types.
+        return hasSuperClass(classType.getElementType().getInternalName(), superClassType.getElementType().getInternalName());
     }
 
-    var classInfo = getClassInfo(owner);
-    boolean result = classInfo.isExecutor(name + desc);
-    logger.debug("{} is {} executor", methodName(owner, name, desc), result ? "an" : "no");
-
-    return result;
-  }
-
-  @Override
-  public boolean isInterruptible(ClassNode owner, MethodNode method) {
-    return isInterruptible(owner.name, method.name, method.desc);
-  }
-
-  @Override
-  public boolean isInterruptible(MethodInsnNode method) {
-    return isInterruptible(method.owner, method.name, method.desc);
-  }
-
-  @Override
-  public boolean isInterruptible(Handle method) {
-    // TODO 2014-06-02 mh: Check tag for invoke?
-    return isInterruptible(method.getOwner(), method.getName(), method.getDesc());
-  }
-
-  @Override
-  public boolean isInterruptible(String owner, String name, String desc) {
-    if (owner.startsWith("[")) {
-      // Arrays are not interruptible
-      return false;
+    @Override
+    public boolean isExecutor(ClassNode clazz, MethodNode method) {
+        return isExecutor(clazz.name, method.name, method.desc);
     }
 
-    var classInfo = getClassInfo(owner);
-    boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
-    logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
+    protected boolean isExecutor(String owner, String name, String desc) {
+        if (owner.startsWith("[")) {
+            // Arrays are no executors
+            return false;
+        }
 
-    return result;
-  }
+        var classInfo = getClassInfo(owner);
+        boolean result = classInfo.isExecutor(name + desc);
+        logger.debug("{} is {} executor", methodName(owner, name, desc), result ? "an" : "no");
 
-  @Override
-  public boolean isInterrupt(MethodInsnNode method) {
-    return isInterrupt(method.owner, method.name, method.desc);
-  }
-
-  public boolean isInterrupt(String owner, String name, String desc) {
-    if (owner.startsWith("[")) {
-      // Arrays are not interruptible
-      return false;
+        return result;
     }
 
-    var classInfo = getClassInfo(owner);
-    boolean result = classInfo.isInterrupt(name + desc);
-    logger.debug("{} is {} interrupt", methodName(owner, name, desc), result ? "an" : "no");
-
-    return result;
-  }
-
-  @Override
-  public boolean isInterruptible(Type type) {
-    return getClassInfo(type.getInternalName()).interruptible();
-  }
-
-  @Override
-  public void addClassInfo(String className, byte[] byteCode) {
-    assert className != null : "Precondition: className != null";
-    assert byteCode != null : "Precondition: byteCode != null";
-
-    // Scan not yet loaded class with ASM to avoid circular class loading.
-    logger.debug("  Direct ASM scan of {}", className);
-    var toProcess = new LinkedList<String>();
-    var classInfo = process(scanClass(read(new ClassReader(byteCode)), toProcess), toProcess);
-    classes.putIfAbsent(className, classInfo);
-  }
-
-  /**
-   * Get class info for a class
-   *
-   * @param className internal name of class
-   * @return class info
-   */
-  protected ClassInfo getClassInfo(String className) {
-    var classInfo = classes.get(className);
-    if (classInfo == null) {
-      // Concurrent threads may process the same class at once.
-      // That just wastes some cycles, but is safe, because the resulting class infos are equivalent.
-      // The first one wins.
-      classInfo = process(className);
-      var existing = classes.putIfAbsent(className, classInfo);
-      if (existing != null) {
-        classInfo = existing;
-      }
+    @Override
+    public boolean isInterruptible(ClassNode owner, MethodNode method) {
+        return isInterruptible(owner.name, method.name, method.desc);
     }
 
-    assert classInfo != null : "Postcondition: classInfo != null";
-    return classInfo;
-  }
-
-  /**
-   * Parse class and extract methods which are interruptible.
-   *
-   * @param owner class to parse
-   */
-  protected ClassInfo process(String owner) {
-    assert owner != null : "Precondition: owner != null";
-
-    logger.debug("Computing interruptible status for class {}", owner);
-
-    try {
-      var toProcess = new LinkedList<String>();
-      return process(scan(owner, toProcess), toProcess);
-    } catch (IOException e) {
-      throw new MissingClassException("Referenced class " + owner + " not found", e);
-    }
-  }
-
-  private ClassInfo process(ClassInfo result, LinkedList<String> toProcess) {
-    while (!toProcess.isEmpty()) {
-      var className = toProcess.pollFirst();
-      if (!result.hasSuperClass(className)) {
-        result = result.merge(getClassInfo(className));
-      }
+    @Override
+    public boolean isInterruptible(MethodInsnNode method) {
+        return isInterruptible(method.owner, method.name, method.desc);
     }
 
-    return result;
-  }
-
-  /**
-   * Scan a given class for interruptible methods.
-   * Does NOT do a deep scan!
-   *
-   * @param className name of class to scan
-   * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
-   */
-  protected abstract ClassInfo scan(String className, Deque<String> toProcess) throws IOException;
-
-  /**
-   * Read class info.
-   *
-   * @param reader class reader with byte code
-   * @return class info visitor
-   */
-  protected ClassInfoVisitor read(ClassReader reader) {
-    var classInfoVisitor = new ClassInfoVisitor();
-    reader.accept(classInfoVisitor, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
-    return classInfoVisitor;
-  }
-
-  /**
-   * Scan class file.
-   * Does NOT do a deep scan!
-   * Uses ASM.
-   *
-   * @param className name of class to scan
-   * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
-   * @return ClassInfo or {@code null}, if no class file could be found.
-   */
-  protected ClassInfo scanClassFile(String className, Deque<String> toProcess) throws IOException {
-    try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
-      if (classFile == null) {
-        return null;
-      }
-
-      logger.debug("  Class file based ASM scan of {}", className);
-      return scanClass(read(new ClassReader(classFile)), toProcess);
+    @Override
+    public boolean isInterruptible(Handle method) {
+        // TODO 2014-06-02 mh: Check tag for invoke?
+        return isInterruptible(method.getOwner(), method.getName(), method.getDesc());
     }
-  }
 
-  /**
-   * Scan class byte code.
-   * Does NOT do a deep scan!
-   * Uses ASM.
-   *
-   * @param classInfoVisitor class info visitor with information about the class
-   * @param toProcess classes to process
-   * @return ClassInfo
-   */
-  protected ClassInfo scanClass(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
-    var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
-    if (classInfoVisitor.getSuperClassName() != null) {
-      // check super classes always first
-      toProcess.addFirst(classInfoVisitor.getSuperClassName());
+    @Override
+    public boolean isInterruptible(String owner, String name, String desc) {
+        if (owner.startsWith("[")) {
+            // Arrays are not interruptible
+            return false;
+        }
+
+        var classInfo = getClassInfo(owner);
+        boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
+        logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
+
+        return result;
     }
-    toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));
 
-    return result;
-  }
+    @Override
+    public boolean isInterrupt(MethodInsnNode method) {
+        return isInterrupt(method.owner, method.name, method.desc);
+    }
+
+    public boolean isInterrupt(String owner, String name, String desc) {
+        if (owner.startsWith("[")) {
+            // Arrays are not interruptible
+            return false;
+        }
+
+        var classInfo = getClassInfo(owner);
+        boolean result = classInfo.isInterrupt(name + desc);
+        logger.debug("{} is {} interrupt", methodName(owner, name, desc), result ? "an" : "no");
+
+        return result;
+    }
+
+    @Override
+    public boolean isInterruptible(Type type) {
+        return getClassInfo(type.getInternalName()).interruptible();
+    }
+
+    @Override
+    public void addClassInfo(String className, byte[] byteCode) {
+        assert className != null : "Precondition: className != null";
+        assert byteCode != null : "Precondition: byteCode != null";
+
+        // Scan not yet loaded class with ASM to avoid circular class loading.
+        logger.debug("  Direct ASM scan of {}", className);
+        var toProcess = new LinkedList<String>();
+        var classInfo = process(scanClass(read(new ClassReader(byteCode)), toProcess), toProcess);
+        classes.putIfAbsent(className, classInfo);
+    }
+
+    /**
+     * Get class info for a class
+     *
+     * @param className
+     *         internal name of class
+     * @return class info
+     */
+    protected ClassInfo getClassInfo(String className) {
+        var classInfo = classes.get(className);
+        if (classInfo == null) {
+            // Concurrent threads may process the same class at once.
+            // That just wastes some cycles, but is safe, because the resulting class infos are equivalent.
+            // The first one wins.
+            classInfo = process(className);
+            var existing = classes.putIfAbsent(className, classInfo);
+            if (existing != null) {
+                classInfo = existing;
+            }
+        }
+
+        assert classInfo != null : "Postcondition: classInfo != null";
+        return classInfo;
+    }
+
+    /**
+     * Parse class and extract methods which are interruptible.
+     *
+     * @param owner
+     *         class to parse
+     */
+    protected ClassInfo process(String owner) {
+        assert owner != null : "Precondition: owner != null";
+
+        logger.debug("Computing interruptible status for class {}", owner);
+
+        try {
+            var toProcess = new LinkedList<String>();
+            return process(scan(owner, toProcess), toProcess);
+        } catch (IOException e) {
+            throw new MissingClassException("Referenced class " + owner + " not found", e);
+        }
+    }
+
+    private ClassInfo process(ClassInfo result, LinkedList<String> toProcess) {
+        while (!toProcess.isEmpty()) {
+            var className = toProcess.pollFirst();
+            if (!result.hasSuperClass(className)) {
+                result = result.merge(getClassInfo(className));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Scan a given class for interruptible methods.
+     * Does NOT do a deep scan!
+     *
+     * @param className
+     *         name of class to scan
+     * @param toProcess
+     *         further classes to scan, will be filled with super class and interfaces of scanned class
+     */
+    protected abstract ClassInfo scan(String className, Deque<String> toProcess) throws IOException;
+
+    /**
+     * Read class info.
+     *
+     * @param reader
+     *         class reader with byte code
+     * @return class info visitor
+     */
+    protected ClassInfoVisitor read(ClassReader reader) {
+        var classInfoVisitor = new ClassInfoVisitor();
+        reader.accept(classInfoVisitor, SKIP_CODE | SKIP_DEBUG | SKIP_FRAMES);
+        return classInfoVisitor;
+    }
+
+    /**
+     * Scan class file.
+     * Does NOT do a deep scan!
+     * Uses ASM.
+     *
+     * @param className
+     *         name of class to scan
+     * @param toProcess
+     *         further classes to scan, will be filled with super class and interfaces of scanned class
+     * @return ClassInfo or {@code null}, if no class file could be found.
+     */
+    protected ClassInfo scanClassFile(String className, Deque<String> toProcess) throws IOException {
+        try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
+            if (classFile == null) {
+                return null;
+            }
+
+            logger.debug("  Class file based ASM scan of {}", className);
+            return scanClass(read(new ClassReader(classFile)), toProcess);
+        }
+    }
+
+    /**
+     * Scan class byte code.
+     * Does NOT do a deep scan!
+     * Uses ASM.
+     *
+     * @param classInfoVisitor
+     *         class info visitor with information about the class
+     * @param toProcess
+     *         classes to process
+     * @return ClassInfo
+     */
+    protected ClassInfo scanClass(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
+        var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
+        if (classInfoVisitor.getSuperClassName() != null) {
+            // check super classes always first
+            toProcess.addFirst(classInfoVisitor.getSuperClassName());
+        }
+        toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));
+
+        return result;
+    }
 }

@@ -24,59 +24,62 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
  * This transformation needs no static thread holder, {@link SerialThreadExecutor} can be used.
  */
 public class FrequentInterruptsTransformer4 extends AbstractTransformer {
-  /**
-   * Strategy name.
-   */
-  public static final String STRATEGY = "FREQUENT4";
+    /**
+     * Strategy name.
+     */
+    public static final String STRATEGY = "FREQUENT4";
 
-  /**
-   * Constructor.
-   *
-   * @param classInfoCache class cache to use
-   */
-  public FrequentInterruptsTransformer4(IClassInfoCache classInfoCache) {
-    super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
-  }
-
-  @Override
-  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
-    if (isRun(clazz, method, classInfoCache)) {
-      return doTransformRun(clazz, method);
+    /**
+     * Constructor.
+     *
+     * @param classInfoCache
+     *         class cache to use
+     */
+    public FrequentInterruptsTransformer4(IClassInfoCache classInfoCache) {
+        super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
     }
 
-    if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
-      // Copied method not needed, because it will be called never.
-      // Original method needs to be transformed though, because callers don't known about this fact.
-      return singletonList(
-        new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
+    @Override
+    protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
+        if (isRun(clazz, method, classInfoCache)) {
+            return doTransformRun(clazz, method);
+        }
+
+        if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
+            // Copied method not needed, because it will be called never.
+            // Original method needs to be transformed though, because callers don't known about this fact.
+            return singletonList(
+                    new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
+        }
+
+        // "Standard" transformation of interruptible methods.
+        return asList(
+                new CopyMethodTransformer(clazz, method, classInfoCache).transform(),
+                new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
-    // "Standard" transformation of interruptible methods.
-    return asList(
-      new CopyMethodTransformer(clazz, method, classInfoCache).transform(),
-      new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
-  }
+    /**
+     * Execute byte code transformation on run method.
+     *
+     * @param clazz
+     *         class to transform
+     * @param method
+     *         method node to transform
+     * @return transformed methods
+     */
+    private List<MethodNode> doTransformRun(ClassNode clazz, MethodNode method) throws AnalyzerException {
+        if (isInterface(clazz) || isAbstract(method)) {
+            // Do not transform IRunnable.run() itself.
+            return null;
+        }
 
-  /**
-   * Execute byte code transformation on run method.
-   *
-   * @param clazz class to transform
-   * @param method method node to transform
-   * @return transformed methods
-   */
-  private List<MethodNode> doTransformRun(ClassNode clazz, MethodNode method) throws AnalyzerException {
-    if (isInterface(clazz) || isAbstract(method)) {
-      // Do not transform IRunnable.run() itself.
-      return null;
+        // Take special care of run method.
+        return singletonList(
+                new RunMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
-    // Take special care of run method.
-    return singletonList(
-      new RunMethodTransformer(clazz, method, classInfoCache).transform());
-  }
-
-  @Override
-  public String toString() {
-    return "Transformer " + STRATEGY;
-  }
+    @Override
+    public String toString() {
+        return "Transformer " + STRATEGY;
+    }
 }

@@ -15,281 +15,285 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration test for transformer.
  */
 public abstract class TransformerIntegration_AbstractTest {
-  private SerialThreadManager manager;
+    private SerialThreadManager manager;
 
-  @AfterEach
-  void tearDown() {
-    if (manager != null) {
-      manager.close();
+    @AfterEach
+    void tearDown() {
+        if (manager != null) {
+            manager.close();
+        }
     }
-  }
 
-  /**
-   * Check that transformation does not alter behaviour.
-   */
-  @Test
-  void testTransform() {
-    var test = new TestInterruptible(true);
+    /**
+     * Check that transformation does not alter behaviour.
+     */
+    @Test
+    void testTransform() {
+        var test = new TestInterruptible(true);
 
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute();
 
-    test.assertExpectedResult();
-  }
-
-  /**
-   * Check that transformation does not alter behaviour.
-   * Tests, that {@link IRunnable#run()} is transformed correctly,
-   * if not containing any interruptible method call.
-   */
-  @Test
-  void testRunNo() {
-    var test = new TestRunNoInterruptible();
-
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute();
-
-    test.assertExpectedResult();
-  }
-
-  /**
-   * Check that transformation does not alter behaviour.
-   * Tests, that {@link IRunnable#run()} is transformed correctly,
-   * if just containing one interruptible method call.
-   */
-  @Test
-  void testRunSingle() {
-    var test = new TestRunSingleInterruptible();
-
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute();
-
-    test.assertExpectedResult();
-  }
-
-  /**
-   * Check that transformation does not alter behaviour.
-   * Tests, that {@link IRunnable#run()} is transformed correctly,
-   * if just containing multiple interruptible method calls.
-   */
-  @Test
-  void testRunMulti() {
-    var test = new TestRunMultiInterruptible();
-
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute();
-
-    test.assertExpectedResult();
-  }
-
-  /**
-   * Test capture and restore of locals of type {@link int}.
-   */
-  @Test
-  void testLocalStorage_int() throws Exception {
-    testLocalStorage(new TestInt(0), Integer::parseInt);
-  }
-
-  /**
-   * Test capture and restore of locals of type {@link long}.
-   */
-  @Test
-  void testLocalStorage_long() throws Exception {
-    testLocalStorage(new TestLong(0), Long::parseLong);
-  }
-
-  /**
-   * Test capture and restore of locals of type {@link float}.
-   */
-  @Test
-  void testLocalStorage_float() throws Exception {
-    testLocalStorage(new TestFloat(0), Float::parseFloat);
-  }
-
-  /**
-   * Test capture and restore of locals of type {@link double}.
-   */
-  @Test
-  void testLocalStorage_double() throws Exception {
-    testLocalStorage(new TestDouble(0), Double::parseDouble);
-  }
-
-  /**
-   * Test that locals are stored and restored correctly.
-   *
-   * @param test Test object.
-   * @param parser Parser for the primitive type which is tested.
-   */
-  private void testLocalStorage(IRunnable test, Function<String, Number> parser) throws Exception {
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    for (int i = 0; i < 9; i++) {
-      assertThat(field(test, "value" + i)).isEqualTo(parser.apply("-1"));
+        test.assertExpectedResult();
     }
-    manager.execute(1);
-    for (int i = 0; i < 9; i++) {
-      assertThat(field(test, "value" + i)).isEqualTo(parser.apply("" + i));
+
+    /**
+     * Check that transformation does not alter behaviour.
+     * Tests, that {@link IRunnable#run()} is transformed correctly,
+     * if not containing any interruptible method call.
+     */
+    @Test
+    void testRunNo() {
+        var test = new TestRunNoInterruptible();
+
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute();
+
+        test.assertExpectedResult();
     }
-  }
 
-  /**
-   * Test that a finished serial thread is reset, so that it can be restarted.
-   */
-  @Test
-  void testRestart() {
-    var test = new TestRestart();
+    /**
+     * Check that transformation does not alter behaviour.
+     * Tests, that {@link IRunnable#run()} is transformed correctly,
+     * if just containing one interruptible method call.
+     */
+    @Test
+    void testRunSingle() {
+        var test = new TestRunSingleInterruptible();
 
-    manager = new SimpleSerialThreadManager(test);
-    // Run until the interrupt.
-    manager.execute(1);
-    assertThat(test.runs).isEqualTo(1);
-    assertThat(test.value).isEqualTo(1);
-    // Finish the thread: it gets reset to be able to run again.
-    manager.execute(1);
-    assertThat(test.runs).isEqualTo(1);
-    assertThat(test.value).isEqualTo(2);
-    // Restart the thread: it runs from the beginning until the interrupt again.
-    manager.execute(1);
-    assertThat(test.runs).isEqualTo(2);
-    assertThat(test.value).isEqualTo(1);
-  }
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute();
 
-  /**
-   * Test that classes whose frames need the computation of a common super class transform correctly.
-   */
-  @Test
-  void testTypeMerge() {
-    var test = new TestTypeMerge();
+        test.assertExpectedResult();
+    }
 
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.value).isEmpty();
-    manager.execute(1);
-    assertThat(test.value).isEqualTo("a");
-  }
+    /**
+     * Check that transformation does not alter behaviour.
+     * Tests, that {@link IRunnable#run()} is transformed correctly,
+     * if just containing multiple interruptible method calls.
+     */
+    @Test
+    void testRunMulti() {
+        var test = new TestRunMultiInterruptible();
 
-  /**
-   * Test capture and restore of operand stack values of type {@link long}.
-   */
-  @Test
-  void testStackStorage_long() {
-    var test = new TestStackLong();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute();
 
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(-1);
-    assertThat(test.valueDeep).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(42);
-    assertThat(test.valueDeep).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.valueDeep).isEqualTo(122);
-  }
+        test.assertExpectedResult();
+    }
 
-  /**
-   * Test capture and restore of operand stack values of type {@link double}.
-   */
-  @Test
-  void testStackStorage_double() {
-    var test = new TestStackDouble();
+    /**
+     * Test capture and restore of locals of type {@link int}.
+     */
+    @Test
+    void testLocalStorage_int() throws Exception {
+        testLocalStorage(new TestInt(0), Integer::parseInt);
+    }
 
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(-1);
-    assertThat(test.valueDeep).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(42.25);
-    assertThat(test.valueDeep).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.valueDeep).isEqualTo(126.25);
-  }
+    /**
+     * Test capture and restore of locals of type {@link long}.
+     */
+    @Test
+    void testLocalStorage_long() throws Exception {
+        testLocalStorage(new TestLong(0), Long::parseLong);
+    }
 
-  /**
-   * Test that tail calls return the correct value.
-   */
-  @Test
-  void testTailCall() {
-    var test = new TestTailCall();
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(1);
-  }
+    /**
+     * Test capture and restore of locals of type {@link float}.
+     */
+    @Test
+    void testLocalStorage_float() throws Exception {
+        testLocalStorage(new TestFloat(0), Float::parseFloat);
+    }
 
-  /**
-   * Test that a return shared by a tail call and another interruptible method call returns the correct value.
-   */
-  @Test
-  void testMergedReturn() {
-    var test = new TestMergedReturn();
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.valueFirst).isEmpty();
-    assertThat(test.valueSecond).isEmpty();
-    manager.execute(1);
-    assertThat(test.valueFirst).isEqualTo("first");
-    assertThat(test.valueSecond).isEmpty();
-    manager.execute(1);
-    assertThat(test.valueSecond).isEqualTo("second");
-  }
+    /**
+     * Test capture and restore of locals of type {@link double}.
+     */
+    @Test
+    void testLocalStorage_double() throws Exception {
+        testLocalStorage(new TestDouble(0), Double::parseDouble);
+    }
 
-  /**
-   * Test that the operand stack below the owner of a non-static interrupt method is captured and restored correctly.
-   */
-  @Test
-  void testInterruptStack() {
-    var test = new TestInterruptStack();
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(42);
-  }
+    /**
+     * Test that locals are stored and restored correctly.
+     *
+     * @param test
+     *         Test object.
+     * @param parser
+     *         Parser for the primitive type which is tested.
+     */
+    private void testLocalStorage(IRunnable test, Function<String, Number> parser) throws Exception {
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        for (int i = 0; i < 9; i++) {
+            assertThat(field(test, "value" + i)).isEqualTo(parser.apply("-1"));
+        }
+        manager.execute(1);
+        for (int i = 0; i < 9; i++) {
+            assertThat(field(test, "value" + i)).isEqualTo(parser.apply("" + i));
+        }
+    }
 
-  /**
-   * Test that static interruptible methods calling interruptible instance methods keep their local 0.
-   */
-  @Test
-  void testStaticCaller() {
-    var test = new TestStaticCaller();
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.valueLocal).isEqualTo(-1);
-    assertThat(test.valueOwner).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.valueLocal).isEqualTo(44);
-    assertThat(test.valueOwner).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.valueOwner).isEqualTo(15);
-  }
+    /**
+     * Test that a finished serial thread is reset, so that it can be restarted.
+     */
+    @Test
+    void testRestart() {
+        var test = new TestRestart();
 
-  /**
-   * Test exception handling.
-   */
-  @Disabled // TODO markus 2018-01-04: Implement exception handling.
-  @Test
-  void testException() {
-    var test = new TestException();
-    manager = new SimpleSerialThreadManager(test);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(-1);
-    manager.execute(1);
-    assertThat(test.value).isEqualTo(1);
-  }
+        manager = new SimpleSerialThreadManager(test);
+        // Run until the interrupt.
+        manager.execute(1);
+        assertThat(test.runs).isEqualTo(1);
+        assertThat(test.value).isEqualTo(1);
+        // Finish the thread: it gets reset to be able to run again.
+        manager.execute(1);
+        assertThat(test.runs).isEqualTo(1);
+        assertThat(test.value).isEqualTo(2);
+        // Restart the thread: it runs from the beginning until the interrupt again.
+        manager.execute(1);
+        assertThat(test.runs).isEqualTo(2);
+        assertThat(test.value).isEqualTo(1);
+    }
 
-  //
-  // Reflection test support
-  //
+    /**
+     * Test that classes whose frames need the computation of a common super class transform correctly.
+     */
+    @Test
+    void testTypeMerge() {
+        var test = new TestTypeMerge();
 
-  /**
-   * Get value of a field of the test object.
-   *
-   * @param test Test object.
-   * @param name Name of the field.
-   * @return Value of the field.
-   */
-  private Object field(IRunnable test, String name) throws Exception {
-    return test.getClass().getField(name).get(test);
-  }
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.value).isEmpty();
+        manager.execute(1);
+        assertThat(test.value).isEqualTo("a");
+    }
+
+    /**
+     * Test capture and restore of operand stack values of type {@link long}.
+     */
+    @Test
+    void testStackStorage_long() {
+        var test = new TestStackLong();
+
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(-1);
+        assertThat(test.valueDeep).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(42);
+        assertThat(test.valueDeep).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.valueDeep).isEqualTo(122);
+    }
+
+    /**
+     * Test capture and restore of operand stack values of type {@link double}.
+     */
+    @Test
+    void testStackStorage_double() {
+        var test = new TestStackDouble();
+
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(-1);
+        assertThat(test.valueDeep).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(42.25);
+        assertThat(test.valueDeep).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.valueDeep).isEqualTo(126.25);
+    }
+
+    /**
+     * Test that tail calls return the correct value.
+     */
+    @Test
+    void testTailCall() {
+        var test = new TestTailCall();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(1);
+    }
+
+    /**
+     * Test that a return shared by a tail call and another interruptible method call returns the correct value.
+     */
+    @Test
+    void testMergedReturn() {
+        var test = new TestMergedReturn();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.valueFirst).isEmpty();
+        assertThat(test.valueSecond).isEmpty();
+        manager.execute(1);
+        assertThat(test.valueFirst).isEqualTo("first");
+        assertThat(test.valueSecond).isEmpty();
+        manager.execute(1);
+        assertThat(test.valueSecond).isEqualTo("second");
+    }
+
+    /**
+     * Test that the operand stack below the owner of a non-static interrupt method is captured and restored correctly.
+     */
+    @Test
+    void testInterruptStack() {
+        var test = new TestInterruptStack();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(42);
+    }
+
+    /**
+     * Test that static interruptible methods calling interruptible instance methods keep their local 0.
+     */
+    @Test
+    void testStaticCaller() {
+        var test = new TestStaticCaller();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.valueLocal).isEqualTo(-1);
+        assertThat(test.valueOwner).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.valueLocal).isEqualTo(44);
+        assertThat(test.valueOwner).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.valueOwner).isEqualTo(15);
+    }
+
+    /**
+     * Test exception handling.
+     */
+    @Disabled // TODO markus 2018-01-04: Implement exception handling.
+    @Test
+    void testException() {
+        var test = new TestException();
+        manager = new SimpleSerialThreadManager(test);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(-1);
+        manager.execute(1);
+        assertThat(test.value).isEqualTo(1);
+    }
+
+    //
+    // Reflection test support
+    //
+
+    /**
+     * Get value of a field of the test object.
+     *
+     * @param test
+     *         Test object.
+     * @param name
+     *         Name of the field.
+     * @return Value of the field.
+     */
+    private Object field(IRunnable test, String name) throws Exception {
+        return test.getClass().getField(name).get(test);
+    }
 }

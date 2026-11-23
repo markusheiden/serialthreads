@@ -5,8 +5,8 @@ package org.serialthreads.context;
  * Do NOT use, except for transformers and serial thread managers!
  */
 public interface ITransformedRunnable extends IRunnable {
-  /**
-   * Get serial thread.
-   */
-  SerialThread getThread();
+    /**
+     * Get serial thread.
+     */
+    SerialThread getThread();
 }

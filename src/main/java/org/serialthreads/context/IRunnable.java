@@ -8,11 +8,12 @@ import org.serialthreads.Interruptible;
  * TODO 2010-02-03 mh: move to org.serialthreads?
  */
 public interface IRunnable {
-  /**
-   * Run serial thread.
-   *
-   * @throws ThreadFinishedException if thread terminates
-   */
-  @Interruptible
-  void run() throws ThreadFinishedException;
+    /**
+     * Run serial thread.
+     *
+     * @throws ThreadFinishedException
+     *         if thread terminates
+     */
+    @Interruptible
+    void run() throws ThreadFinishedException;
 }

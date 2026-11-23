@@ -8,21 +8,21 @@ import org.serialthreads.context.IRunnable;
  * Test object for restarting a finished serial thread.
  */
 public class TestRestart implements IRunnable {
-  public int runs = 0;
-  public int value = 0;
+    public int runs = 0;
+    public int value = 0;
 
-  @Interruptible
-  public void run() {
-    runs++;
-    value = 1;
+    @Interruptible
+    public void run() {
+        runs++;
+        value = 1;
 
-    interrupt();
+        interrupt();
 
-    value = 2;
-  }
+        value = 2;
+    }
 
-  @Interrupt
-  void interrupt() {
-    // Method call will be redirected to interrupt code.
-  }
+    @Interrupt
+    void interrupt() {
+        // Method call will be redirected to interrupt code.
+    }
 }

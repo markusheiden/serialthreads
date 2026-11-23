@@ -2,7 +2,6 @@ package org.serialthreads.transformer;
 
 import org.junit.jupiter.api.Test;
 
-import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -11,30 +10,30 @@ import java.lang.invoke.MethodType;
  * Test to reproduce lambda creation via {@link LambdaMetafactory}.
  */
 class LambdaTest {
-  @Test
-  void test() throws Throwable {
-    var callSite = LambdaMetafactory.metafactory(
-      MethodHandles.lookup(),
-      "execute",
-      MethodType.methodType(Opcode.class, LambdaTest.class),
-      MethodType.methodType(void.class),
-      MethodHandles.lookup().findVirtual(LambdaTest.class, "opcode00", MethodType.methodType(void.class)),
-      MethodType.methodType(void.class));
+    @Test
+    void test() throws Throwable {
+        var callSite = LambdaMetafactory.metafactory(
+                MethodHandles.lookup(),
+                "execute",
+                MethodType.methodType(Opcode.class, LambdaTest.class),
+                MethodType.methodType(void.class),
+                MethodHandles.lookup().findVirtual(LambdaTest.class, "opcode00", MethodType.methodType(void.class)),
+                MethodType.methodType(void.class));
 
-    var o = callSite.getTarget().invoke(new LambdaTest());
+        var o = callSite.getTarget().invoke(new LambdaTest());
 
-    System.out.println(o.getClass());
-    System.out.println(o instanceof Opcode);
-    ((Opcode) o).execute();
-  }
+        System.out.println(o.getClass());
+        System.out.println(o instanceof Opcode);
+        ((Opcode) o).execute();
+    }
 
-  private void opcode00() {
-    System.out.println("Opcode");
-  }
+    private void opcode00() {
+        System.out.println("Opcode");
+    }
 
-  private interface Opcode {
-    void execute();
-  }
+    private interface Opcode {
+        void execute();
+    }
 
   /*
   Problem:

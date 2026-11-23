@@ -12,49 +12,49 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test for ClassInfoCacheReflection.
  */
 class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
-  @Override
-  protected IClassInfoCache createCache(ClassLoader classLoader) {
-    return new ClassInfoCacheReflection(classLoader);
-  }
-
-  /**
-   * Test that the reflection based scan detects annotations.
-   * Uses a class loader which provides no class file resources, so that the scan has to fall back to reflection.
-   */
-  @Test
-  void testIsInterruptible_reflection() {
-    cache = new ClassInfoCacheReflection(new ResourceHidingClassLoader());
-
-    var className = Type.getType(TestClass.class).getInternalName();
-    assertThat(cache.isInterruptible(className, "interruptible", "()V")).isTrue();
-    assertThat(cache.isInterruptible(className, "notInterruptible", "()V")).isFalse();
-  }
-
-  /**
-   * Test class with an interruptible and a not interruptible method.
-   */
-  public static class TestClass {
-    @Interruptible
-    public void interruptible() {
-      // just for the annotation
-    }
-
-    public void notInterruptible() {
-      // just for the missing annotation
-    }
-  }
-
-  /**
-   * Class loader which hides all class file resources to force reflection based scans.
-   */
-  private static class ResourceHidingClassLoader extends ClassLoader {
-    ResourceHidingClassLoader() {
-      super(ClassInfoCacheReflectionTest.class.getClassLoader());
-    }
-
     @Override
-    public InputStream getResourceAsStream(String name) {
-      return null;
+    protected IClassInfoCache createCache(ClassLoader classLoader) {
+        return new ClassInfoCacheReflection(classLoader);
     }
-  }
+
+    /**
+     * Test that the reflection based scan detects annotations.
+     * Uses a class loader which provides no class file resources, so that the scan has to fall back to reflection.
+     */
+    @Test
+    void testIsInterruptible_reflection() {
+        cache = new ClassInfoCacheReflection(new ResourceHidingClassLoader());
+
+        var className = Type.getType(TestClass.class).getInternalName();
+        assertThat(cache.isInterruptible(className, "interruptible", "()V")).isTrue();
+        assertThat(cache.isInterruptible(className, "notInterruptible", "()V")).isFalse();
+    }
+
+    /**
+     * Test class with an interruptible and a not interruptible method.
+     */
+    public static class TestClass {
+        @Interruptible
+        public void interruptible() {
+            // just for the annotation
+        }
+
+        public void notInterruptible() {
+            // just for the missing annotation
+        }
+    }
+
+    /**
+     * Class loader which hides all class file resources to force reflection based scans.
+     */
+    private static class ResourceHidingClassLoader extends ClassLoader {
+        ResourceHidingClassLoader() {
+            super(ClassInfoCacheReflectionTest.class.getClassLoader());
+        }
+
+        @Override
+        public InputStream getResourceAsStream(String name) {
+            return null;
+        }
+    }
 }

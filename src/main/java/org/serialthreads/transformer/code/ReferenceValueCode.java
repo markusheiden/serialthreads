@@ -21,47 +21,47 @@ import static org.objectweb.asm.Type.OBJECT;
  * Code for object values.
  */
 public class ReferenceValueCode extends AbstractValueCode {
-  private final Type concreteType;
+    private final Type concreteType;
 
-  public ReferenceValueCode(Type type) {
-    super(Type.getType(Object.class), "Object", ALOAD, ASTORE, AALOAD, AASTORE, ACONST_NULL, ARETURN);
+    public ReferenceValueCode(Type type) {
+        super(Type.getType(Object.class), "Object", ALOAD, ASTORE, AALOAD, AASTORE, ACONST_NULL, ARETURN);
 
-    this.concreteType = type;
-  }
-
-  @Override
-  public boolean isCompatibleWith(Type type) {
-    assert type != null : "Precondition: type != null.";
-
-    return super.isCompatibleWith(type) &&
-           this.concreteType.getInternalName().equals(type.getInternalName());
-  }
-
-  @Override
-  public boolean isResponsibleFor(Type type) {
-    if (type == null) {
-      return false;
-    }
-    return switch (type.getSort()) {
-      case OBJECT, ARRAY -> true;
-      default -> false;
-    };
-  }
-
-  @Override
-  protected InsnList cast() {
-    var instructions = new InsnList();
-    instructions.add(new TypeInsnNode(CHECKCAST, concreteType.getInternalName()));
-
-    return instructions;
-  }
-
-  @Override
-  public AbstractInsnNode push(Object value) {
-    if (value == null) {
-      return new InsnNode(ACONST_NULL);
+        this.concreteType = type;
     }
 
-    return new LdcInsnNode(value);
-  }
+    @Override
+    public boolean isCompatibleWith(Type type) {
+        assert type != null : "Precondition: type != null.";
+
+        return super.isCompatibleWith(type) &&
+               this.concreteType.getInternalName().equals(type.getInternalName());
+    }
+
+    @Override
+    public boolean isResponsibleFor(Type type) {
+        if (type == null) {
+            return false;
+        }
+        return switch (type.getSort()) {
+            case OBJECT, ARRAY -> true;
+            default -> false;
+        };
+    }
+
+    @Override
+    protected InsnList cast() {
+        var instructions = new InsnList();
+        instructions.add(new TypeInsnNode(CHECKCAST, concreteType.getInternalName()));
+
+        return instructions;
+    }
+
+    @Override
+    public AbstractInsnNode push(Object value) {
+        if (value == null) {
+            return new InsnNode(ACONST_NULL);
+        }
+
+        return new LdcInsnNode(value);
+    }
 }

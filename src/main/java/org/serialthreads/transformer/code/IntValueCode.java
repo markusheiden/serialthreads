@@ -31,53 +31,46 @@ import static org.objectweb.asm.Type.SHORT;
  * Code for int values (and boolean, byte, char and short).
  */
 public class IntValueCode extends AbstractValueCode {
-  public IntValueCode() {
-    super(INT_TYPE, "Int", ILOAD, ISTORE, IALOAD, IASTORE, ICONST_0, IRETURN);
-  }
-
-  @Override
-  public boolean isResponsibleFor(Type type) {
-    if (type == null) {
-      return false;
+    public IntValueCode() {
+        super(INT_TYPE, "Int", ILOAD, ISTORE, IALOAD, IASTORE, ICONST_0, IRETURN);
     }
-    return switch (type.getSort()) {
-      case BOOLEAN, CHAR, BYTE, SHORT, INT -> true;
-      default -> false;
-    };
-  }
 
-  @Override
-  public AbstractInsnNode push(Object value) {
-    int i = (Integer) value;
-
-    return push(i);
-  }
-
-  public static AbstractInsnNode push(int i) {
-    return switch (i) {
-      case -1 ->
-              new InsnNode(ICONST_M1);
-      case 0 ->
-              new InsnNode(ICONST_0);
-      case 1 ->
-              new InsnNode(ICONST_1);
-      case 2 ->
-              new InsnNode(ICONST_2);
-      case 3 ->
-              new InsnNode(ICONST_3);
-      case 4 ->
-              new InsnNode(ICONST_4);
-      case 5 ->
-              new InsnNode(ICONST_5);
-      default -> {
-        if (i >= Byte.MIN_VALUE && i <= Byte.MAX_VALUE) {
-          yield new IntInsnNode(BIPUSH, i);
-        } else if (i >= Short.MIN_VALUE && i <= Short.MAX_VALUE) {
-          yield new IntInsnNode(SIPUSH, i);
-        } else {
-          yield new LdcInsnNode(i);
+    @Override
+    public boolean isResponsibleFor(Type type) {
+        if (type == null) {
+            return false;
         }
-      }
-    };
-  }
+        return switch (type.getSort()) {
+            case BOOLEAN, CHAR, BYTE, SHORT, INT -> true;
+            default -> false;
+        };
+    }
+
+    @Override
+    public AbstractInsnNode push(Object value) {
+        int i = (Integer) value;
+
+        return push(i);
+    }
+
+    public static AbstractInsnNode push(int i) {
+        return switch (i) {
+            case -1 -> new InsnNode(ICONST_M1);
+            case 0 -> new InsnNode(ICONST_0);
+            case 1 -> new InsnNode(ICONST_1);
+            case 2 -> new InsnNode(ICONST_2);
+            case 3 -> new InsnNode(ICONST_3);
+            case 4 -> new InsnNode(ICONST_4);
+            case 5 -> new InsnNode(ICONST_5);
+            default -> {
+                if (i >= Byte.MIN_VALUE && i <= Byte.MAX_VALUE) {
+                    yield new IntInsnNode(BIPUSH, i);
+                } else if (i >= Short.MIN_VALUE && i <= Short.MAX_VALUE) {
+                    yield new IntInsnNode(SIPUSH, i);
+                } else {
+                    yield new LdcInsnNode(i);
+                }
+            }
+        };
+    }
 }

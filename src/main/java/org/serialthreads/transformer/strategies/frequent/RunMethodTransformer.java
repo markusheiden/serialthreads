@@ -13,87 +13,92 @@ import java.util.List;
  * Method transformer for run methods.
  */
 class RunMethodTransformer extends MethodTransformer {
-  /**
-   * Constructor.
-   *
-   * @param clazz class to transform
-   * @param method method to transform
-   * @param classInfoCache class cache to use
-   */
-  protected RunMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-    super(clazz, method, classInfoCache);
-  }
-
-  @Override
-  protected boolean suppressOwner() {
-    return true;
-  }
-
-  /**
-   * Transform method.
-   *
-   * @return Transformed method
-   * @throws AnalyzerException In case of incorrect byte code of the original method
-   */
-  public MethodNode transform() throws AnalyzerException {
-    shiftLocals();
-    analyze();
-
-    replaceRunReturns();
-    var restores = insertCaptureAndRestoreCode();
-    createRestoreHandlerRun(restores);
-    fixMaxs();
-    nameLocals();
-
-    return method;
-  }
-
-  /**
-   * Insert frame restoring code at the begin of the run() method.
-   *
-   * @param restores Labels pointing to the generated restore codes for method calls.
-   */
-  private void createRestoreHandlerRun(List<LabelNode> restores) {
-    if (restores.isEmpty()) {
-      logger.debug("    No restore handler needed for run");
-      return;
+    /**
+     * Constructor.
+     *
+     * @param clazz
+     *         class to transform
+     * @param method
+     *         method to transform
+     * @param classInfoCache
+     *         class cache to use
+     */
+    protected RunMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
+        super(clazz, method, classInfoCache);
     }
 
-    logger.debug("    Creating restore handler for run");
-
-    var instructions = new InsnList();
-
-    // thread = this.$$thread$$;
-    instructions.add(threadCode.getRunThread(clazz.name, localThread));
-    // frame = this.$$frame$$;
-    instructions.add(threadCode.getRunFrame(clazz.name, localFrame));
-
-    // SerialThreadManager.setThread(thread);
-    instructions.add(threadCode.setThread(localThread));
-    // Store current frame, so next method can fetch is as previous frame.
-    // thread.frame = frame;
-    instructions.add(threadCode.setFrame(localThread, localFrame));
-
-    // No previous frame needed in run, because there may not be a previous frame.
-
-    // Add label for first call of run() at index -1, see "startIndex" below.
-    // Empty frames are expected to have method == -1.
-    var startRun = new LabelNode();
-    restores.add(0, startRun);
-
-    instructions.add(restoreCodeDispatcher(localFrame, restores, -1));
-
-    // Dummy startup code to avoid check of thread.serializing.
-    instructions.add(startRun);
-
-    // Reset method to 0 for the case that there is just one normal restore code (except startRun),
-    // because if there is just one normal restore code, the method index will not be captured.
-    // So we set the correct one (0) for this case.
-    if (restores.size() == 2) {
-      instructions.add(threadCode.setMethod(localFrame, 0));
+    @Override
+    protected boolean suppressOwner() {
+        return true;
     }
-    // Continue with normal code.
 
-    method.instructions.insertBefore(method.instructions.getFirst(), instructions);
-  }
+    /**
+     * Transform method.
+     *
+     * @return Transformed method
+     * @throws AnalyzerException
+     *         In case of incorrect byte code of the original method
+     */
+    public MethodNode transform() throws AnalyzerException {
+        shiftLocals();
+        analyze();
+
+        replaceRunReturns();
+        var restores = insertCaptureAndRestoreCode();
+        createRestoreHandlerRun(restores);
+        fixMaxs();
+        nameLocals();
+
+        return method;
+    }
+
+    /**
+     * Insert frame restoring code at the begin of the run() method.
+     *
+     * @param restores
+     *         Labels pointing to the generated restore codes for method calls.
+     */
+    private void createRestoreHandlerRun(List<LabelNode> restores) {
+        if (restores.isEmpty()) {
+            logger.debug("    No restore handler needed for run");
+            return;
+        }
+
+        logger.debug("    Creating restore handler for run");
+
+        var instructions = new InsnList();
+
+        // thread = this.$$thread$$;
+        instructions.add(threadCode.getRunThread(clazz.name, localThread));
+        // frame = this.$$frame$$;
+        instructions.add(threadCode.getRunFrame(clazz.name, localFrame));
+
+        // SerialThreadManager.setThread(thread);
+        instructions.add(threadCode.setThread(localThread));
+        // Store current frame, so next method can fetch is as previous frame.
+        // thread.frame = frame;
+        instructions.add(threadCode.setFrame(localThread, localFrame));
+
+        // No previous frame needed in run, because there may not be a previous frame.
+
+        // Add label for first call of run() at index -1, see "startIndex" below.
+        // Empty frames are expected to have method == -1.
+        var startRun = new LabelNode();
+        restores.add(0, startRun);
+
+        instructions.add(restoreCodeDispatcher(localFrame, restores, -1));
+
+        // Dummy startup code to avoid check of thread.serializing.
+        instructions.add(startRun);
+
+        // Reset method to 0 for the case that there is just one normal restore code (except startRun),
+        // because if there is just one normal restore code, the method index will not be captured.
+        // So we set the correct one (0) for this case.
+        if (restores.size() == 2) {
+            instructions.add(threadCode.setMethod(localFrame, 0));
+        }
+        // Continue with normal code.
+
+        method.instructions.insertBefore(method.instructions.getFirst(), instructions);
+    }
 }

@@ -28,217 +28,219 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
  */
 @Transform(transformer = FrequentInterruptsTransformer4.class)
 class TransformingExtensionTest extends TransformingExtensionAbstractTest {
-  /**
-   * Value set by {@link #setUp()} to check that all lifecycle methods run on the same transformed instance.
-   */
-  private int beforeEachValue = 0;
-
-  @BeforeEach
-  void setUp() {
-    beforeEachValue = 42;
-  }
-
-  @AfterEach
-  void tearDown() {
-    // The after each method runs on the same transformed instance as the before each method.
-    assertThat(beforeEachValue).isEqualTo(42);
-  }
-
-  /**
-   * Test that test methods run on an instance loaded by the transforming class loader.
-   */
-  @Test
-  void testRunsOnTransformedInstance() {
-    assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
-  }
-
-  /**
-   * Test that the before each method runs on the same transformed instance as the test method.
-   */
-  @Test
-  void testBeforeEachSharesInstance() {
-    assertThat(beforeEachValue).isEqualTo(42);
-  }
-
-  /**
-   * Test that transformed code executes correctly in a test method.
-   */
-  @Test
-  void testTransformedCodeExecutes() {
-    var runnable = new TestRunnable();
-    try (var manager = new SimpleSerialThreadManager(runnable)) {
-      manager.execute(1);
-      assertThat(runnable.value).isEqualTo(1);
-      manager.execute(1);
-      assertThat(runnable.value).isEqualTo(2);
-    }
-  }
-
-  /**
-   * Test that the argument of a parameterized test is passed to the transformed test method.
-   */
-  @ParameterizedTest
-  @ValueSource(ints = {1, 2})
-  void testParameterized(int value) {
-    assertThat(value).isIn(1, 2);
-    // The before each method has been run on the same transformed instance too.
-    assertThat(beforeEachValue).isEqualTo(42);
-  }
-
-  /**
-   * Test that all arguments of a parameterized test are passed to the transformed test method.
-   */
-  @ParameterizedTest
-  @CsvSource({"1, one", "2, two"})
-  void testParameterized_multipleArguments(int number, String name) {
-    assertThat(name).isEqualTo(number == 1 ? "one" : "two");
-  }
-
-  /**
-   * Test that test factory methods run on the transformed instance
-   * and the dynamic tests they create execute correctly.
-   */
-  @TestFactory
-  List<DynamicTest> testFactory() {
-    return List.of(
-      dynamicTest("factory runs on transformed instance", () ->
-        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName())),
-      dynamicTest("factory shares instance with before each method", () ->
-        assertThat(beforeEachValue).isEqualTo(42)));
-  }
-
-  /**
-   * Test that each test method runs with its own transforming class loader:
-   * Static state does not leak between test methods.
-   * @see #testStaticStateIsolation2()
-   */
-  @Test
-  void testStaticStateIsolation1() {
-    assertThat(++StaticCounter.count).isEqualTo(1);
-  }
-
-  /**
-   * Test that each test method runs with its own transforming class loader:
-   * Static state does not leak between test methods.
-   * @see #testStaticStateIsolation1()
-   */
-  @Test
-  void testStaticStateIsolation2() {
-    assertThat(++StaticCounter.count).isEqualTo(1);
-  }
-
-  /**
-   * Test that nested test classes run on transformed instances too.
-   */
-  @Nested
-  class NestedTest {
     /**
-     * Value set by {@link #setUpNested()} to check that all lifecycle methods run on the same transformed instance.
+     * Value set by {@link #setUp()} to check that all lifecycle methods run on the same transformed instance.
      */
-    private int nestedBeforeEachValue = 0;
+    private int beforeEachValue = 0;
 
     @BeforeEach
-    void setUpNested() {
-      // The before each method of the enclosing class has been run on the transformed enclosing instance before.
-      assertThat(beforeEachValue).isEqualTo(42);
-      nestedBeforeEachValue = 43;
+    void setUp() {
+        beforeEachValue = 42;
     }
 
     @AfterEach
-    void tearDownNested() {
-      assertThat(nestedBeforeEachValue).isEqualTo(43);
+    void tearDown() {
+        // The after each method runs on the same transformed instance as the before each method.
+        assertThat(beforeEachValue).isEqualTo(42);
     }
 
     /**
-     * Test that test methods of nested test classes run on an instance loaded by the transforming class loader.
+     * Test that test methods run on an instance loaded by the transforming class loader.
      */
     @Test
     void testRunsOnTransformedInstance() {
-      assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
-      assertThat(getClass().getName()).isEqualTo(TransformingExtensionTest.class.getName() + "$NestedTest");
+        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
     }
 
     /**
-     * Test that the before each methods of the nested test class and its enclosing class
-     * run on the transformed instance and its transformed enclosing instance.
+     * Test that the before each method runs on the same transformed instance as the test method.
      */
     @Test
-    void testBeforeEachSharesInstances() {
-      assertThat(nestedBeforeEachValue).isEqualTo(43);
-      assertThat(beforeEachValue).isEqualTo(42);
+    void testBeforeEachSharesInstance() {
+        assertThat(beforeEachValue).isEqualTo(42);
     }
 
     /**
-     * Test that the enclosing instance has been loaded by the same transforming class loader.
+     * Test that transformed code executes correctly in a test method.
      */
     @Test
-    void testEnclosingInstanceSharesClassLoader() {
-      assertThat(TransformingExtensionTest.this.getClass().getClassLoader()).isSameAs(getClass().getClassLoader());
+    void testTransformedCodeExecutes() {
+        var runnable = new TestRunnable();
+        try (var manager = new SimpleSerialThreadManager(runnable)) {
+            manager.execute(1);
+            assertThat(runnable.value).isEqualTo(1);
+            manager.execute(1);
+            assertThat(runnable.value).isEqualTo(2);
+        }
     }
 
     /**
      * Test that the argument of a parameterized test is passed to the transformed test method.
      */
     @ParameterizedTest
-    @ValueSource(ints = {1, 2})
+    @ValueSource(ints = { 1, 2 })
     void testParameterized(int value) {
-      assertThat(value).isIn(1, 2);
-      assertThat(nestedBeforeEachValue).isEqualTo(43);
+        assertThat(value).isIn(1, 2);
+        // The before each method has been run on the same transformed instance too.
+        assertThat(beforeEachValue).isEqualTo(42);
     }
 
     /**
-     * Test that test classes nested in nested test classes run on transformed instances too.
+     * Test that all arguments of a parameterized test are passed to the transformed test method.
+     */
+    @ParameterizedTest
+    @CsvSource({ "1, one", "2, two" })
+    void testParameterized_multipleArguments(int number, String name) {
+        assertThat(name).isEqualTo(number == 1 ? "one" : "two");
+    }
+
+    /**
+     * Test that test factory methods run on the transformed instance
+     * and the dynamic tests they create execute correctly.
+     */
+    @TestFactory
+    List<DynamicTest> testFactory() {
+        return List.of(
+                dynamicTest("factory runs on transformed instance", () ->
+                        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName())),
+                dynamicTest("factory shares instance with before each method", () ->
+                        assertThat(beforeEachValue).isEqualTo(42)));
+    }
+
+    /**
+     * Test that each test method runs with its own transforming class loader:
+     * Static state does not leak between test methods.
+     *
+     * @see #testStaticStateIsolation2()
+     */
+    @Test
+    void testStaticStateIsolation1() {
+        assertThat(++StaticCounter.count).isEqualTo(1);
+    }
+
+    /**
+     * Test that each test method runs with its own transforming class loader:
+     * Static state does not leak between test methods.
+     *
+     * @see #testStaticStateIsolation1()
+     */
+    @Test
+    void testStaticStateIsolation2() {
+        assertThat(++StaticCounter.count).isEqualTo(1);
+    }
+
+    /**
+     * Test that nested test classes run on transformed instances too.
      */
     @Nested
-    class DeeplyNestedTest {
-      @Test
-      void testBeforeEachSharesInstances() {
-        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
-        assertThat(nestedBeforeEachValue).isEqualTo(43);
-        assertThat(beforeEachValue).isEqualTo(42);
-      }
+    class NestedTest {
+        /**
+         * Value set by {@link #setUpNested()} to check that all lifecycle methods run on the same transformed instance.
+         */
+        private int nestedBeforeEachValue = 0;
+
+        @BeforeEach
+        void setUpNested() {
+            // The before each method of the enclosing class has been run on the transformed enclosing instance before.
+            assertThat(beforeEachValue).isEqualTo(42);
+            nestedBeforeEachValue = 43;
+        }
+
+        @AfterEach
+        void tearDownNested() {
+            assertThat(nestedBeforeEachValue).isEqualTo(43);
+        }
+
+        /**
+         * Test that test methods of nested test classes run on an instance loaded by the transforming class loader.
+         */
+        @Test
+        void testRunsOnTransformedInstance() {
+            assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
+            assertThat(getClass().getName()).isEqualTo(TransformingExtensionTest.class.getName() + "$NestedTest");
+        }
+
+        /**
+         * Test that the before each methods of the nested test class and its enclosing class
+         * run on the transformed instance and its transformed enclosing instance.
+         */
+        @Test
+        void testBeforeEachSharesInstances() {
+            assertThat(nestedBeforeEachValue).isEqualTo(43);
+            assertThat(beforeEachValue).isEqualTo(42);
+        }
+
+        /**
+         * Test that the enclosing instance has been loaded by the same transforming class loader.
+         */
+        @Test
+        void testEnclosingInstanceSharesClassLoader() {
+            assertThat(TransformingExtensionTest.this.getClass().getClassLoader()).isSameAs(getClass().getClassLoader());
+        }
+
+        /**
+         * Test that the argument of a parameterized test is passed to the transformed test method.
+         */
+        @ParameterizedTest
+        @ValueSource(ints = { 1, 2 })
+        void testParameterized(int value) {
+            assertThat(value).isIn(1, 2);
+            assertThat(nestedBeforeEachValue).isEqualTo(43);
+        }
+
+        /**
+         * Test that test classes nested in nested test classes run on transformed instances too.
+         */
+        @Nested
+        class DeeplyNestedTest {
+            @Test
+            void testBeforeEachSharesInstances() {
+                assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
+                assertThat(nestedBeforeEachValue).isEqualTo(43);
+                assertThat(beforeEachValue).isEqualTo(42);
+            }
+        }
     }
-  }
 
-  /**
-   * Holder for static state to check class loader isolation of test methods.
-   */
-  static class StaticCounter {
-    static int count = 0;
-  }
-
-  /**
-   * Test runnable which gets interrupted once.
-   */
-  public static class TestRunnable implements IRunnable {
-    public int value = 0;
-
-    @Interruptible
-    @Override
-    public void run() {
-      value = 1;
-
-      interrupt();
-
-      value = 2;
+    /**
+     * Holder for static state to check class loader isolation of test methods.
+     */
+    static class StaticCounter {
+        static int count = 0;
     }
 
-    @Interrupt
-    void interrupt() {
-      // Method call will be redirected to interrupt code.
+    /**
+     * Test runnable which gets interrupted once.
+     */
+    public static class TestRunnable implements IRunnable {
+        public int value = 0;
+
+        @Interruptible
+        @Override
+        public void run() {
+            value = 1;
+
+            interrupt();
+
+            value = 2;
+        }
+
+        @Interrupt
+        void interrupt() {
+            // Method call will be redirected to interrupt code.
+        }
     }
-  }
 }
 
 /**
  * Base class to check that inherited test methods are found on the transformed instance.
  */
 abstract class TransformingExtensionAbstractTest {
-  /**
-   * Test that test methods inherited from a super class run on the transformed instance.
-   */
-  @Test
-  void testInheritedRunsOnTransformedInstance() {
-    assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
-  }
+    /**
+     * Test that test methods inherited from a super class run on the transformed instance.
+     */
+    @Test
+    void testInheritedRunsOnTransformedInstance() {
+        assertThat(getClass().getClassLoader().getClass().getName()).isEqualTo(TransformingClassLoader.class.getName());
+    }
 }

@@ -62,419 +62,442 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
  * Base class for all method transformers.
  */
 public abstract class AbstractMethodTransformer {
-  /**
-   * Logger.
-   */
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+    /**
+     * Logger.
+     */
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-  private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
-  private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
-  private static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
+    private static final String OBJECT_NAME = Type.getType(Object.class).getInternalName();
+    private static final String STRING_DESC = Type.getType(String.class).getDescriptor();
+    private static final String THREAD_FINISHED_EXCEPTION_NAME = Type.getType(ThreadFinishedException.class).getInternalName();
 
-  protected static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
-  protected static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
+    protected static final String THREAD_IMPL_DESC = Type.getType(Stack.class).getDescriptor();
+    protected static final String FRAME_IMPL_DESC = Type.getType(StackFrame.class).getDescriptor();
 
-  protected final ClassNode clazz;
-  protected final MethodNode method;
-  protected final IClassInfoCache classInfoCache;
+    protected final ClassNode clazz;
+    protected final MethodNode method;
+    protected final IClassInfoCache classInfoCache;
 
-  protected final ThreadCode threadCode = new CompactingStackCode();
+    protected final ThreadCode threadCode = new CompactingStackCode();
 
-  /**
-   * Meta information about instructions.
-   */
-  protected final Map<AbstractInsnNode, MetaInfo> metaInfos = new LinkedHashMap<>();
+    /**
+     * Meta information about instructions.
+     */
+    protected final Map<AbstractInsnNode, MetaInfo> metaInfos = new LinkedHashMap<>();
 
-  /**
-   * Interruptible method calls.
-   */
-  protected final Set<MethodInsnNode> interruptibleMethodCalls = new LinkedHashSet<>();
+    /**
+     * Interruptible method calls.
+     */
+    protected final Set<MethodInsnNode> interruptibleMethodCalls = new LinkedHashSet<>();
 
-  /**
-   * Constructor.
-   *
-   * @param clazz class to transform
-   * @param method method to transform
-   * @param classInfoCache class cache to use
-   */
-  protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-    this.clazz = clazz;
-    this.method = method;
-    this.classInfoCache = classInfoCache;
-  }
-
-  /**
-   * Parameter p used by this transformer.
-   */
-  protected final int param(int p) {
-    return firstParam(method) + p;
-  }
-
-  /**
-   * Local l used by this transformer.
-   */
-  protected final int local(int l) {
-    return firstLocal(method) + l;
-  }
-
-  /**
-   * Name local in the whole method.
-   *
-   * @param local Number of local.
-   * @param desc Type descriptor.
-   * @param variableName Name for local.
-   */
-  protected void nameLocal(int local, String desc, String variableName) {
-    method.localVariables.add(
-      new LocalVariableNode(variableName, desc, null, insertLabelAtStart(), insertLabelAtEnd(), local));
-  }
-
-  /**
-   * Analyze a method to compute frames.
-   * Extract all interruptible method calls.
-   *
-   * @throws AnalyzerException on invalid byte code.
-   * @throws NotTransformableException if the method calls run() or contains an unreachable interruptible call.
-   */
-  protected void analyze() throws AnalyzerException {
-    // Init meta information.
-    var frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
-    var instructions = method.instructions;
-    for (int i = 0, e = instructions.size(), last = e - 1; i < e; i++) {
-      metaInfos.put(instructions.get(i), new MetaInfo(frames[i], i < last ? frames[i + 1] : null));
+    /**
+     * Constructor.
+     *
+     * @param clazz
+     *         class to transform
+     * @param method
+     *         method to transform
+     * @param classInfoCache
+     *         class cache to use
+     */
+    protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
+        this.clazz = clazz;
+        this.method = method;
+        this.classInfoCache = classInfoCache;
     }
 
-    // Tag special instructions.
-    for (var instruction : instructions) {
-      if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall &&
-          classInfoCache.isInterruptible(methodCall)) {
-        checkTransformable(methodCall, instruction);
-        interruptibleMethodCalls.add(methodCall);
-          tag(instruction, TAG_INTERRUPTIBLE);
-          if (classInfoCache.isInterrupt(methodCall)) {
-            tag(instruction, TAG_INTERRUPT);
-          } else if (isReturn(nextInstruction(methodCall))) {
-            // Tag (tail) method call.
-            tag(instruction, TAG_TAIL_CALL);
-          }
-      }
-    }
-  }
-
-  /**
-   * Abort if method call is not transformable.
-   */
-  private void checkTransformable(MethodInsnNode methodCall, AbstractInsnNode instruction) {
-    if (isRun(methodCall, classInfoCache)) {
-      // run() is the entry point of a serial thread, it never returns normally.
-      throw new NotTransformableException(
-        "Interruptible method %s may not call run, just executors may do that"
-                .formatted(methodName(clazz, method)));
-    }
-    if (metaInfos.get(instruction).frameBefore == null) {
-      // The analyzer computes no frames for unreachable code, so there is nothing to capture and restore.
-      throw new NotTransformableException(
-        "Interruptible method %s contains an unreachable call of the interruptible method %s"
-                .formatted(methodName(clazz, method), methodName(methodCall)));
-    }
-  }
-
-  /**
-   * Tag an instruction.
-   *
-   * @param instruction Instruction.
-   * @param tag Tag.
-   */
-  private void tag(AbstractInsnNode instruction, String tag) {
-    metaInfos.get(instruction).tags.add(tag);
-  }
-
-  /**
-   * Create restore code dispatcher.
-   *
-   * @param localFrame Number of local containing the current frame.
-   * @param restores Restore codes for each interruptible method call.
-   * @param startIndex first method index, should be -1 for run(), 0 otherwise.
-   * @return Generated restore code.
-   */
-  protected InsnList restoreCodeDispatcher(int localFrame, List<LabelNode> restores, int startIndex) {
-    assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
-
-    var instructions = new InsnList();
-
-    if (restores.size() == 1) {
-      // just one method call -> nothing to dispatch -> execute directly
-      instructions.add(new JumpInsnNode(GOTO, restores.get(0)));
-      return instructions;
+    /**
+     * Parameter p used by this transformer.
+     */
+    protected final int param(int p) {
+        return firstParam(method) + p;
     }
 
-    var defaultLabel = new LabelNode();
-    restores.replaceAll(label -> label != null? label : defaultLabel);
-
-    // switch(currentFrame.method) // branch to specific restore code
-    instructions.add(threadCode.pushMethod(localFrame));
-    instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(LabelNode[]::new)));
-
-    // default case -> may not happen -> throw IllegalThreadStateException
-    instructions.add(defaultLabel);
-    instructions.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
-    instructions.add(new InsnNode(DUP));
-    instructions.add(new LdcInsnNode("Invalid method pointer"));
-    instructions.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V", false));
-    instructions.add(new InsnNode(ATHROW));
-
-    return instructions;
-  }
-
-  //
-  // capture code insertion
-  //
-
-  /**
-   * Inserts capture code after method calls.
-   * Mainly used for concrete methods.
-   */
-  protected void insertCaptureCode() {
-    int methodCallIndex = 0;
-    for (var methodCall : interruptibleMethodCalls) {
-      var metaInfo = metaInfos.get(methodCall);
-      createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false);
-    }
-  }
-
-  /**
-   * Inserts capture and restore code after method calls.
-   * Mainly used for copied concrete methods.
-   *
-   * @return Labels pointing to the generated restore codes for method calls.
-   */
-  protected List<LabelNode> insertCaptureAndRestoreCode() {
-    var restores = new ArrayList<LabelNode>(interruptibleMethodCalls.size());
-    int methodCallIndex = 0;
-    for (var methodCall : interruptibleMethodCalls) {
-      var metaInfo = metaInfos.get(methodCall);
-      restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, true));
+    /**
+     * Local l used by this transformer.
+     */
+    protected final int local(int l) {
+        return firstLocal(method) + l;
     }
 
-    return restores;
-  }
-
-  /**
-   * Insert frame capturing and restore code after the given method call.
-   *
-   * @param methodCall Method call to generate capturing code for.
-   * @param metaInfo Meta information about method call.
-   * @param position Position of method call in method.
-   * @param restore Generate restore code too?.
-   * @return Label to restore code, or null, if no restore code has been generated.
-   */
-  protected abstract LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore);
-
-  /**
-   * Replace all return instructions by ThreadFinishedException.
-   * Needed for transformation of IRunnable.run().
-   */
-  protected void replaceRunReturns() {
-    // TODO 2013-11-24 mh: implement as method -> call method?
-
-    var exception = new LabelNode();
-    for (var returnInstruction : returnInstructions(method)) {
-      method.instructions.set(returnInstruction, new JumpInsnNode(GOTO, exception));
+    /**
+     * Name local in the whole method.
+     *
+     * @param local
+     *         Number of local.
+     * @param desc
+     *         Type descriptor.
+     * @param variableName
+     *         Name for local.
+     */
+    protected void nameLocal(int local, String desc, String variableName) {
+        method.localVariables.add(
+                new LocalVariableNode(variableName, desc, null, insertLabelAtStart(), insertLabelAtEnd(), local));
     }
 
-    var instructions = new InsnList();
-    instructions.add(exception);
-    // throw new ThreadFinishedException(this.toString());
-    instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
-    instructions.add(new InsnNode(DUP));
-    // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
-    instructions.add(new VarInsnNode(ALOAD, 0));
-    instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC, false));
-    instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V", false));
-    instructions.add(new InsnNode(ATHROW));
-    method.instructions.insert(method.instructions.getLast(), instructions);
-  }
+    /**
+     * Analyze a method to compute frames.
+     * Extract all interruptible method calls.
+     *
+     * @throws AnalyzerException
+     *         on invalid byte code.
+     * @throws NotTransformableException
+     *         if the method calls run() or contains an unreachable interruptible call.
+     */
+    protected void analyze() throws AnalyzerException {
+        // Init meta information.
+        var frames = ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
+        var instructions = method.instructions;
+        for (int i = 0, e = instructions.size(), last = e - 1; i < e; i++) {
+            metaInfos.put(instructions.get(i), new MetaInfo(frames[i], i < last ? frames[i + 1] : null));
+        }
 
-  //
-  // Stack frame code.
-  //
-
-  /**
-   * Push method onto frame.
-   *
-   * @param localFrame
-   *           Number of local containing the current frame .
-   * @param position
-   *           position of method call.
-   * @return generated capture code.
-   */
-  protected InsnList setMethod(int localFrame, int position) {
-    if (interruptibleMethodCalls.size() <= 1) {
-      return new InsnList();
+        // Tag special instructions.
+        for (var instruction : instructions) {
+            if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall &&
+                classInfoCache.isInterruptible(methodCall)) {
+                checkTransformable(methodCall, instruction);
+                interruptibleMethodCalls.add(methodCall);
+                tag(instruction, TAG_INTERRUPTIBLE);
+                if (classInfoCache.isInterrupt(methodCall)) {
+                    tag(instruction, TAG_INTERRUPT);
+                } else if (isReturn(nextInstruction(methodCall))) {
+                    // Tag (tail) method call.
+                    tag(instruction, TAG_TAIL_CALL);
+                }
+            }
+        }
     }
 
-    return threadCode.setMethod(localFrame, position);
-  }
-
-  /**
-   * Suppress capturing of owner?.
-   */
-  protected boolean suppressOwner() {
-    return false;
-  }
-
-  /**
-   * Push owner (this) of the transformed method onto the frame of its caller.
-   * The caller needs it to call the transformed method again when restoring.
-   *
-   * @param localPreviousFrame
-   *           Number of local containing the previous frame.
-   * @return generated capture code.
-   */
-  protected InsnList setOwner(int localPreviousFrame) {
-    if (suppressOwner() || isStatic(method)) {
-      // Static methods have no owner.
-      return new InsnList();
+    /**
+     * Abort if method call is not transformable.
+     */
+    private void checkTransformable(MethodInsnNode methodCall, AbstractInsnNode instruction) {
+        if (isRun(methodCall, classInfoCache)) {
+            // run() is the entry point of a serial thread, it never returns normally.
+            throw new NotTransformableException(
+                    "Interruptible method %s may not call run, just executors may do that"
+                            .formatted(methodName(clazz, method)));
+        }
+        if (metaInfos.get(instruction).frameBefore == null) {
+            // The analyzer computes no frames for unreachable code, so there is nothing to capture and restore.
+            throw new NotTransformableException(
+                    "Interruptible method %s contains an unreachable call of the interruptible method %s"
+                            .formatted(methodName(clazz, method), methodName(methodCall)));
+        }
     }
 
-    return threadCode.setOwner(localPreviousFrame);
-  }
-
-  /**
-   * Remove the owner of a replaced interrupt method call from the stack.
-   * Interrupt methods have no parameters, so the owner is the only remainder of the call.
-   *
-   * @param methodCall
-   *           interrupt method call, which will be replaced.
-   * @return generated code.
-   */
-  protected InsnList popOwner(MethodInsnNode methodCall) {
-    var instructions = new InsnList();
-    if (isNotStatic(methodCall)) {
-      instructions.add(new InsnNode(POP));
-    }
-    return instructions;
-  }
-
-  /**
-   * Restore owner.
-   *
-   * @param methodCall
-   *           method call to process.
-   * @param metaInfo
-   *           Meta information about method call.
-   * @param localFrame
-   *           Number of local containing the current frame .
-   * @return generated restore code.
-   */
-  protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
-    var instructions = new InsnList();
-
-    if (isSelfCall(method, methodCall, metaInfo)) {
-      // self call: owner == this
-      instructions.add(new VarInsnNode(ALOAD, 0));
-    } else if (isNotStatic(methodCall)) {
-      // get owner
-      instructions.add(threadCode.pushOwner(localFrame));
-      instructions.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
+    /**
+     * Tag an instruction.
+     *
+     * @param instruction
+     *         Instruction.
+     * @param tag
+     *         Tag.
+     */
+    private void tag(AbstractInsnNode instruction, String tag) {
+        metaInfos.get(instruction).tags.add(tag);
     }
 
-    return instructions;
-  }
+    /**
+     * Create restore code dispatcher.
+     *
+     * @param localFrame
+     *         Number of local containing the current frame.
+     * @param restores
+     *         Restore codes for each interruptible method call.
+     * @param startIndex
+     *         first method index, should be -1 for run(), 0 otherwise.
+     * @return Generated restore code.
+     */
+    protected InsnList restoreCodeDispatcher(int localFrame, List<LabelNode> restores, int startIndex) {
+        assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
 
-  //
-  // Instructions helper.
-  //
+        var instructions = new InsnList();
 
-  /**
-   * Replace instruction.
-   *
-   * @param instruction Instruction to replace.
-   * @param replacement Replacement.
-   */
-  protected void replace(AbstractInsnNode instruction, InsnList replacement) {
-    method.instructions.insert(instruction, replacement);
-    method.instructions.remove(instruction);
-  }
+        if (restores.size() == 1) {
+            // just one method call -> nothing to dispatch -> execute directly
+            instructions.add(new JumpInsnNode(GOTO, restores.get(0)));
+            return instructions;
+        }
 
-  /**
-   * Insert label before all instructions.
-   *
-   * @return Existing label, if there is already a label at the start of the method, new label otherwise.
-   */
-  protected LabelNode insertLabelAtStart() {
-    var first = method.instructions.getFirst();
-    var label = searchLabel(first, AbstractInsnNode::getNext);
-    if (label == null) {
-      label = new LabelNode();
-      method.instructions.insertBefore(first, label);
+        var defaultLabel = new LabelNode();
+        restores.replaceAll(label -> label != null ? label : defaultLabel);
+
+        // switch(currentFrame.method) // branch to specific restore code
+        instructions.add(threadCode.pushMethod(localFrame));
+        instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(LabelNode[]::new)));
+
+        // default case -> may not happen -> throw IllegalThreadStateException
+        instructions.add(defaultLabel);
+        instructions.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
+        instructions.add(new InsnNode(DUP));
+        instructions.add(new LdcInsnNode("Invalid method pointer"));
+        instructions.add(new MethodInsnNode(INVOKESPECIAL, "java/lang/IllegalThreadStateException", "<init>", "(" + STRING_DESC + ")V", false));
+        instructions.add(new InsnNode(ATHROW));
+
+        return instructions;
     }
 
-    return label;
-  }
+    //
+    // capture code insertion
+    //
 
-  /**
-   * Insert label before instruction.
-   *
-   * @param instruction Instruction to insert label before.
-   * @return Existing label, if there is already a label before the instruction, new label otherwise.
-   */
-  protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
-    var label = searchLabel(instruction, AbstractInsnNode::getPrevious);
-    if (label == null) {
-      label = new LabelNode();
-      method.instructions.insertBefore(instruction, label);
+    /**
+     * Inserts capture code after method calls.
+     * Mainly used for concrete methods.
+     */
+    protected void insertCaptureCode() {
+        int methodCallIndex = 0;
+        for (var methodCall : interruptibleMethodCalls) {
+            var metaInfo = metaInfos.get(methodCall);
+            createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false);
+        }
     }
 
-    return label;
-  }
+    /**
+     * Inserts capture and restore code after method calls.
+     * Mainly used for copied concrete methods.
+     *
+     * @return Labels pointing to the generated restore codes for method calls.
+     */
+    protected List<LabelNode> insertCaptureAndRestoreCode() {
+        var restores = new ArrayList<LabelNode>(interruptibleMethodCalls.size());
+        int methodCallIndex = 0;
+        for (var methodCall : interruptibleMethodCalls) {
+            var metaInfo = metaInfos.get(methodCall);
+            restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, true));
+        }
 
-  /**
-   * Insert label after instruction.
-   *
-   * @param instruction Instruction to insert label after.
-   * @return Existing label, if there is already a label after the instruction, new label otherwise.
-   */
-  protected LabelNode insertLabelAfter(AbstractInsnNode instruction) {
-    var label = searchLabel(instruction, AbstractInsnNode::getNext);
-    if (label == null) {
-      label = new LabelNode();
-      method.instructions.insert(instruction, label);
+        return restores;
     }
 
-    return label;
-  }
+    /**
+     * Insert frame capturing and restore code after the given method call.
+     *
+     * @param methodCall
+     *         Method call to generate capturing code for.
+     * @param metaInfo
+     *         Meta information about method call.
+     * @param position
+     *         Position of method call in method.
+     * @param restore
+     *         Generate restore code too?.
+     * @return Label to restore code, or null, if no restore code has been generated.
+     */
+    protected abstract LabelNode createCaptureAndRestoreCode(MethodInsnNode methodCall, MetaInfo metaInfo, int position, boolean restore);
 
-  /**
-   * Insert label after all instructions.
-   *
-   * @return Existing label, if there is already a label at the end of the method, new label otherwise.
-   */
-  protected LabelNode insertLabelAtEnd() {
-    var last = method.instructions.getLast();
-    var label = searchLabel(last, AbstractInsnNode::getPrevious);
-    if (label == null) {
-      label = new LabelNode();
-      method.instructions.insert(last, label);
+    /**
+     * Replace all return instructions by ThreadFinishedException.
+     * Needed for transformation of IRunnable.run().
+     */
+    protected void replaceRunReturns() {
+        // TODO 2013-11-24 mh: implement as method -> call method?
+
+        var exception = new LabelNode();
+        for (var returnInstruction : returnInstructions(method)) {
+            method.instructions.set(returnInstruction, new JumpInsnNode(GOTO, exception));
+        }
+
+        var instructions = new InsnList();
+        instructions.add(exception);
+        // throw new ThreadFinishedException(this.toString());
+        instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
+        instructions.add(new InsnNode(DUP));
+        // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
+        instructions.add(new VarInsnNode(ALOAD, 0));
+        instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC, false));
+        instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V", false));
+        instructions.add(new InsnNode(ATHROW));
+        method.instructions.insert(method.instructions.getLast(), instructions);
     }
 
-    return label;
-  }
+    //
+    // Stack frame code.
+    //
 
-  /**
-   * Search label node. Stops at first real instruction.
-   *
-   * @param start Instruction to start search at.
-   * @param direction Direction of search.
-   * @return Label, if there is a label before any real instruction, null otherwise.
-   */
-  private LabelNode searchLabel(AbstractInsnNode start, Function<AbstractInsnNode, AbstractInsnNode> direction) {
-    for (var l = start; l != null && l.getOpcode() < 0; l = direction.apply(l)) {
-      if (l instanceof LabelNode labelNode) {
-        return labelNode;
-      }
+    /**
+     * Push method onto frame.
+     *
+     * @param localFrame
+     *         Number of local containing the current frame .
+     * @param position
+     *         position of method call.
+     * @return generated capture code.
+     */
+    protected InsnList setMethod(int localFrame, int position) {
+        if (interruptibleMethodCalls.size() <= 1) {
+            return new InsnList();
+        }
+
+        return threadCode.setMethod(localFrame, position);
     }
 
-    return null;
-  }
+    /**
+     * Suppress capturing of owner?.
+     */
+    protected boolean suppressOwner() {
+        return false;
+    }
+
+    /**
+     * Push owner (this) of the transformed method onto the frame of its caller.
+     * The caller needs it to call the transformed method again when restoring.
+     *
+     * @param localPreviousFrame
+     *         Number of local containing the previous frame.
+     * @return generated capture code.
+     */
+    protected InsnList setOwner(int localPreviousFrame) {
+        if (suppressOwner() || isStatic(method)) {
+            // Static methods have no owner.
+            return new InsnList();
+        }
+
+        return threadCode.setOwner(localPreviousFrame);
+    }
+
+    /**
+     * Remove the owner of a replaced interrupt method call from the stack.
+     * Interrupt methods have no parameters, so the owner is the only remainder of the call.
+     *
+     * @param methodCall
+     *         interrupt method call, which will be replaced.
+     * @return generated code.
+     */
+    protected InsnList popOwner(MethodInsnNode methodCall) {
+        var instructions = new InsnList();
+        if (isNotStatic(methodCall)) {
+            instructions.add(new InsnNode(POP));
+        }
+        return instructions;
+    }
+
+    /**
+     * Restore owner.
+     *
+     * @param methodCall
+     *         method call to process.
+     * @param metaInfo
+     *         Meta information about method call.
+     * @param localFrame
+     *         Number of local containing the current frame .
+     * @return generated restore code.
+     */
+    protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
+        var instructions = new InsnList();
+
+        if (isSelfCall(method, methodCall, metaInfo)) {
+            // self call: owner == this
+            instructions.add(new VarInsnNode(ALOAD, 0));
+        } else if (isNotStatic(methodCall)) {
+            // get owner
+            instructions.add(threadCode.pushOwner(localFrame));
+            instructions.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
+        }
+
+        return instructions;
+    }
+
+    //
+    // Instructions helper.
+    //
+
+    /**
+     * Replace instruction.
+     *
+     * @param instruction
+     *         Instruction to replace.
+     * @param replacement
+     *         Replacement.
+     */
+    protected void replace(AbstractInsnNode instruction, InsnList replacement) {
+        method.instructions.insert(instruction, replacement);
+        method.instructions.remove(instruction);
+    }
+
+    /**
+     * Insert label before all instructions.
+     *
+     * @return Existing label, if there is already a label at the start of the method, new label otherwise.
+     */
+    protected LabelNode insertLabelAtStart() {
+        var first = method.instructions.getFirst();
+        var label = searchLabel(first, AbstractInsnNode::getNext);
+        if (label == null) {
+            label = new LabelNode();
+            method.instructions.insertBefore(first, label);
+        }
+
+        return label;
+    }
+
+    /**
+     * Insert label before instruction.
+     *
+     * @param instruction
+     *         Instruction to insert label before.
+     * @return Existing label, if there is already a label before the instruction, new label otherwise.
+     */
+    protected LabelNode insertLabelBefore(AbstractInsnNode instruction) {
+        var label = searchLabel(instruction, AbstractInsnNode::getPrevious);
+        if (label == null) {
+            label = new LabelNode();
+            method.instructions.insertBefore(instruction, label);
+        }
+
+        return label;
+    }
+
+    /**
+     * Insert label after instruction.
+     *
+     * @param instruction
+     *         Instruction to insert label after.
+     * @return Existing label, if there is already a label after the instruction, new label otherwise.
+     */
+    protected LabelNode insertLabelAfter(AbstractInsnNode instruction) {
+        var label = searchLabel(instruction, AbstractInsnNode::getNext);
+        if (label == null) {
+            label = new LabelNode();
+            method.instructions.insert(instruction, label);
+        }
+
+        return label;
+    }
+
+    /**
+     * Insert label after all instructions.
+     *
+     * @return Existing label, if there is already a label at the end of the method, new label otherwise.
+     */
+    protected LabelNode insertLabelAtEnd() {
+        var last = method.instructions.getLast();
+        var label = searchLabel(last, AbstractInsnNode::getPrevious);
+        if (label == null) {
+            label = new LabelNode();
+            method.instructions.insert(last, label);
+        }
+
+        return label;
+    }
+
+    /**
+     * Search label node. Stops at first real instruction.
+     *
+     * @param start
+     *         Instruction to start search at.
+     * @param direction
+     *         Direction of search.
+     * @return Label, if there is a label before any real instruction, null otherwise.
+     */
+    private LabelNode searchLabel(AbstractInsnNode start, Function<AbstractInsnNode, AbstractInsnNode> direction) {
+        for (var l = start; l != null && l.getOpcode() < 0; l = direction.apply(l)) {
+            if (l instanceof LabelNode labelNode) {
+                return labelNode;
+            }
+        }
+
+        return null;
+    }
 }

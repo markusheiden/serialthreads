@@ -6,7 +6,7 @@ import org.serialthreads.context.IRunnable;
  * Interface for counters.
  */
 public interface ICounter extends IRunnable {
-  boolean isReady();
+    boolean isReady();
 
-  long getCount();
+    long getCount();
 }

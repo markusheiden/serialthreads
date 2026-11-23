@@ -5,7 +5,7 @@ package org.serialthreads.transformer;
  * So it is unknown, whether the referencing class needs to be transformed.
  */
 public class MissingClassException extends NotTransformableException {
-  public MissingClassException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public MissingClassException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

@@ -21,57 +21,58 @@ import static org.serialthreads.transformer.code.MethodCode.isRun;
  * This transformation needs a static thread holder, {@link SimpleSerialThreadManager} needs to be used.
  */
 public class FrequentInterruptsTransformer extends AbstractTransformer {
-  /**
-   * Strategy name.
-   */
-  public static final String STRATEGY = "FREQUENT";
+    /**
+     * Strategy name.
+     */
+    public static final String STRATEGY = "FREQUENT";
 
-  /**
-   * Constructor.
-   *
-   * @param classInfoCache class cache to use
-   */
-  public FrequentInterruptsTransformer(IClassInfoCache classInfoCache) {
-    super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
-  }
-
-  @Override
-  protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
-    if (isAbstract(method)) {
-      // abstract methods need no transformation
-      return null;
+    /**
+     * Constructor.
+     *
+     * @param classInfoCache
+     *         class cache to use
+     */
+    public FrequentInterruptsTransformer(IClassInfoCache classInfoCache) {
+        super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
     }
 
-    if (isRun(clazz, method, classInfoCache)) {
-      // take special care of run method
-      return singletonList(
-        new RunMethodTransformer(clazz, method, classInfoCache).transform());
+    @Override
+    protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
+        if (isAbstract(method)) {
+            // abstract methods need no transformation
+            return null;
+        }
+
+        if (isRun(clazz, method, classInfoCache)) {
+            // take special care of run method
+            return singletonList(
+                    new RunMethodTransformer(clazz, method, classInfoCache).transform());
+        }
+
+        if (hasNoInterruptibleMethodCalls(method)) {
+            // no transformation needed
+            return null;
+        }
+
+        // "standard" transformation of interruptible methods
+        return singletonList(
+                new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
     }
 
-    if (hasNoInterruptibleMethodCalls(method)) {
-      // no transformation needed
-      return null;
+    @Override
+    protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
+        if (isInterface(clazz) || implementTransformedRunnable(clazz, constructors, true, true)) {
+            return;
+        }
+
+        if (!classInfoCache.isInterruptible(classInfoCache.getSuperClass(clazz.name))) {
+            logger.debug("  Creating stack for {}", clazz.name);
+            addThreadField(clazz, false);
+        }
     }
 
-    // "standard" transformation of interruptible methods
-    return singletonList(
-      new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
-  }
-
-  @Override
-  protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
-    if (isInterface(clazz) || implementTransformedRunnable(clazz, constructors, true, true)) {
-      return;
+    @Override
+    public String toString() {
+        return "Transformer " + STRATEGY;
     }
-
-    if (!classInfoCache.isInterruptible(classInfoCache.getSuperClass(clazz.name))) {
-      logger.debug("  Creating stack for {}", clazz.name);
-      addThreadField(clazz, false);
-    }
-  }
-
-  @Override
-  public String toString() {
-    return "Transformer " + STRATEGY;
-  }
 }

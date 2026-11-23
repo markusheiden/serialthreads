@@ -8,27 +8,27 @@ import org.serialthreads.context.IRunnable;
  * Test object for tail call handling.
  */
 public class TestTailCall implements IRunnable {
-  public int value = -1;
+    public int value = -1;
 
-  @Interruptible
-  public void run() {
-    value = method1();
-    interrupt();
-  }
+    @Interruptible
+    public void run() {
+        value = method1();
+        interrupt();
+    }
 
-  @Interruptible
-  private int method1() {
-    return method2();
-  }
+    @Interruptible
+    private int method1() {
+        return method2();
+    }
 
-  @Interruptible
-  private int method2() {
-    interrupt();
-    return 1;
-  }
+    @Interruptible
+    private int method2() {
+        interrupt();
+        return 1;
+    }
 
-  @Interrupt
-  private void interrupt() {
-    throw new UnsupportedOperationException("Method calls should be replaced by interrupt code");
-  }
+    @Interrupt
+    private void interrupt() {
+        throw new UnsupportedOperationException("Method calls should be replaced by interrupt code");
+    }
 }

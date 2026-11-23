@@ -9,44 +9,44 @@ import org.serialthreads.context.IRunnable;
  * The two subclasses merge at the ternary operator.
  */
 public class TestTypeMerge implements IRunnable {
-  public String value = "";
+    public String value = "";
 
-  // Deliberately not final, so that the ternary operator does not get folded by javac.
-  private boolean flag = true;
+    // Deliberately not final, so that the ternary operator does not get folded by javac.
+    private boolean flag = true;
 
-  @Interruptible
-  public void run() {
-    // Force a frame merge of the two subclasses, so that their common super class gets computed.
-    Base base = flag ? new SubA() : new SubB();
+    @Interruptible
+    public void run() {
+        // Force a frame merge of the two subclasses, so that their common super class gets computed.
+        Base base = flag ? new SubA() : new SubB();
 
-    interrupt();
+        interrupt();
 
-    value = base.name();
-  }
-
-  @Interrupt
-  void interrupt() {
-    // Method call will be redirected to interrupt code.
-  }
-
-  /**
-   * Common super class of the merged classes.
-   */
-  static abstract class Base {
-    abstract String name();
-  }
-
-  static class SubA extends Base {
-    @Override
-    String name() {
-      return "a";
+        value = base.name();
     }
-  }
 
-  static class SubB extends Base {
-    @Override
-    String name() {
-      return "b";
+    @Interrupt
+    void interrupt() {
+        // Method call will be redirected to interrupt code.
     }
-  }
+
+    /**
+     * Common super class of the merged classes.
+     */
+    static abstract class Base {
+        abstract String name();
+    }
+
+    static class SubA extends Base {
+        @Override
+        String name() {
+            return "a";
+        }
+    }
+
+    static class SubB extends Base {
+        @Override
+        String name() {
+            return "b";
+        }
+    }
 }

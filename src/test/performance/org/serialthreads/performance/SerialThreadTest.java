@@ -11,83 +11,83 @@ import org.serialthreads.context.SimpleSerialThreadManager;
  */
 @Transform(classPrefixes = "org.serialthreads.performance")
 class SerialThreadTest extends AbstractPerformanceTest {
-  private Thread managerThread;
-  private volatile boolean ready;
-  private final Object lock = new Object();
+    private Thread managerThread;
+    private volatile boolean ready;
+    private final Object lock = new Object();
 
-  @BeforeEach
-  void setUp() {
-    for (int i = 0; i < counters.length; i++) {
-      counters[i] = new SerialCounter(i);
-    }
-  }
-
-  @Override
-  protected void doStartThreads() {
-    ready = false;
-    managerThread = new Thread(() -> {
-      try {
-        SimpleSerialThreadManager manager = new SimpleSerialThreadManager(counters);
-        synchronized (lock) {
-          ready = true;
-          lock.wait();
+    @BeforeEach
+    void setUp() {
+        for (int i = 0; i < counters.length; i++) {
+            counters[i] = new SerialCounter(i);
         }
-        manager.execute();
-        System.out.println("stopped scheduling");
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }, "Serial thread manager");
-    managerThread.start();
-
-    do {
-      Thread.yield();
-    } while (!ready);
-  }
-
-  @Override
-  protected void doUnlockThreads() {
-    Counter.startAll();
-    synchronized (lock) {
-      lock.notifyAll();
-    }
-  }
-
-  @Override
-  protected void doStopCounters() {
-    System.out.println("stopping all");
-    Counter.stopAll();
-  }
-
-  @Override
-  protected void doStop() {
-    // not needed
-  }
-
-  @Override
-  protected void doJoinThreads() throws Exception {
-    managerThread.join();
-  }
-
-  static class SerialCounter extends Counter {
-    SerialCounter(int number) {
-      super(number);
     }
 
     @Override
-    protected void waitForStart() {
-      // not needed
+    protected void doStartThreads() {
+        ready = false;
+        managerThread = new Thread(() -> {
+            try {
+                SimpleSerialThreadManager manager = new SimpleSerialThreadManager(counters);
+                synchronized (lock) {
+                    ready = true;
+                    lock.wait();
+                }
+                manager.execute();
+                System.out.println("stopped scheduling");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }, "Serial thread manager");
+        managerThread.start();
+
+        do {
+            Thread.yield();
+        } while (!ready);
     }
 
     @Override
-    @Interruptible
-    protected final void tick(long count) {
-      interrupt();
+    protected void doUnlockThreads() {
+        Counter.startAll();
+        synchronized (lock) {
+            lock.notifyAll();
+        }
     }
 
-    @Interrupt
-    private void interrupt() {
-      throw new IllegalThreadStateException("Byte code transformation failed");
+    @Override
+    protected void doStopCounters() {
+        System.out.println("stopping all");
+        Counter.stopAll();
     }
-  }
+
+    @Override
+    protected void doStop() {
+        // not needed
+    }
+
+    @Override
+    protected void doJoinThreads() throws Exception {
+        managerThread.join();
+    }
+
+    static class SerialCounter extends Counter {
+        SerialCounter(int number) {
+            super(number);
+        }
+
+        @Override
+        protected void waitForStart() {
+            // not needed
+        }
+
+        @Override
+        @Interruptible
+        protected final void tick(long count) {
+            interrupt();
+        }
+
+        @Interrupt
+        private void interrupt() {
+            throw new IllegalThreadStateException("Byte code transformation failed");
+        }
+    }
 }

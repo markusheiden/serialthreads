@@ -18,86 +18,89 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
  * Checks and caches which methods are marked as interruptible.
  */
 public class ClassInfoCacheReflection extends AbstractClassInfoCache {
-  /**
-   * Cosntructor.
-   */
-  public ClassInfoCacheReflection(ClassLoader classLoader) {
-    super(classLoader);
-  }
-
-  @Override
-  protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
-    logger.debug("Scanning class {}", className);
-
-    var classInfo = scanClassFile(className, toProcess);
-    if (classInfo != null) {
-      return classInfo;
+    /**
+     * Cosntructor.
+     */
+    public ClassInfoCacheReflection(ClassLoader classLoader) {
+        super(classLoader);
     }
 
-    logger.error("  Reflection scan of {}", className);
-    return scanReflection(classLoader, className, toProcess);
-  }
+    @Override
+    protected ClassInfo scan(String className, Deque<String> toProcess) throws IOException {
+        logger.debug("Scanning class {}", className);
 
-  /**
-   * Scan a given class for interruptible methods.
-   * Does NOT do a deep scan!
-   * Uses reflection.
-   *
-   * @param classLoader class loader to use
-   * @param className name of class to scan
-   * @param toProcess further classes to scan, will be filled with super class and interfaces of scanned class
-   */
-  private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess) {
-    try {
-      // Scan all other classes via reflection, because not all other classes have class files.
-      var clazz = Class.forName(className.replace('/', '.'), false, classLoader);
+        var classInfo = scanClassFile(className, toProcess);
+        if (classInfo != null) {
+            return classInfo;
+        }
 
-      String superClassName = null;
-      if (clazz.getSuperclass() != null) {
-        superClassName = clazz.getSuperclass().getName().replace('.', '/');
-      }
-      var methodInfos = new HashMap<String, MethodInfo>();
-      var methods = clazz.getDeclaredMethods();
-      for (var method : methods) {
-        var name = method.getName();
-        var desc = Type.getMethodDescriptor(method);
-        var annotations = stream(method.getAnnotations())
-          .map(Annotation::annotationType)
-          .map(Type::getType)
-          .collect(toSet());
-
-        var info = new MethodInfo(method.getModifiers(), name, desc, annotations);
-        methodInfos.put(info.getId(), info);
-      }
-
-      var constructors = clazz.getDeclaredConstructors();
-      for (var constructor : constructors) {
-        var name = "<init>";
-        var desc = Type.getConstructorDescriptor(constructor);
-        Set<Type> annotations = emptySet();
-
-        var info = new MethodInfo(constructor.getModifiers(), name, desc, annotations);
-        methodInfos.put(info.getId(), info);
-      }
-
-      var name = "<clinit>";
-      var desc = "()V";
-      Set<Type> annotations = emptySet();
-
-      var info = new MethodInfo(ACC_STATIC, name, desc, annotations);
-      methodInfos.put(info.getId(), info);
-
-      var classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);
-      if (clazz.getSuperclass() != null) {
-        toProcess.addFirst(clazz.getSuperclass().getName().replace('.', '/'));
-      }
-      for (var superInterface : clazz.getInterfaces()) {
-        toProcess.add(superInterface.getName().replace('.', '/'));
-      }
-
-      return classInfo;
-    } catch (ClassNotFoundException e) {
-      throw new MissingClassException("Class " + className + " not found", e);
+        logger.error("  Reflection scan of {}", className);
+        return scanReflection(classLoader, className, toProcess);
     }
-  }
+
+    /**
+     * Scan a given class for interruptible methods.
+     * Does NOT do a deep scan!
+     * Uses reflection.
+     *
+     * @param classLoader
+     *         class loader to use
+     * @param className
+     *         name of class to scan
+     * @param toProcess
+     *         further classes to scan, will be filled with super class and interfaces of scanned class
+     */
+    private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess) {
+        try {
+            // Scan all other classes via reflection, because not all other classes have class files.
+            var clazz = Class.forName(className.replace('/', '.'), false, classLoader);
+
+            String superClassName = null;
+            if (clazz.getSuperclass() != null) {
+                superClassName = clazz.getSuperclass().getName().replace('.', '/');
+            }
+            var methodInfos = new HashMap<String, MethodInfo>();
+            var methods = clazz.getDeclaredMethods();
+            for (var method : methods) {
+                var name = method.getName();
+                var desc = Type.getMethodDescriptor(method);
+                var annotations = stream(method.getAnnotations())
+                        .map(Annotation::annotationType)
+                        .map(Type::getType)
+                        .collect(toSet());
+
+                var info = new MethodInfo(method.getModifiers(), name, desc, annotations);
+                methodInfos.put(info.getId(), info);
+            }
+
+            var constructors = clazz.getDeclaredConstructors();
+            for (var constructor : constructors) {
+                var name = "<init>";
+                var desc = Type.getConstructorDescriptor(constructor);
+                Set<Type> annotations = emptySet();
+
+                var info = new MethodInfo(constructor.getModifiers(), name, desc, annotations);
+                methodInfos.put(info.getId(), info);
+            }
+
+            var name = "<clinit>";
+            var desc = "()V";
+            Set<Type> annotations = emptySet();
+
+            var info = new MethodInfo(ACC_STATIC, name, desc, annotations);
+            methodInfos.put(info.getId(), info);
+
+            var classInfo = new ClassInfo(clazz.isInterface(), className, superClassName, methodInfos);
+            if (clazz.getSuperclass() != null) {
+                toProcess.addFirst(clazz.getSuperclass().getName().replace('.', '/'));
+            }
+            for (var superInterface : clazz.getInterfaces()) {
+                toProcess.add(superInterface.getName().replace('.', '/'));
+            }
+
+            return classInfo;
+        } catch (ClassNotFoundException e) {
+            throw new MissingClassException("Class " + className + " not found", e);
+        }
+    }
 }
