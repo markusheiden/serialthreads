@@ -38,7 +38,6 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 /**
  * Base class for method transformers of {@link FrequentInterruptsTransformer4}.
  */
-@SuppressWarnings("UnusedDeclaration")
 abstract class MethodTransformer extends AbstractMethodTransformer {
   /**
    * Local holding the previous frame.

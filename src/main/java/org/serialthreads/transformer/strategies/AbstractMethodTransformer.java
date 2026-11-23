@@ -61,7 +61,6 @@ import static org.serialthreads.transformer.strategies.MetaInfo.TAG_TAIL_CALL;
 /**
  * Base class for all method transformers.
  */
-@SuppressWarnings("UnusedDeclaration")
 public abstract class AbstractMethodTransformer {
   /**
    * Logger.
