@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -72,8 +73,8 @@ public abstract class AbstractTransformer implements ITransformer {
      *         Default size of frames.
      */
     protected AbstractTransformer(IClassInfoCache classInfoCache, int defaultFrameSize) {
-        assert classInfoCache != null : "Precondition: classInfoCache != null";
-        assert defaultFrameSize > 0 : "Precondition: defaultFrameSize > 0";
+        requireThat(classInfoCache, "classInfoCache").isNotNull();
+        requireThat(defaultFrameSize, "defaultFrameSize").isPositive();
 
         this.classInfoCache = classInfoCache;
         this.defaultFrameSize = defaultFrameSize;
@@ -355,7 +356,7 @@ public abstract class AbstractTransformer implements ITransformer {
      *         Initialize $$frame$$?.
      */
     private void transformConstructor(ClassNode clazz, MethodNode constructor, boolean storeThread, boolean initFrame) {
-        assert constructor.name.equals("<init>") : "Precondition: constructor.name.equals(\"<init>\")";
+        requireThat(constructor.name, "constructor.name").isEqualTo("<init>");
 
         logger.debug("    Transforming constructor {}", methodName(clazz, constructor));
 
@@ -366,7 +367,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
         for (var returnInstruction : returnInstructions(constructor)) {
             // Constructors may not return a value.
-            assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
+            requireThat(returnInstruction.getOpcode(), "returnInstruction.getOpcode()").isEqualTo(RETURN);
 
             var instructions = new InsnList();
             // thread = new Stack(this, defaultFrameSize);

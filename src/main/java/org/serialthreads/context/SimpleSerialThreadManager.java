@@ -2,6 +2,8 @@ package org.serialthreads.context;
 
 import org.serialthreads.Executor;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+
 /**
  * Simple implementation of a thread manager.
  */
@@ -46,7 +48,7 @@ public class SimpleSerialThreadManager extends SerialThreadManager {
     @Override
     @Executor
     public void execute(int interrupts) {
-        assert interrupts > 0 : "Precondition: interrupts > 0";
+        requireThat(interrupts, "interrupts").isPositive();
 
         // long, because the product may overflow an int.
         long loops = (long) interrupts * chains.length;

@@ -13,6 +13,7 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BIPUSH;
@@ -117,7 +118,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
      *         Modified local.
      */
     private void removeLocalFromStack(int modifiedLocal) {
-        assert modifiedLocal >= 0 && modifiedLocal < getLocals() : "Precondition: modifiedLocal >= 0 && modifiedLocal < getLocals()";
+        requireThat(modifiedLocal, "modifiedLocal").isBetween(0, getLocals());
 
         var copy = new ExtendedFrame(this);
         for (int i = 0; i < copy.getLocals(); i++) {

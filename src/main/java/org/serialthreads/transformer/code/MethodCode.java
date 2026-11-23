@@ -17,6 +17,7 @@ import org.serialthreads.transformer.strategies.MetaInfo;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -94,7 +95,7 @@ public final class MethodCode {
         // "Pop" all arguments from stack.
         var argumentTypes = Type.getArgumentTypes(methodCall.desc);
         var s = frameBefore.getStackSize() - argumentTypes.length;
-        assert s > 0 : "Check: stack pointer is positive";
+        requireThat(s, "s").isPositive();
         var ownerType = frameBefore.getStack(s - 1);
         return ownerType instanceof ExtendedValue o && o.getLocals().contains(0);
     }

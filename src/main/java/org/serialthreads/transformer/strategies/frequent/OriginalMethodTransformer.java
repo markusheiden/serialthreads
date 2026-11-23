@@ -11,6 +11,7 @@ import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.List;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNONNULL;
@@ -61,7 +62,7 @@ class OriginalMethodTransformer extends MethodTransformer {
      *         Labels pointing to the generated restore codes for method calls.
      */
     private void createRestoreHandlerMethod(List<LabelNode> restores) {
-        assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
+        requireThat(restores, "restores").isNotEmpty();
 
         logger.debug("    Creating restore handler for method");
 

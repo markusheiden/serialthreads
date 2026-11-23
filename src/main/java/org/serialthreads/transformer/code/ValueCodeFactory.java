@@ -3,6 +3,7 @@ package org.serialthreads.transformer.code;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Type.ARRAY;
 import static org.objectweb.asm.Type.BOOLEAN;
 import static org.objectweb.asm.Type.BYTE;
@@ -35,7 +36,7 @@ public final class ValueCodeFactory {
      *         Basic value.
      */
     public static IValueCode code(BasicValue value) {
-        assert value.getType() != null : "Precondition: value.getType() != null";
+        requireThat(value.getType(), "value.getType()").isNotNull();
 
         return code(value.getType());
     }
@@ -47,7 +48,7 @@ public final class ValueCodeFactory {
      *         Type.
      */
     public static IValueCode code(Type type) {
-        assert type != null : "Precondition: type != null";
+        requireThat(type, "type").isNotNull();
 
         return switch (type.getSort()) {
             case BOOLEAN, CHAR, BYTE, SHORT, INT -> INT_CODE;

@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static java.util.Arrays.asList;
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
@@ -51,29 +52,29 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      *         Class loader for loading classes.
      */
     protected AbstractClassInfoCache(ClassLoader classLoader) {
-        assert classLoader != null : "Precondition: classLoader != null";
+        requireThat(classLoader, "classLoader").isNotNull();
 
         this.classLoader = classLoader;
     }
 
     @Override
     public boolean isInterface(String className) {
-        assert className != null : "Precondition: className != null";
+        requireThat(className, "className").isNotNull();
 
         return getClassInfo(className).isInterface();
     }
 
     @Override
     public Type getSuperClass(String className) {
-        assert className != null : "Precondition: className != null";
+        requireThat(className, "className").isNotNull();
 
         return getClassInfo(className).superType();
     }
 
     @Override
     public boolean hasSuperClass(String className, String superClassName) {
-        assert className != null : "Precondition: className != null";
-        assert superClassName != null : "Precondition: superClassName != null";
+        requireThat(className, "className").isNotNull();
+        requireThat(superClassName, "superClassName").isNotNull();
 
         var classType = Type.getObjectType(className);
         if (classType.getSort() == ARRAY) {
@@ -179,8 +180,8 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     @Override
     public void addClassInfo(String className, byte[] byteCode) {
-        assert className != null : "Precondition: className != null";
-        assert byteCode != null : "Precondition: byteCode != null";
+        requireThat(className, "className").isNotNull();
+        requireThat(byteCode, "byteCode").isNotNull();
 
         // Scan not yet loaded class with ASM to avoid circular class loading.
         logger.debug("  Direct ASM scan of {}", className);
@@ -209,7 +210,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
             }
         }
 
-        assert classInfo != null : "Postcondition: classInfo != null";
+        requireThat(classInfo, "classInfo").isNotNull();
         return classInfo;
     }
 
@@ -220,7 +221,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      *         Class to parse.
      */
     protected ClassInfo process(String owner) {
-        assert owner != null : "Precondition: owner != null";
+        requireThat(owner, "owner").isNotNull();
 
         logger.debug("Computing interruptible status for class {}", owner);
 

@@ -7,6 +7,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.AALOAD;
 import static org.objectweb.asm.Opcodes.AASTORE;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
@@ -31,7 +32,7 @@ public class ReferenceValueCode extends AbstractValueCode {
 
     @Override
     public boolean isCompatibleWith(Type type) {
-        assert type != null : "Precondition: type != null.";
+        requireThat(type, "type").isNotNull();
 
         return super.isCompatibleWith(type) &&
                this.concreteType.getInternalName().equals(type.getInternalName());

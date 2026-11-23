@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.hash;
@@ -58,8 +59,8 @@ public final class ExtendedValue extends BasicValue {
      *         Number of local.
      */
     public static ExtendedValue valueInLocal(Type type, int local) {
-        assert type != null : "Precondition: type != null";
-        assert local >= 0 : "Precondition: local >= 0";
+        requireThat(type, "type").isNotNull();
+        requireThat(local, "local").isNotNegative();
 
         return new ExtendedValue(type, NOT_CONSTANT, Set.of(local));
     }
@@ -73,8 +74,8 @@ public final class ExtendedValue extends BasicValue {
      *         Number of locals.
      */
     public static ExtendedValue valueInLocals(Type type, Set<Integer> locals) {
-        assert type != null : "Precondition: type != null";
-        assert locals != null : "Precondition: locals != null";
+        requireThat(type, "type").isNotNull();
+        requireThat(locals, "locals").isNotNull();
 
         return new ExtendedValue(type, NOT_CONSTANT, locals);
     }
@@ -88,7 +89,7 @@ public final class ExtendedValue extends BasicValue {
      *         Constant value.
      */
     public static ExtendedValue constantValue(Type type, Object constant) {
-        assert type != null : "Precondition: type != null";
+        requireThat(type, "type").isNotNull();
 
         return new ExtendedValue(type, constant, Set.of());
     }
@@ -104,8 +105,8 @@ public final class ExtendedValue extends BasicValue {
      *         Number of locals.
      */
     public static ExtendedValue constantInLocals(Type type, Object constant, Set<Integer> locals) {
-        assert type != null : "Precondition: type != null";
-        assert locals != null : "Precondition: locals != null";
+        requireThat(type, "type").isNotNull();
+        requireThat(locals, "locals").isNotNull();
 
         return new ExtendedValue(type, constant, locals);
     }
@@ -123,8 +124,8 @@ public final class ExtendedValue extends BasicValue {
     private ExtendedValue(Type type, Object constant, Set<Integer> locals) {
         super(type);
 
-        assert type != null : "Precondition: type != null";
-        assert locals != null : "Precondition: locals != null";
+        requireThat(type, "type").isNotNull();
+        requireThat(locals, "locals").isNotNull();
 
         this.constant = constant;
         this.locals = unmodifiableSortedSet(new TreeSet<>(locals));
@@ -141,9 +142,9 @@ public final class ExtendedValue extends BasicValue {
      * Get constant value.
      */
     public Object getConstant() {
-        assert isConstant() : "Precondition: isConstant()";
+        requireThat(isConstant(), "isConstant()").isTrue();
 
-        assert constant != NOT_CONSTANT : "Postcondition: constant != NOT_CONSTANT";
+        requireThat(constant, "constant").isNotEqualTo(NOT_CONSTANT);
         return constant;
     }
 
@@ -161,7 +162,7 @@ public final class ExtendedValue extends BasicValue {
      *         Local to add.
      */
     public ExtendedValue addLocal(int local) {
-        assert local >= 0 : "Precondition: local >= 0";
+        requireThat(local, "local").isNotNegative();
 
         if (locals.contains(local)) {
             return this;
@@ -179,7 +180,7 @@ public final class ExtendedValue extends BasicValue {
      *         The local that has been modified.
      */
     public ExtendedValue removeLocal(int modifiedLocal) {
-        assert modifiedLocal >= 0 : "Precondition: modifiedLocal >= 0";
+        requireThat(modifiedLocal, "modifiedLocal").isNotNegative();
 
         if (!locals.contains(modifiedLocal)) {
             return this;

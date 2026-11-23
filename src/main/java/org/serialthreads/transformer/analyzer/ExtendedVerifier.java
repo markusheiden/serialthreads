@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.constantInLocals;
 import static org.serialthreads.transformer.analyzer.ExtendedValue.valueInLocals;
@@ -74,8 +75,8 @@ public class ExtendedVerifier extends SimpleVerifier {
 
     @Override
     public BasicValue merge(BasicValue v, BasicValue w) {
-        assert v != null : "Precondition: v != null";
-        assert w != null : "Precondition: w != null";
+        requireThat(v, "v").isNotNull();
+        requireThat(w, "w").isNotNull();
 
         var result = super.merge(v, w);
         if (result.equals(UNINITIALIZED_VALUE)) {
@@ -83,8 +84,8 @@ public class ExtendedVerifier extends SimpleVerifier {
             return result;
         }
 
-        assert !v.equals(UNINITIALIZED_VALUE) : "Check: !v.equals(UNINITIALIZED_VALUE)";
-        assert !w.equals(UNINITIALIZED_VALUE) : "Check: !w.equals(UNINITIALIZED_VALUE)";
+        requireThat(v, "v").isNotEqualTo(UNINITIALIZED_VALUE);
+        requireThat(w, "w").isNotEqualTo(UNINITIALIZED_VALUE);
 
         var ev = (ExtendedValue) v;
         var ew = (ExtendedValue) w;

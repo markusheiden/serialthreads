@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ATHROW;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -211,7 +212,7 @@ public abstract class AbstractMethodTransformer {
      * @return Generated restore code.
      */
     protected InsnList restoreCodeDispatcher(int localFrame, List<LabelNode> restores, int startIndex) {
-        assert !restores.isEmpty() : "Precondition: !restores.isEmpty()";
+        requireThat(restores, "restores").isNotEmpty();
 
         var instructions = new InsnList();
 

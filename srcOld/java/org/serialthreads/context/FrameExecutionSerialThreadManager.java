@@ -2,6 +2,8 @@ package org.serialthreads.context;
 
 import org.serialthreads.Executor;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+
 /**
  * Simple implementation of a thread manager.
  * Expects that getThread() is never called!
@@ -17,7 +19,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
    * @param runnables Runnables.
    */
   public FrameExecutionSerialThreadManager(IRunnable... runnables) {
-    assert runnables.length > 0 : "Precondition: runnables.length > 0";
+    requireThat(runnables, "runnables").isNotEmpty();
 
     chains = ChainedRunnable.chain(runnables);
     lastExecuted = chains[chains.length - 1];
@@ -57,7 +59,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
    */
   @Executor
   public void execute(int interrupts) {
-    assert interrupts > 0 : "Precondition: interrupts > 0";
+    requireThat(interrupts, "interrupts").isPositive();
 
     int loops = interrupts * chains.length;
 

@@ -4,6 +4,7 @@ import org.objectweb.asm.Type;
 
 import java.util.Set;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
@@ -30,9 +31,9 @@ public class MethodInfo {
      *         Descriptors of the type of the annotations of this method.
      */
     public MethodInfo(int access, String name, String desc, Set<Type> annotations) {
-        assert name != null : "Precondition: name != null";
-        assert desc != null : "Precondition: desc != null";
-        assert annotations != null : "Precondition: annotations != null";
+        requireThat(name, "name").isNotNull();
+        requireThat(desc, "desc").isNotNull();
+        requireThat(annotations, "annotations").isNotNull();
 
         this.access = access;
         this.id = name + desc;
@@ -97,7 +98,7 @@ public class MethodInfo {
      *         Type of annotation.
      */
     public boolean hasAnnotation(Type annotationType) {
-        assert annotationType != null : "Precondition: annotationType != null";
+        requireThat(annotationType, "annotationType").isNotNull();
 
         return annotations.contains(annotationType);
     }
@@ -108,8 +109,8 @@ public class MethodInfo {
     public MethodInfo copy() {
         var result = new MethodInfo(access, name, desc, annotations);
 
-        assert result != null : "Postcondition: result != null";
-        assert getId().equals(result.getId()) : "Postcondition: getID().equals(result.getID())";
+        requireThat(result, "result").isNotNull();
+        requireThat(result.getId(), "result.getId()").isEqualTo(getId(), "getId()");
         return result;
     }
 

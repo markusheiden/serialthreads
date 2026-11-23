@@ -11,6 +11,7 @@ import org.serialthreads.transformer.code.MethodNodeCopier;
 
 import java.util.List;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ACC_SYNTHETIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
@@ -87,7 +88,7 @@ class CopyMethodTransformer extends MethodTransformer {
      *         Labels pointing to the generated restore codes for method calls.
      */
     private void createRestoreHandlerCopy(List<LabelNode> restores) {
-        assert !restores.isEmpty() : "Precondition: !restoreCodes.isEmpty()";
+        requireThat(restores, "restores").isNotEmpty();
 
         logger.debug("    Creating restore handler for copied method");
 

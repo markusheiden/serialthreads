@@ -2,6 +2,8 @@ package org.serialthreads.context;
 
 import org.serialthreads.Executor;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+
 /**
  * Thread executor for transformers that do not need a current thread holder.
  * Other transformers need a {@link SerialThreadManager} for execution.
@@ -51,7 +53,7 @@ public class SerialThreadExecutor {
      */
     @Executor
     public void execute(int interrupts) {
-        assert interrupts > 0 : "Precondition: interrupts > 0";
+        requireThat(interrupts, "interrupts").isPositive();
 
         // long, because the product may overflow an int.
         long loops = (long) interrupts * chains.length;

@@ -3,6 +3,8 @@ package org.serialthreads.transformer.classcache;
 import java.io.IOException;
 import java.util.Deque;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+
 /**
  * Checks and caches which methods are marked as interruptible.
  */
@@ -26,7 +28,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
             throw new IOException("Class file for class " + className + " not found");
         }
 
-        assert classInfo != null : "Postcondition: classInfo != null";
+        requireThat(classInfo, "classInfo").isNotNull();
         return classInfo;
     }
 }

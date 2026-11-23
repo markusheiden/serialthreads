@@ -40,6 +40,8 @@ dependencies {
     implementation(libs.asm.tree)
     implementation(libs.asm.util)
 
+    implementation(libs.requirements)
+
     testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core")

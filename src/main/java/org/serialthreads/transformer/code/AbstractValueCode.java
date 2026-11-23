@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import org.serialthreads.context.Stack;
 import org.serialthreads.context.StackFrame;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.DUP_X2;
@@ -130,7 +131,7 @@ public abstract class AbstractValueCode implements IValueCode {
 
     @Override
     public boolean isCompatibleWith(Type type) {
-        assert type != null : "Precondition: type != null";
+        requireThat(type, "type").isNotNull();
 
         return isResponsibleFor(type);
     }
