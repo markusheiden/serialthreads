@@ -9,9 +9,8 @@ import org.serialthreads.transformer.LoadUntransformedException;
 import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.serialthreads.transformer.ByteCodes.byteCode;
 import static org.serialthreads.transformer.Strategies.DEFAULT;
 
 /**
@@ -79,13 +78,6 @@ class AbstractTransformerCheckTest {
   //
   // Helper.
   //
-
-  byte[] byteCode(Class<?> clazz) throws IOException {
-    var classFile = clazz.getName().replace('.', '/') + ".class";
-    try (var in = clazz.getClassLoader().getResourceAsStream(classFile)) {
-      return in.readAllBytes();
-    }
-  }
 
   static class RunExecutor {
     @Executor

@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
+import static org.serialthreads.transformer.ByteCodes.byteCode;
 
 /**
  * Test that the strategies passing the owner at method entry just do so, if the method may be restored.
@@ -63,13 +64,6 @@ class OwnerCaptureTest {
   //
   // Helper.
   //
-
-  byte[] byteCode(Class<?> clazz) throws IOException {
-    var classFile = clazz.getName().replace('.', '/') + ".class";
-    try (var in = clazz.getClassLoader().getResourceAsStream(classFile)) {
-      return in.readAllBytes();
-    }
-  }
 
   static class Worker {
     int value;
