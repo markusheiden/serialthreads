@@ -17,7 +17,4 @@ public final class ByteCodes {
       return in.readAllBytes();
     }
   }
-
-  private ByteCodes() {
-  }
 }
