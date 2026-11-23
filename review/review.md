@@ -9,7 +9,7 @@ against the ASM 9.x sources.
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
 C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, L7, L8, L13, M1, M2, M4, M5, M7, M9
-and M10, fixed 2026-11-22; L5 and L9, fixed 2026-11-23)
+and M10, fixed 2026-11-22; L1, L5 and L9, fixed 2026-11-23)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -53,11 +53,7 @@ All medium severity findings have been fixed.
 
 ## Correctness — Low
 
-- **L1.** `strategies/AbstractMethodTransformer.java:140-146` — `analyze()` stores
-  analyzer frames directly; unreachable interruptible calls (possible with non-javac
-  bytecode) get `MetaInfo` with null frames → NPE in `CompactingStackCode` instead of a
-  `NotTransformableException`.
-- **L2.** `strategies/AbstractMethodTransformer.java:193-200, 257` — the documented
+- **L2.** `strategies/AbstractMethodTransformer.java:199-206, 263` — the documented
   "may return null" contract of `createCaptureAndRestoreCode` is honored by no strategy
   (all return a — sometimes dangling, never-inserted — label), the single-restore path
   would emit `GOTO null` if it ever were, and the multi-restore `replaceAll` null-guard
@@ -125,7 +121,7 @@ All medium severity findings have been fixed.
 - **C8 (low).** `transformer/code/` — `MethodNodeCopier.copyEmpty` (also lossier than
   `copy`); `IValueCode.move`/`AbstractValueCode.move`; the whole
   `MethodCode.isCompatible` → `isCompatibleWith` chain (~40 lines across four files).
-- **C9 (low).** `strategies/AbstractMethodTransformer.java:410-434` —
+- **C9 (low).** `strategies/AbstractMethodTransformer.java:416-440` —
   `insertLabelBefore`/`insertLabelAfter` have zero callers; related, `searchLabel`
   (459-467) tests the start node itself first, so label reuse never triggers for real
   instructions. `AbstractTransformer.logDebug(Frame)` likewise uncalled. The blanket

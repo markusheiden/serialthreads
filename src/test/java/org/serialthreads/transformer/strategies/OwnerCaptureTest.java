@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 import static org.serialthreads.transformer.ByteCodes.byteCode;
+import static org.serialthreads.transformer.ByteCodes.readClass;
 
 /**
  * Test that the strategies passing the owner at method entry just do so, if the method may be restored.
@@ -49,8 +50,7 @@ class OwnerCaptureTest {
    */
   boolean storesOwner(IStrategy strategy, String methodName) throws IOException {
     var transformer = strategy.getTransformer(new ClassInfoCacheASM(getClass().getClassLoader()));
-    var clazz = new ClassNode();
-    new ClassReader(transformer.transform(byteCode(Worker.class))).accept(clazz, 0);
+    var clazz = readClass(transformer.transform(byteCode(Worker.class)));
 
     var method = clazz.methods.stream().filter(m -> m.name.equals(methodName)).findFirst().orElseThrow();
     for (var instruction : method.instructions) {

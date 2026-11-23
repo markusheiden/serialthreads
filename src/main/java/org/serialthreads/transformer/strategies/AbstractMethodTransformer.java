@@ -135,7 +135,7 @@ public abstract class AbstractMethodTransformer {
    * Extract all interruptible method calls.
    *
    * @throws AnalyzerException on invalid byte code.
-   * @throws NotTransformableException if the method calls run().
+   * @throws NotTransformableException if the method calls run() or contains an unreachable interruptible call.
    */
   protected void analyze() throws AnalyzerException {
     // Init meta information.
@@ -154,6 +154,12 @@ public abstract class AbstractMethodTransformer {
             throw new NotTransformableException(
               "Interruptible method %s may not call run, just executors may do that"
                       .formatted(methodName(clazz, method)));
+          }
+          if (metaInfos.get(instruction).frameBefore == null) {
+            // The analyzer computes no frames for unreachable code, so there is nothing to capture and restore.
+            throw new NotTransformableException(
+              "Interruptible method %s contains an unreachable call of the interruptible method %s"
+                      .formatted(methodName(clazz, method), methodName(methodCall)));
           }
           interruptibleMethodCalls.add(methodCall);
           tag(instruction, TAG_INTERRUPTIBLE);

@@ -1,6 +1,10 @@
 package org.serialthreads.transformer.strategies;
 
 import org.junit.jupiter.api.Test;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.serialthreads.Executor;
 import org.serialthreads.Interruptible;
 import org.serialthreads.context.IRunnable;
@@ -10,7 +14,10 @@ import org.serialthreads.transformer.NotTransformableException;
 import org.serialthreads.transformer.classcache.ClassInfoCacheASM;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.objectweb.asm.Opcodes.RETURN;
 import static org.serialthreads.transformer.ByteCodes.byteCode;
+import static org.serialthreads.transformer.ByteCodes.readClass;
+import static org.serialthreads.transformer.ByteCodes.writeClass;
 import static org.serialthreads.transformer.Strategies.DEFAULT;
 
 /**
@@ -75,6 +82,26 @@ class AbstractTransformerCheckTest {
       .hasMessageContaining("may not call run");
   }
 
+  /**
+   * An interruptible method may not contain unreachable interruptible calls.
+   * javac does not generate unreachable code, so a return is inserted at the start of the method.
+   */
+  @Test
+  void testInterruptible_unreachable() throws Exception {
+    var unreachable = readClass(Unreachable.class);
+    unreachable.methods.stream()
+            .filter(method -> method.name.equals("test"))
+            .findFirst().orElseThrow()
+            .instructions.insert(new InsnNode(RETURN));
+    var byteCode = writeClass(unreachable);
+
+    assertThatThrownBy(() -> transformer.transform(byteCode))
+      .isInstanceOf(NotTransformableException.class)
+      .hasMessageContaining("unreachable call")
+      .hasMessageContaining("#test(")
+      .hasMessageContaining("#work(");
+  }
+
   //
   // Helper.
   //
@@ -109,6 +136,15 @@ class AbstractTransformerCheckTest {
     @Interruptible
     void test(IRunnable runnable) {
       runnable.run();
+    }
+  }
+
+  static class Unreachable {
+    @Interruptible
+    void test(Worker worker) {
+      // The first call is no tail call, because tail calls need no frames.
+      worker.work();
+      worker.work();
     }
   }
 
