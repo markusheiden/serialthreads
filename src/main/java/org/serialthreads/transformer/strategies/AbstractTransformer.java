@@ -428,7 +428,7 @@ public abstract class AbstractTransformer implements ITransformer {
      *         Frame.
      */
     @SuppressWarnings({ "UnusedDeclaration" })
-    protected void logDebug(Frame frame) {
+    protected void logDebug(Frame<?> frame) {
         for (int i = 0; i < frame.getLocals(); i++) {
             var local = (BasicValue) frame.getLocal(i);
             logger.debug("        Local {}: {}", i, local.isReference() ? local.getType().getDescriptor() : local);
