@@ -150,7 +150,6 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         }
 
         var instructions = method.instructions;
-        //noinspection InfiniteLoopStatement
         while (true) {
             var instruction = instructions.get(index);
             var frameBefore = frames[index];
