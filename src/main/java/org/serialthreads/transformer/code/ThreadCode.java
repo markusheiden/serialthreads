@@ -140,9 +140,9 @@ public interface ThreadCode {
      * Save current frameAfter after returning from a method call.
      *
      * @param method
-     *         method containing the method call.
+     *         Method containing the method call.
      * @param methodCall
-     *         method call to process.
+     *         Method call to process.
      * @param metaInfo
      *         Meta information about method call.
      * @param localFrame
@@ -155,9 +155,9 @@ public interface ThreadCode {
      * Set position as {@link StackFrame#method}.
      *
      * @param localFrame
-     *         number of local containing the current frame.
+     *         Number of local containing the current frame.
      * @param position
-     *         position of method call.
+     *         Position of method call.
      * @return Generated code.
      */
     InsnList setMethod(int localFrame, int position);
@@ -208,7 +208,7 @@ public interface ThreadCode {
      * @param localThread
      *         Number of local containing the thread.
      * @param localFrame
-     *         number of local containing the frame.
+     *         Number of local containing the frame.
      * @return Generated code.
      */
     InsnList setFrame(int localThread, int localFrame);
@@ -217,7 +217,7 @@ public interface ThreadCode {
      * Push {@link StackFrame#owner} onto stack.
      *
      * @param localFrame
-     *         number of local containing the frame.
+     *         Number of local containing the frame.
      * @return Generated code.
      */
     InsnList pushOwner(int localFrame);
@@ -226,7 +226,7 @@ public interface ThreadCode {
      * Push {@link StackFrame#method} onto stack.
      *
      * @param localFrame
-     *         number of local containing the current frame.
+     *         Number of local containing the current frame.
      * @return Generated code.
      */
     InsnList pushMethod(int localFrame);
@@ -235,13 +235,13 @@ public interface ThreadCode {
      * Restore current frame before resuming the method call.
      *
      * @param method
-     *         method containing the method call.
+     *         Method containing the method call.
      * @param methodCall
-     *         method call to process.
+     *         Method call to process.
      * @param metaInfo
      *         Meta information about method call.
      * @param localFrame
-     *         number of local containing the frame.
+     *         Number of local containing the frame.
      * @return Generated code.
      */
     InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame);

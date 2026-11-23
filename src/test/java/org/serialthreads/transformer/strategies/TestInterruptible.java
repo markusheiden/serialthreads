@@ -131,7 +131,7 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     }
 
     //
-    // Check results of execution ("self test")
+    // Check results of execution ("self test").
     //
 
     /**

@@ -13,7 +13,7 @@ public interface IValueCode {
      * Is this type compatible with another type?
      *
      * @param type
-     *         type.
+     *         Type.
      */
     boolean isCompatibleWith(Type type);
 
@@ -21,7 +21,7 @@ public interface IValueCode {
      * Is this code responsible for handling the given type?
      *
      * @param type
-     *         type.
+     *         Type.
      */
     boolean isResponsibleFor(Type type);
 
@@ -34,9 +34,9 @@ public interface IValueCode {
      * stack. The stack element to push is expected to be the element under the frame.
      *
      * @param index
-     *         index of stack element among stack elements of the same type.
+     *         Index of stack element among stack elements of the same type.
      * @param localFrame
-     *         frame to push to.
+     *         Frame to push to.
      */
     InsnList pushStack(int index, int localFrame);
 
@@ -45,9 +45,9 @@ public interface IValueCode {
      * stack.
      *
      * @param index
-     *         index of stack element among stack elements of the same type.
+     *         Index of stack element among stack elements of the same type.
      * @param localFrame
-     *         frame to pop from.
+     *         Frame to pop from.
      */
     InsnList popStack(int index, int localFrame);
 
@@ -59,13 +59,13 @@ public interface IValueCode {
      * Generate code to capture a local to a frame.
      *
      * @param local
-     *         number of local.
+     *         Number of local.
      * @param index
-     *         index of local among locals of the same type.
+     *         Index of local among locals of the same type.
      * @param more
      *         Are there any more values to capture?
      * @param localFrame
-     *         frame to push to.
+     *         Frame to push to.
      */
     InsnList pushLocal(int local, int index, boolean more, int localFrame);
 
@@ -73,13 +73,13 @@ public interface IValueCode {
      * Generate code to restore a local from a frame.
      *
      * @param local
-     *         number of local.
+     *         Number of local.
      * @param index
-     *         index of local among locals of the same type.
+     *         Index of local among locals of the same type.
      * @param more
      *         Are there any more values to capture?
      * @param localFrame
-     *         frame to pop from.
+     *         Frame to pop from.
      */
     InsnList popLocal(int local, int index, boolean more, int localFrame);
 
@@ -121,7 +121,7 @@ public interface IValueCode {
      * Push value from local onto stack.
      *
      * @param i
-     *         number of local variable.
+     *         Number of local variable.
      */
     VarInsnNode load(int i);
 
@@ -129,7 +129,7 @@ public interface IValueCode {
      * Pop value from stack into local.
      *
      * @param i
-     *         number of local variable.
+     *         Number of local variable.
      */
     VarInsnNode store(int i);
 
@@ -157,7 +157,7 @@ public interface IValueCode {
      * Push value on stack.
      *
      * @param value
-     *         value.
+     *         Value.
      */
     AbstractInsnNode push(Object value);
 

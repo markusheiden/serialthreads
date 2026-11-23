@@ -17,11 +17,11 @@ class RunMethodTransformer extends MethodTransformer {
      * Constructor.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method to transform
+     *         Method to transform.
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     protected RunMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
         super(clazz, method, classInfoCache);
@@ -35,9 +35,9 @@ class RunMethodTransformer extends MethodTransformer {
     /**
      * Transform method.
      *
-     * @return Transformed method
+     * @return Transformed method.
      * @throws AnalyzerException
-     *         In case of incorrect byte code of the original method
+     *         In case of incorrect byte code of the original method.
      */
     public MethodNode transform() throws AnalyzerException {
         shiftLocals();
@@ -75,7 +75,7 @@ class RunMethodTransformer extends MethodTransformer {
 
         // SerialThreadManager.setThread(thread);
         instructions.add(threadCode.setThread(localThread));
-        // Store current frame, so next method can fetch is as previous frame.
+        // Store current frame, so next method can fetch it as previous frame.
         // thread.frame = frame;
         instructions.add(threadCode.setFrame(localThread, localFrame));
 

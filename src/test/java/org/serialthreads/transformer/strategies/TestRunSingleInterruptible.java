@@ -39,7 +39,7 @@ public class TestRunSingleInterruptible implements IRunnable {
     }
 
     //
-    // Check results of execution ("self test")
+    // Check results of execution ("self test").
     //
 
     /**

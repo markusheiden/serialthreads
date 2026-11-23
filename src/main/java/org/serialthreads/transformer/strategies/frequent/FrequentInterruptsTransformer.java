@@ -30,7 +30,7 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
      * Constructor.
      *
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     public FrequentInterruptsTransformer(IClassInfoCache classInfoCache) {
         super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
@@ -39,22 +39,22 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
     @Override
     protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
         if (isAbstract(method)) {
-            // abstract methods need no transformation
+            // Abstract methods need no transformation.
             return null;
         }
 
         if (isRun(clazz, method, classInfoCache)) {
-            // take special care of run method
+            // Take special care of run method.
             return singletonList(
                     new RunMethodTransformer(clazz, method, classInfoCache).transform());
         }
 
         if (hasNoInterruptibleMethodCalls(method)) {
-            // no transformation needed
+            // No transformation needed.
             return null;
         }
 
-        // "standard" transformation of interruptible methods
+        // "Standard" transformation of interruptible methods.
         return singletonList(
                 new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
     }

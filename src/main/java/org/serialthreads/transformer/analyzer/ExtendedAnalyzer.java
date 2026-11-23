@@ -31,7 +31,7 @@ import static org.serialthreads.transformer.code.MethodCode.isStore;
 public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     /**
      * Opcodes considered as starting points.
-     * Jump instructions have to considered too, because of methods with an endless loop (-> no return).
+     * Jump instructions have to be considered too, because of methods with an endless loop (-> no return).
      */
     private static final Set<Integer> STARTING_POINT_OPCODES = new TreeSet<>(Arrays.asList(
             IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN,
@@ -52,14 +52,14 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * Analyze a method to compute its frames.
      *
      * @param clazz
-     *         owner of method
+     *         Owner of method.
      * @param method
-     *         method
+     *         Method.
      * @param classInfoCache
-     *         class info cache
-     * @return frames
+     *         Class info cache.
+     * @return Frames.
      * @throws AnalyzerException
-     *         In case of incorrect byte code of the original method
+     *         In case of incorrect byte code of the original method.
      */
     public static ExtendedFrame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
             throws AnalyzerException {
@@ -71,9 +71,9 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * This class will not be loaded into the JVM since it may be incorrect.
      *
      * @param clazz
-     *         owner of method
+     *         Owner of method.
      * @param classInfoCache
-     *         class info cache
+     *         Class info cache.
      */
     public static ExtendedAnalyzer create(ClassNode clazz, IClassInfoCache classInfoCache) {
         var classType = Type.getObjectType(clazz.name);
@@ -91,7 +91,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * Constructs a new {@link ExtendedAnalyzer}.
      *
      * @param verifier
-     *         Verifier
+     *         Verifier.
      */
     public ExtendedAnalyzer(ExtendedVerifier verifier) {
         super(verifier);
@@ -133,19 +133,19 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * Updates the needed locals on its way.
      *
      * @param method
-     *         Method
+     *         Method.
      * @param startingPoints
-     *         Starting points
+     *         Starting points.
      * @param frames
-     *         Frames
+     *         Frames.
      */
     private void traceBack(MethodNode method, SortedSet<Integer> startingPoints, ExtendedFrame[] frames) {
-        // Use last starting point
+        // Use last starting point.
         var index = startingPoints.last();
         startingPoints.remove(index);
         var firstFrame = frames[index];
         if (firstFrame == null) {
-            // No frame -> unreachable code -> no need to compute
+            // No frame -> unreachable code -> no need to compute.
             return;
         }
 
@@ -163,11 +163,11 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
             var froms = backflow.get(index);
             if (froms == null || froms.isEmpty()) {
-                // no predecessors at all -> we are finished with the current starting point
+                // No predecessors at all -> we are finished with the current starting point.
                 return;
             }
 
-            // Update needed locals of all other predecessors
+            // Update needed locals of all other predecessors.
             for (var from : froms) {
                 var fromFrame = frames[from];
                 boolean modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
@@ -176,10 +176,10 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
                 }
             }
 
-            // move backwards to nearest predecessor
+            // Move backwards to nearest predecessor.
             index = froms.lower(index);
             if (index == null) {
-                // no direct predecessor -> we are finished with the current starting point
+                // No direct predecessor -> we are finished with the current starting point.
                 return;
             }
             startingPoints.remove(index);

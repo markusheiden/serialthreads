@@ -16,14 +16,14 @@ public class LocalVariablesShifter {
      * Shift all locals >= point to the left by shift.
      *
      * @param point
-     *         first local to shift
+     *         First local to shift.
      * @param shift
-     *         number of to locals to shift
+     *         Number of locals to shift.
      * @param method
-     *         method to transform
+     *         Method to transform.
      */
     public static void shift(int point, int shift, MethodNode method) {
-        // Adopt instructions.
+        // Adapt instructions.
         for (var instruction : method.instructions) {
             if (instruction.getType() == VAR_INSN && instruction instanceof VarInsnNode varInstruction) {
                 varInstruction.var = remap(point, shift, varInstruction.var);
@@ -32,12 +32,12 @@ public class LocalVariablesShifter {
             }
         }
 
-        // adopt local variable debug info
+        // Adapt local variable debug info.
         for (var local : method.localVariables) {
             local.index = remap(point, shift, local.index);
         }
 
-        // fix max locals
+        // Fix max locals.
         method.maxLocals += shift;
     }
 
@@ -45,12 +45,12 @@ public class LocalVariablesShifter {
      * Remap a local.
      *
      * @param point
-     *         number of first local to alter
+     *         Number of first local to alter.
      * @param shift
-     *         increment for locals >= point
+     *         Increment for locals >= point.
      * @param local
-     *         local to remap
-     * @return remapped local
+     *         Local to remap.
+     * @return Remapped local.
      */
     protected static int remap(int point, int shift, int local) {
         return local < point ? local : local + shift;

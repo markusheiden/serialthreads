@@ -21,13 +21,13 @@ public class MethodInfo {
      * Constructor.
      *
      * @param access
-     *         access flags of method
+     *         Access flags of method.
      * @param name
-     *         name of method
+     *         Name of method.
      * @param desc
-     *         method descriptor
+     *         Method descriptor.
      * @param annotations
-     *         descriptors of the type of the annotations of this method
+     *         Descriptors of the type of the annotations of this method.
      */
     public MethodInfo(int access, String name, String desc, Set<Type> annotations) {
         assert name != null : "Precondition: name != null";
@@ -42,7 +42,7 @@ public class MethodInfo {
     }
 
     /**
-     * Id of method: name + desc.
+     * ID of method: name + desc.
      */
     public String getId() {
         return id;
@@ -94,7 +94,7 @@ public class MethodInfo {
      * Is this method annotated with a given type of annotation?
      *
      * @param annotationType
-     *         type of annotation
+     *         Type of annotation.
      */
     public boolean hasAnnotation(Type annotationType) {
         assert annotationType != null : "Precondition: annotationType != null";

@@ -36,14 +36,14 @@ public final class MethodCode {
     private static final String IRUNNABLE_NAME = Type.getType(IRunnable.class).getInternalName();
 
     //
-    // method call specific code
+    // Method call specific code.
     //
 
     /**
      * Is a static method been called?.
      *
      * @param methodCall
-     *         method call
+     *         Method call.
      */
     public static boolean isStatic(MethodInsnNode methodCall) {
         return methodCall.getOpcode() == INVOKESTATIC;
@@ -53,7 +53,7 @@ public final class MethodCode {
      * Is a not static method been called?.
      *
      * @param methodCall
-     *         method call
+     *         Method call.
      */
     public static boolean isNotStatic(MethodInsnNode methodCall) {
         return !isStatic(methodCall);
@@ -63,7 +63,7 @@ public final class MethodCode {
      * Is a not void method been called?.
      *
      * @param methodCall
-     *         method call
+     *         Method call.
      */
     public static boolean isNotVoid(MethodInsnNode methodCall) {
         return !Type.getReturnType(methodCall.desc).equals(VOID_TYPE);
@@ -73,25 +73,25 @@ public final class MethodCode {
      * Is the call a call to a method on the same object (this)?
      *
      * @param method
-     *         method containing the method call
+     *         Method containing the method call.
      * @param methodCall
-     *         method call
+     *         Method call.
      * @param metaInfo
-     *         Meta information about method call
+     *         Meta information about method call.
      */
     public static boolean isSelfCall(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo) {
         if (isStatic(method)) {
-            // static methods have no this, their local 0 is a normal local
+            // Static methods have no this, their local 0 is a normal local.
             return false;
         }
         if (methodCall.getOpcode() == INVOKESTATIC) {
-            // static methods have no owner
+            // Static methods have no owner.
             return false;
         }
 
         var frameBefore = metaInfo.frameBefore;
 
-        // "pop" all arguments from stack
+        // "Pop" all arguments from stack.
         var argumentTypes = Type.getArgumentTypes(methodCall.desc);
         var s = frameBefore.getStackSize() - argumentTypes.length;
         assert s > 0 : "Check: stack pointer is positive";
@@ -103,9 +103,9 @@ public final class MethodCode {
      * Check if the called method is IRunnable.run().
      *
      * @param methodCall
-     *         method call
+     *         Method call.
      * @param classInfoCache
-     *         classInfoCache
+     *         classInfoCache.
      */
     public static boolean isRun(MethodInsnNode methodCall, IClassInfoCache classInfoCache) {
         return
@@ -119,7 +119,7 @@ public final class MethodCode {
      * Creates appropriate argument values for a method call with 0 or null values.
      *
      * @param method
-     *         method node to create arguments for
+     *         Method node to create arguments for.
      */
     public static InsnList dummyArguments(MethodInsnNode method) {
         var instructions = new InsnList();
@@ -132,28 +132,28 @@ public final class MethodCode {
     }
 
     //
-    // class specific code
+    // Class specific code.
     //
 
     /**
      * Is the class an interface?.
      *
      * @param clazz
-     *         class
+     *         Class.
      */
     public static boolean isInterface(ClassNode clazz) {
         return (clazz.access & ACC_INTERFACE) != 0;
     }
 
     //
-    // method specific code
+    // Method specific code.
     //
 
     /**
      * Check if method is static.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static boolean isStatic(MethodNode method) {
         return (method.access & ACC_STATIC) != 0;
@@ -163,7 +163,7 @@ public final class MethodCode {
      * Check if method is not static.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static boolean isNotStatic(MethodNode method) {
         return (method.access & ACC_STATIC) == 0;
@@ -173,7 +173,7 @@ public final class MethodCode {
      * Is the method abstract?.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static boolean isAbstract(MethodNode method) {
         return (method.access & ACC_ABSTRACT) != 0;
@@ -183,7 +183,7 @@ public final class MethodCode {
      * Check if the method is not void.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static boolean isNotVoid(MethodNode method) {
         return !Type.getReturnType(method.desc).equals(VOID_TYPE);
@@ -193,14 +193,14 @@ public final class MethodCode {
      * Check if the method is IRunnable.run() or an implementation of it.
      *
      * @param clazz
-     *         owner of method
+     *         Owner of method.
      * @param method
-     *         method
+     *         Method.
      * @param classInfoCache
-     *         class info cache
+     *         Class info cache.
      */
     public static boolean isRun(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-        // TODO 2009-11-04 mh: remove special handling for clazz == null
+        // TODO 2009-11-04 mh: Remove special handling for clazz == null.
         return
                 (clazz == null || classInfoCache.hasSuperClass(clazz.name, IRUNNABLE_NAME)) &&
                 method.name.equals("run") &&
@@ -213,7 +213,7 @@ public final class MethodCode {
      * For non-static methods local 0 contains "this" and the first parameter is in local 1.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static int firstParam(MethodNode method) {
         return isNotStatic(method) ? 1 : 0;
@@ -223,7 +223,7 @@ public final class MethodCode {
      * The first local of a method that is no parameter.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static int firstLocal(MethodNode method) {
         int local = firstParam(method);
@@ -239,7 +239,7 @@ public final class MethodCode {
      * Creates appropriate return statement for a method with a 0, null or void return value.
      *
      * @param method
-     *         method node to create return statement for
+     *         Method node to create return statement for.
      */
     public static InsnList dummyReturnStatement(MethodNode method) {
         var returnType = Type.getReturnType(method.desc);
@@ -256,13 +256,13 @@ public final class MethodCode {
      * Check if frame is still compatible with the method arguments.
      *
      * @param method
-     *         method
+     *         Method.
      * @param frame
-     *         frame check
+     *         Frame to check.
      */
     public static boolean isCompatible(MethodNode method, Frame<?> frame) {
         var arguments = Type.getArgumentTypes(method.desc);
-        // Condition "l < frame.getLocals()" holds  always, because each argument is stored in a local
+        // Condition "l < frame.getLocals()" holds  always, because each argument is stored in a local.
         for (int l = isNotStatic(method) ? 1 : 0, a = 0; a < arguments.length; a++) {
             var local = (BasicValue) frame.getLocal(l);
             if (BasicValue.UNINITIALIZED_VALUE.equals(local)) {
@@ -292,14 +292,14 @@ public final class MethodCode {
     }
 
     //
-    // code related to the instructions of a method
+    // Code related to the instructions of a method.
     //
 
     /**
      * All return instructions.
      *
      * @param method
-     *         method
+     *         Method.
      */
     public static List<AbstractInsnNode> returnInstructions(MethodNode method) {
         var result = new ArrayList<AbstractInsnNode>();
@@ -317,7 +317,7 @@ public final class MethodCode {
      * Is an instruction a return?.
      *
      * @param instruction
-     *         Instruction
+     *         Instruction.
      */
     public static boolean isReturn(AbstractInsnNode instruction) {
         return instruction != null &&
@@ -328,7 +328,7 @@ public final class MethodCode {
      * Is an instruction a load?.
      *
      * @param instruction
-     *         Instruction
+     *         Instruction.
      */
     public static boolean isLoad(AbstractInsnNode instruction) {
         var opcode = instruction.getOpcode();
@@ -339,7 +339,7 @@ public final class MethodCode {
      * Is an instruction a store?.
      *
      * @param instruction
-     *         Instruction
+     *         Instruction.
      */
     public static boolean isStore(AbstractInsnNode instruction) {
         var opcode = instruction.getOpcode();
@@ -350,7 +350,7 @@ public final class MethodCode {
      * The previous instruction. Skips labels etc.
      *
      * @param instruction
-     *         Instruction
+     *         Instruction.
      */
     public static AbstractInsnNode previousInstruction(AbstractInsnNode instruction) {
         for (var result = instruction.getPrevious(); result != null; result = result.getPrevious()) {
@@ -366,7 +366,7 @@ public final class MethodCode {
      * The next instruction. Skips labels etc.
      *
      * @param instruction
-     *         Instruction
+     *         Instruction.
      */
     public static AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
         for (var result = instruction.getNext(); result != null; result = result.getNext()) {
@@ -379,16 +379,16 @@ public final class MethodCode {
     }
 
     //
-    // Log / debug code
+    // Log / debug code.
     //
 
     /**
      * Generate identification string for a method.
      *
      * @param clazz
-     *         owning class
+     *         Owning class.
      * @param method
-     *         method
+     *         Method.
      */
     public static String methodName(ClassNode clazz, MethodNode method) {
         return methodName(clazz.name, method.name, method.desc);
@@ -398,7 +398,7 @@ public final class MethodCode {
      * Generate identification string for a method call.
      *
      * @param method
-     *         method call
+     *         Method call.
      */
     public static String methodName(MethodInsnNode method) {
         return methodName(method.owner, method.name, method.desc);
@@ -408,11 +408,11 @@ public final class MethodCode {
      * Generate identification string for a method.
      *
      * @param owner
-     *         owning class
+     *         Owning class.
      * @param name
-     *         method name
+     *         Method name.
      * @param desc
-     *         method descriptor
+     *         Method descriptor.
      */
     public static String methodName(String owner, String name, String desc) {
         return owner + "#" + name + desc;

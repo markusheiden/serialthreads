@@ -18,7 +18,7 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 /**
  * Checks correct usage of {@link Interruptible} annotations.
  */
-@SupportedAnnotationTypes("*") // we need all compiled classes, because we are checking for missing annotations too
+@SupportedAnnotationTypes("*") // We need all compiled classes, because we are checking for missing annotations too.
 @SupportedSourceVersion(SourceVersion.RELEASE_27)
 public class InterruptibleProcessor extends AbstractProcessor {
     @Override
@@ -28,7 +28,7 @@ public class InterruptibleProcessor extends AbstractProcessor {
             root.accept(scanner, null);
         }
 
-        // Most annotations are not ours, so we do not claim them
+        // Most annotations are not ours, so we do not claim them.
         return false;
     }
 
@@ -52,7 +52,7 @@ public class InterruptibleProcessor extends AbstractProcessor {
      * A mismatch is an error, because the transformer rejects such classes.
      *
      * @param overrider
-     *         Method to check, whether it overrides something
+     *         Method to check, whether it overrides something.
      */
     private void check(ExecutableElement overrider) {
         var types = processingEnv.getTypeUtils();

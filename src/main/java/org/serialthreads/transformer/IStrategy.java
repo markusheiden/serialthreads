@@ -10,7 +10,7 @@ public interface IStrategy {
      * Create a new transformer.
      *
      * @param classInfoCache
-     *         ClassInfoCache
+     *         ClassInfoCache.
      */
     ITransformer getTransformer(IClassInfoCache classInfoCache);
 }

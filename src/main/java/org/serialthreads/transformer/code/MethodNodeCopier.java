@@ -17,8 +17,8 @@ public class MethodNodeCopier {
      * Copy method without instructions.
      *
      * @param method
-     *         method
-     * @return copied method
+     *         Method.
+     * @return Copied method.
      */
     @SuppressWarnings({ "UnusedDeclaration" })
     public static MethodNode copyEmpty(MethodNode method) {
@@ -31,8 +31,8 @@ public class MethodNodeCopier {
      * Takes care that labels are correctly cloned.
      *
      * @param method
-     *         method
-     * @return copied method
+     *         Method.
+     * @return Copied method.
      */
     public static MethodNode copy(MethodNode method) {
         var exceptions = method.exceptions.toArray(String[]::new);

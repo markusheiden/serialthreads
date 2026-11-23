@@ -52,11 +52,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Constructor.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method to transform
+     *         Method to transform.
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     protected MethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
         super(clazz, method, classInfoCache);
@@ -87,10 +87,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Change the name of a copied method.
      *
      * @param name
-     *         name of method
+     *         Name of method.
      * @param desc
-     *         parameters
-     * @return changed name
+     *         Parameters.
+     * @return Changed name.
      */
     protected String changeCopyName(String name, String desc) {
         return name + "$$" + escapeForMethodName(desc) + "$$";
@@ -100,8 +100,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Change parameters of a copied method.
      *
      * @param desc
-     *         parameters
-     * @return changed parameters
+     *         Parameters.
+     * @return Changed parameters.
      */
     protected String changeCopyDesc(String desc) {
         return "(" + THREAD_IMPL_DESC + FRAME_IMPL_DESC + ")" + Type.getReturnType(desc);
@@ -124,11 +124,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Insert frame capturing and restore code for interrupts.
      *
      * @param methodCall
-     *         method call to generate capturing code for
+     *         Method call to generate capturing code for.
      * @param metaInfo
-     *         Meta information about method call
+     *         Meta information about method call.
      * @param position
-     *         position of method call in method
+     *         Position of method call in method.
      * @param restore
      *         Generate restore code too?.
      * @return Label to restore code, or null, if no restore code has been generated.
@@ -173,11 +173,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Insert frame capturing and restore code after method calls.
      *
      * @param methodCall
-     *         method call to generate capturing code for
+     *         Method call to generate capturing code for.
      * @param metaInfo
-     *         Meta information about method call
+     *         Meta information about method call.
      * @param position
-     *         position of method call in method
+     *         Position of method call in method.
      * @param restore
      *         Generate restore code too?.
      * @return Label to restore code, or null, if no restore code has been generated.
@@ -193,7 +193,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         instructions.add(threadCode.pushSerializing(localThread));
         instructions.add(new JumpInsnNode(IFEQ, normal));
 
-        // get rid of dummy return value of called method first
+        // Get rid of dummy return value of called method first.
         if (isNotVoid(methodCall)) {
             instructions.add(code(Type.getReturnType(methodCall.desc)).pop());
         }
@@ -212,14 +212,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         if (restore) {
             instructions.add(restoreLabel);
 
-            // Introduce new local holding the return value
+            // Introduce new local holding the return value.
             var localReturnValue = method.maxLocals;
 
             var restoreFrame = new LabelNode();
 
-            // call interrupted method
+            // Call interrupted method.
             instructions.add(pushOwner(methodCall, metaInfo, localFrame));
-            // jump to cloned method call with thread and frame as arguments
+            // Jump to cloned method call with thread and frame as arguments.
             instructions.add(new VarInsnNode(ALOAD, localThread));
             instructions.add(new VarInsnNode(ALOAD, localFrame));
             var clonedCall = copyMethodCall(methodCall);
@@ -229,19 +229,19 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
             instructions.add(threadCode.pushSerializing(localThread));
             instructions.add(new JumpInsnNode(IFEQ, restoreFrame));
 
-            // early return, the frame already has been captured
+            // Early return, the frame already has been captured.
             instructions.add(dummyReturnStatement(method));
 
-            // restore frame to be able to resume normal execution of method
+            // Restore frame to be able to resume normal execution of method.
             instructions.add(restoreFrame);
 
-            // TODO 2009-11-26 mh: remove me?
-            // set the current frame, because the next called method will need it
+            // TODO 2009-11-26 mh: Remove me?
+            // Set the current frame, because the next called method will need it.
             // thread.frame = frame;
             instructions.add(threadCode.setFrame(localThread, localFrame));
 
-            // restore stack "under" the returned value, if any
-            // TODO 2009-10-17 mh: avoid restore, if method returns directly after returning from called method???
+            // Restore stack "under" the returned value, if any.
+            // TODO 2009-10-17 mh: Avoid restore, if method returns directly after returning from called method???
             var returnType = Type.getReturnType(clonedCall.desc);
             var needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
             if (needToSaveReturnValue) {
@@ -254,14 +254,14 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
             }
         }
 
-        // normal execution
+        // Normal execution.
         instructions.add(normal);
 
-        // TODO 2009-11-26 mh: remove me?
+        // TODO 2009-11-26 mh: Remove me?
         // thread.frame = frame;
         instructions.add(threadCode.setFrame(localThread, localFrame));
 
-        // insert capture code
+        // Insert capture code.
         method.instructions.insert(methodCall, instructions);
 
         return restoreLabel;
@@ -271,7 +271,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Copies method call and changes the signature.
      *
      * @param methodCall
-     *         method call
+     *         Method call.
      */
     private MethodInsnNode copyMethodCall(MethodInsnNode methodCall) {
         var result = (MethodInsnNode) methodCall.clone(null);
@@ -292,7 +292,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
     protected void fixMaxs() {
         // Reserve space for the local holding the return value, if needed.
         method.maxLocals += maxReturnValueSize;
-        // TODO 2009-10-11 mh: recalculate minimum maxs
+        // TODO 2009-10-11 mh: Recalculate minimum maxs.
         method.maxStack = Math.max(method.maxStack + 2, 5);
     }
 }

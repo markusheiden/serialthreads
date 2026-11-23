@@ -40,14 +40,14 @@ class SynchronizedBarrierTest extends AbstractPerformanceTest {
         }
 
         private int incrementAndGetBarrier() {
-            // Synchronization needed, because the may be interrupted in middle of read-modify-write.
+            // Synchronization needed, because they may be interrupted in middle of read-modify-write.
             synchronized (lock) {
                 return ++barrierCount;
             }
         }
 
         private int getBarrier() {
-            // Synchronization needed, because the may be interrupted in middle of read-modify-write.
+            // Synchronization needed, because they may be interrupted in middle of read-modify-write.
             synchronized (lock) {
                 return barrierCount;
             }

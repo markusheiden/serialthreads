@@ -14,9 +14,9 @@ public interface IClassInfoCache {
      * Add class info for the given class.
      *
      * @param className
-     *         internal name of class
+     *         Internal name of class.
      * @param byteCode
-     *         byte code of class
+     *         Byte code of class.
      */
     void addClassInfo(String className, byte[] byteCode);
 
@@ -24,7 +24,7 @@ public interface IClassInfoCache {
      * Is the class an interface.
      *
      * @param clazz
-     *         class
+     *         Class.
      */
     boolean isInterface(String clazz);
 
@@ -32,7 +32,7 @@ public interface IClassInfoCache {
      * Get direct super class of this class.
      *
      * @param clazz
-     *         internal name of class
+     *         Internal name of class.
      */
     Type getSuperClass(String clazz);
 
@@ -40,9 +40,9 @@ public interface IClassInfoCache {
      * Extends / implements this class the given super class or interface.
      *
      * @param clazz
-     *         internal name of class
+     *         Internal name of class.
      * @param superClass
-     *         super class to check class for
+     *         Super class to check class for.
      */
     boolean hasSuperClass(String clazz, String superClass);
 
@@ -50,9 +50,9 @@ public interface IClassInfoCache {
      * Check if the method is an executor.
      *
      * @param clazz
-     *         owner of method
+     *         Owner of method.
      * @param method
-     *         method
+     *         Method.
      */
     boolean isExecutor(ClassNode clazz, MethodNode method);
 
@@ -61,9 +61,9 @@ public interface IClassInfoCache {
      * This includes interrupt methods.
      *
      * @param owner
-     *         owner of method
+     *         Owner of method.
      * @param method
-     *         method
+     *         Method.
      */
     boolean isInterruptible(ClassNode owner, MethodNode method);
 
@@ -72,7 +72,7 @@ public interface IClassInfoCache {
      * This includes interrupt methods.
      *
      * @param method
-     *         method call
+     *         Method call.
      */
     boolean isInterruptible(MethodInsnNode method);
 
@@ -81,7 +81,7 @@ public interface IClassInfoCache {
      * This includes interrupt methods.
      *
      * @param method
-     *         method call
+     *         Method call.
      */
     boolean isInterruptible(Handle method);
 
@@ -90,11 +90,11 @@ public interface IClassInfoCache {
      * This includes interrupt methods.
      *
      * @param owner
-     *         owner of method
+     *         Owner of method.
      * @param name
-     *         name of method
+     *         Name of method.
      * @param desc
-     *         descriptor of method
+     *         Descriptor of method.
      */
     boolean isInterruptible(String owner, String name, String desc);
 
@@ -102,7 +102,7 @@ public interface IClassInfoCache {
      * Check if the called method is an interrupt.
      *
      * @param method
-     *         method call
+     *         Method call.
      */
     boolean isInterrupt(MethodInsnNode method);
 

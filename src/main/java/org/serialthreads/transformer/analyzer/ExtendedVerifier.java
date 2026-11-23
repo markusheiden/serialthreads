@@ -47,15 +47,15 @@ public class ExtendedVerifier extends SimpleVerifier {
      * class will not be loaded into the JVM since it may be incorrect.
      *
      * @param classInfoCache
-     *         class info cache.
+     *         Class info cache.
      * @param currentClass
-     *         the class that is verified.
+     *         The class that is verified.
      * @param currentSuperClass
-     *         the super class of the class that is verified.
+     *         The super class of the class that is verified.
      * @param currentClassInterfaces
-     *         the interfaces implemented by the class that is verified.
+     *         The interfaces implemented by the class that is verified.
      * @param isInterface
-     *         if the class that is verified is an interface.
+     *         If the class that is verified is an interface.
      */
     public ExtendedVerifier(
             IClassInfoCache classInfoCache,
@@ -79,7 +79,7 @@ public class ExtendedVerifier extends SimpleVerifier {
 
         var result = super.merge(v, w);
         if (result.equals(UNINITIALIZED_VALUE)) {
-            // return uninitialized value
+            // Return uninitialized value.
             return result;
         }
 
@@ -89,8 +89,8 @@ public class ExtendedVerifier extends SimpleVerifier {
         var ev = (ExtendedValue) v;
         var ew = (ExtendedValue) w;
         if (!ev.equals(ew)) {
-            // the types differ -> create new value with merged constant and locals or
-            // the types are the same, but the constant or the locals have to be merged
+            // The types differ -> create new value with merged constant and locals or
+            // the types are the same, but the constant or the locals have to be merged.
 
             boolean isConstant = ev.isConstant() && ew.isConstant() && Objects.equals(ev.getConstant(), ew.getConstant());
 
@@ -102,7 +102,7 @@ public class ExtendedVerifier extends SimpleVerifier {
                     valueInLocals(result.getType(), mergedLocals);
         }
 
-        // the value and its locals have not been changed
+        // The value and its locals have not been changed.
         return result;
     }
 

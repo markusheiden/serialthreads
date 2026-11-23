@@ -35,7 +35,7 @@ public abstract class SerialThreadManager implements AutoCloseable {
      * Execute all serial threads for a given number of interrupts.
      *
      * @param interrupts
-     *         number interrupts to execute each serial thread
+     *         Number of interrupts to execute each serial thread.
      */
     @Executor
     public abstract void execute(int interrupts);

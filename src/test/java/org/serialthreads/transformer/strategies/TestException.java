@@ -16,7 +16,7 @@ public class TestException implements IRunnable {
         try {
             throwException();
         } catch (Exception e) {
-            // ignore
+            // Ignore.
         }
         value = v;
     }

@@ -35,27 +35,27 @@ public final class ExtendedValue extends BasicValue {
     private final Object constant;
 
     /**
-     * The locals this value is hold in too.
+     * The locals this value is held in too.
      */
     private final SortedSet<Integer> locals;
 
     /**
-     * Factory method for a value which is currently not hold in a local.
+     * Factory method for a value which is currently not held in a local.
      *
      * @param type
-     *         type of value
+     *         Type of value.
      */
     public static ExtendedValue value(Type type) {
         return new ExtendedValue(type, NOT_CONSTANT, emptySet());
     }
 
     /**
-     * Factory method for a value which is hold in a local too.
+     * Factory method for a value which is held in a local too.
      *
      * @param type
-     *         type of value
+     *         Type of value.
      * @param local
-     *         number of local
+     *         Number of local.
      */
     public static ExtendedValue valueInLocal(Type type, int local) {
         assert type != null : "Precondition: type != null";
@@ -65,12 +65,12 @@ public final class ExtendedValue extends BasicValue {
     }
 
     /**
-     * Factory method for a value which is hold in locals too.
+     * Factory method for a value which is held in locals too.
      *
      * @param type
-     *         type of value
+     *         Type of value.
      * @param locals
-     *         number of locals
+     *         Number of locals.
      */
     public static ExtendedValue valueInLocals(Type type, Set<Integer> locals) {
         assert type != null : "Precondition: type != null";
@@ -80,12 +80,12 @@ public final class ExtendedValue extends BasicValue {
     }
 
     /**
-     * Factory method for a constant value which is currently not hold in a local.
+     * Factory method for a constant value which is currently not held in a local.
      *
      * @param type
-     *         type of value
+     *         Type of value.
      * @param constant
-     *         constant value
+     *         Constant value.
      */
     public static ExtendedValue constantValue(Type type, Object constant) {
         assert type != null : "Precondition: type != null";
@@ -94,14 +94,14 @@ public final class ExtendedValue extends BasicValue {
     }
 
     /**
-     * Factory method for a constant value which is hold in locals too.
+     * Factory method for a constant value which is held in locals too.
      *
      * @param type
-     *         type of value
+     *         Type of value.
      * @param constant
-     *         constant value
+     *         Constant value.
      * @param locals
-     *         number of locals
+     *         Number of locals.
      */
     public static ExtendedValue constantInLocals(Type type, Object constant, Set<Integer> locals) {
         assert type != null : "Precondition: type != null";
@@ -111,14 +111,14 @@ public final class ExtendedValue extends BasicValue {
     }
 
     /**
-     * Constructor for values which are hold in a local too.
+     * Constructor for values which are held in a local too.
      *
      * @param type
-     *         type of value
+     *         Type of value.
      * @param constant
-     *         constant value this value represents
+     *         Constant value this value represents.
      * @param locals
-     *         number of locals
+     *         Number of locals.
      */
     private ExtendedValue(Type type, Object constant, Set<Integer> locals) {
         super(type);
@@ -148,7 +148,7 @@ public final class ExtendedValue extends BasicValue {
     }
 
     /**
-     * All locals this value is hold in too, if any.
+     * All locals this value is held in too, if any.
      */
     public SortedSet<Integer> getLocals() {
         return locals;
@@ -158,7 +158,7 @@ public final class ExtendedValue extends BasicValue {
      * Notifies this value, that a local has been modified.
      *
      * @param local
-     *         local to add
+     *         Local to add.
      */
     public ExtendedValue addLocal(int local) {
         assert local >= 0 : "Precondition: local >= 0";
@@ -176,7 +176,7 @@ public final class ExtendedValue extends BasicValue {
      * Notifies this value, that a local has been modified.
      *
      * @param modifiedLocal
-     *         the local that has been modified
+     *         The local that has been modified.
      */
     public ExtendedValue removeLocal(int modifiedLocal) {
         assert modifiedLocal >= 0 : "Precondition: modifiedLocal >= 0";

@@ -61,7 +61,7 @@ class SerialThreadTest extends AbstractPerformanceTest {
 
     @Override
     protected void doStop() {
-        // not needed
+        // Not needed.
     }
 
     @Override
@@ -76,7 +76,7 @@ class SerialThreadTest extends AbstractPerformanceTest {
 
         @Override
         protected void waitForStart() {
-            // not needed
+            // Not needed.
         }
 
         @Override

@@ -15,12 +15,12 @@ public class DynamicContextTest {
   }
 
   protected void testPushPop(DynamicContext context) {
-    // force dynamic increase of size
+    // Force dynamic increase of size.
     for (int i = 1; i <= DynamicContext.maxLocalInts + 2; i++) {
       context.pushLocalInt(i);
     }
 
-    // test increase result
+    // Test increase result.
     for (int i = DynamicContext.maxLocalInts + 2; i > 0; i--) {
       assertEquals(i, context.popLocalInt());
     }

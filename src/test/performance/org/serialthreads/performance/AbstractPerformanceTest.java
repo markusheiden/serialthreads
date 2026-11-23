@@ -30,10 +30,10 @@ public abstract class AbstractPerformanceTest {
         assertThat(count).as("Counters did not block").isGreaterThan(1);
 
         for (int i = 1; i < counters.length; i++) {
-            // check that all counters differ only by max 1, due to different stop time
+            // Check that all counters differ only by max 1, due to different stop time.
             assertThat(counters[i].getCount()).as("Counters are consistent: %d / %d", count, counters[i].getCount())
                     .isBetween(count - 1, count + 1);
-            // just to be sure check that not all counters are the same
+            // Just to be sure check that not all counters are the same.
             assertThat(counters[i]).isNotSameAs(counters[0]);
         }
     }
@@ -102,7 +102,7 @@ public abstract class AbstractPerformanceTest {
     protected abstract void doStop() throws Exception;
 
     /**
-     * Join stopped thread to ensure that they have really ended.
+     * Join stopped threads to ensure that they have really ended.
      */
     protected void doJoinThreads() throws Exception {
         for (Thread thread : threads) {

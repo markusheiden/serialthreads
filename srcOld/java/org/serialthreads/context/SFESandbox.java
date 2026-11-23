@@ -10,7 +10,7 @@ public class SFESandbox implements IRunnable, IFrameExecutor {
 
   @Executor
   public void execute() {
-    // loop until a chain finishes
+    // Loop until a chain finishes.
     Stack thread = null;
     thread.first.executor = new InitialFrameExecutor();
     try {
@@ -20,7 +20,7 @@ public class SFESandbox implements IRunnable, IFrameExecutor {
         executeFrame(thread);
       }
     } catch (ThreadFinishedException e) {
-      // expected: execution finished normally due to the end of a serial thread
+      // Expected: execution finished normally due to the end of a serial thread.
     }
   }
 
@@ -29,12 +29,12 @@ public class SFESandbox implements IRunnable, IFrameExecutor {
     do {
       frame.executor.executeFrame(thread, frame);
       if (thread.serializing) {
-        // thread has been interrupted again, so exit run() for now
+        // Thread has been interrupted again, so exit run() for now.
         return;
       }
       frame = frame.previous;
     } while (frame != null);
-    // TODO 2010-02-02 mh: rework of stack chain needed to hold frame != null ending condition?
+    // TODO 2010-02-02 mh: Rework of stack chain needed to hold frame != null ending condition?
 
     thread.reset();
     throw new ThreadFinishedException(thread.toString());
@@ -46,12 +46,12 @@ public class SFESandbox implements IRunnable, IFrameExecutor {
     do {
       frame.executor.executeFrame(thread, frame);
       if (thread.serializing) {
-        // thread has been interrupted again, so exit run() for now
+        // Thread has been interrupted again, so exit run() for now.
         return;
       }
       frame = frame.previous;
     } while (frame != null);
-    // TODO 2010-02-02 mh: reworked of stack chain needed to hold frame != null ending condition?
+    // TODO 2010-02-02 mh: Rework of stack chain needed to hold frame != null ending condition?
 
     throw new ThreadFinishedException(toString());
   }

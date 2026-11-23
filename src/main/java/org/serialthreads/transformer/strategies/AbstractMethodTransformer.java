@@ -94,11 +94,11 @@ public abstract class AbstractMethodTransformer {
      * Constructor.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method to transform
+     *         Method to transform.
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     protected AbstractMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
         this.clazz = clazz;
@@ -140,9 +140,9 @@ public abstract class AbstractMethodTransformer {
      * Extract all interruptible method calls.
      *
      * @throws AnalyzerException
-     *         on invalid byte code.
+     *         On invalid byte code.
      * @throws NotTransformableException
-     *         if the method calls run() or contains an unreachable interruptible call.
+     *         If the method calls run() or contains an unreachable interruptible call.
      */
     protected void analyze() throws AnalyzerException {
         // Init meta information.
@@ -207,7 +207,7 @@ public abstract class AbstractMethodTransformer {
      * @param restores
      *         Restore codes for each interruptible method call.
      * @param startIndex
-     *         first method index, should be -1 for run(), 0 otherwise.
+     *         First method index, should be -1 for run(), 0 otherwise.
      * @return Generated restore code.
      */
     protected InsnList restoreCodeDispatcher(int localFrame, List<LabelNode> restores, int startIndex) {
@@ -216,7 +216,7 @@ public abstract class AbstractMethodTransformer {
         var instructions = new InsnList();
 
         if (restores.size() == 1) {
-            // just one method call -> nothing to dispatch -> execute directly
+            // Just one method call -> nothing to dispatch -> execute directly.
             instructions.add(new JumpInsnNode(GOTO, restores.get(0)));
             return instructions;
         }
@@ -224,11 +224,11 @@ public abstract class AbstractMethodTransformer {
         var defaultLabel = new LabelNode();
         restores.replaceAll(label -> label != null ? label : defaultLabel);
 
-        // switch(currentFrame.method) // branch to specific restore code
+        // switch(currentFrame.method) // Branch to specific restore code.
         instructions.add(threadCode.pushMethod(localFrame));
         instructions.add(new TableSwitchInsnNode(startIndex, startIndex + restores.size() - 1, defaultLabel, restores.toArray(LabelNode[]::new)));
 
-        // default case -> may not happen -> throw IllegalThreadStateException
+        // Default case -> may not happen -> throw IllegalThreadStateException.
         instructions.add(defaultLabel);
         instructions.add(new TypeInsnNode(NEW, "java/lang/IllegalThreadStateException"));
         instructions.add(new InsnNode(DUP));
@@ -240,7 +240,7 @@ public abstract class AbstractMethodTransformer {
     }
 
     //
-    // capture code insertion
+    // Capture code insertion.
     //
 
     /**
@@ -292,7 +292,7 @@ public abstract class AbstractMethodTransformer {
      * Needed for transformation of IRunnable.run().
      */
     protected void replaceRunReturns() {
-        // TODO 2013-11-24 mh: implement as method -> call method?
+        // TODO 2013-11-24 mh: Implement as method -> call method?
 
         var exception = new LabelNode();
         for (var returnInstruction : returnInstructions(method)) {
@@ -304,7 +304,7 @@ public abstract class AbstractMethodTransformer {
         // throw new ThreadFinishedException(this.toString());
         instructions.add(new TypeInsnNode(NEW, THREAD_FINISHED_EXCEPTION_NAME));
         instructions.add(new InsnNode(DUP));
-        // TODO 2010-02-02 mh: use thread name instead of runnable.toString()
+        // TODO 2010-02-02 mh: Use thread name instead of runnable.toString().
         instructions.add(new VarInsnNode(ALOAD, 0));
         instructions.add(new MethodInsnNode(INVOKEVIRTUAL, OBJECT_NAME, "toString", "()" + STRING_DESC, false));
         instructions.add(new MethodInsnNode(INVOKESPECIAL, THREAD_FINISHED_EXCEPTION_NAME, "<init>", "(" + STRING_DESC + ")V", false));
@@ -320,10 +320,10 @@ public abstract class AbstractMethodTransformer {
      * Push method onto frame.
      *
      * @param localFrame
-     *         Number of local containing the current frame .
+     *         Number of local containing the current frame.
      * @param position
-     *         position of method call.
-     * @return generated capture code.
+     *         Position of method call.
+     * @return Generated capture code.
      */
     protected InsnList setMethod(int localFrame, int position) {
         if (interruptibleMethodCalls.size() <= 1) {
@@ -346,7 +346,7 @@ public abstract class AbstractMethodTransformer {
      *
      * @param localPreviousFrame
      *         Number of local containing the previous frame.
-     * @return generated capture code.
+     * @return Generated capture code.
      */
     protected InsnList setOwner(int localPreviousFrame) {
         if (suppressOwner() || isStatic(method)) {
@@ -362,8 +362,8 @@ public abstract class AbstractMethodTransformer {
      * Interrupt methods have no parameters, so the owner is the only remainder of the call.
      *
      * @param methodCall
-     *         interrupt method call, which will be replaced.
-     * @return generated code.
+     *         Interrupt method call, which will be replaced.
+     * @return Generated code.
      */
     protected InsnList popOwner(MethodInsnNode methodCall) {
         var instructions = new InsnList();
@@ -377,21 +377,21 @@ public abstract class AbstractMethodTransformer {
      * Restore owner.
      *
      * @param methodCall
-     *         method call to process.
+     *         Method call to process.
      * @param metaInfo
      *         Meta information about method call.
      * @param localFrame
-     *         Number of local containing the current frame .
-     * @return generated restore code.
+     *         Number of local containing the current frame.
+     * @return Generated restore code.
      */
     protected InsnList pushOwner(MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
         var instructions = new InsnList();
 
         if (isSelfCall(method, methodCall, metaInfo)) {
-            // self call: owner == this
+            // Self call: owner == this.
             instructions.add(new VarInsnNode(ALOAD, 0));
         } else if (isNotStatic(methodCall)) {
-            // get owner
+            // Get owner.
             instructions.add(threadCode.pushOwner(localFrame));
             instructions.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
         }

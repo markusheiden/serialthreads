@@ -26,22 +26,22 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
 
       final boolean isMethodNotStatic = isNotStatic(method);
 
-      // save method index of this method and owner of method call one level above
+      // Save method index of this method and owner of method call one level above.
       boolean pushOwner = isMethodNotStatic && !suppressOwner;
       boolean pushMethod = containsMoreThanOneMethodCall;
       if (pushOwner && pushMethod) {
-         // save owner of this method for calling method and index of interrupted method
+         // Save owner of this method for calling method and index of interrupted method.
          result.add(new VarInsnNode(ALOAD, localThread));
          result.add(new VarInsnNode(ALOAD, 0));
          result.add(push(position));
          result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + "I)V", false));
       } else if (pushOwner) {
-         // save owner of this method for calling method
+         // Save owner of this method for calling method.
          result.add(new VarInsnNode(ALOAD, localThread));
          result.add(new VarInsnNode(ALOAD, 0));
          result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(" + OBJECT_DESC + ")V", false));
       } else if (pushMethod) {
-         // save index of interrupted method
+         // Save index of interrupted method.
          result.add(new VarInsnNode(ALOAD, localThread));
          result.add(push(position));
          result.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, methodName, "(I)V", false));
@@ -91,10 +91,10 @@ public abstract class AbstractStackFrameCode implements StackFrameCode {
       InsnList result = new InsnList();
 
       if (isSelfCall(methodCall, metaInfo)) {
-         // self call: owner == this
+         // Self call: owner == this.
          result.add(new VarInsnNode(ALOAD, 0));
       } else if (isNotStatic(methodCall)) {
-         // get owner
+         // Get owner.
          result.add(new VarInsnNode(ALOAD, localFrame));
          result.add(new FieldInsnNode(GETFIELD, FRAME_IMPL_NAME, "owner", OBJECT_DESC));
          result.add(new TypeInsnNode(CHECKCAST, methodCall.owner));

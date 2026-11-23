@@ -50,7 +50,7 @@ public class TestRunMultiInterruptible implements IRunnable {
     }
 
     //
-    // Check results of execution ("self test")
+    // Check results of execution ("self test").
     //
 
     /**

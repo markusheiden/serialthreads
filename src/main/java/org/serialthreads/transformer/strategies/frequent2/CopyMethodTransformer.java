@@ -36,14 +36,14 @@ class CopyMethodTransformer extends MethodTransformer {
      * Constructor.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method to transform
+     *         Method to transform.
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     protected CopyMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
-        // create copy of method with shortened signature
+        // Create copy of method with shortened signature.
         super(clazz, MethodNodeCopier.copy(method), classInfoCache);
 
         this.paramThread = param(0);
@@ -58,9 +58,9 @@ class CopyMethodTransformer extends MethodTransformer {
     /**
      * Transform method.
      *
-     * @return Transformed method
+     * @return Transformed method.
      * @throws AnalyzerException
-     *         In case of incorrect byte code of the original method
+     *         In case of incorrect byte code of the original method.
      */
     public MethodNode transform() throws AnalyzerException {
         boolean concrete = !isAbstract(method);
@@ -68,7 +68,7 @@ class CopyMethodTransformer extends MethodTransformer {
             shiftLocals();
             analyze();
 
-            // create copy of method with shortened signature
+            // Create copy of method with shortened signature.
             var restores = insertCaptureAndRestoreCode();
             createRestoreHandlerCopy(restores);
             fixMaxs();

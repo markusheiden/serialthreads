@@ -92,9 +92,9 @@ class ExtendedValueTest {
      * but equals it.
      *
      * @param expected
-     *         expected value
+     *         Expected value.
      * @param value
-     *         value
+     *         Value.
      */
     static void assertEqualsValue(ExtendedValue expected, Value value) {
         assertThat(value).isInstanceOf(ExtendedValue.class);

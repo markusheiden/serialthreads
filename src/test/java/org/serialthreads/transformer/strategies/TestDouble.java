@@ -55,6 +55,6 @@ public class TestDouble implements IRunnable {
 
     @Interrupt
     private void interrupt() {
-        // method call will be redirected to interrupt code
+        // Method call will be redirected to interrupt code.
     }
 }

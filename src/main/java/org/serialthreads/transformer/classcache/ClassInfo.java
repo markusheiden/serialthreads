@@ -19,7 +19,7 @@ import java.util.Set;
  * @param isInterface
  *         The class is an interface.
  * @param type
- *         ASM type representation fpr this class.
+ *         ASM type representation for this class.
  * @param className
  *         (Internal) name of this class.
  * @param superClassName
@@ -55,11 +55,11 @@ public record ClassInfo(
      * @param isInterface
      *         Is this class an interface?
      * @param className
-     *         Internal name of this class
+     *         Internal name of this class.
      * @param superClassName
-     *         Internal name of the direct super class
+     *         Internal name of the direct super class.
      * @param methods
-     *         Methods directly defined in the class and their interruptible status
+     *         Methods directly defined in the class and their interruptible status.
      */
     public ClassInfo(boolean isInterface, String className, String superClassName, Map<String, MethodInfo> methods) {
         var allClasses = new HashSet<String>();
@@ -90,7 +90,7 @@ public record ClassInfo(
      * Extends or implements this class the given super class or interface?.
      *
      * @param superClassName
-     *         name of super class to check
+     *         Name of super class to check.
      */
     public boolean hasSuperClass(String superClassName) {
         return classes.contains(superClassName);
@@ -100,7 +100,7 @@ public record ClassInfo(
      * Is the given method of this class an executor?.
      *
      * @param methodId
-     *         method ID = name + desc
+     *         Method ID = name + desc.
      */
     public boolean isExecutor(String methodId) {
         return getMethodInfo(methodId).hasAnnotation(TYPE_EXECUTOR);
@@ -110,7 +110,7 @@ public record ClassInfo(
      * Is the given method of this class interruptible?.
      *
      * @param methodId
-     *         method ID = name + desc
+     *         Method ID = name + desc.
      */
     public boolean isInterruptible(String methodId) {
         return isInterruptible(getMethodInfo(methodId));
@@ -124,7 +124,7 @@ public record ClassInfo(
      * Is the given method of this class an interrupt?.
      *
      * @param methodId
-     *         method ID = name + desc.
+     *         Method ID = name + desc.
      */
     public boolean isInterrupt(String methodId) {
         return isInterrupt(getMethodInfo(methodId));
@@ -138,7 +138,7 @@ public record ClassInfo(
      * Info for the given method.
      *
      * @param methodId
-     *         method ID = name + desc
+     *         Method ID = name + desc.
      */
     MethodInfo getMethodInfo(String methodId) {
         return methods.get(methodId);
@@ -148,7 +148,7 @@ public record ClassInfo(
      * Merge interruptible status of a scanned class (classInfo) into the status of a subclass (this).
      *
      * @param classInfo
-     *         interruptible status of superclass
+     *         Interruptible status of superclass.
      */
     ClassInfo merge(ClassInfo classInfo) {
         logger.debug("Merging interruptible status of class {} into status of class {}", classInfo.className(), className());
@@ -179,7 +179,7 @@ public record ClassInfo(
                         " does not match its definition in the super class or interface " + classInfo.className());
             }
 
-            // executor status need not be checked
+            // Executor status need not be checked.
         });
 
         return new ClassInfo(

@@ -33,7 +33,7 @@ class CyclicBarrierTest extends AbstractPerformanceTest {
             try {
                 barrier.await();
             } catch (BrokenBarrierException e) {
-                // ignore exception thrown due to stopping
+                // Ignore exception thrown due to stopping.
             }
         }
     }

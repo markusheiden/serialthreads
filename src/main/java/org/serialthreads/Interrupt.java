@@ -9,7 +9,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Marker annotation for methods representing an interrupt.
- * Calls to methods annotated with this annotations will be replaced by an interrupt.
+ * Calls to methods annotated with this annotation will be replaced by an interrupt.
  */
 @Documented
 @Retention(RUNTIME)

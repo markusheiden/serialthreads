@@ -14,7 +14,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
   /**
    * Constructor.
    *
-   * @param runnables runnables
+   * @param runnables Runnables.
    */
   public FrameExecutionSerialThreadManager(IRunnable... runnables) {
     assert runnables.length > 0 : "Precondition: runnables.length > 0";
@@ -22,7 +22,7 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
     chains = ChainedRunnable.chain(runnables);
     lastExecuted = chains[chains.length - 1];
 
-    // not used in this manager!
+    // Not used in this manager!
     currentThread = null;
   }
 
@@ -32,10 +32,10 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
    */
   @Executor
   public void execute() {
-    // loop until a chain finishes
+    // Loop until a chain finishes.
     ChainedRunnable chain = lastExecuted;
 
-    // loop until a chain finishes
+    // Loop until a chain finishes.
     ((Stack) chain.thread).first.executor = new InitialFrameExecutor();
     try {
       //noinspection InfiniteLoopStatement
@@ -44,8 +44,8 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
         executeFrame((Stack) chain.thread);
       }
     } catch (ThreadFinishedException e) {
-      // expected: execution finished normally due to the end of a serial thread
-      // TODO 2009-12-09 mh: Avoid cast
+      // Expected: execution finished normally due to the end of a serial thread.
+      // TODO 2009-12-09 mh: Avoid cast.
       ((Stack) chain.thread).reset();
     }
 
@@ -61,10 +61,10 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
 
     int loops = interrupts * chains.length;
 
-    // loop until a chain finishes
+    // Loop until a chain finishes.
     ChainedRunnable chain = lastExecuted;
 
-    // loop until a chain finishes
+    // Loop until a chain finishes.
     ((Stack) chain.thread).first.executor = new InitialFrameExecutor();
     try {
       do {
@@ -72,8 +72,8 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
         executeFrame((Stack) chain.thread);
       } while (--loops != 0);
     } catch (ThreadFinishedException e) {
-      // expected: execution finished normally due to the end of a serial thread
-      // TODO 2009-12-09 mh: Avoid cast
+      // Expected: execution finished normally due to the end of a serial thread.
+      // TODO 2009-12-09 mh: Avoid cast.
       ((Stack) chain.thread).reset();
     }
 
@@ -85,12 +85,12 @@ public class FrameExecutionSerialThreadManager extends SerialThreadManager {
     do {
       frame.executor.executeFrame(thread, frame);
       if (thread.serializing) {
-        // thread has been interrupted again, so exit run() for now
+        // Thread has been interrupted again, so exit run() for now.
         return;
       }
       frame = frame.previous;
     } while (frame != null);
-    // TODO 2010-02-02 mh: rework of stack chain needed to hold frame != null ending condition?
+    // TODO 2010-02-02 mh: Rework of stack chain needed to hold frame != null ending condition?
 
     throw new ThreadFinishedException(thread.toString());
   }

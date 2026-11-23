@@ -8,7 +8,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation for tagging method, which are able to execute serial threads.
+ * Annotation for tagging methods, which are able to execute serial threads.
  * Methods annotated with this annotation are the only methods allowed to call
  * ITransformedRunnable#run().
  */

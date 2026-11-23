@@ -45,7 +45,7 @@ class SynchronizedConcurrentTest extends AbstractPerformanceTest {
                     tick(count);
                 }
             } catch (InterruptedException e) {
-                // ignore
+                // Ignore.
             } catch (Exception e) {
                 e.printStackTrace();
             }

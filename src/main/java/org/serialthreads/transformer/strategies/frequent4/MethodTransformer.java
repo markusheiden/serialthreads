@@ -53,11 +53,11 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Constructor.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method to transform
+     *         Method to transform.
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     protected MethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
         super(clazz, method, classInfoCache);
@@ -87,10 +87,10 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Computes an unique name based on the name and the descriptor.
      *
      * @param name
-     *         name of method
+     *         Name of method.
      * @param desc
-     *         parameters
-     * @return changed name
+     *         Parameters.
+     * @return Changed name.
      */
     protected String changeCopyName(String name, String desc) {
         return name + "$$" + escapeForMethodName(desc) + "$$";
@@ -100,8 +100,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Change the parameters of a copied method to (Thread, Frame).
      *
      * @param desc
-     *         parameters
-     * @return changed parameters
+     *         Parameters.
+     * @return Changed parameters.
      */
     protected String changeCopyDesc(String desc) {
         return "(" + FRAME_IMPL_DESC + ")" + BOOLEAN_TYPE;
@@ -112,8 +112,8 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Inserts thread and frame as additional parameters at the end.
      *
      * @param desc
-     *         parameters
-     * @return changed parameters
+     *         Parameters.
+     * @return Changed parameters.
      */
     protected String changeDesc(String desc) {
         int index = desc.indexOf(")");
@@ -354,9 +354,9 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Does the method need a frame for storing its state?.
      * <p>
      * A frame is not needed, if following conditions apply:
-     * - There is just one interruptible method call (-> no need to store the method index)
-     * - The method call is a static or self call (-> no need to store the method owner)
-     * - The method call is a tail call (-> needs no storing of locals and stack)
+     * - There is just one interruptible method call (-> no need to store the method index).
+     * - The method call is a static or self call (-> no need to store the method owner).
+     * - The method call is a tail call (-> needs no storing of locals and stack).
      * The third condition is somewhat suboptimal,
      * but for now the easiest way to implement the detection,
      * that neither the locals nor the stack is needed / used.
@@ -381,7 +381,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * Ignores run() methods, because they have a special return value handling.
      *
      * @param metaInfo
-     *         Meta information about method call
+     *         Meta information about method call.
      */
     protected final boolean isTailCall(MetaInfo metaInfo) {
         return metaInfo != null && metaInfo.tags.contains(TAG_TAIL_CALL) &&
@@ -406,7 +406,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
             instructions.add(new InsnNode(serializing ? ICONST_1 : ICONST_0));
             instructions.add(new InsnNode(IRETURN));
         } else {
-            // serializing flag is already on the stack.
+            // Serializing flag is already on the stack.
             instructions.add(new InsnNode(IRETURN));
         }
         return instructions;
@@ -418,7 +418,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      */
     protected void fixMaxs() {
         method.maxLocals += 1;
-        // TODO 2009-10-11 mh: recalculate minimum maxs
+        // TODO 2009-10-11 mh: Recalculate minimum maxs.
         method.maxStack = Math.max(method.maxStack + 2, 5);
     }
 }

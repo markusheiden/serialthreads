@@ -14,9 +14,9 @@ public class SerialThreadExecutor {
      * Constructor.
      *
      * @param runnables
-     *         runnables
+     *         Runnables.
      * @throws IllegalArgumentException
-     *         if there are no runnables
+     *         If there are no runnables.
      */
     public SerialThreadExecutor(IRunnable... runnables) {
         chains = ChainedRunnable.chain(runnables);
@@ -29,7 +29,7 @@ public class SerialThreadExecutor {
      */
     @Executor
     public void execute() {
-        // loop until a chain finishes
+        // Loop until a chain finishes.
         var chain = lastExecuted;
         try {
             //noinspection InfiniteLoopStatement
@@ -38,8 +38,8 @@ public class SerialThreadExecutor {
                 chain.runnable.run();
             }
         } catch (ThreadFinishedException e) {
-            // expected: execution finished normally due to the end of a serial thread
-            // TODO 2009-12-09 mh: Avoid cast
+            // Expected: execution finished normally due to the end of a serial thread.
+            // TODO 2009-12-09 mh: Avoid cast.
             ((Stack) chain.runnable.getThread()).reset();
         }
 
@@ -56,7 +56,7 @@ public class SerialThreadExecutor {
         // long, because the product may overflow an int.
         long loops = (long) interrupts * chains.length;
 
-        // loop until a chain finishes
+        // Loop until a chain finishes.
         var chain = lastExecuted;
         try {
             do {
@@ -64,10 +64,10 @@ public class SerialThreadExecutor {
                 chain.runnable.run();
             } while (--loops > 0);
 
-            // execution finished, because the given number of interrupts have been processed
+            // Execution finished, because the given number of interrupts have been processed.
         } catch (ThreadFinishedException e) {
-            // expected: execution finished normally due to the end of a serial thread
-            // TODO 2009-12-09 mh: Avoid cast
+            // Expected: execution finished normally due to the end of a serial thread.
+            // TODO 2009-12-09 mh: Avoid cast.
             ((Stack) chain.runnable.getThread()).reset();
         }
 

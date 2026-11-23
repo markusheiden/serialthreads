@@ -34,7 +34,7 @@ public abstract class AbstractValueCode implements IValueCode {
     protected static final String FRAME_IMPL_NAME = Type.getType(StackFrame.class).getInternalName();
 
     /**
-     * Type representing the the value class.
+     * Type representing the value class.
      */
     protected final Type type;
 
@@ -93,21 +93,21 @@ public abstract class AbstractValueCode implements IValueCode {
      * Constructor.
      *
      * @param type
-     *         Type representing the the value class
+     *         Type representing the value class.
      * @param methodName
-     *         Base name of value specific load/store methods at stack
+     *         Base name of value specific load/store methods at stack.
      * @param load
-     *         Value specific load instruction
+     *         Value specific load instruction.
      * @param store
-     *         Value specific store instruction
+     *         Value specific store instruction.
      * @param aload
-     *         Value specific array load instruction
+     *         Value specific array load instruction.
      * @param astore
-     *         Value specific array store instruction
+     *         Value specific array store instruction.
      * @param pushNull
-     *         Value specific instruction to push a zero/null onto the stack
+     *         Value specific instruction to push a zero/null onto the stack.
      * @param returnValue
-     *         Value specific return instruction
+     *         Value specific return instruction.
      */
     public AbstractValueCode(Type type, String methodName, int load, int store, int aload, int astore, int pushNull, int returnValue) {
         this.type = type;
@@ -143,7 +143,7 @@ public abstract class AbstractValueCode implements IValueCode {
      * Generate code to get the array for stack elements of the frame.
      *
      * @param localFrame
-     *         local with frame.
+     *         Local with frame.
      */
     private InsnList getStacks(int localFrame) {
         var instructions = new InsnList();
@@ -257,7 +257,7 @@ public abstract class AbstractValueCode implements IValueCode {
      * Generate code to get the array for locals of the frame.
      *
      * @param localFrame
-     *         local with frame.
+     *         Local with frame.
      */
     private InsnList getLocals(int localFrame) {
         var instructions = new InsnList();
@@ -416,10 +416,10 @@ public abstract class AbstractValueCode implements IValueCode {
     /**
      * Generate code to cast the topmost element on the stack to this type.
      *
-     * @return Instructions
+     * @return Instructions.
      */
     protected InsnList cast() {
-        // overwrite, if needed
+        // Overwrite, if needed.
         return new InsnList();
     }
 

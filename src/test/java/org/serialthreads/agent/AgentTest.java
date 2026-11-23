@@ -140,7 +140,7 @@ class AgentTest {
          * Constructor.
          *
          * @param hiddenResources
-         *         class file resources to hide, e.g. {@code "org/example/Test.class"}
+         *         Class file resources to hide, e.g. {@code "org/example/Test.class"}.
          */
         AgentSimulatingClassLoader(String... hiddenResources) {
             super(AgentTest.class.getClassLoader());
@@ -170,8 +170,8 @@ class AgentTest {
          * like an instrumented JVM would do.
          *
          * @param name
-         *         binary name of class
-         * @return defined class or {@code null}, if the byte code of the class is not available
+         *         Binary name of class.
+         * @return Defined class or {@code null}, if the byte code of the class is not available.
          */
         private Class<?> defineTransformed(String name) {
             var internalName = name.replace('.', '/');
@@ -191,8 +191,8 @@ class AgentTest {
          * Load byte code of the given class.
          *
          * @param internalName
-         *         internal name of class
-         * @return byte code or {@code null}, if the class file resource is not available
+         *         Internal name of class.
+         * @return Byte code or {@code null}, if the class file resource is not available.
          */
         private byte[] loadByteCode(String internalName) {
             try (var classFile = getResourceAsStream(internalName + ".class")) {
@@ -263,7 +263,7 @@ class AgentTest {
         /**
          * Run {@link TestRunnable} with one interrupt per execute.
          *
-         * @return value of the runnable after the first execute * 10 + value after the second execute
+         * @return Value of the runnable after the first execute * 10 + value after the second execute.
          */
         public static int run() {
             var runnable = new TestRunnable();

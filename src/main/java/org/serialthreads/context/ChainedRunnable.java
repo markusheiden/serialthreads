@@ -14,7 +14,7 @@ public final class ChainedRunnable {
      * Create linked chain array.
      *
      * @param runnables
-     *         Runnables
+     *         Runnables.
      */
     public static ChainedRunnable[] chain(IRunnable... runnables) {
         return chain(List.of(runnables));
@@ -24,9 +24,9 @@ public final class ChainedRunnable {
      * Create linked chain array.
      *
      * @param runnables
-     *         Runnables
+     *         Runnables.
      * @throws IllegalArgumentException
-     *         if there are no runnables
+     *         If there are no runnables.
      */
     public static ChainedRunnable[] chain(Collection<? extends IRunnable> runnables) {
         int count = runnables.size();
@@ -51,7 +51,7 @@ public final class ChainedRunnable {
      * Constructor.
      *
      * @param runnable
-     *         task to execute
+     *         Task to execute.
      */
     private ChainedRunnable(IRunnable runnable) {
         this.runnable = (ITransformedRunnable) runnable;

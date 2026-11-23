@@ -36,11 +36,11 @@ class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
     public static class TestClass {
         @Interruptible
         public void interruptible() {
-            // just for the annotation
+            // Just for the annotation.
         }
 
         public void notInterruptible() {
-            // just for the missing annotation
+            // Just for the missing annotation.
         }
     }
 

@@ -32,7 +32,7 @@ public final class ValueCodeFactory {
      * Get code for specific type.
      *
      * @param value
-     *         basic value
+     *         Basic value.
      */
     public static IValueCode code(BasicValue value) {
         assert value.getType() != null : "Precondition: value.getType() != null";
@@ -44,7 +44,7 @@ public final class ValueCodeFactory {
      * Get code for specific type.
      *
      * @param type
-     *         type
+     *         Type.
      */
     public static IValueCode code(Type type) {
         assert type != null : "Precondition: type != null";

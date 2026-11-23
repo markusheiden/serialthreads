@@ -8,7 +8,7 @@ public class ThreadFinishedException extends RuntimeException {
      * Constructor.
      *
      * @param name
-     *         name of the thread
+     *         Name of the thread.
      */
     public ThreadFinishedException(String name) {
         super("Thread " + name + " finished");

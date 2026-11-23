@@ -98,7 +98,7 @@ class ExtendedAnalyzerTest {
         var label1 = new LabelNode();
         var label2 = new LabelNode();
 
-        // 0: define local1, local2 and local3
+        // 0: Define local1, local2 and local3.
         instructions.add(new InsnNode(ICONST_1));
         instructions.add(new VarInsnNode(ISTORE, 1));
         instructions.add(new InsnNode(ICONST_1));
@@ -107,34 +107,34 @@ class ExtendedAnalyzerTest {
         instructions.add(new VarInsnNode(ISTORE, 3));
 
         instructions.add(new InsnNode(ICONST_0));
-        // 7: (pseudo) conditional branch -> at this point local1, local2 and local3 are needed for the remaining code
+        // 7: (Pseudo) conditional branch -> at this point local1, local2 and local3 are needed for the remaining code.
         instructions.add(new JumpInsnNode(IFEQ, label2));
 
-        // 8: usage of local2 -> at this point just local2 and local1 are needed for the remaining code
+        // 8: Usage of local2 -> at this point just local2 and local1 are needed for the remaining code.
         instructions.add(new VarInsnNode(ILOAD, 2));
         instructions.add(new VarInsnNode(ISTORE, 2));
         instructions.add(new JumpInsnNode(GOTO, label1));
 
         instructions.add(label2);
-        // 12: usage of local3 -> at this point just local3 and local1 are needed for the remaining code
+        // 12: Usage of local3 -> at this point just local3 and local1 are needed for the remaining code.
         instructions.add(new VarInsnNode(ILOAD, 3));
         instructions.add(new VarInsnNode(ISTORE, 3));
 
         instructions.add(label1);
-        // 15: return local1 -> a this point just local1 is needed for the remaining code
+        // 15: Return local1 -> at this point just local1 is needed for the remaining code.
         instructions.add(new VarInsnNode(ILOAD, 1));
         instructions.add(new InsnNode(IRETURN));
 
         var frames = analyzer.analyze("Test", method);
 
-        // Check that at instruction 15 just local 1 is declared as needed for the remaining code
+        // Check that at instruction 15 just local 1 is declared as needed for the remaining code.
         assertThat(frames[15].neededLocals).containsOnly(1);
-        // Check that at instruction 8 just locals 1 & 2 are declared as needed for the remaining code
+        // Check that at instruction 8 just locals 1 & 2 are declared as needed for the remaining code.
         assertThat(frames[8].neededLocals).containsOnly(1, 2);
-        // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code
+        // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code.
         assertThat(frames[12].neededLocals).containsOnly(1, 3);
 
-        // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code
+        // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code.
         assertThat(frames[7].neededLocals).containsOnly(1, 2, 3);
     }
 
@@ -150,21 +150,21 @@ class ExtendedAnalyzerTest {
 
         var label1 = new LabelNode();
 
-        // 0: define local1 and local2
+        // 0: Define local1 and local2.
         instructions.add(new InsnNode(ICONST_1));
         instructions.add(new VarInsnNode(ISTORE, 1));
         instructions.add(new InsnNode(ICONST_1));
         instructions.add(new VarInsnNode(ISTORE, 2));
 
         instructions.add(label1);
-        // 5: usage of local1 -> at this point just local1 is needed for the remaining code
+        // 5: Usage of local1 -> at this point just local1 is needed for the remaining code.
         instructions.add(new VarInsnNode(ILOAD, 1));
         instructions.add(new VarInsnNode(ISTORE, 1));
         instructions.add(new JumpInsnNode(GOTO, label1));
 
         var frames = analyzer.analyze("Test", method);
 
-        // Check that at instruction 5 locals 1 is declared as needed for the remaining code
+        // Check that at instruction 5 local 1 is declared as needed for the remaining code.
         assertThat(frames[5].neededLocals).containsOnly(1);
     }
 
@@ -208,30 +208,30 @@ class ExtendedAnalyzerTest {
 
         var label = new LabelNode();
 
-        // 0: local1 = 1, local2 = local1 -> the value of local 2 is constant and hold in local 1 too
+        // 0: local1 = 1, local2 = local1 -> the value of local 2 is constant and held in local 1 too.
         instructions.add(new InsnNode(ICONST_1));
         instructions.add(new VarInsnNode(ISTORE, 1));
         instructions.add(new VarInsnNode(ILOAD, 1));
         instructions.add(new VarInsnNode(ISTORE, 2));
 
-        // 4: conditional branch
+        // 4: Conditional branch.
         instructions.add(new VarInsnNode(ILOAD, 0));
         instructions.add(new JumpInsnNode(IFEQ, label));
 
-        // 6: modify local 1 and local 2 -> local 2 is no more constant and no more hold in local 1
+        // 6: Modify local 1 and local 2 -> local 2 is no more constant and no more held in local 1.
         instructions.add(new VarInsnNode(ILOAD, 0));
         instructions.add(new VarInsnNode(ISTORE, 2));
         instructions.add(new VarInsnNode(ILOAD, 0));
         instructions.add(new VarInsnNode(ISTORE, 1));
 
         instructions.add(label);
-        // 11: return local2
+        // 11: Return local2.
         instructions.add(new VarInsnNode(ILOAD, 2));
         instructions.add(new InsnNode(IRETURN));
 
         var frames = analyzer.analyze("Test", method);
 
-        // Before the branch the value of local 2 is the constant 1 and hold in local 1 too.
+        // Before the branch the value of local 2 is the constant 1 and held in local 1 too.
         var before = (ExtendedValue) frames[4].getLocal(2);
         assertThat(before.isConstant()).isTrue();
         assertThat(before.getLocals()).containsOnly(1, 2);

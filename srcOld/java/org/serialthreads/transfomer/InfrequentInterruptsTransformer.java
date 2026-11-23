@@ -23,7 +23,7 @@ import static org.serialthreads.transformer.code.MethodCode.*;
  * TODO 2008-08-29 mh: Add line numbers to generated code?
  * TODO 2008-08-29 mh: Name local variables in generated code?
  * TODO 2008-08-29 mh: Need to fix longs and doubles (size==2)?
- * TODO 2008-08-30 mh: Check all Type#getSort() to handle boolean, char, byte, short too
+ * TODO 2008-08-30 mh: Check all Type#getSort() to handle boolean, char, byte, short too.
  */
 public class InfrequentInterruptsTransformer extends AbstractTransformer {
   public static final String STRATEGY = "INFREQUENT";
@@ -34,7 +34,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
   /**
    * Constructor.
    *
-   * @param isInterruptableCache class cache to use
+   * @param isInterruptableCache Class cache to use.
    */
   public InfrequentInterruptsTransformer(IIsInterruptableCache isInterruptableCache) {
     super(DynamicContext.class, DynamicContext.class, isInterruptableCache);
@@ -53,8 +53,8 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
     logger.debug("  Creating context");
 
-    // TODO 2008-09-23 mh: just for classes which contain at least one not static, interruptable method?
-    // TODO 2008-09-25 mh: make protected and do not create, when a subclass already has this field?
+    // TODO 2008-09-23 mh: Just for classes which contain at least one not static, interruptible method?
+    // TODO 2008-09-25 mh: Make protected and do not create, when a subclass already has this field?
     clazz.fields.add(new FieldNode(ACC_PRIVATE + ACC_TRANSIENT + ACC_FINAL + ACC_SYNTHETIC, THREAD, THREAD_IMPL_DESC, THREAD_IMPL_DESC, null));
   }
 
@@ -78,11 +78,11 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
    * Fix maxs of method.
    * These have not to be exact (but may not be too small!), because it is just for debugging purposes.
    *
-   * @param method method to alter
+   * @param method Method to alter.
    */
   protected void fixMaxs(MethodNode method) {
     method.maxLocals++;
-    // 2 extra stack elements + 1 extra element due to possible dup2 to optimization overhead
+    // 2 extra stack elements + 1 extra element due to possible dup2 to optimization overhead.
     method.maxStack = Math.max(method.maxStack + 2 + 1, 5);
   }
 
@@ -97,24 +97,24 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
     InsnList capture = new InsnList();
 
     //
-    // capture code and stack / locals restore code
+    // Capture code and stack / locals restore code.
     //
 
-    // start capturing now
+    // Start capturing now.
     // $$thread$$.serializing = true;
     capture.add(new VarInsnNode(ALOAD, localThread));
     capture.add(new InsnNode(ICONST_1));
     capture.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
 
-    // capture frame and return early
+    // Capture frame and return early.
     capture.add(pushToFrame(method, methodCall, frameAfter, localThread));
     capture.add(pushMethodToFrame(clazz, method, position, containsMoreThanOneMethodCall, "pushMethod", localThread));
     capture.add(dummyReturnStatement(method));
 
-    // normal execution
+    // Normal execution.
     capture.add(normal);
 
-    // insert capture code and remove interrupt call if any
+    // Insert capture code and remove interrupt call if any.
     method.instructions.insert(methodCall, capture);
     method.instructions.remove(methodCall);
   }
@@ -130,7 +130,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
     InsnList capture = new InsnList();
 
     //
-    // capture code and stack / locals restore code
+    // Capture code and stack / locals restore code.
     //
 
     // if ($$thread$$.serializing), else "GOTO" normal
@@ -138,15 +138,15 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
     capture.add(new FieldInsnNode(GETFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
     capture.add(new JumpInsnNode(IFEQ, normal));
 
-    // capture frame and return early
+    // Capture frame and return early.
     capture.add(pushToFrame(method, methodCall, frameAfter, localThread));
     capture.add(pushMethodToFrame(clazz, method, position, containsMoreThanOneMethodCall, "pushMethod", localThread));
     capture.add(dummyReturnStatement(method));
 
-    // normal execution
+    // Normal execution.
     capture.add(normal);
 
-    // insert capture code and remove interrupt call if any
+    // Insert capture code and remove interrupt call if any.
     method.instructions.insert(methodCall, capture);
   }
 
@@ -162,7 +162,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
     restoreCode.add(popFromFrame(method, methodCall, frame, localThread));
 
-    // stop restore
+    // Stop restore.
     restoreCode.add(new VarInsnNode(ALOAD, localThread));
     restoreCode.add(new InsnNode(ICONST_0));
     restoreCode.add(new FieldInsnNode(PUTFIELD, THREAD_IMPL_NAME, "serializing", "Z"));
@@ -183,18 +183,18 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
 
     InsnList restoreCode = popFromFrame(method, methodCall, frameAfter, localThread);
 
-    // call interrupted method
+    // Call interrupted method.
     if (isCallNotStatic) {
-      // pop owner
+      // Pop owner.
       restoreCode.add(new VarInsnNode(ALOAD, localThread));
       restoreCode.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "popOwner", "()" + OBJECT_DESC));
       restoreCode.add(new TypeInsnNode(CHECKCAST, methodCall.owner));
     }
 
-    // push arguments on stack and jump to method call
-    // TODO 2008-08-22 mh: restore locals by passing them as arguments, if possible?
+    // Push arguments on stack and jump to method call.
+    // TODO 2008-08-22 mh: Restore locals by passing them as arguments, if possible?
     restoreCode.add(dummyArguments(methodCall));
-    // TODO 2009-11-21 mh: clone call, optimize
+    // TODO 2009-11-21 mh: Clone call, optimize.
     restoreCode.add(new JumpInsnNode(GOTO, normal));
 
     return restoreCode;
@@ -203,9 +203,9 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
   /**
    * Insert frame restoring code at the begin of a method.
    *
-   * @param clazz class to alter
-   * @param method method to alter
-   * @param restoreCodes restore codes for all method calls in the method
+   * @param clazz Class to alter.
+   * @param method Method to alter.
+   * @param restoreCodes Restore codes for all method calls in the method.
    */
   protected void createRestoreCode(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes) {
     Assert.isTrue(!restoreCodes.isEmpty(), "Precondition: !restoreCodes.isEmpty()");
@@ -228,10 +228,10 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
     getMethod.add(new MethodInsnNode(INVOKEVIRTUAL, THREAD_IMPL_NAME, "popMethod", "()I"));
     instructions.add(restoreCodeDispatcher(getMethod, restoreCodes, 0));
 
-    // insert label for normal body of method
+    // Insert label for normal body of method.
     instructions.add(normal);
 
-    // insert generated byte code
+    // Insert generated byte code.
     insertMethodGetThreadStartCode(clazz, method, localThread, isSerializing, instructions);
   }
 }

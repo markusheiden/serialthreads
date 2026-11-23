@@ -56,9 +56,9 @@ public final class ExtendedFrame extends Frame<BasicValue> {
      * Constructs a new frame with the given size.
      *
      * @param nLocals
-     *         the maximum number of local variables of the frame.
+     *         The maximum number of local variables of the frame.
      * @param nStack
-     *         the maximum stack size of the frame.
+     *         The maximum stack size of the frame.
      */
     public ExtendedFrame(int nLocals, int nStack) {
         super(nLocals, nStack);
@@ -68,7 +68,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
      * Constructs a new frame that is identical to the given frame.
      *
      * @param src
-     *         a frame.
+     *         A frame.
      */
     public ExtendedFrame(Frame<? extends BasicValue> src) {
         super(src);
@@ -76,7 +76,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
 
     @Override
     public void execute(AbstractInsnNode insn, Interpreter<BasicValue> interpreter) throws AnalyzerException {
-        // remove references to local, if required
+        // Remove references to local, if required.
         switch (insn.getOpcode()) {
             case ACONST_NULL -> push(constantValue(interpreter.newOperation(insn).getType(), null));
             case ICONST_M1 -> push(constantValue(interpreter.newOperation(insn).getType(), -1));
@@ -114,7 +114,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
      * no longer have the same value as the local.
      *
      * @param modifiedLocal
-     *         modified local
+     *         Modified local.
      */
     private void removeLocalFromStack(int modifiedLocal) {
         assert modifiedLocal >= 0 && modifiedLocal < getLocals() : "Precondition: modifiedLocal >= 0 && modifiedLocal < getLocals()";
@@ -141,13 +141,13 @@ public final class ExtendedFrame extends Frame<BasicValue> {
     @Override
     public void setLocal(int i, BasicValue value) throws IndexOutOfBoundsException {
         if (value.equals(UNINITIALIZED_VALUE)) {
-            // it is the uninitialized value -> no annotation needed, because there is no value
+            // It is the uninitialized value -> no annotation needed, because there is no value.
             super.setLocal(i, value);
         } else if (value instanceof ExtendedValue v) {
-            // annotate the value, that it belongs to the local too
+            // Annotate the value, that it belongs to the local too.
             super.setLocal(i, v.addLocal(i));
         } else {
-            // annotate the value, that it belongs to the local -> new annotated value
+            // Annotate the value, that it belongs to the local -> new annotated value.
             super.setLocal(i, valueInLocal(value.getType(), i));
         }
     }
@@ -160,19 +160,19 @@ public final class ExtendedFrame extends Frame<BasicValue> {
     @Override
     public void push(BasicValue value) throws IndexOutOfBoundsException {
         if (value.equals(UNINITIALIZED_VALUE)) {
-            // no uninitialized values on the stack are allowed
+            // No uninitialized values on the stack are allowed.
             throw new IllegalArgumentException("Stack values have to be initialized");
         } else if (value instanceof ExtendedValue v) {
-            // the value already has been converted to an extended value -> copy value
+            // The value already has been converted to an extended value -> copy value.
             super.push(v);
         } else {
-            // convert the value to an extended value -> new value
+            // Convert the value to an extended value -> new value.
             super.push(value(value.getType()));
         }
     }
 
     //
-    // Backflow analysis related stuff
+    // Backflow analysis related stuff.
     //
 
     /**
@@ -180,7 +180,7 @@ public final class ExtendedFrame extends Frame<BasicValue> {
      *
      * @param value
      *         Value.
-     * @return local or -1.
+     * @return Local or -1.
      */
     public int getLowestNeededLocal(ExtendedValue value) {
         for (int lowerLocal : value.getLocals()) {

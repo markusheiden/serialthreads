@@ -155,13 +155,13 @@ class ExtendedFrameTest {
         var interpreter = new ExtendedVerifier(null, null, null, null, false);
 
         var frame = new ExtendedFrame(4, 4);
-        // value which will be changed
+        // Value which will be changed.
         frame.setLocal(0, ExtendedValue.value(type));
-        // local which locals will be updated
+        // Local which locals will be updated.
         frame.setLocal(type.getSize(), ExtendedValue.value(type).addLocal(0).addLocal(type.getSize()));
-        // stack which locals will be updated
+        // Stack which locals will be updated.
         frame.push(ExtendedValue.value(type).addLocal(0).addLocal(type.getSize()));
-        // stack which may be changed
+        // Stack which may be changed.
         frame.push(ExtendedValue.value(type));
         frame.execute(instruction, interpreter);
 

@@ -8,7 +8,7 @@ public interface IFrame {
   /**
    * Push stack object.
    *
-   * @param object object
+   * @param object Object.
    */
   public void pushStackObject(Object object);
 
@@ -20,7 +20,7 @@ public interface IFrame {
   /**
    * Push stack int value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushStackInt(int value);
 
@@ -32,7 +32,7 @@ public interface IFrame {
   /**
    * Push stack long value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushStackLong(long value);
 
@@ -44,7 +44,7 @@ public interface IFrame {
   /**
    * Push stack float value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushStackFloat(float value);
 
@@ -56,7 +56,7 @@ public interface IFrame {
   /**
    * Push stack double value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushStackDouble(double value);
 
@@ -68,7 +68,7 @@ public interface IFrame {
   /**
    * Push local object.
    *
-   * @param object object
+   * @param object Object.
    */
   public void pushLocalObject(Object object);
 
@@ -80,7 +80,7 @@ public interface IFrame {
   /**
    * Push local int value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushLocalInt(int value);
 
@@ -92,7 +92,7 @@ public interface IFrame {
   /**
    * Push local long value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushLocalLong(long value);
 
@@ -104,7 +104,7 @@ public interface IFrame {
   /**
    * Push local float value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushLocalFloat(float value);
 
@@ -116,7 +116,7 @@ public interface IFrame {
   /**
    * Push local double value.
    *
-   * @param value value
+   * @param value Value.
    */
   public void pushLocalDouble(double value);
 

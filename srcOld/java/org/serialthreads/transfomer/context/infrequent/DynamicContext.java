@@ -55,7 +55,7 @@ public class DynamicContext extends SerialThread implements IFrame {
   /**
    * Constructor.
    *
-   * @param name name of the thread
+   * @param name Name of the thread.
    */
   public DynamicContext(String name) {
     super(name);
@@ -252,11 +252,11 @@ public class DynamicContext extends SerialThread implements IFrame {
   }
 
   //
-  // debug
+  // Debug.
   //
 
   /**
-   * Check if the context is completly empty.
+   * Check if the context is completely empty.
    */
   public boolean isEmpty() {
     return

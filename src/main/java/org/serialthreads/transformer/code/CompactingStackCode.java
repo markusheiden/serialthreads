@@ -54,7 +54,7 @@ public class CompactingStackCode extends AbstractStackCode {
             var value = (ExtendedValue) frameAfter.getStack(stack);
             int lowestLocal = frameAfter.getLowestNeededLocal(value);
             if (value.isConstant() || lowestLocal >= 0) {
-                // just pop the value from stack, because the stack value is constant or stored in a local too.
+                // Just pop the value from stack, because the stack value is constant or stored in a local too.
                 instructions.add(code(value).pop());
             } else {
                 instructions.add(code(value).pushStack(stackIndexes[stack], localFrame));
@@ -139,7 +139,7 @@ public class CompactingStackCode extends AbstractStackCode {
                     // Normal case -> Pop local from frameAfter.
                     popLocals.add(local);
                 } else if (lowestLocal >= 0) {
-                    // The value of the local is hold in a lower local too -> copy.
+                    // The value of the local is held in a lower local too -> copy.
                     logger.debug("        Detected codes with the same value: {}/{}", lowestLocal, local);
                     copyLocals.add(code(extendedValue).load(lowestLocal));
                     copyLocals.add(code(extendedValue).store(local));
@@ -173,15 +173,15 @@ public class CompactingStackCode extends AbstractStackCode {
             var value = (ExtendedValue) frameAfter.getStack(stack);
             var lowestLocal = frameAfter.getLowestNeededLocal(value);
             if (value.isConstant()) {
-                // the stack value is constant -> push constant
+                // The stack value is constant -> push constant.
                 logger.debug("        Detected constant value on stack: {} / value {}", value, value.getConstant());
                 instructions.add(code(value).push(value.getConstant()));
             } else if (lowestLocal >= 0) {
-                // the stack value was already stored in local variable -> load local
+                // The stack value was already stored in local variable -> load local.
                 logger.debug("        Detected value of local on stack: {} / local {}", value, lowestLocal);
                 instructions.add(code(value).load(lowestLocal));
             } else {
-                // normal case -> pop stack from frameAfter
+                // Normal case -> pop stack from frameAfter.
                 instructions.add(code(value).popStack(stackIndexes[stack], localFrame));
             }
         }
@@ -192,7 +192,7 @@ public class CompactingStackCode extends AbstractStackCode {
      *
      * @param frame
      *         Frame.
-     * @return array stack element -> stack element index.
+     * @return Array stack element -> stack element index.
      */
     private int[] stackIndexes(Frame<?> frame) {
         var result = new int[frame.getStackSize()];

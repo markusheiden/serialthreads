@@ -19,7 +19,7 @@ class ClassInfoCacheClassWriter extends ClassWriter {
      * Constructor.
      *
      * @param classInfoCache
-     *         class info cache to look up the class hierarchy
+     *         Class info cache to look up the class hierarchy.
      */
     ClassInfoCacheClassWriter(IClassInfoCache classInfoCache) {
         super(COMPUTE_FRAMES);

@@ -33,7 +33,7 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
      * Constructor.
      *
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     public FrequentInterruptsTransformer4(IClassInfoCache classInfoCache) {
         super(classInfoCache, StackFrame.DEFAULT_FRAME_SIZE);
@@ -47,7 +47,7 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
 
         if (!isAbstract(method) && hasNoInterruptibleMethodCalls(method)) {
             // Copied method not needed, because it will be called never.
-            // Original method needs to be transformed though, because callers don't known about this fact.
+            // Original method needs to be transformed though, because callers don't know about this fact.
             return singletonList(
                     new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
         }
@@ -62,10 +62,10 @@ public class FrequentInterruptsTransformer4 extends AbstractTransformer {
      * Execute byte code transformation on run method.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method node to transform
-     * @return transformed methods
+     *         Method node to transform.
+     * @return Transformed methods.
      */
     private List<MethodNode> doTransformRun(ClassNode clazz, MethodNode method) throws AnalyzerException {
         if (isInterface(clazz) || isAbstract(method)) {

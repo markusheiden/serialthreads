@@ -11,25 +11,25 @@ public final class StackFrame implements Serializable {
     public static final int FAST_FRAME_SIZE = 8;
 
     public Stack stack;
-    // double linked list of stack frames
+    // Double linked list of stack frames.
     public final StackFrame previous;
     public StackFrame next;
 
-    // Method owner and index of restore code
+    // Method owner and index of restore code.
     public Object owner;
     public int method;
 
-    // size of frame
+    // Size of frame.
     private int size;
 
-    // stack
+    // Stack.
     public Object[] stackObjects;
     public int[] stackInts;
     public long[] stackLongs;
     public float[] stackFloats;
     public double[] stackDoubles;
 
-    // fast stack
+    // Fast stack.
     public Object stackObject0;
     public Object stackObject1;
     public Object stackObject2;
@@ -71,14 +71,14 @@ public final class StackFrame implements Serializable {
     public double stackDouble6;
     public double stackDouble7;
 
-    // locals
+    // Locals.
     public Object[] localObjects;
     public int[] localInts;
     public long[] localLongs;
     public float[] localFloats;
     public double[] localDoubles;
 
-    // fast locals
+    // Fast locals.
     public Object localObject0;
     public Object localObject1;
     public Object localObject2;
@@ -124,9 +124,9 @@ public final class StackFrame implements Serializable {
      * Constructor.
      *
      * @param previous
-     *         previous stack frame for a linked list
+     *         Previous stack frame for a linked list.
      * @param size
-     *         maximum size of the frame
+     *         Maximum size of the frame.
      */
     public StackFrame(Stack stack, StackFrame previous, int size) {
         this.stack = stack;
@@ -139,7 +139,7 @@ public final class StackFrame implements Serializable {
         this.next = null;
 
         owner = null;
-        // has to be -1 for dummy startup restore!
+        // Has to be -1 for dummy startup restore!
         method = -1;
 
         this.size = size;
@@ -160,7 +160,7 @@ public final class StackFrame implements Serializable {
     /**
      * Increase the stack by one frame.
      *
-     * @return Added frame
+     * @return Added frame.
      */
     public StackFrame addFrame() {
         return new StackFrame(stack, this, size);
@@ -205,7 +205,7 @@ public final class StackFrame implements Serializable {
      * Never shrinks arrays.
      *
      * @param max
-     *         highest needed index
+     *         Highest needed index.
      */
     public void resize(int max) {
         if (max < size) {

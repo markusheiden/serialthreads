@@ -48,7 +48,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      * Constructor.
      *
      * @param classLoader
-     *         class loader for loading classes.
+     *         Class loader for loading classes.
      */
     protected AbstractClassInfoCache(ClassLoader classLoader) {
         assert classLoader != null : "Precondition: classLoader != null";
@@ -88,17 +88,17 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
         var superClassType = Type.getObjectType(superClassName);
 
         if (superClassType.getSort() != ARRAY) {
-            // only possible non array super class is Object
+            // Only possible non array super class is Object.
             return superClassType.equals(Type.getType(Object.class));
         }
 
         if (classType.getDimensions() != superClassType.getDimensions()) {
-            // arrays dimension mismatch
+            // Arrays dimension mismatch.
             return false;
         }
 
         if (classType.getElementType().getSort() != OBJECT) {
-            // primitive arrays -> no inheritance
+            // Primitive arrays -> no inheritance.
             return classType.getElementType().equals(superClassType.getElementType());
         }
 
@@ -113,7 +113,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     protected boolean isExecutor(String owner, String name, String desc) {
         if (owner.startsWith("[")) {
-            // Arrays are no executors
+            // Arrays are no executors.
             return false;
         }
 
@@ -143,7 +143,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     @Override
     public boolean isInterruptible(String owner, String name, String desc) {
         if (owner.startsWith("[")) {
-            // Arrays are not interruptible
+            // Arrays are not interruptible.
             return false;
         }
 
@@ -161,7 +161,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     public boolean isInterrupt(String owner, String name, String desc) {
         if (owner.startsWith("[")) {
-            // Arrays are not interruptible
+            // Arrays are not interruptible.
             return false;
         }
 
@@ -190,11 +190,11 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     }
 
     /**
-     * Get class info for a class
+     * Get class info for a class.
      *
      * @param className
-     *         internal name of class
-     * @return class info
+     *         Internal name of class.
+     * @return Class info.
      */
     protected ClassInfo getClassInfo(String className) {
         var classInfo = classes.get(className);
@@ -217,7 +217,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      * Parse class and extract methods which are interruptible.
      *
      * @param owner
-     *         class to parse
+     *         Class to parse.
      */
     protected ClassInfo process(String owner) {
         assert owner != null : "Precondition: owner != null";
@@ -248,9 +248,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      * Does NOT do a deep scan!
      *
      * @param className
-     *         name of class to scan
+     *         Name of class to scan.
      * @param toProcess
-     *         further classes to scan, will be filled with super class and interfaces of scanned class
+     *         Further classes to scan, will be filled with super class and interfaces of scanned class.
      */
     protected abstract ClassInfo scan(String className, Deque<String> toProcess) throws IOException;
 
@@ -258,8 +258,8 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      * Read class info.
      *
      * @param reader
-     *         class reader with byte code
-     * @return class info visitor
+     *         Class reader with byte code.
+     * @return Class info visitor.
      */
     protected ClassInfoVisitor read(ClassReader reader) {
         var classInfoVisitor = new ClassInfoVisitor();
@@ -273,9 +273,9 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      * Uses ASM.
      *
      * @param className
-     *         name of class to scan
+     *         Name of class to scan.
      * @param toProcess
-     *         further classes to scan, will be filled with super class and interfaces of scanned class
+     *         Further classes to scan, will be filled with super class and interfaces of scanned class.
      * @return ClassInfo or {@code null}, if no class file could be found.
      */
     protected ClassInfo scanClassFile(String className, Deque<String> toProcess) throws IOException {
@@ -295,15 +295,15 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      * Uses ASM.
      *
      * @param classInfoVisitor
-     *         class info visitor with information about the class
+     *         Class info visitor with information about the class.
      * @param toProcess
-     *         classes to process
-     * @return ClassInfo
+     *         Classes to process.
+     * @return ClassInfo.
      */
     protected ClassInfo scanClass(ClassInfoVisitor classInfoVisitor, Deque<String> toProcess) {
         var result = new ClassInfo(classInfoVisitor.isInterface(), classInfoVisitor.getClassName(), classInfoVisitor.getSuperClassName(), classInfoVisitor.getMethods());
         if (classInfoVisitor.getSuperClassName() != null) {
-            // check super classes always first
+            // Check super classes always first.
             toProcess.addFirst(classInfoVisitor.getSuperClassName());
         }
         toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));

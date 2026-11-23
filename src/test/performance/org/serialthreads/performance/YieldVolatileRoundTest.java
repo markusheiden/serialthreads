@@ -44,7 +44,7 @@ class YieldVolatileRoundTest extends AbstractPerformanceTest {
         }
 
         private int decrementAndGetBarrier() {
-            // Synchronization needed, because the may be interrupted in middle of read-modify-write.
+            // Synchronization needed, because they may be interrupted in middle of read-modify-write.
             // barrierCount needs still to be volatile, because it is reset above.
             synchronized (lock) {
                 return --barrierCount;

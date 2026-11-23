@@ -55,7 +55,7 @@ public final class Stack implements SerialThread {
      * @param runnable
      *         Runnable.
      * @param frameSize
-     *         Default size of frames
+     *         Default size of frames.
      */
     public Stack(Object runnable, int frameSize) {
         this.name = runnable.getClass().getSimpleName();
@@ -80,7 +80,7 @@ public final class Stack implements SerialThread {
      * Needed after an exception has been thrown to clean up the stack.
      *
      * @param resetTo
-     *         Frame to reset to
+     *         Frame to reset to.
      */
     public void resetTo(StackFrame resetTo) {
         for (StackFrame frame = resetTo.next; frame != null; frame = frame.next) {

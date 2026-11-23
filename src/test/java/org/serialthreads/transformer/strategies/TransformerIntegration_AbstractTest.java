@@ -281,7 +281,7 @@ public abstract class TransformerIntegration_AbstractTest {
     }
 
     //
-    // Reflection test support
+    // Reflection test support.
     //
 
     /**

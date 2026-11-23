@@ -43,9 +43,9 @@ public class MetaInfo {
      * Constructor.
      *
      * @param frameBefore
-     *         Frame before instruction
+     *         Frame before instruction.
      * @param frameAfter
-     *         Frame after instruction
+     *         Frame after instruction.
      */
     public MetaInfo(ExtendedFrame frameBefore, ExtendedFrame frameAfter) {
         this.frameBefore = frameBefore;

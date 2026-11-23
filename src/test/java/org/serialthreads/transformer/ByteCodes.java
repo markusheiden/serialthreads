@@ -14,7 +14,7 @@ public final class ByteCodes {
      * Load the untransformed byte code of a class.
      *
      * @param clazz
-     *         Class
+     *         Class.
      */
     public static byte[] byteCode(Class<?> clazz) throws IOException {
         var classFile = clazz.getName().replace('.', '/') + ".class";

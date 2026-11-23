@@ -21,11 +21,11 @@ class OriginalMethodTransformer extends MethodTransformer {
      * Constructor.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method to transform
+     *         Method to transform.
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      */
     protected OriginalMethodTransformer(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache) {
         super(clazz, method, classInfoCache);
@@ -34,9 +34,9 @@ class OriginalMethodTransformer extends MethodTransformer {
     /**
      * Transform method.
      *
-     * @return Transformed method
+     * @return Transformed method.
      * @throws AnalyzerException
-     *         In case of incorrect byte code of the original method
+     *         In case of incorrect byte code of the original method.
      */
     public MethodNode transform() throws AnalyzerException {
         boolean concrete = !isAbstract(method);

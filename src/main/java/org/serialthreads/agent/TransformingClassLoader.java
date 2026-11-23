@@ -29,9 +29,9 @@ public class TransformingClassLoader extends SecureClassLoader {
      * Constructor using the context class loader of the current thread as parent.
      *
      * @param strategy
-     *         transformation strategy
+     *         Transformation strategy.
      * @param classPrefixes
-     *         prefixes of class to transform
+     *         Prefixes of classes to transform.
      */
     public TransformingClassLoader(IStrategy strategy, String... classPrefixes) {
         this(Thread.currentThread().getContextClassLoader(), strategy, classPrefixes);
@@ -41,11 +41,11 @@ public class TransformingClassLoader extends SecureClassLoader {
      * Constructor using a given class loader as parent.
      *
      * @param parent
-     *         parent class loader
+     *         Parent class loader.
      * @param strategy
-     *         transformation strategy
+     *         Transformation strategy.
      * @param classPrefixes
-     *         prefixes of class to transform
+     *         Prefixes of classes to transform.
      */
     public TransformingClassLoader(ClassLoader parent, IStrategy strategy, String... classPrefixes) {
         super("serialthreads", parent);
@@ -74,7 +74,7 @@ public class TransformingClassLoader extends SecureClassLoader {
                 var resourceName = name.replace('.', '/') + ".class";
                 var resource = getResource(resourceName);
                 if (resource == null) {
-                    // use default behaviour for all classes that could not be loaded directly
+                    // Use default behaviour for all classes that could not be loaded directly.
                     return super.loadClass(name, resolve);
                 }
 
@@ -83,7 +83,7 @@ public class TransformingClassLoader extends SecureClassLoader {
                     try {
                         byteCode = transformer.transform(byteCode);
                     } catch (LoadUntransformedException e) {
-                        // load class, because class should use this classloader to load referenced classes
+                        // Load class, because class should use this classloader to load referenced classes.
                     }
 
                     result = defineClass(name, byteCode, 0, byteCode.length, codeSource(resource, resourceName));
@@ -106,10 +106,10 @@ public class TransformingClassLoader extends SecureClassLoader {
      * Load byte code of the given class.
      *
      * @param resource
-     *         class file
-     * @return byte code
+     *         Class file.
+     * @return Byte code.
      * @throws IOException
-     *         in case of IO exception while reading the class file
+     *         In case of IO exception while reading the class file.
      */
     private byte[] loadByteCode(URL resource) throws IOException {
         try (var in = resource.openStream()) {
@@ -121,11 +121,11 @@ public class TransformingClassLoader extends SecureClassLoader {
      * Code source of a class: The location of its class file without the name of the class file.
      *
      * @param resource
-     *         class file
+     *         Class file.
      * @param resourceName
-     *         name of class file relative to its code source
+     *         Name of class file relative to its code source.
      * @throws IOException
-     *         if the location is no valid URL
+     *         If the location is no valid URL.
      */
     private CodeSource codeSource(URL resource, String resourceName) throws IOException {
         var url = resource.toExternalForm();
@@ -137,7 +137,7 @@ public class TransformingClassLoader extends SecureClassLoader {
      * Should this class be transformed.
      *
      * @param className
-     *         fully qualified name of class
+     *         Fully qualified name of class.
      */
     protected boolean shouldBeTransformed(String className) {
         for (var classPrefix : classPrefixes) {

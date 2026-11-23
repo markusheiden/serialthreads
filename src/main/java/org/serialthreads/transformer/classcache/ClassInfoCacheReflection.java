@@ -19,7 +19,7 @@ import static org.objectweb.asm.Opcodes.ACC_STATIC;
  */
 public class ClassInfoCacheReflection extends AbstractClassInfoCache {
     /**
-     * Cosntructor.
+     * Constructor.
      */
     public ClassInfoCacheReflection(ClassLoader classLoader) {
         super(classLoader);
@@ -44,11 +44,11 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
      * Uses reflection.
      *
      * @param classLoader
-     *         class loader to use
+     *         Class loader to use.
      * @param className
-     *         name of class to scan
+     *         Name of class to scan.
      * @param toProcess
-     *         further classes to scan, will be filled with super class and interfaces of scanned class
+     *         Further classes to scan, will be filled with super class and interfaces of scanned class.
      */
     private ClassInfo scanReflection(ClassLoader classLoader, String className, Deque<String> toProcess) {
         try {

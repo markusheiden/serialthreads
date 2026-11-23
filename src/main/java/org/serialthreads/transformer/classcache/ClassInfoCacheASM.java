@@ -11,7 +11,7 @@ public class ClassInfoCacheASM extends AbstractClassInfoCache {
      * Constructor.
      *
      * @param classLoader
-     *         class loader for loading classes.
+     *         Class loader for loading classes.
      */
     public ClassInfoCacheASM(ClassLoader classLoader) {
         super(classLoader);

@@ -68,7 +68,7 @@ class DebugPrinter extends Textifier {
     }
 
     //
-    // instructions
+    // Instructions.
     //
 
     @Override
@@ -163,7 +163,7 @@ class DebugPrinter extends Textifier {
     }
 
     //
-    // no instructions, but which asm counts as instructions
+    // No instructions, but which ASM counts as instructions.
     //
 
     @Override

@@ -98,8 +98,8 @@ class InterruptibleProcessorTest {
      * Check the given source of the class "Impl" together with {@link #BASE}.
      *
      * @param javaCode
-     *         Source of the class "Impl"
-     * @return diagnostics of the compiler
+     *         Source of the class "Impl".
+     * @return Diagnostics of the compiler.
      */
     List<Diagnostic<? extends JavaFileObject>> compile(String javaCode) {
         var compiler = getSystemJavaCompiler();

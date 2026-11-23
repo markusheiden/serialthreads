@@ -67,9 +67,9 @@ public abstract class AbstractTransformer implements ITransformer {
      * Constructor.
      *
      * @param classInfoCache
-     *         class cache to use
+     *         Class cache to use.
      * @param defaultFrameSize
-     *         default size of frames
+     *         Default size of frames.
      */
     protected AbstractTransformer(IClassInfoCache classInfoCache, int defaultFrameSize) {
         assert classInfoCache != null : "Precondition: classInfoCache != null";
@@ -121,12 +121,12 @@ public abstract class AbstractTransformer implements ITransformer {
      * Execute byte code transformation on a class.
      *
      * @param clazz
-     *         class to be transformed
+     *         Class to be transformed.
      */
     private void transform(ClassNode clazz) {
         logger.info("Transforming class {} with {}", clazz.name, this);
 
-        // separate constructors and methods
+        // Separate constructors and methods.
         var constructors = new ArrayList<MethodNode>(clazz.methods.size());
         var methods = new ArrayList<MethodNode>(clazz.methods.size());
         for (var method : clazz.methods) {
@@ -137,7 +137,7 @@ public abstract class AbstractTransformer implements ITransformer {
             }
         }
 
-        // constructors are never transformed -> check that they contain no calls of interruptible methods
+        // Constructors are never transformed -> check that they contain no calls of interruptible methods.
         for (var constructor : constructors) {
             check(clazz, constructor);
         }
@@ -146,20 +146,20 @@ public abstract class AbstractTransformer implements ITransformer {
         for (var method : methods) {
             var transformedMethods = transformMethod(clazz, method);
             if (transformedMethods == null) {
-                // method not transformed? -> check that it contains no calls of interruptible methods
+                // Method not transformed? -> check that it contains no calls of interruptible methods.
                 check(clazz, method);
             } else {
                 allTransformedMethods.addAll(transformedMethods);
 
                 if (logger.isDebugEnabled()) {
-                    // analyze methods again to be sure that they are correct
+                    // Analyze methods again to be sure that they are correct.
                     reanalyzeMethods(clazz, transformedMethods);
                 }
             }
         }
 
         if (allTransformedMethods.isEmpty()) {
-            // Class needs no transformation, but it should be loaded with this class loader
+            // Class needs no transformation, but it should be loaded with this class loader.
             logger.debug("  Class {} needs no transformation", clazz.name);
             throw new LoadUntransformedException(clazz.name);
         }
@@ -174,15 +174,15 @@ public abstract class AbstractTransformer implements ITransformer {
      * Executors are the only exception, they may call run().
      *
      * @param clazz
-     *         Clazz to check
+     *         Class to check.
      * @param method
-     *         Method to check
+     *         Method to check.
      */
     private void check(ClassNode clazz, MethodNode method) {
         for (var instruction : method.instructions) {
             if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall) {
                 if (!classInfoCache.isInterruptible(methodCall)) {
-                    // nothing to check on not interruptible methods
+                    // Nothing to check on not interruptible methods.
                     continue;
                 }
 
@@ -202,16 +202,16 @@ public abstract class AbstractTransformer implements ITransformer {
      * Logs disassembled transformed byte code on errors.
      *
      * @param clazz
-     *         owning class
+     *         Owning class.
      * @param methods
-     *         transformed methods
+     *         Transformed methods.
      */
     private void reanalyzeMethods(ClassNode clazz, List<MethodNode> methods) throws NotTransformableException {
         for (var method : methods) {
             try {
                 ExtendedAnalyzer.analyze(clazz, method, classInfoCache);
             } catch (Exception e) {
-                // disassemble erroneous method
+                // Disassemble erroneous method.
                 logger.error("Unable to analyze transformed method {}: {}", methodName(clazz, method), e.getMessage());
                 logger.error("Byte code:\n{}", Debugger.debug(clazz, method));
                 throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
@@ -223,10 +223,10 @@ public abstract class AbstractTransformer implements ITransformer {
      * Execute byte code transformation on interruptible method.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method node to transform
-     * @return transformed methods or null, if the method needs to transformation
+     *         Method node to transform.
+     * @return Transformed methods or null, if the method needs no transformation.
      */
     protected List<MethodNode> transformMethod(ClassNode clazz, MethodNode method) {
         logger.debug("  Transforming method {}", methodName(clazz, method));
@@ -249,7 +249,7 @@ public abstract class AbstractTransformer implements ITransformer {
 
             return doTransformMethod(clazz, method);
         } catch (AnalyzerException e) {
-            // abort in case of analyzer errors
+            // Abort in case of analyzer errors.
             throw new NotTransformableException("Unable to analyze transformed method " + methodName(clazz, method) + ": " + e.getMessage(), e);
         }
     }
@@ -258,10 +258,10 @@ public abstract class AbstractTransformer implements ITransformer {
      * Execute byte code transformation on interruptible method.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param method
-     *         method node to transform
-     * @return transformed methods
+     *         Method node to transform.
+     * @return Transformed methods.
      */
     protected abstract List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
 
@@ -269,7 +269,7 @@ public abstract class AbstractTransformer implements ITransformer {
      * Are there no interruptible method calls?.
      *
      * @param method
-     *         method node to transform
+     *         Method node to transform.
      */
     protected boolean hasNoInterruptibleMethodCalls(MethodNode method) {
         for (var instruction : method.instructions) {
@@ -286,9 +286,9 @@ public abstract class AbstractTransformer implements ITransformer {
      * This method will be only executed, if some methods of the clazz had been transformed.
      *
      * @param clazz
-     *         class to alter
+     *         Class to alter.
      * @param constructors
-     *         all constructors of class
+     *         All constructors of class.
      */
     protected void afterTransformation(ClassNode clazz, List<MethodNode> constructors) {
         implementTransformedRunnable(clazz, constructors, false, true);
@@ -298,14 +298,14 @@ public abstract class AbstractTransformer implements ITransformer {
      * Make IRunnables implement ITransformedRunnable.
      *
      * @param clazz
-     *         class to transform
+     *         Class to transform.
      * @param constructors
-     *         constructors
+     *         Constructors.
      * @param storeThread
      *         Store thread via "SerialThreadManager.setThread(thread)".
      * @param initFrame
      *         Initialize $$frame$$?.
-     * @return whether ITransformedRunnable has been implemented
+     * @return Whether ITransformedRunnable has been implemented.
      */
     protected boolean implementTransformedRunnable(ClassNode clazz, List<MethodNode> constructors, boolean storeThread, boolean initFrame) {
         if (!classInfoCache.hasSuperClass(clazz.name, IRUNNABLE_NAME)) {
@@ -365,7 +365,7 @@ public abstract class AbstractTransformer implements ITransformer {
         int localThread = 1;
 
         for (var returnInstruction : returnInstructions(constructor)) {
-            // constructors may not return a value
+            // Constructors may not return a value.
             assert returnInstruction.getOpcode() == RETURN : "Check: returnInstruction.getOpcode() == RETURN";
 
             var instructions = new InsnList();
@@ -388,7 +388,7 @@ public abstract class AbstractTransformer implements ITransformer {
      * Implement ITransformedRunnable.getThread().
      *
      * @param clazz
-     *         clazz to alter
+     *         Class to alter.
      */
     private void createGetThread(ClassNode clazz) {
         var getThread = new MethodNode(ACC_PUBLIC, "getThread", "()" + THREAD_DESC, null, new String[0]);
@@ -406,14 +406,14 @@ public abstract class AbstractTransformer implements ITransformer {
     }
 
     //
-    // Log / debug code
+    // Log / debug code.
     //
 
     /**
      * Log details of method for debugging purposes.
      *
      * @param method
-     *         method
+     *         Method.
      */
     protected void logDebug(MethodNode method) {
         logger.debug("    Max stack : {}", method.maxStack);
@@ -424,7 +424,7 @@ public abstract class AbstractTransformer implements ITransformer {
      * Log contents of a frame for debugging purposes.
      *
      * @param frame
-     *         frame
+     *         Frame.
      */
     @SuppressWarnings({ "UnusedDeclaration" })
     protected void logDebug(Frame frame) {

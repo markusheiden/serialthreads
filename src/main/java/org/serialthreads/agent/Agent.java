@@ -51,7 +51,7 @@ public class Agent implements ClassFileTransformer {
      * Creates a new class file transformer.
      *
      * @param strategy
-     *         strategy to use
+     *         Strategy to use.
      */
     public Agent(IStrategy strategy) {
         this.strategy = strategy;
@@ -69,7 +69,7 @@ public class Agent implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (loader == null) {
-            // No need to transform classes loaded by the bootstrap classloader
+            // No need to transform classes loaded by the bootstrap classloader.
             return null;
         }
 
@@ -83,7 +83,7 @@ public class Agent implements ClassFileTransformer {
 
             return transformed;
         } catch (LoadUntransformedException e) {
-            // No need to transform byte code
+            // No need to transform byte code.
             return null;
         } catch (MissingClassException e) {
             logger.warn("Unable to analyze {}, loading it untransformed: {}", className, e.getMessage());
@@ -98,13 +98,13 @@ public class Agent implements ClassFileTransformer {
     }
 
     /**
-     * Start of agent before main method have been called.
-     * Called by vm to start this agent.
+     * Start of agent before main method has been called.
+     * Called by VM to start this agent.
      *
      * @param arguments
-     *         arguments
+     *         Arguments.
      * @param inst
-     *         instrumentation
+     *         Instrumentation.
      */
     public static void premain(String arguments, Instrumentation inst) {
         agentmain(arguments, inst);
@@ -112,12 +112,12 @@ public class Agent implements ClassFileTransformer {
 
     /**
      * Start of agent after main method has been called.
-     * Called by vm to start this agent.
+     * Called by VM to start this agent.
      *
      * @param arguments
-     *         arguments
+     *         Arguments.
      * @param inst
-     *         instrumentation
+     *         Instrumentation.
      */
     public static void agentmain(String arguments, Instrumentation inst) {
         try {
