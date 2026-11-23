@@ -13,6 +13,8 @@ import javax.lang.model.util.ElementScanner14;
 import javax.tools.Diagnostic.Kind;
 import java.util.Set;
 
+import static javax.tools.Diagnostic.Kind.ERROR;
+
 /**
  * Checks correct usage of {@link Interruptible} annotations.
  */
@@ -46,7 +48,8 @@ public class InterruptibleProcessor extends AbstractProcessor {
   }
 
   /**
-   * Check that an interruptible method overrides another interruptible method, if it overrides anything.
+   * Check that the interruptible status of a method matches the one of the methods it overrides.
+   * A mismatch is an error, because the transformer rejects such classes.
    *
    * @param overrider Method to check, whether it overrides something
    */
@@ -64,12 +67,12 @@ public class InterruptibleProcessor extends AbstractProcessor {
           var overriddenInterruptible = overridden.getAnnotation(Interruptible.class) != null;
 
           if (interruptible && !overriddenInterruptible) {
-            processingEnv.getMessager().printMessage(Kind.NOTE,
+            processingEnv.getMessager().printMessage(ERROR,
               "Method " + overrider + " may not be interruptible, because the overridden method in " +
                 overriddenType.getQualifiedName() + " is not interruptible",
               overrider);
           } else if (!interruptible && overriddenInterruptible) {
-            processingEnv.getMessager().printMessage(Kind.NOTE,
+            processingEnv.getMessager().printMessage(ERROR,
               "Method " + overrider + " should be interruptible, because the overridden method in " +
                 overriddenType.getQualifiedName() + " is interruptible",
               overrider);

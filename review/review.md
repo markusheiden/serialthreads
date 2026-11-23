@@ -9,7 +9,7 @@ against the ASM 9.x sources.
 Findings fixed since the review (H1, H5, H7, M3, M6, M8, M11–M13, fixed 2026-08-24;
 L11, fixed by "Fix concurrency"; H6, fixed by the per-class-loader class info caches;
 C5–C7, dead `Maxs`, `StackFrame` and `Stack` API deleted; C10, C11, H2, H3, H4, L7, L8, L13, M1, M2, M4, M5, M7, M9
-and M10, fixed 2026-11-22; L5, fixed 2026-11-23)
+and M10, fixed 2026-11-22; L5 and L9, fixed 2026-11-23)
 have been removed from this document; the numbering of the remaining findings is
 unchanged, so it has gaps.
 
@@ -76,8 +76,6 @@ All medium severity findings have been fixed.
   (clearing the static ThreadLocal) on first thread finish although the manager is
   designed for repeated invocation, and clobbers a thread set by a different manager on
   the same OS thread. Inconsistent with `SerialThreadExecutor`, which never closes.
-- **L9.** `compiler/InterruptibleProcessor.java:67, 72` — findings are emitted only as
-  `Kind.NOTE`, so the check can neither fail nor visibly warn.
 - **L10.** `transformer/classcache/ClassInfo.java:92-129` — `isInterruptible`/`isInterrupt`/
   `isExecutor` NPE for unknown method ids (reachable via signature-polymorphic
   `MethodHandle.invoke` call sites) instead of a diagnostic exception.
