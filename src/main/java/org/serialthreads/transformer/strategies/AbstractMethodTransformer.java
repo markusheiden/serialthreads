@@ -149,19 +149,8 @@ public abstract class AbstractMethodTransformer {
     for (var instruction : instructions) {
       if (instruction.getType() == METHOD_INSN && instruction instanceof MethodInsnNode methodCall &&
           classInfoCache.isInterruptible(methodCall)) {
-          if (isRun(methodCall, classInfoCache)) {
-            // run() is the entry point of a serial thread, it never returns normally.
-            throw new NotTransformableException(
-              "Interruptible method %s may not call run, just executors may do that"
-                      .formatted(methodName(clazz, method)));
-          }
-          if (metaInfos.get(instruction).frameBefore == null) {
-            // The analyzer computes no frames for unreachable code, so there is nothing to capture and restore.
-            throw new NotTransformableException(
-              "Interruptible method %s contains an unreachable call of the interruptible method %s"
-                      .formatted(methodName(clazz, method), methodName(methodCall)));
-          }
-          interruptibleMethodCalls.add(methodCall);
+        checkTransformable(methodCall, instruction);
+        interruptibleMethodCalls.add(methodCall);
           tag(instruction, TAG_INTERRUPTIBLE);
           if (classInfoCache.isInterrupt(methodCall)) {
             tag(instruction, TAG_INTERRUPT);
@@ -170,6 +159,24 @@ public abstract class AbstractMethodTransformer {
             tag(instruction, TAG_TAIL_CALL);
           }
       }
+    }
+  }
+
+  /**
+   * Abort if method call is not transformable.
+   */
+  private void checkTransformable(MethodInsnNode methodCall, AbstractInsnNode instruction) {
+    if (isRun(methodCall, classInfoCache)) {
+      // run() is the entry point of a serial thread, it never returns normally.
+      throw new NotTransformableException(
+        "Interruptible method %s may not call run, just executors may do that"
+                .formatted(methodName(clazz, method)));
+    }
+    if (metaInfos.get(instruction).frameBefore == null) {
+      // The analyzer computes no frames for unreachable code, so there is nothing to capture and restore.
+      throw new NotTransformableException(
+        "Interruptible method %s contains an unreachable call of the interruptible method %s"
+                .formatted(methodName(clazz, method), methodName(methodCall)));
     }
   }
 
