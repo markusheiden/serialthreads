@@ -7,13 +7,13 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transfomer.context.infrequent.DynamicContext;
 import org.serialthreads.transformer.interruptable.IIsInterruptableCache;
 import org.serialthreads.transformer.strategies.AbstractTransformer;
-import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static org.objectweb.asm.Opcodes.*;
 import static org.serialthreads.transformer.code.MethodCode.*;
 
@@ -208,7 +208,7 @@ public class InfrequentInterruptsTransformer extends AbstractTransformer {
    * @param restoreCodes Restore codes for all method calls in the method.
    */
   protected void createRestoreCode(ClassNode clazz, MethodNode method, List<InsnList> restoreCodes) {
-    Assert.isTrue(!restoreCodes.isEmpty(), "Precondition: !restoreCodes.isEmpty()");
+    requireThat(restoreCodes, "restoreCodes").isNotEmpty();
 
     logger.debug("    Creating retore code for method");
 
