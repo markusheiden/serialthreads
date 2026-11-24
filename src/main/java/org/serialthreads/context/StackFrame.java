@@ -25,7 +25,7 @@ public final class StackFrame implements Serializable {
     private int size;
 
     // Stack.
-    public Object[] stackObjects;
+    public @Nullable Object[] stackObjects;
     public int[] stackInts;
     public long[] stackLongs;
     public float[] stackFloats;
@@ -74,7 +74,7 @@ public final class StackFrame implements Serializable {
     public double stackDouble7;
 
     // Locals.
-    public Object[] localObjects;
+    public @Nullable Object[] localObjects;
     public int[] localInts;
     public long[] localLongs;
     public float[] localFloats;
@@ -230,13 +230,13 @@ public final class StackFrame implements Serializable {
         localDoubles = resize(localDoubles);
     }
 
-    private Object[] resize(Object[] old) {
+    private @Nullable Object[] resize(@Nullable Object[] old) {
         if (old.length >= size) {
             // The array already has grown to at least the needed size.
             return old;
         }
 
-        final var result = new Object[size];
+        final var result = new @Nullable Object[size];
         System.arraycopy(old, 0, result, 0, old.length);
         return result;
     }

@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.analyzer;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static java.util.Objects.requireNonNull;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isLoad;
 import static org.serialthreads.transformer.code.MethodCode.isStore;
@@ -61,7 +63,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * @throws AnalyzerException
      *         In case of incorrect byte code of the original method.
      */
-    public static ExtendedFrame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
+    public static @Nullable ExtendedFrame[] analyze(ClassNode clazz, MethodNode method, IClassInfoCache classInfoCache)
             throws AnalyzerException {
         return create(clazz, classInfoCache).analyze(clazz.name, method);
     }
@@ -98,17 +100,17 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
     }
 
     @Override
-    public ExtendedFrame[] getFrames() {
+    public @Nullable ExtendedFrame[] getFrames() {
         var frames = super.getFrames();
-        var result = new ExtendedFrame[frames.length];
+        var result = new @Nullable ExtendedFrame[frames.length];
         System.arraycopy(frames, 0, result, 0, frames.length);
         return result;
     }
 
     @Override
-    public ExtendedFrame[] analyze(String owner, MethodNode m) throws AnalyzerException {
+    public @Nullable ExtendedFrame[] analyze(String owner, MethodNode m) throws AnalyzerException {
         var frames = super.analyze(owner, m);
-        var result = new ExtendedFrame[frames.length];
+        var result = new @Nullable ExtendedFrame[frames.length];
         System.arraycopy(frames, 0, result, 0, frames.length);
 
         var instructions = m.instructions;
@@ -139,7 +141,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * @param frames
      *         Frames.
      */
-    private void traceBack(MethodNode method, SortedSet<Integer> startingPoints, ExtendedFrame[] frames) {
+    private void traceBack(MethodNode method, SortedSet<Integer> startingPoints, @Nullable ExtendedFrame[] frames) {
         // Use last starting point.
         var index = startingPoints.last();
         startingPoints.remove(index);
@@ -152,7 +154,8 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         var instructions = method.instructions;
         while (true) {
             var instruction = instructions.get(index);
-            var frameBefore = frames[index];
+            // The instruction is the starting point or one of its predecessors, so it is reachable and has a frame.
+            var frameBefore = requireNonNull(frames[index]);
 
             if (isLoad(instruction)) {
                 frameBefore.neededLocals.add(((VarInsnNode) instruction).var);
@@ -168,7 +171,8 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
 
             // Update needed locals of all other predecessors.
             for (var from : froms) {
-                var fromFrame = frames[from];
+                // Control flow edges start at reachable instructions only.
+                var fromFrame = requireNonNull(frames[from]);
                 boolean modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
                 if (modified) {
                     startingPoints.add(from);

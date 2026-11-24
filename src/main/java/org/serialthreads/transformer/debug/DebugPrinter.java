@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.debug;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.analysis.BasicValue;
@@ -15,9 +16,9 @@ import static org.objectweb.asm.Opcodes.ASM9;
  */
 class DebugPrinter extends Textifier {
     private int instruction;
-    private final ExtendedFrame[] frames;
+    private final @Nullable ExtendedFrame[] frames;
 
-    public DebugPrinter(ExtendedFrame[] frames) {
+    public DebugPrinter(@Nullable ExtendedFrame[] frames) {
         super(ASM9);
 
         this.instruction = 0;
