@@ -26,16 +26,16 @@ public class TestInt implements IRunnable {
 
     @Interruptible
     public void run() {
-        var local0 = 0;
-        var local1 = local0 + 1;
-        var local2 = local1 + 1;
-        var local3 = local2 + 1;
-        var local4 = local3 + 1;
-        var local5 = local4 + 1;
-        var local6 = local5 + 1;
-        var local7 = local6 + 1;
-        var local8 = local7 + 1;
-        var local9 = local8 + 1;
+        int local0 = init;
+        int local1 = local0 + 1;
+        int local2 = local1 + 1;
+        int local3 = local2 + 1;
+        int local4 = local3 + 1;
+        int local5 = local4 + 1;
+        int local6 = local5 + 1;
+        int local7 = local6 + 1;
+        int local8 = local7 + 1;
+        int local9 = local8 + 1;
 
         interrupt();
 

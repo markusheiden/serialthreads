@@ -26,16 +26,16 @@ public class TestDouble implements IRunnable {
 
     @Interruptible
     public void run() {
-        var local0 = init;
-        var local1 = local0 + 1;
-        var local2 = local1 + 1;
-        var local3 = local2 + 1;
-        var local4 = local3 + 1;
-        var local5 = local4 + 1;
-        var local6 = local5 + 1;
-        var local7 = local6 + 1;
-        var local8 = local7 + 1;
-        var local9 = local8 + 1;
+        double local0 = init;
+        double local1 = local0 + 1;
+        double local2 = local1 + 1;
+        double local3 = local2 + 1;
+        double local4 = local3 + 1;
+        double local5 = local4 + 1;
+        double local6 = local5 + 1;
+        double local7 = local6 + 1;
+        double local8 = local7 + 1;
+        double local9 = local8 + 1;
 
         interrupt();
 
