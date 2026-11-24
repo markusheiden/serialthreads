@@ -15,14 +15,14 @@ class SynchronizedConcurrentTest extends AbstractPerformanceTest {
     void setUp() {
         barrierCount.set(0);
         waiting.set(1);
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new SynchronizedConcurrentCounter(i);
         }
     }
 
     @Override
     protected void doStop() {
-        for (Thread thread : threads) {
+        for (var thread : threads) {
             thread.interrupt();
         }
     }

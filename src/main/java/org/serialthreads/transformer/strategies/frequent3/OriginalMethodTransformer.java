@@ -38,7 +38,7 @@ class OriginalMethodTransformer extends MethodTransformer {
      *         In case of incorrect byte code of the original method.
      */
     public MethodNode transform() throws AnalyzerException {
-        boolean concrete = !isAbstract(method);
+        var concrete = !isAbstract(method);
         if (concrete) {
             shiftLocals();
             analyze();

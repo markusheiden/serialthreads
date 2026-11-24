@@ -363,7 +363,7 @@ public abstract class AbstractTransformer implements ITransformer {
         constructor.maxLocals = Math.max(constructor.maxLocals, 2);
         constructor.maxStack = Math.max(constructor.maxStack, 5);
 
-        int localThread = 1;
+        var localThread = 1;
 
         for (var returnInstruction : returnInstructions(constructor)) {
             // Constructors may not return a value.
@@ -429,11 +429,11 @@ public abstract class AbstractTransformer implements ITransformer {
      */
     @SuppressWarnings({ "UnusedDeclaration" })
     protected void logDebug(Frame<?> frame) {
-        for (int i = 0; i < frame.getLocals(); i++) {
+        for (var i = 0; i < frame.getLocals(); i++) {
             var local = (BasicValue) frame.getLocal(i);
             logger.debug("        Local {}: {}", i, local.isReference() ? local.getType().getDescriptor() : local);
         }
-        for (int i = 0; i < frame.getStackSize(); i++) {
+        for (var i = 0; i < frame.getStackSize(); i++) {
             var stack = (BasicValue) frame.getStack(i);
             logger.debug("        Stack {}: {}", i, stack.isReference() ? stack.getType().getDescriptor() : stack);
         }

@@ -91,7 +91,7 @@ public class ExtendedVerifier extends SimpleVerifier {
             // The types differ -> create new value with merged constant and locals or
             // the types are the same, but the constant or the locals have to be merged.
 
-            boolean isConstant = ev.isConstant() && ew.isConstant() && Objects.equals(ev.getConstant(), ew.getConstant());
+            var isConstant = ev.isConstant() && ew.isConstant() && Objects.equals(ev.getConstant(), ew.getConstant());
 
             var mergedLocals = new HashSet<>(ev.getLocals());
             mergedLocals.retainAll(ew.getLocals());
@@ -132,7 +132,7 @@ public class ExtendedVerifier extends SimpleVerifier {
                 return true;
             }
             if (currentClassInterfaces != null) {
-                for (Type v : currentClassInterfaces) {
+                for (var v : currentClassInterfaces) {
                     if (isAssignableFrom(t, v)) {
                         return true;
                     }

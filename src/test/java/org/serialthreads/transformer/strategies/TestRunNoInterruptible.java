@@ -17,7 +17,7 @@ public class TestRunNoInterruptible implements IRunnable {
     @Override
     @Interruptible
     public void run() {
-        int i = 2;
+        var i = 2;
         i = notInterruptible(i);
         i = i * 5;
         this.i = i;

@@ -229,7 +229,7 @@ public final class MethodCode {
      *         Method.
      */
     public static int firstLocal(MethodNode method) {
-        int local = firstParam(method);
+        var local = firstParam(method);
         for (var type : Type.getArgumentTypes(method.desc)) {
             local += type.getSize();
         }

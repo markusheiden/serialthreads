@@ -56,7 +56,7 @@ public class SerialThreadExecutor {
         requireThat(interrupts, "interrupts").isPositive();
 
         // long, because the product may overflow an int.
-        long loops = (long) interrupts * chains.length;
+        var loops = (long) interrupts * chains.length;
 
         // Loop until a chain finishes.
         var chain = lastExecuted;

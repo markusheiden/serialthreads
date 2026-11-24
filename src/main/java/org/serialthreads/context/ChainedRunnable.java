@@ -31,7 +31,7 @@ public final class ChainedRunnable {
      *         If there are no runnables.
      */
     public static ChainedRunnable[] chain(Collection<? extends IRunnable> runnables) {
-        int count = runnables.size();
+        var count = runnables.size();
         if (count == 0) {
             throw new IllegalArgumentException("At least one runnable is needed");
         }
@@ -39,7 +39,7 @@ public final class ChainedRunnable {
         var result = new ChainedRunnable[count];
         var iterator = runnables.iterator();
         result[0] = new ChainedRunnable(iterator.next());
-        for (int i = 1; i < count; i++) {
+        for (var i = 1; i < count; i++) {
             var chain = new ChainedRunnable(iterator.next());
             result[i] = chain;
             result[i - 1].next = chain;

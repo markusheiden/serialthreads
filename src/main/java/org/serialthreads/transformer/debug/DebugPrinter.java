@@ -29,7 +29,7 @@ class DebugPrinter extends Textifier {
         var index = "000" + instruction;
         index = index.substring(index.length() - 4);
 
-        for (int i = lastSize; i < text.size(); i++) {
+        for (var i = lastSize; i < text.size(); i++) {
             var line = (String) text.get(i);
             text.set(i, index.toUpperCase() + line);
         }
@@ -41,7 +41,7 @@ class DebugPrinter extends Textifier {
         var frame = frames[instruction];
         if (frame != null) {
             var frameText = new ArrayList<String>();
-            for (int i = 0; i < frame.getLocals(); i++) {
+            for (var i = 0; i < frame.getLocals(); i++) {
                 var local = frame.getLocal(i);
                 if (local != BasicValue.UNINITIALIZED_VALUE) {
                     var value = local.isReference() ? local.getType().getDescriptor() : local;
@@ -49,7 +49,7 @@ class DebugPrinter extends Textifier {
                 }
             }
             frameText.add(tab3 + "Needed locals: " + frame.neededLocals + "\n");
-            for (int i = 0; i < frame.getStackSize(); i++) {
+            for (var i = 0; i < frame.getStackSize(); i++) {
                 var stack = frame.getStack(i);
                 var value = stack.isReference() ? stack.getType().getDescriptor() : stack;
                 frameText.add(tab3 + "Stack: " + i + ": " + value + "\n");
@@ -62,7 +62,7 @@ class DebugPrinter extends Textifier {
     }
 
     private void addNoByteCodeIndex(int lastSize) {
-        for (int i = lastSize; i < text.size(); i++) {
+        for (var i = lastSize; i < text.size(); i++) {
             var line = (String) text.get(i);
             text.set(i, "----" + line);
         }
@@ -74,91 +74,91 @@ class DebugPrinter extends Textifier {
 
     @Override
     public void visitInsn(int opcode) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitInsn(opcode);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitIntInsn(int opcode, int operand) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitIntInsn(opcode, operand);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitVarInsn(int opcode, int var) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitVarInsn(opcode, var);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitTypeInsn(int opcode, String type) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitTypeInsn(opcode, type);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitFieldInsn(opcode, owner, name, desc);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitMethodInsn(opcode, owner, name, desc, itf);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitJumpInsn(int opcode, Label label) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitJumpInsn(opcode, label);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitLdcInsn(Object cst) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitLdcInsn(cst);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitIincInsn(int var, int increment) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitIincInsn(var, increment);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitTableSwitchInsn(min, max, dflt, labels);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitLookupSwitchInsn(dflt, keys, labels);
         addByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitMultiANewArrayInsn(String desc, int dims) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitMultiANewArrayInsn(desc, dims);
         addByteCodeIndex(lastSize);
     }
@@ -169,21 +169,21 @@ class DebugPrinter extends Textifier {
 
     @Override
     public void visitLabel(Label label) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitLabel(label);
         addByteCodeIndexWithoutFrame(lastSize);
     }
 
     @Override
     public void visitLineNumber(int line, Label start) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitLineNumber(line, start);
         addByteCodeIndexWithoutFrame(lastSize);
     }
 
     @Override
     public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitFrame(type, nLocal, local, nStack, stack);
         addByteCodeIndexWithoutFrame(lastSize);
     }
@@ -194,21 +194,21 @@ class DebugPrinter extends Textifier {
 
     @Override
     public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitTryCatchBlock(start, end, handler, type);
         addNoByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitLocalVariable(name, desc, signature, start, end, index);
         addNoByteCodeIndex(lastSize);
     }
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
-        int lastSize = text.size();
+        var lastSize = text.size();
         super.visitMaxs(maxStack, maxLocals);
         addNoByteCodeIndex(lastSize);
     }

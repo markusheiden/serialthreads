@@ -125,11 +125,11 @@ public abstract class TransformerIntegration_AbstractTest {
     private void testLocalStorage(IRunnable test, Function<String, Number> parser) throws Exception {
         manager = new SimpleSerialThreadManager(test);
         manager.execute(1);
-        for (int i = 0; i < 9; i++) {
+        for (var i = 0; i < 9; i++) {
             assertThat(field(test, "value" + i)).isEqualTo(parser.apply("-1"));
         }
         manager.execute(1);
-        for (int i = 0; i < 9; i++) {
+        for (var i = 0; i < 9; i++) {
             assertThat(field(test, "value" + i)).isEqualTo(parser.apply("" + i));
         }
     }

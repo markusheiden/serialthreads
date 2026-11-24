@@ -12,7 +12,7 @@ public class TestException implements IRunnable {
 
     @Interruptible
     public void run() {
-        int v = Math.round(1.1F);
+        var v = Math.round(1.1F);
         try {
             throwException();
         } catch (Exception e) {

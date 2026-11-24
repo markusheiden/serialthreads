@@ -18,7 +18,7 @@ public class TestRunMultiInterruptible implements IRunnable {
     @Override
     @Interruptible
     public void run() {
-        int i = 2;
+        var i = 2;
         i = interruptible1(i);
         i = i * 7;
         i = interruptible2(i);

@@ -117,7 +117,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * @return Changed parameters.
      */
     protected String changeDesc(String desc) {
-        int index = desc.indexOf(")");
+        var index = desc.indexOf(")");
         return desc.substring(0, index) + FRAME_IMPL_DESC + ")" + BOOLEAN_TYPE;
     }
 

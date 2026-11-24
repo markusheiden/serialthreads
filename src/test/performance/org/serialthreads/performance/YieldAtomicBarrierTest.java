@@ -13,7 +13,7 @@ class YieldAtomicBarrierTest extends AbstractPerformanceTest {
     @BeforeEach
     void setUp() {
         barrierCount.set(0);
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new YieldConcurrentCounter(i);
         }
     }

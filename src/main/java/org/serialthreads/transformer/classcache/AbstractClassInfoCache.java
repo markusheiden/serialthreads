@@ -110,7 +110,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
         }
 
         var classInfo = getClassInfo(owner);
-        boolean result = classInfo.isExecutor(name + desc);
+        var result = classInfo.isExecutor(name + desc);
         logger.debug("{} is {} executor", methodName(owner, name, desc), result ? "an" : "no");
 
         return result;
@@ -140,7 +140,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
         }
 
         var classInfo = getClassInfo(owner);
-        boolean result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
+        var result = classInfo.isInterruptible(name + desc) || classInfo.isInterrupt(name + desc);
         logger.debug("{} is {} interruptible", methodName(owner, name, desc), result ? "" : "not");
 
         return result;
@@ -158,7 +158,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
         }
 
         var classInfo = getClassInfo(owner);
-        boolean result = classInfo.isInterrupt(name + desc);
+        var result = classInfo.isInterrupt(name + desc);
         logger.debug("{} is {} interrupt", methodName(owner, name, desc), result ? "an" : "no");
 
         return result;

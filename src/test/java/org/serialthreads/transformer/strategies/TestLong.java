@@ -27,15 +27,15 @@ public class TestLong implements IRunnable {
     @Interruptible
     public void run() {
         long local0 = 0;
-        long local1 = local0 + 1;
-        long local2 = local1 + 1;
-        long local3 = local2 + 1;
-        long local4 = local3 + 1;
-        long local5 = local4 + 1;
-        long local6 = local5 + 1;
-        long local7 = local6 + 1;
-        long local8 = local7 + 1;
-        long local9 = local8 + 1;
+        var local1 = local0 + 1;
+        var local2 = local1 + 1;
+        var local3 = local2 + 1;
+        var local4 = local3 + 1;
+        var local5 = local4 + 1;
+        var local6 = local5 + 1;
+        var local7 = local6 + 1;
+        var local8 = local7 + 1;
+        var local9 = local8 + 1;
 
         interrupt();
 

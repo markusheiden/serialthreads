@@ -261,7 +261,7 @@ public abstract class AbstractMethodTransformer {
      * Mainly used for concrete methods.
      */
     protected void insertCaptureCode() {
-        int methodCallIndex = 0;
+        var methodCallIndex = 0;
         for (var methodCall : interruptibleMethodCalls) {
             var metaInfo = metaInfo(methodCall);
             createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false);
@@ -276,7 +276,7 @@ public abstract class AbstractMethodTransformer {
      */
     protected List<LabelNode> insertCaptureAndRestoreCode() {
         var restores = new ArrayList<LabelNode>(interruptibleMethodCalls.size());
-        int methodCallIndex = 0;
+        var methodCallIndex = 0;
         for (var methodCall : interruptibleMethodCalls) {
             var metaInfo = metaInfo(methodCall);
             restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, true));

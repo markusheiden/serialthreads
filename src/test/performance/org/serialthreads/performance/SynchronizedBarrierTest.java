@@ -11,7 +11,7 @@ class SynchronizedBarrierTest extends AbstractPerformanceTest {
     @BeforeEach
     void setUp() {
         barrierCount = 0;
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new SynchronizedCounter(i);
         }
     }

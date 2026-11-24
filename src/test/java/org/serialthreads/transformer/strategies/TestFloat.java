@@ -27,15 +27,15 @@ public class TestFloat implements IRunnable {
     @Interruptible
     public void run() {
         float local0 = 0;
-        float local1 = local0 + 1;
-        float local2 = local1 + 1;
-        float local3 = local2 + 1;
-        float local4 = local3 + 1;
-        float local5 = local4 + 1;
-        float local6 = local5 + 1;
-        float local7 = local6 + 1;
-        float local8 = local7 + 1;
-        float local9 = local8 + 1;
+        var local1 = local0 + 1;
+        var local2 = local1 + 1;
+        var local3 = local2 + 1;
+        var local4 = local3 + 1;
+        var local5 = local4 + 1;
+        var local6 = local5 + 1;
+        var local7 = local6 + 1;
+        var local8 = local7 + 1;
+        var local9 = local8 + 1;
 
         interrupt();
 

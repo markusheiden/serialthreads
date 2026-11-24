@@ -15,7 +15,7 @@ class YieldAtomicRoundTest extends AbstractPerformanceTest {
     void setUp() {
         barrierCount.set(COUNT);
         round.set(Integer.MIN_VALUE);
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new YieldConcurrentCounter(i);
         }
     }

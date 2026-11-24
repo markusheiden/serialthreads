@@ -17,7 +17,7 @@ public class TestTypeMerge implements IRunnable {
     @Interruptible
     public void run() {
         // Force a frame merge of the two subclasses, so that their common super class gets computed.
-        Base base = flag ? new SubA() : new SubB();
+        var base = flag ? new SubA() : new SubB();
 
         interrupt();
 

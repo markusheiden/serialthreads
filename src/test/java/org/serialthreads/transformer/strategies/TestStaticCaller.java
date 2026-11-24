@@ -24,7 +24,7 @@ public class TestStaticCaller implements IRunnable {
      */
     @Interruptible
     private static int staticLocal(int i, TestStaticCaller target) {
-        int result = target.method(1);
+        var result = target.method(1);
         return result + i;
     }
 
@@ -33,7 +33,7 @@ public class TestStaticCaller implements IRunnable {
      */
     @Interruptible
     private static int staticOwner(TestStaticCaller target, int i) {
-        int result = target.method(i);
+        var result = target.method(i);
         return result + i;
     }
 

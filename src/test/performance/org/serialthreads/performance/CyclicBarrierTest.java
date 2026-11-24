@@ -13,7 +13,7 @@ class CyclicBarrierTest extends AbstractPerformanceTest {
 
     @BeforeEach
     void setUp() {
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new BarrierCounter(i);
         }
     }

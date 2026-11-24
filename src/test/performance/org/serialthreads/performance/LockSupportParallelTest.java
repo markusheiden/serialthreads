@@ -14,14 +14,14 @@ class LockSupportParallelTest extends AbstractPerformanceTest {
     @BeforeEach
     void setUp() {
         barrierCount.set(COUNT);
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new ConcurrentCounter(i);
         }
     }
 
     @Override
     protected void doStop() {
-        for (Thread thread : threads) {
+        for (var thread : threads) {
             LockSupport.unpark(thread);
         }
     }
@@ -37,7 +37,7 @@ class LockSupportParallelTest extends AbstractPerformanceTest {
                 LockSupport.park();
             } else {
                 barrierCount.set(COUNT);
-                for (int i = 0; i < COUNT; i++) {
+                for (var i = 0; i < COUNT; i++) {
                     if (counters[i] != this) {
                         LockSupport.unpark(threads[i]);
                     }

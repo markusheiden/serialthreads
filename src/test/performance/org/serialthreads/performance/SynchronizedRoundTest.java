@@ -13,7 +13,7 @@ class SynchronizedRoundTest extends AbstractPerformanceTest {
     void setUp() {
         barrierCount = COUNT;
         round = Integer.MIN_VALUE;
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new YieldCounter(i);
         }
     }

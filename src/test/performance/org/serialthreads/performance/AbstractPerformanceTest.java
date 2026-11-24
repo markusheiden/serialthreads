@@ -21,15 +21,15 @@ public abstract class AbstractPerformanceTest {
         wait(TIME);
         stop();
 
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             System.out.println("Counter " + i + ": " + counters[i].getCount());
         }
 
-        long count = counters[0].getCount();
+        var count = counters[0].getCount();
         // Check that counters have run at all.
         assertThat(count).as("Counters did not block").isGreaterThan(1);
 
-        for (int i = 1; i < counters.length; i++) {
+        for (var i = 1; i < counters.length; i++) {
             // Check that all counters differ only by max 1, due to different stop time.
             assertThat(counters[i].getCount()).as("Counters are consistent: %d / %d", count, counters[i].getCount())
                     .isBetween(count - 1, count + 1);
@@ -52,7 +52,7 @@ public abstract class AbstractPerformanceTest {
      * Threads should be in a waiting state.
      */
     protected void doStartThreads() throws Exception {
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             final IRunnable counter = counters[i];
             threads[i] = new Thread(counter::run, "Counter " + i);
             threads[i].start();
@@ -62,7 +62,7 @@ public abstract class AbstractPerformanceTest {
         do {
             Thread.yield();
             ready = true;
-            for (ICounter counter : counters) {
+            for (var counter : counters) {
                 ready &= counter.isReady();
             }
         } while (!ready);
@@ -80,12 +80,12 @@ public abstract class AbstractPerformanceTest {
      */
     protected final void stop() throws Exception {
         doStopCounters();
-        long endTime = System.currentTimeMillis();
+        var endTime = System.currentTimeMillis();
         doStop();
         doJoinThreads();
 
-        long duration = endTime - startTime;
-        long countsPerSecond = counters[0].getCount() * 1000 / duration;
+        var duration = endTime - startTime;
+        var countsPerSecond = counters[0].getCount() * 1000 / duration;
         System.out.println("Performance: " + countsPerSecond + " counts/s for " + COUNT + " threads");
     }
 
@@ -105,7 +105,7 @@ public abstract class AbstractPerformanceTest {
      * Join stopped threads to ensure that they have really ended.
      */
     protected void doJoinThreads() throws Exception {
-        for (Thread thread : threads) {
+        for (var thread : threads) {
             thread.join();
         }
     }

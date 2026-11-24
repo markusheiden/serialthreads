@@ -51,9 +51,9 @@ public class CompactingStackCode extends AbstractStackCode {
 
         var stackIndexes = stackIndexes(frameAfter);
         // The topmost element is a dummy return value, if the called method returns one.
-        for (int stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
+        for (var stack = isCallNotVoid ? frameAfter.getStackSize() - 2 : frameAfter.getStackSize() - 1; stack >= 0; stack--) {
             var value = (ExtendedValue) frameAfter.getStack(stack);
-            int lowestLocal = frameAfter.getLowestNeededLocal(value);
+            var lowestLocal = frameAfter.getLowestNeededLocal(value);
             if (value.isConstant() || lowestLocal >= 0) {
                 // Just pop the value from stack, because the stack value is constant or stored in a local too.
                 instructions.add(code(value).pop());

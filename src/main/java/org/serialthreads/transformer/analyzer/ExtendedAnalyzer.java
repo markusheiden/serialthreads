@@ -84,7 +84,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         for (var interfaceName : clazz.interfaces) {
             interfaceTypes.add(Type.getObjectType(interfaceName));
         }
-        boolean isInterface = isInterface(clazz);
+        var isInterface = isInterface(clazz);
 
         return new ExtendedAnalyzer(new ExtendedVerifier(classInfoCache, classType, superClassType, interfaceTypes, isInterface));
     }
@@ -116,7 +116,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
         var instructions = m.instructions;
 
         var startingPoints = new TreeSet<Integer>();
-        for (int i = 0; i < instructions.size(); i++) {
+        for (var i = 0; i < instructions.size(); i++) {
             var instruction = instructions.get(i);
             if (STARTING_POINT_OPCODES.contains(instruction.getOpcode())) {
                 startingPoints.add(i);
@@ -173,7 +173,7 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
             for (var from : froms) {
                 // Control flow edges start at reachable instructions only.
                 var fromFrame = requireNonNull(frames[from]);
-                boolean modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
+                var modified = fromFrame.neededLocals.addAll(frameBefore.neededLocals);
                 if (modified) {
                     startingPoints.add(from);
                 }

@@ -46,9 +46,9 @@ public class TestInterruptible extends AbstractTestInterruptible implements ITes
     @Override
     @Interruptible
     public void run() {
-        long l1 = testLong(true, (char) 1, (byte) 3, (short) 5, 7, 11L);
-        double d1 = testDouble(13.0F, 17.0D);
-        int i1 = testStatic(19);
+        var l1 = testLong(true, (char) 1, (byte) 3, (short) 5, 7, 11L);
+        var d1 = testDouble(13.0F, 17.0D);
+        var i1 = testStatic(19);
 
         test = i1 + l1 + (long) d1;
 

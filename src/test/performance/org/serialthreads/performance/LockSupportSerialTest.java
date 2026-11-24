@@ -10,7 +10,7 @@ import java.util.concurrent.locks.LockSupport;
 class LockSupportSerialTest extends AbstractPerformanceTest {
     @BeforeEach
     void setUp() {
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new ConcurrentSerialCounter(i);
         }
     }
@@ -23,8 +23,8 @@ class LockSupportSerialTest extends AbstractPerformanceTest {
 
     @Override
     protected void doStop() {
-        for (int i = 0; i < 100; i++) {
-            for (Thread thread : threads) {
+        for (var i = 0; i < 100; i++) {
+            for (var thread : threads) {
                 LockSupport.unpark(thread);
             }
         }

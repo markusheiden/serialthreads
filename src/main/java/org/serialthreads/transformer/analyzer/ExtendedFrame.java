@@ -121,14 +121,14 @@ public final class ExtendedFrame extends Frame<BasicValue> {
         requireThat(modifiedLocal, "modifiedLocal").isBetween(0, getLocals());
 
         var copy = new ExtendedFrame(this);
-        for (int i = 0; i < copy.getLocals(); i++) {
+        for (var i = 0; i < copy.getLocals(); i++) {
             var local = copy.getLocal(i);
             if (local instanceof ExtendedValue l) {
                 super.setLocal(i, l.removeLocal(modifiedLocal));
             }
         }
         clearStack();
-        for (int i = 0; i < copy.getStackSize(); i++) {
+        for (var i = 0; i < copy.getStackSize(); i++) {
             var stack = copy.getStack(i);
             super.push(((ExtendedValue) stack).removeLocal(modifiedLocal));
         }

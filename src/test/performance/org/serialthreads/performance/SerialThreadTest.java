@@ -17,7 +17,7 @@ class SerialThreadTest extends AbstractPerformanceTest {
 
     @BeforeEach
     void setUp() {
-        for (int i = 0; i < counters.length; i++) {
+        for (var i = 0; i < counters.length; i++) {
             counters[i] = new SerialCounter(i);
         }
     }
@@ -27,7 +27,7 @@ class SerialThreadTest extends AbstractPerformanceTest {
         ready = false;
         managerThread = new Thread(() -> {
             try {
-                SimpleSerialThreadManager manager = new SimpleSerialThreadManager(counters);
+                var manager = new SimpleSerialThreadManager(counters);
                 synchronized (lock) {
                     ready = true;
                     lock.wait();

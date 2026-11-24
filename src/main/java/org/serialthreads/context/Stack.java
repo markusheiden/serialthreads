@@ -85,7 +85,7 @@ public final class Stack implements SerialThread {
      *         Frame to reset to.
      */
     public void resetTo(StackFrame resetTo) {
-        for (StackFrame frame = resetTo.next; frame != null; frame = frame.next) {
+        for (var frame = resetTo.next; frame != null; frame = frame.next) {
             frame.reset();
         }
     }
