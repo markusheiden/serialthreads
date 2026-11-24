@@ -1,5 +1,6 @@
 package org.serialthreads.agent;
 
+import org.jspecify.annotations.Nullable;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -67,7 +68,7 @@ public class Agent implements ClassFileTransformer {
      * are loaded untransformed, because this agent sees all classes, not just the ones containing interruptible code.
      */
     @Override
-    public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+    public byte @Nullable [] transform(@Nullable ClassLoader loader, String className, @Nullable Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
         if (loader == null) {
             // No need to transform classes loaded by the bootstrap classloader.
             return null;

@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -35,6 +36,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ATHROW;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -180,12 +182,22 @@ public abstract class AbstractMethodTransformer {
                     "Interruptible method %s may not call run, just executors may do that"
                             .formatted(methodName(clazz, method)));
         }
-        if (metaInfos.get(instruction).frameBefore == null) {
+        if (metaInfo(instruction).frameBefore == null) {
             // The analyzer computes no frames for unreachable code, so there is nothing to capture and restore.
             throw new NotTransformableException(
                     "Interruptible method %s contains an unreachable call of the interruptible method %s"
                             .formatted(methodName(clazz, method), methodName(methodCall)));
         }
+    }
+
+    /**
+     * Meta information of an instruction of the method.
+     *
+     * @param instruction
+     *         Instruction.
+     */
+    protected MetaInfo metaInfo(AbstractInsnNode instruction) {
+        return requireNonNull(metaInfos.get(instruction), "Meta information of instruction");
     }
 
     /**
@@ -197,7 +209,7 @@ public abstract class AbstractMethodTransformer {
      *         Tag.
      */
     private void tag(AbstractInsnNode instruction, String tag) {
-        metaInfos.get(instruction).tags.add(tag);
+        metaInfo(instruction).tags.add(tag);
     }
 
     /**
@@ -251,7 +263,7 @@ public abstract class AbstractMethodTransformer {
     protected void insertCaptureCode() {
         int methodCallIndex = 0;
         for (var methodCall : interruptibleMethodCalls) {
-            var metaInfo = metaInfos.get(methodCall);
+            var metaInfo = metaInfo(methodCall);
             createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, false);
         }
     }
@@ -266,7 +278,7 @@ public abstract class AbstractMethodTransformer {
         var restores = new ArrayList<LabelNode>(interruptibleMethodCalls.size());
         int methodCallIndex = 0;
         for (var methodCall : interruptibleMethodCalls) {
-            var metaInfo = metaInfos.get(methodCall);
+            var metaInfo = metaInfo(methodCall);
             restores.add(createCaptureAndRestoreCode(methodCall, metaInfo, methodCallIndex++, true));
         }
 
@@ -492,7 +504,7 @@ public abstract class AbstractMethodTransformer {
      *         Direction of search.
      * @return Label, if there is a label before any real instruction, null otherwise.
      */
-    private LabelNode searchLabel(AbstractInsnNode start, Function<AbstractInsnNode, AbstractInsnNode> direction) {
+    private @Nullable LabelNode searchLabel(AbstractInsnNode start, Function<AbstractInsnNode, AbstractInsnNode> direction) {
         for (var l = start; l != null && l.getOpcode() < 0; l = direction.apply(l)) {
             if (l instanceof LabelNode labelNode) {
                 return labelNode;

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static java.util.Objects.requireNonNull;
 import static org.serialthreads.transformer.code.MethodCode.isNotStatic;
 import static org.serialthreads.transformer.code.MethodCode.isNotVoid;
 import static org.serialthreads.transformer.code.ValueCodeFactory.code;
@@ -33,7 +34,7 @@ public class CompactingStackCode extends AbstractStackCode {
     public InsnList captureFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
         var instructions = new InsnList();
         if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
-            var frameAfter = metaInfo.frameAfter;
+            var frameAfter = requireNonNull(metaInfo.frameAfter);
             saveStack(methodCall, frameAfter, localFrame, instructions);
             saveLocals(method, frameAfter, localFrame, instructions);
         }
@@ -103,7 +104,7 @@ public class CompactingStackCode extends AbstractStackCode {
     public InsnList restoreFrame(MethodNode method, MethodInsnNode methodCall, MetaInfo metaInfo, int localFrame) {
         var instructions = new InsnList();
         if (!metaInfo.tags.contains(TAG_TAIL_CALL)) {
-            var frameAfter = metaInfo.frameAfter;
+            var frameAfter = requireNonNull(metaInfo.frameAfter);
             restoreLocals(method, frameAfter, localFrame, instructions);
             restoreStack(methodCall, frameAfter, localFrame, instructions);
         }

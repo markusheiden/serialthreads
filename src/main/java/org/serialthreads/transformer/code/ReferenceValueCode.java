@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -58,7 +59,7 @@ public class ReferenceValueCode extends AbstractValueCode {
     }
 
     @Override
-    public AbstractInsnNode push(Object value) {
+    public AbstractInsnNode push(@Nullable Object value) {
         if (value == null) {
             return new InsnNode(ACONST_NULL);
         }

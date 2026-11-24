@@ -1,8 +1,11 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     `java-library`
     `java-test-fixtures`
     `maven-publish`
     jacoco
+    alias(libs.plugins.error.prone)
     alias(libs.plugins.versions)
 }
 
@@ -33,6 +36,7 @@ configurations.all {
 dependencies {
     implementation(platform(libs.spring.boot.bom))
 
+    api(libs.jspecify)
     implementation("org.slf4j:slf4j-api")
 
     implementation(libs.asm)
@@ -48,8 +52,22 @@ dependencies {
     testRuntimeOnly("ch.qos.logback:logback-classic")
     testImplementation(testFixtures(project(":")))
 
+    errorprone(libs.error.prone)
+    errorprone(libs.nullaway)
+
     testFixturesImplementation(platform(libs.spring.boot.bom))
     testFixturesImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.errorprone {
+        // Check just the null safety of the production code.
+        disableAllChecks = true
+        enabled = !name.contains("test", ignoreCase = true)
+        error("NullAway")
+        option("NullAway:AnnotatedPackages", "org.serialthreads")
+        option("NullAway:JSpecifyMode", "true")
+    }
 }
 
 tasks.withType<AbstractArchiveTask> {

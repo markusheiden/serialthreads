@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.jspecify.annotations.Nullable;
 import org.serialthreads.transformer.analyzer.ExtendedFrame;
 
 import java.util.HashSet;
@@ -10,14 +11,14 @@ import java.util.Set;
  */
 public class MetaInfo {
     /**
-     * Frame before instruction.
+     * Frame before instruction, null for unreachable instructions.
      */
-    public final ExtendedFrame frameBefore;
+    public final @Nullable ExtendedFrame frameBefore;
 
     /**
-     * Frame after instruction.
+     * Frame after instruction, null for unreachable instructions and after the last instruction.
      */
-    public final ExtendedFrame frameAfter;
+    public final @Nullable ExtendedFrame frameAfter;
 
     /**
      * Tag for interruptible methods.
@@ -47,7 +48,7 @@ public class MetaInfo {
      * @param frameAfter
      *         Frame after instruction.
      */
-    public MetaInfo(ExtendedFrame frameBefore, ExtendedFrame frameAfter) {
+    public MetaInfo(@Nullable ExtendedFrame frameBefore, @Nullable ExtendedFrame frameAfter) {
         this.frameBefore = frameBefore;
         this.frameAfter = frameAfter;
     }

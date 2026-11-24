@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.serialthreads.Executor;
 import org.serialthreads.Interrupt;
@@ -12,6 +13,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Class info for scanned classes.
@@ -35,8 +38,8 @@ public record ClassInfo(
         boolean isInterface,
         Type type,
         String className,
-        Type superType,
-        String superClassName,
+        @Nullable Type superType,
+        @Nullable String superClassName,
         Set<String> classes,
         Map<String, MethodInfo> methods,
         boolean interruptible) {
@@ -61,7 +64,7 @@ public record ClassInfo(
      * @param methods
      *         Methods directly defined in the class and their interruptible status.
      */
-    public ClassInfo(boolean isInterface, String className, String superClassName, Map<String, MethodInfo> methods) {
+    public ClassInfo(boolean isInterface, String className, @Nullable String superClassName, Map<String, MethodInfo> methods) {
         var allClasses = new HashSet<String>();
         allClasses.add(className);
         var allMethods = new HashMap<>(methods);
@@ -103,7 +106,7 @@ public record ClassInfo(
      *         Method ID = name + desc.
      */
     public boolean isExecutor(String methodId) {
-        return getMethodInfo(methodId).hasAnnotation(TYPE_EXECUTOR);
+        return methodInfo(methodId).hasAnnotation(TYPE_EXECUTOR);
     }
 
     /**
@@ -113,7 +116,7 @@ public record ClassInfo(
      *         Method ID = name + desc.
      */
     public boolean isInterruptible(String methodId) {
-        return isInterruptible(getMethodInfo(methodId));
+        return isInterruptible(methodInfo(methodId));
     }
 
     private static boolean isInterruptible(MethodInfo method) {
@@ -127,7 +130,7 @@ public record ClassInfo(
      *         Method ID = name + desc.
      */
     public boolean isInterrupt(String methodId) {
-        return isInterrupt(getMethodInfo(methodId));
+        return isInterrupt(methodInfo(methodId));
     }
 
     private static boolean isInterrupt(MethodInfo method) {
@@ -140,8 +143,18 @@ public record ClassInfo(
      * @param methodId
      *         Method ID = name + desc.
      */
-    MethodInfo getMethodInfo(String methodId) {
+    @Nullable MethodInfo getMethodInfo(String methodId) {
         return methods.get(methodId);
+    }
+
+    /**
+     * Info for the given method, which has to exist.
+     *
+     * @param methodId
+     *         Method ID = name + desc.
+     */
+    private MethodInfo methodInfo(String methodId) {
+        return requireNonNull(getMethodInfo(methodId), () -> "Method %s of class %s".formatted(methodId, className));
     }
 
     /**

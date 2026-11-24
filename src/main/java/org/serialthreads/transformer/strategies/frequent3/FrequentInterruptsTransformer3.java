@@ -1,6 +1,7 @@
 
 package org.serialthreads.transformer.strategies.frequent3;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -40,7 +41,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer {
     }
 
     @Override
-    protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
+    protected @Nullable List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
         if (isRun(clazz, method, classInfoCache)) {
             return doTransformRun(clazz, method);
         }
@@ -67,7 +68,7 @@ public class FrequentInterruptsTransformer3 extends AbstractTransformer {
      *         Method node to transform.
      * @return Transformed methods.
      */
-    private List<MethodNode> doTransformRun(ClassNode clazz, MethodNode method) throws AnalyzerException {
+    private @Nullable List<MethodNode> doTransformRun(ClassNode clazz, MethodNode method) throws AnalyzerException {
         if (isInterface(clazz) || isAbstract(method)) {
             // Do not transform IRunnable.run() itself.
             return null;

@@ -1,10 +1,12 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.DALOAD;
 import static org.objectweb.asm.Opcodes.DASTORE;
 import static org.objectweb.asm.Opcodes.DCONST_0;
@@ -29,8 +31,8 @@ public class DoubleValueCode extends AbstractValueCode {
     }
 
     @Override
-    public AbstractInsnNode push(Object value) {
-        double d = (Double) value;
+    public AbstractInsnNode push(@Nullable Object value) {
+        double d = (Double) requireNonNull(value);
 
         if (d == 0D) {
             return new InsnNode(DCONST_0);

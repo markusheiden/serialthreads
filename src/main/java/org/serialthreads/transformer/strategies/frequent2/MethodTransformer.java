@@ -13,6 +13,7 @@ import org.serialthreads.transformer.code.LocalVariablesShifter;
 import org.serialthreads.transformer.strategies.AbstractMethodTransformer;
 import org.serialthreads.transformer.strategies.MetaInfo;
 
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.serialthreads.transformer.code.MethodCode.dummyReturnStatement;
@@ -242,7 +243,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
             // Restore stack "under" the returned value, if any.
             // TODO 2009-10-17 mh: Avoid restore, if method returns directly after returning from called method???
             var returnType = Type.getReturnType(clonedCall.desc);
-            var needToSaveReturnValue = isNotVoid(clonedCall) && metaInfo.frameAfter.getStackSize() > 1;
+            var needToSaveReturnValue = isNotVoid(clonedCall) && requireNonNull(metaInfo.frameAfter).getStackSize() > 1;
             if (needToSaveReturnValue) {
                 instructions.add(code(returnType).store(localReturnValue));
                 maxReturnValueSize = Math.max(maxReturnValueSize, returnType.getSize());

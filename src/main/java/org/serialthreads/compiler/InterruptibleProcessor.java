@@ -13,6 +13,7 @@ import javax.lang.model.util.ElementScanner14;
 import javax.tools.Diagnostic.Kind;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 /**
@@ -60,7 +61,7 @@ public class InterruptibleProcessor extends AbstractProcessor {
 
         var interruptible = overrider.getAnnotation(Interruptible.class) != null;
 
-        var overriderType = (TypeElement) overrider.getEnclosingElement();
+        var overriderType = (TypeElement) requireNonNull(overrider.getEnclosingElement());
         for (var superType : types.directSupertypes(overriderType.asType())) {
             var overriddenType = (TypeElement) types.asElement(superType);
             for (var overridden : elements.getAllMembers(overriddenType)) {

@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -159,7 +160,7 @@ public interface IValueCode {
      * @param value
      *         Value.
      */
-    AbstractInsnNode push(Object value);
+    AbstractInsnNode push(@Nullable Object value);
 
     /**
      * Return statement. Returns null value (if not void).

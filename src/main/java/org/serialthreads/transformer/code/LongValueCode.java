@@ -1,10 +1,12 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.LALOAD;
 import static org.objectweb.asm.Opcodes.LASTORE;
 import static org.objectweb.asm.Opcodes.LCONST_0;
@@ -29,8 +31,8 @@ public class LongValueCode extends AbstractValueCode {
     }
 
     @Override
-    public AbstractInsnNode push(Object value) {
-        long l = (Long) value;
+    public AbstractInsnNode push(@Nullable Object value) {
+        long l = (Long) requireNonNull(value);
 
         if (l == 0L) {
             return new InsnNode(LCONST_0);

@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.analyzer;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.SimpleVerifier;
@@ -116,7 +117,7 @@ public class ExtendedVerifier extends SimpleVerifier {
     }
 
     @Override
-    protected Type getSuperClass(Type t) {
+    protected @Nullable Type getSuperClass(Type t) {
         if (t.equals(currentClass)) {
             return currentSuperClass;
         }

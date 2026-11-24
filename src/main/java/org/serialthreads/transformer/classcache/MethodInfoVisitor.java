@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -31,7 +32,7 @@ public class MethodInfoVisitor extends MethodVisitor {
     }
 
     @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+    public @Nullable AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         methodAnnotations.add(Type.getType(desc));
         return null;
     }

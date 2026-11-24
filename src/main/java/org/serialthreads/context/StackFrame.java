@@ -1,5 +1,7 @@
 package org.serialthreads.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -12,11 +14,11 @@ public final class StackFrame implements Serializable {
 
     public Stack stack;
     // Double linked list of stack frames.
-    public final StackFrame previous;
-    public StackFrame next;
+    public final @Nullable StackFrame previous;
+    public @Nullable StackFrame next;
 
     // Method owner and index of restore code.
-    public Object owner;
+    public @Nullable Object owner;
     public int method;
 
     // Size of frame.
@@ -30,14 +32,14 @@ public final class StackFrame implements Serializable {
     public double[] stackDoubles;
 
     // Fast stack.
-    public Object stackObject0;
-    public Object stackObject1;
-    public Object stackObject2;
-    public Object stackObject3;
-    public Object stackObject4;
-    public Object stackObject5;
-    public Object stackObject6;
-    public Object stackObject7;
+    public @Nullable Object stackObject0;
+    public @Nullable Object stackObject1;
+    public @Nullable Object stackObject2;
+    public @Nullable Object stackObject3;
+    public @Nullable Object stackObject4;
+    public @Nullable Object stackObject5;
+    public @Nullable Object stackObject6;
+    public @Nullable Object stackObject7;
     public int stackInt0;
     public int stackInt1;
     public int stackInt2;
@@ -79,14 +81,14 @@ public final class StackFrame implements Serializable {
     public double[] localDoubles;
 
     // Fast locals.
-    public Object localObject0;
-    public Object localObject1;
-    public Object localObject2;
-    public Object localObject3;
-    public Object localObject4;
-    public Object localObject5;
-    public Object localObject6;
-    public Object localObject7;
+    public @Nullable Object localObject0;
+    public @Nullable Object localObject1;
+    public @Nullable Object localObject2;
+    public @Nullable Object localObject3;
+    public @Nullable Object localObject4;
+    public @Nullable Object localObject5;
+    public @Nullable Object localObject6;
+    public @Nullable Object localObject7;
     public int localInt0;
     public int localInt1;
     public int localInt2;
@@ -128,7 +130,7 @@ public final class StackFrame implements Serializable {
      * @param size
      *         Maximum size of the frame.
      */
-    public StackFrame(Stack stack, StackFrame previous, int size) {
+    public StackFrame(Stack stack, @Nullable StackFrame previous, int size) {
         this.stack = stack;
 
         if (previous != null) {

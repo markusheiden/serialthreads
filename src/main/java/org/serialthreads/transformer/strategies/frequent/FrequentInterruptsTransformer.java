@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies.frequent;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -11,6 +12,7 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
 import static org.serialthreads.transformer.code.MethodCode.isRun;
@@ -37,7 +39,7 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
     }
 
     @Override
-    protected List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
+    protected @Nullable List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
         if (isAbstract(method)) {
             // Abstract methods need no transformation.
             return null;
@@ -65,7 +67,7 @@ public class FrequentInterruptsTransformer extends AbstractTransformer {
             return;
         }
 
-        if (!classInfoCache.isInterruptible(classInfoCache.getSuperClass(clazz.name))) {
+        if (!classInfoCache.isInterruptible(requireNonNull(classInfoCache.getSuperClass(clazz.name)))) {
             logger.debug("  Creating stack for {}", clazz.name);
             addThreadField(clazz, false);
         }

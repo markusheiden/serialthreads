@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -29,12 +30,12 @@ public interface IClassInfoCache {
     boolean isInterface(String clazz);
 
     /**
-     * Get direct super class of this class.
+     * Get direct super class of this class, null for {@link Object}.
      *
      * @param clazz
      *         Internal name of class.
      */
-    Type getSuperClass(String clazz);
+    @Nullable Type getSuperClass(String clazz);
 
     /**
      * Extends / implements this class the given super class or interface.

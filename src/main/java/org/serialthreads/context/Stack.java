@@ -1,5 +1,7 @@
 package org.serialthreads.context;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Stack for all frames of a thread.
  */
@@ -27,7 +29,7 @@ public final class Stack implements SerialThread {
     /**
      * Return value of the last executed method: Object.
      */
-    public Object returnObject;
+    public @Nullable Object returnObject;
 
     /**
      * Return value of the last executed method: int.

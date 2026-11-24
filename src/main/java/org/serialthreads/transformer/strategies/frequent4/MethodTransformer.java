@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies.frequent4;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
@@ -370,7 +371,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
         }
 
         var methodCall = interruptibleMethodCalls.iterator().next();
-        var metaInfo = metaInfos.get(methodCall);
+        var metaInfo = metaInfo(methodCall);
         return
                 !(isSelfCall(method, methodCall, metaInfo) || isStatic(methodCall)) ||
                 !isTailCall(metaInfo);
@@ -398,7 +399,7 @@ abstract class MethodTransformer extends AbstractMethodTransformer {
      * @param serializing
      *         Serializing flag. Null means the serializing flag is already on the stack.
      */
-    private InsnList methodReturn(Boolean serializing) {
+    private InsnList methodReturn(@Nullable Boolean serializing) {
         var instructions = new InsnList();
         if (isRun(clazz, method, classInfoCache)) {
             instructions.add(new InsnNode(RETURN));

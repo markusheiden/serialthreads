@@ -8,6 +8,8 @@ import java.util.List;
  */
 public final class ChainedRunnable {
     public final ITransformedRunnable runnable;
+    // Is set by chain() right after construction.
+    @SuppressWarnings("NullAway.Init")
     public ChainedRunnable next;
 
     /**

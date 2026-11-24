@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -90,7 +92,7 @@ public final class MethodCode {
             return false;
         }
 
-        var frameBefore = metaInfo.frameBefore;
+        var frameBefore = requireNonNull(metaInfo.frameBefore);
 
         // "Pop" all arguments from stack.
         var argumentTypes = Type.getArgumentTypes(methodCall.desc);
@@ -320,7 +322,7 @@ public final class MethodCode {
      * @param instruction
      *         Instruction.
      */
-    public static boolean isReturn(AbstractInsnNode instruction) {
+    public static boolean isReturn(@Nullable AbstractInsnNode instruction) {
         return instruction != null &&
                instruction.getOpcode() >= IRETURN && instruction.getOpcode() <= RETURN;
     }
@@ -353,7 +355,7 @@ public final class MethodCode {
      * @param instruction
      *         Instruction.
      */
-    public static AbstractInsnNode previousInstruction(AbstractInsnNode instruction) {
+    public static @Nullable AbstractInsnNode previousInstruction(AbstractInsnNode instruction) {
         for (var result = instruction.getPrevious(); result != null; result = result.getPrevious()) {
             if (result.getOpcode() >= 0) {
                 return result;
@@ -369,7 +371,7 @@ public final class MethodCode {
      * @param instruction
      *         Instruction.
      */
-    public static AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
+    public static @Nullable AbstractInsnNode nextInstruction(AbstractInsnNode instruction) {
         for (var result = instruction.getNext(); result != null; result = result.getNext()) {
             if (result.getOpcode() >= 0) {
                 return result;

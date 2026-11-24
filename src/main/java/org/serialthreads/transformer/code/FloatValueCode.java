@@ -1,10 +1,12 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.FALOAD;
 import static org.objectweb.asm.Opcodes.FASTORE;
 import static org.objectweb.asm.Opcodes.FCONST_0;
@@ -30,8 +32,8 @@ public class FloatValueCode extends AbstractValueCode {
     }
 
     @Override
-    public AbstractInsnNode push(Object value) {
-        float f = (Float) value;
+    public AbstractInsnNode push(@Nullable Object value) {
+        float f = (Float) requireNonNull(value);
 
         if (f == 0F) {
             return new InsnNode(FCONST_0);

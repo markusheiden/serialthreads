@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -229,7 +230,7 @@ public abstract class AbstractTransformer implements ITransformer {
      *         Method node to transform.
      * @return Transformed methods or null, if the method needs no transformation.
      */
-    protected List<MethodNode> transformMethod(ClassNode clazz, MethodNode method) {
+    protected @Nullable List<MethodNode> transformMethod(ClassNode clazz, MethodNode method) {
         logger.debug("  Transforming method {}", methodName(clazz, method));
 
         if (classInfoCache.isExecutor(clazz, method)) {
@@ -264,7 +265,7 @@ public abstract class AbstractTransformer implements ITransformer {
      *         Method node to transform.
      * @return Transformed methods.
      */
-    protected abstract List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
+    protected abstract @Nullable List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException;
 
     /**
      * Are there no interruptible method calls?.

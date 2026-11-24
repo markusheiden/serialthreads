@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.analyzer;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
@@ -33,7 +34,7 @@ public final class ExtendedValue extends BasicValue {
     /**
      * Constant value.
      */
-    private final Object constant;
+    private final @Nullable Object constant;
 
     /**
      * The locals this value is held in too.
@@ -88,7 +89,7 @@ public final class ExtendedValue extends BasicValue {
      * @param constant
      *         Constant value.
      */
-    public static ExtendedValue constantValue(Type type, Object constant) {
+    public static ExtendedValue constantValue(Type type, @Nullable Object constant) {
         requireThat(type, "type").isNotNull();
 
         return new ExtendedValue(type, constant, Set.of());
@@ -104,7 +105,7 @@ public final class ExtendedValue extends BasicValue {
      * @param locals
      *         Number of locals.
      */
-    public static ExtendedValue constantInLocals(Type type, Object constant, Set<Integer> locals) {
+    public static ExtendedValue constantInLocals(Type type, @Nullable Object constant, Set<Integer> locals) {
         requireThat(type, "type").isNotNull();
         requireThat(locals, "locals").isNotNull();
 
@@ -121,7 +122,7 @@ public final class ExtendedValue extends BasicValue {
      * @param locals
      *         Number of locals.
      */
-    private ExtendedValue(Type type, Object constant, Set<Integer> locals) {
+    private ExtendedValue(Type type, @Nullable Object constant, Set<Integer> locals) {
         super(type);
 
         requireThat(type, "type").isNotNull();
@@ -141,7 +142,7 @@ public final class ExtendedValue extends BasicValue {
     /**
      * Get constant value.
      */
-    public Object getConstant() {
+    public @Nullable Object getConstant() {
         requireThat(isConstant(), "isConstant()").isTrue();
 
         requireThat(constant, "constant").isNotEqualTo(NOT_CONSTANT);

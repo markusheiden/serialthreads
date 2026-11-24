@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
@@ -14,9 +15,11 @@ import static org.objectweb.asm.Opcodes.ASM9;
  */
 public class ClassInfoVisitor extends ClassVisitor {
     private boolean isInterface;
+    // Are set by visit(), which is called first.
+    @SuppressWarnings("NullAway.Init")
     private String className;
-    private String superClassName;
-    private String[] interfaceNames;
+    private @Nullable String superClassName;
+    private String @Nullable [] interfaceNames;
 
     private final Map<String, MethodInfo> methods;
 
@@ -27,7 +30,7 @@ public class ClassInfoVisitor extends ClassVisitor {
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public void visit(int version, int access, String name, @Nullable String signature, @Nullable String superName, String @Nullable [] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
 
         isInterface = (access & ACC_INTERFACE) != 0;
@@ -49,11 +52,11 @@ public class ClassInfoVisitor extends ClassVisitor {
         return className;
     }
 
-    public String getSuperClassName() {
+    public @Nullable String getSuperClassName() {
         return superClassName;
     }
 
-    public String[] getInterfaceNames() {
+    public String @Nullable [] getInterfaceNames() {
         return interfaceNames;
     }
 

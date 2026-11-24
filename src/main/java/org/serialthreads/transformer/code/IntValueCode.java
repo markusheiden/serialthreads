@@ -1,11 +1,13 @@
 package org.serialthreads.transformer.code;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.IALOAD;
 import static org.objectweb.asm.Opcodes.IASTORE;
@@ -47,8 +49,8 @@ public class IntValueCode extends AbstractValueCode {
     }
 
     @Override
-    public AbstractInsnNode push(Object value) {
-        int i = (Integer) value;
+    public AbstractInsnNode push(@Nullable Object value) {
+        int i = (Integer) requireNonNull(value);
 
         return push(i);
     }

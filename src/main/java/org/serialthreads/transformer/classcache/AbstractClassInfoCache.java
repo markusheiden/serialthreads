@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
@@ -65,7 +66,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
     }
 
     @Override
-    public Type getSuperClass(String className) {
+    public @Nullable Type getSuperClass(String className) {
         requireThat(className, "className").isNotNull();
 
         return getClassInfo(className).superType();
@@ -279,7 +280,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      *         Further classes to scan, will be filled with super class and interfaces of scanned class.
      * @return ClassInfo or {@code null}, if no class file could be found.
      */
-    protected ClassInfo scanClassFile(String className, Deque<String> toProcess) throws IOException {
+    protected @Nullable ClassInfo scanClassFile(String className, Deque<String> toProcess) throws IOException {
         try (var classFile = classLoader.getResourceAsStream(className + ".class")) {
             if (classFile == null) {
                 return null;
@@ -307,7 +308,10 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
             // Check super classes always first.
             toProcess.addFirst(classInfoVisitor.getSuperClassName());
         }
-        toProcess.addAll(asList(classInfoVisitor.getInterfaceNames()));
+        var interfaceNames = classInfoVisitor.getInterfaceNames();
+        if (interfaceNames != null) {
+            toProcess.addAll(asList(interfaceNames));
+        }
 
         return result;
     }
