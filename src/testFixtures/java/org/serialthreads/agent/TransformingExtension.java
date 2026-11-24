@@ -1,5 +1,6 @@
 package org.serialthreads.agent;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -28,14 +29,13 @@ import static java.util.Arrays.stream;
  * So {@link #interceptDynamicTest(Invocation, DynamicTestInvocationContext, ExtensionContext)}
  * does not need to be overridden.
  */
-@SuppressWarnings("NullableProblems")
 public class TransformingExtension implements InvocationInterceptor {
     private static final Namespace NAMESPACE = Namespace.create(TransformingExtension.class);
     private static final String TRANSFORMED_INSTANCES = "transformedInstances";
 
     @Override
     public void interceptBeforeEachMethod(
-            Invocation<Void> invocation,
+            Invocation<@Nullable Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext) throws Throwable {
         runOnTransformed(invocation, invocationContext, extensionContext);
@@ -43,14 +43,14 @@ public class TransformingExtension implements InvocationInterceptor {
 
     @Override
     public void interceptTestMethod(
-            Invocation<Void> invocation,
+            Invocation<@Nullable Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext) throws Throwable {
         runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @Override
-    public <T> T interceptTestFactoryMethod(
+    public <T extends @Nullable Object> T interceptTestFactoryMethod(
             Invocation<T> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext) throws Throwable {
@@ -59,7 +59,7 @@ public class TransformingExtension implements InvocationInterceptor {
 
     @Override
     public void interceptTestTemplateMethod(
-            Invocation<Void> invocation,
+            Invocation<@Nullable Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext) throws Throwable {
         runOnTransformed(invocation, invocationContext, extensionContext);
@@ -67,14 +67,14 @@ public class TransformingExtension implements InvocationInterceptor {
 
     @Override
     public void interceptAfterEachMethod(
-            Invocation<Void> invocation,
+            Invocation<@Nullable Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext) throws Throwable {
         runOnTransformed(invocation, invocationContext, extensionContext);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> T runOnTransformed(
+    private <T extends @Nullable Object> T runOnTransformed(
             Invocation<T> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
             ExtensionContext extensionContext) throws Throwable {

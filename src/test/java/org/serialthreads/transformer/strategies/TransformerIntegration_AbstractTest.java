@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.strategies;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration test for transformer.
  */
 public abstract class TransformerIntegration_AbstractTest {
-    private SerialThreadManager manager;
+    private @Nullable SerialThreadManager manager;
 
     @AfterEach
     void tearDown() {

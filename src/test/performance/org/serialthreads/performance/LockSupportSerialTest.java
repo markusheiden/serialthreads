@@ -31,6 +31,7 @@ class LockSupportSerialTest extends AbstractPerformanceTest {
     }
 
     private class ConcurrentSerialCounter extends Counter {
+        @SuppressWarnings("NullAway.Init")
         private Thread next;
 
         ConcurrentSerialCounter(int number) {

@@ -60,7 +60,7 @@ Four strategies trade off between code size and performance; `FREQUENT4` is the 
 
 ### Null Safety
 
-Null safety is checked at compile time by NullAway (via Error Prone, JSpecify mode) for the production code; violations fail the build. The tests are not checked.
+Null safety is checked at compile time by NullAway (via Error Prone, JSpecify mode) for the production code and the tests; violations fail the build.
 
 - Non-null is the default: every package (tests too) has a `package-info.java` with `@NullMarked`, new packages need one too. NullAway additionally treats `org.serialthreads` as annotated (`NullAway:AnnotatedPackages`).
 - Annotate only what may be null with `org.jspecify.annotations.Nullable`, as a type annotation right before the type: `private @Nullable Foo foo`, `Foo @Nullable []` (nullable array), `@Nullable Foo[]` (nullable elements). Never use `@NonNull`.

@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.analyzer;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -45,6 +46,7 @@ import static org.objectweb.asm.tree.analysis.BasicValue.INT_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.LONG_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
 import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqualsValue;
+import static org.serialthreads.transformer.analyzer.ExtendedVerifierTest.verifier;
 
 /**
  * Test for {@link ExtendedFrame}.
@@ -128,8 +130,8 @@ class ExtendedFrameTest {
         testExecute_const(new LdcInsnNode("TEST"), Type.getType(String.class), "TEST");
     }
 
-    private void testExecute_const(AbstractInsnNode instruction, Type type, Object constant) throws Exception {
-        var interpreter = new ExtendedVerifier(null, null, null, null, false);
+    private void testExecute_const(AbstractInsnNode instruction, Type type, @Nullable Object constant) throws Exception {
+        var interpreter = verifier();
 
         var frame = new ExtendedFrame(0, 1);
         frame.execute(instruction, interpreter);
@@ -152,7 +154,7 @@ class ExtendedFrameTest {
     }
 
     private void testExecute_store(AbstractInsnNode instruction, Type type) throws Exception {
-        var interpreter = new ExtendedVerifier(null, null, null, null, false);
+        var interpreter = verifier();
 
         var frame = new ExtendedFrame(4, 4);
         // Value which will be changed.

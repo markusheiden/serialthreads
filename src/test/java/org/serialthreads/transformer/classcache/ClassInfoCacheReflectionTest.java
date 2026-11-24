@@ -1,5 +1,6 @@
 package org.serialthreads.transformer.classcache;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.Type;
 import org.serialthreads.Interruptible;
@@ -53,7 +54,7 @@ class ClassInfoCacheReflectionTest extends ClassInfoCacheAbstractTest {
         }
 
         @Override
-        public InputStream getResourceAsStream(String name) {
+        public @Nullable InputStream getResourceAsStream(String name) {
             return null;
         }
     }

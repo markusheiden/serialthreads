@@ -28,7 +28,7 @@ class MethodHandleTestTarget {
             privateStaticHandle = lookup.findStatic(MethodHandleTestTarget.class, "privateStaticTest", METHOD_TYPE);
             varargsHandle = lookup.findVirtual(MethodHandleTestTarget.class, "varargsTest", methodType(void.class, String[].class));
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ExceptionInInitializerError(e);
         }
     }
 

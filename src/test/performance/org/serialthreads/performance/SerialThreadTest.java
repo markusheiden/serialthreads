@@ -11,6 +11,7 @@ import org.serialthreads.context.SimpleSerialThreadManager;
  */
 @Transform(classPrefixes = "org.serialthreads.performance")
 class SerialThreadTest extends AbstractPerformanceTest {
+    @SuppressWarnings("NullAway.Init")
     private Thread managerThread;
     private volatile boolean ready;
     private final Object lock = new Object();

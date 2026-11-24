@@ -13,7 +13,7 @@ class StackFrameTest {
      */
     @Test
     void testReset() {
-        var frame = new StackFrame(null, null, 8);
+        var frame = new StackFrame(new Stack("", 8), null, 8);
         frame.owner = "owner";
         frame.method = 7;
         frame.stackObject0 = "stackFast0";
@@ -40,7 +40,7 @@ class StackFrameTest {
      */
     @Test
     void testResize_noShrink() {
-        var frame = new StackFrame(null, null, 8);
+        var frame = new StackFrame(new Stack("", 8), null, 8);
         frame.resize(20);
         frame.stackObjects[31] = "object";
 
@@ -58,7 +58,7 @@ class StackFrameTest {
      */
     @Test
     void testResize() {
-        var frame = new StackFrame(null, null, 8);
+        var frame = new StackFrame(new Stack("", 8), null, 8);
 
         frame.resize(20);
 

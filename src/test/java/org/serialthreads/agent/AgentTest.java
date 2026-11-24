@@ -1,5 +1,6 @@
 package org.serialthreads.agent;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.ClassWriter;
 import org.serialthreads.Interrupt;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -124,7 +126,7 @@ class AgentTest {
     @Test
     void testNoClassName() {
         var loader = new AgentSimulatingClassLoader();
-        var byteCode = loader.loadByteCode(NotTransformable.class.getName().replace('.', '/'));
+        var byteCode = requireNonNull(loader.loadByteCode(NotTransformable.class.getName().replace('.', '/')));
 
         // The class has been analyzed despite the missing class name: Its load fails instead of loading it untransformed.
         assertThat(new Agent(DEFAULT).transform(loader, null, null, null, byteCode))
@@ -187,7 +189,7 @@ class AgentTest {
          *         Binary name of class.
          * @return Defined class or {@code null}, if the byte code of the class is not available.
          */
-        private Class<?> defineTransformed(String name) {
+        private @Nullable Class<?> defineTransformed(String name) {
             var internalName = name.replace('.', '/');
             var byteCode = loadByteCode(internalName);
             if (byteCode == null) {
@@ -208,7 +210,7 @@ class AgentTest {
          *         Internal name of class.
          * @return Byte code or {@code null}, if the class file resource is not available.
          */
-        private byte[] loadByteCode(String internalName) {
+        private byte @Nullable [] loadByteCode(String internalName) {
             try (var classFile = getResourceAsStream(internalName + ".class")) {
                 return classFile != null ? classFile.readAllBytes() : null;
             } catch (IOException e) {
@@ -217,7 +219,7 @@ class AgentTest {
         }
 
         @Override
-        public InputStream getResourceAsStream(String name) {
+        public @Nullable InputStream getResourceAsStream(String name) {
             requestedResources.add(name);
             if (hiddenResources.contains(name)) {
                 return null;

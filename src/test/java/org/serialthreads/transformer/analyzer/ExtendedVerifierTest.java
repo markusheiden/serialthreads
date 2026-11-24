@@ -18,10 +18,18 @@ import static org.serialthreads.transformer.analyzer.ExtendedValueTest.assertEqu
  * Test for ExtendedVerifier.
  */
 class ExtendedVerifierTest {
+    /**
+     * Verifier for the class "Test" without any super class or interface.
+     */
+    static ExtendedVerifier verifier() {
+        return new ExtendedVerifier(
+                new ClassInfoCacheASM(ExtendedVerifierTest.class.getClassLoader()),
+                Type.getObjectType("Test"), Type.getType(Object.class), List.of(), false);
+    }
+
     @Test
     void testMerge() {
-        var verifier = new ExtendedVerifier(
-                new ClassInfoCacheASM(getClass().getClassLoader()), null, null, null, false);
+        var verifier = verifier();
 
         var local1Int = valueInLocal(INT_TYPE, 1);
         var local12Int = valueInLocal(INT_TYPE, 1).addLocal(2);

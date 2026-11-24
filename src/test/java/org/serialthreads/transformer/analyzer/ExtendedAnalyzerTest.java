@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.Frame;
 
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -25,6 +26,7 @@ import static org.objectweb.asm.tree.analysis.BasicValue.DOUBLE_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.INT_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.LONG_VALUE;
 import static org.objectweb.asm.tree.analysis.BasicValue.UNINITIALIZED_VALUE;
+import static org.serialthreads.transformer.analyzer.ExtendedVerifierTest.verifier;
 
 /**
  * Test for {@link ExtendedAnalyzer}.
@@ -33,7 +35,7 @@ class ExtendedAnalyzerTest {
     /**
      * Analyzer instance for testing.
      */
-    private ExtendedAnalyzer analyzer = new ExtendedAnalyzer(new ExtendedVerifier(null, null, null, null, false));
+    private ExtendedAnalyzer analyzer = new ExtendedAnalyzer(verifier());
 
     /**
      * Test for {@link ExtendedAnalyzer#newFrame(int, int)}.
@@ -128,14 +130,14 @@ class ExtendedAnalyzerTest {
         var frames = analyzer.analyze("Test", method);
 
         // Check that at instruction 15 just local 1 is declared as needed for the remaining code.
-        assertThat(frames[15].neededLocals).containsOnly(1);
+        assertThat(requireNonNull(frames[15]).neededLocals).containsOnly(1);
         // Check that at instruction 8 just locals 1 & 2 are declared as needed for the remaining code.
-        assertThat(frames[8].neededLocals).containsOnly(1, 2);
+        assertThat(requireNonNull(frames[8]).neededLocals).containsOnly(1, 2);
         // Check that at instruction 12 just locals 1 & 3 are declared as needed for the remaining code.
-        assertThat(frames[12].neededLocals).containsOnly(1, 3);
+        assertThat(requireNonNull(frames[12]).neededLocals).containsOnly(1, 3);
 
         // Check that at instruction 7 (merge point) locals 1, 2 & 3 are declared as needed for the remaining code.
-        assertThat(frames[7].neededLocals).containsOnly(1, 2, 3);
+        assertThat(requireNonNull(frames[7]).neededLocals).containsOnly(1, 2, 3);
     }
 
     /**
@@ -165,7 +167,7 @@ class ExtendedAnalyzerTest {
         var frames = analyzer.analyze("Test", method);
 
         // Check that at instruction 5 local 1 is declared as needed for the remaining code.
-        assertThat(frames[5].neededLocals).containsOnly(1);
+        assertThat(requireNonNull(frames[5]).neededLocals).containsOnly(1);
     }
 
     /**
@@ -186,13 +188,13 @@ class ExtendedAnalyzerTest {
         var frames = analyzer.analyze("Test", method);
 
         // Before ICONST_1.
-        assertThat(frames[0].neededLocals).isEmpty();
+        assertThat(requireNonNull(frames[0]).neededLocals).isEmpty();
         // Before ISTORE 1: Local 1 is overwritten -> Local 1 is not needed here and before.
-        assertThat(frames[1].neededLocals).isEmpty();
+        assertThat(requireNonNull(frames[1]).neededLocals).isEmpty();
         // Before ILOAD 1: Local 1 is used -> Local 1 is needed.
-        assertThat(frames[2].neededLocals).containsOnly(1);
+        assertThat(requireNonNull(frames[2]).neededLocals).containsOnly(1);
         // Before IRETURN.
-        assertThat(frames[3].neededLocals).isEmpty();
+        assertThat(requireNonNull(frames[3]).neededLocals).isEmpty();
     }
 
     /**
@@ -232,12 +234,12 @@ class ExtendedAnalyzerTest {
         var frames = analyzer.analyze("Test", method);
 
         // Before the branch the value of local 2 is the constant 1 and held in local 1 too.
-        var before = (ExtendedValue) frames[4].getLocal(2);
+        var before = (ExtendedValue) requireNonNull(frames[4]).getLocal(2);
         assertThat(before.isConstant()).isTrue();
         assertThat(before.getLocals()).containsOnly(1, 2);
 
         // At the merge point this is just true for one of the two paths.
-        var merged = (ExtendedValue) frames[11].getLocal(2);
+        var merged = (ExtendedValue) requireNonNull(frames[11]).getLocal(2);
         assertThat(merged.isConstant()).isFalse();
         assertThat(merged.getLocals()).containsOnly(2);
     }
