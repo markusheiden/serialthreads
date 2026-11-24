@@ -3,7 +3,7 @@ package org.serialthreads.transformer.code;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.BasicValue;
 
-import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
+import static java.util.Objects.requireNonNull;
 import static org.objectweb.asm.Type.ARRAY;
 import static org.objectweb.asm.Type.BOOLEAN;
 import static org.objectweb.asm.Type.BYTE;
@@ -36,9 +36,8 @@ public final class ValueCodeFactory {
      *         Basic value.
      */
     public static IValueCode code(BasicValue value) {
-        requireThat(value.getType(), "value.getType()").isNotNull();
-
-        return code(value.getType());
+        // Uninitialized values have no type.
+        return code(requireNonNull(value.getType(), "value.getType()"));
     }
 
     /**
