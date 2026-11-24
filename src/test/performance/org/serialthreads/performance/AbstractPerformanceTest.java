@@ -53,7 +53,7 @@ public abstract class AbstractPerformanceTest {
      */
     protected void doStartThreads() throws Exception {
         for (var i = 0; i < counters.length; i++) {
-            final IRunnable counter = counters[i];
+            final var counter = counters[i];
             threads[i] = new Thread(counter::run, "Counter " + i);
             threads[i].start();
         }
