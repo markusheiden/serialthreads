@@ -76,9 +76,6 @@ public class ExtendedVerifier extends SimpleVerifier {
 
     @Override
     public BasicValue merge(BasicValue v, BasicValue w) {
-        requireThat(v, "v").isNotNull();
-        requireThat(w, "w").isNotNull();
-
         var result = super.merge(v, w);
         if (result.equals(UNINITIALIZED_VALUE)) {
             // Return uninitialized value.

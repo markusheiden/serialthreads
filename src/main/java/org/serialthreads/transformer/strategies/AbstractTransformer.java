@@ -74,7 +74,6 @@ public abstract class AbstractTransformer implements ITransformer {
      *         Default size of frames.
      */
     protected AbstractTransformer(IClassInfoCache classInfoCache, int defaultFrameSize) {
-        requireThat(classInfoCache, "classInfoCache").isNotNull();
         requireThat(defaultFrameSize, "defaultFrameSize").isPositive();
 
         this.classInfoCache = classInfoCache;

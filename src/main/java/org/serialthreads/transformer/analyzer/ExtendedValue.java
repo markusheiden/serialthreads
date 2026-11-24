@@ -60,7 +60,6 @@ public final class ExtendedValue extends BasicValue {
      *         Number of local.
      */
     public static ExtendedValue valueInLocal(Type type, int local) {
-        requireThat(type, "type").isNotNull();
         requireThat(local, "local").isNotNegative();
 
         return new ExtendedValue(type, NOT_CONSTANT, Set.of(local));
@@ -75,9 +74,6 @@ public final class ExtendedValue extends BasicValue {
      *         Number of locals.
      */
     public static ExtendedValue valueInLocals(Type type, Set<Integer> locals) {
-        requireThat(type, "type").isNotNull();
-        requireThat(locals, "locals").isNotNull();
-
         return new ExtendedValue(type, NOT_CONSTANT, locals);
     }
 
@@ -90,8 +86,6 @@ public final class ExtendedValue extends BasicValue {
      *         Constant value.
      */
     public static ExtendedValue constantValue(Type type, @Nullable Object constant) {
-        requireThat(type, "type").isNotNull();
-
         return new ExtendedValue(type, constant, Set.of());
     }
 
@@ -106,9 +100,6 @@ public final class ExtendedValue extends BasicValue {
      *         Number of locals.
      */
     public static ExtendedValue constantInLocals(Type type, @Nullable Object constant, Set<Integer> locals) {
-        requireThat(type, "type").isNotNull();
-        requireThat(locals, "locals").isNotNull();
-
         return new ExtendedValue(type, constant, locals);
     }
 
@@ -124,9 +115,6 @@ public final class ExtendedValue extends BasicValue {
      */
     private ExtendedValue(Type type, @Nullable Object constant, Set<Integer> locals) {
         super(type);
-
-        requireThat(type, "type").isNotNull();
-        requireThat(locals, "locals").isNotNull();
 
         this.constant = constant;
         this.locals = unmodifiableSortedSet(new TreeSet<>(locals));

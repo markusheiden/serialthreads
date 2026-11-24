@@ -31,10 +31,6 @@ public class MethodInfo {
      *         Descriptors of the type of the annotations of this method.
      */
     public MethodInfo(int access, String name, String desc, Set<Type> annotations) {
-        requireThat(name, "name").isNotNull();
-        requireThat(desc, "desc").isNotNull();
-        requireThat(annotations, "annotations").isNotNull();
-
         this.access = access;
         this.id = name + desc;
         this.name = name;
@@ -98,8 +94,6 @@ public class MethodInfo {
      *         Type of annotation.
      */
     public boolean hasAnnotation(Type annotationType) {
-        requireThat(annotationType, "annotationType").isNotNull();
-
         return annotations.contains(annotationType);
     }
 
@@ -109,7 +103,6 @@ public class MethodInfo {
     public MethodInfo copy() {
         var result = new MethodInfo(access, name, desc, annotations);
 
-        requireThat(result, "result").isNotNull();
         requireThat(result.getId(), "result.getId()").isEqualTo(getId(), "getId()");
         return result;
     }

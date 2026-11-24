@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
 import static java.util.Arrays.asList;
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
@@ -53,30 +52,21 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      *         Class loader for loading classes.
      */
     protected AbstractClassInfoCache(ClassLoader classLoader) {
-        requireThat(classLoader, "classLoader").isNotNull();
-
         this.classLoader = classLoader;
     }
 
     @Override
     public boolean isInterface(String className) {
-        requireThat(className, "className").isNotNull();
-
         return getClassInfo(className).isInterface();
     }
 
     @Override
     public @Nullable Type getSuperClass(String className) {
-        requireThat(className, "className").isNotNull();
-
         return getClassInfo(className).superType();
     }
 
     @Override
     public boolean hasSuperClass(String className, String superClassName) {
-        requireThat(className, "className").isNotNull();
-        requireThat(superClassName, "superClassName").isNotNull();
-
         var classType = Type.getObjectType(className);
         if (classType.getSort() == ARRAY) {
             return hasSuperClassArray(className, superClassName);
@@ -181,9 +171,6 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
 
     @Override
     public void addClassInfo(String className, byte[] byteCode) {
-        requireThat(className, "className").isNotNull();
-        requireThat(byteCode, "byteCode").isNotNull();
-
         // Scan not yet loaded class with ASM to avoid circular class loading.
         logger.debug("  Direct ASM scan of {}", className);
         var toProcess = new LinkedList<String>();
@@ -211,7 +198,6 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
             }
         }
 
-        requireThat(classInfo, "classInfo").isNotNull();
         return classInfo;
     }
 
@@ -222,8 +208,6 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
      *         Class to parse.
      */
     protected ClassInfo process(String owner) {
-        requireThat(owner, "owner").isNotNull();
-
         logger.debug("Computing interruptible status for class {}", owner);
 
         try {

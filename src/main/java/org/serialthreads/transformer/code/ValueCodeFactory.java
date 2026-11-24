@@ -48,8 +48,6 @@ public final class ValueCodeFactory {
      *         Type.
      */
     public static IValueCode code(Type type) {
-        requireThat(type, "type").isNotNull();
-
         return switch (type.getSort()) {
             case BOOLEAN, CHAR, BYTE, SHORT, INT -> INT_CODE;
             case LONG -> LONG_CODE;
