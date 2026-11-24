@@ -118,6 +118,20 @@ class AgentTest {
     }
 
     /**
+     * Test that the agent takes the class name from the byte code, if the JVM passes none,
+     * e.g. for classes defined without a name.
+     */
+    @Test
+    void testNoClassName() {
+        var loader = new AgentSimulatingClassLoader();
+        var byteCode = loader.loadByteCode(NotTransformable.class.getName().replace('.', '/'));
+
+        // The class has been analyzed despite the missing class name: Its load fails instead of loading it untransformed.
+        assertThat(new Agent(DEFAULT).transform(loader, null, null, null, byteCode))
+                .isNotNull();
+    }
+
+    /**
      * Class loader which simulates the JVM instrumentation:
      * All classes of this project are passed through the agent and defined with the (maybe transformed) byte code.
      * Class file resources may be hidden to force reflection based scans of the class info cache.

@@ -1,6 +1,7 @@
 package org.serialthreads.agent;
 
 import org.jspecify.annotations.Nullable;
+import org.objectweb.asm.ClassReader;
 import org.serialthreads.transformer.IStrategy;
 import org.serialthreads.transformer.ITransformer;
 import org.serialthreads.transformer.LoadUntransformedException;
@@ -66,34 +67,48 @@ public class Agent implements ClassFileTransformer {
      * Otherwise, they would be loaded untransformed and fail obscurely when executed.
      * Classes which could not be analyzed, e.g. because they reference missing (optional) classes,
      * are loaded untransformed, because this agent sees all classes, not just the ones containing interruptible code.
+     * <p>
+     * The JVM passes no class name for classes defined without one, e.g. by {@link ClassLoader#defineClass} with a
+     * {@code null} name. In this case the class name is taken from the byte code.
      */
     @Override
-    public byte @Nullable [] transform(@Nullable ClassLoader loader, String className, @Nullable Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
+    public byte @Nullable [] transform(
+            @Nullable ClassLoader loader,
+            @Nullable String className,
+            @Nullable Class<?> classBeingRedefined,
+            @Nullable ProtectionDomain protectionDomain,
+            byte[] classfileBuffer) {
         if (loader == null) {
             // No need to transform classes loaded by the bootstrap classloader.
             return null;
         }
 
+        // Used for logging only, as long as the class name has not been determined.
+        var name = className != null ? className : "<unnamed>";
         try {
-            logger.debug("Transforming class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
+            if (className == null) {
+                name = new ClassReader(classfileBuffer).getClassName();
+            }
+            var mode = classBeingRedefined != null ? "redefining" : "initial";
+
+            logger.debug("Transforming class {} ({})", name, mode);
             var transformer = transformers.computeIfAbsent(loader, this::getTransformer);
-            transformer.getClassInfoCache().addClassInfo(className, classfileBuffer);
+            transformer.getClassInfoCache().addClassInfo(name, classfileBuffer);
             var transformed = transformer.transform(classfileBuffer);
 
-            logger.info("Successfully transformed class {} ({})", className, classBeingRedefined != null ? "redefining" : "initial");
-
+            logger.info("Successfully transformed class {} ({})", name, mode);
             return transformed;
         } catch (LoadUntransformedException e) {
             // No need to transform byte code.
             return null;
         } catch (MissingClassException e) {
-            logger.warn("Unable to analyze {}, loading it untransformed: {}", className, e.getMessage());
+            logger.warn("Unable to analyze {}, loading it untransformed: {}", name, e.getMessage());
             return null;
         } catch (NotTransformableException e) {
-            logger.error("Unable to transform {}, failing its load", className, e);
+            logger.error("Unable to transform {}, failing its load", name, e);
             return INVALID_BYTE_CODE;
         } catch (RuntimeException | Error e) {
-            logger.error("Failed to transform {}, loading it untransformed", className, e);
+            logger.error("Failed to transform {}, loading it untransformed", name, e);
             return null;
         }
     }
