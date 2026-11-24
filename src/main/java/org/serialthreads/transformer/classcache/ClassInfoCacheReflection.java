@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static java.util.Arrays.stream;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 
@@ -77,7 +76,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
             for (var constructor : constructors) {
                 var name = "<init>";
                 var desc = Type.getConstructorDescriptor(constructor);
-                Set<Type> annotations = emptySet();
+                var annotations = Set.<Type>of();
 
                 var info = new MethodInfo(constructor.getModifiers(), name, desc, annotations);
                 methodInfos.put(info.getId(), info);
@@ -85,7 +84,7 @@ public class ClassInfoCacheReflection extends AbstractClassInfoCache {
 
             var name = "<clinit>";
             var desc = "()V";
-            Set<Type> annotations = emptySet();
+            var annotations = Set.<Type>of();
 
             var info = new MethodInfo(ACC_STATIC, name, desc, annotations);
             methodInfos.put(info.getId(), info);

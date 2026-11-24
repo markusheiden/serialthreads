@@ -11,8 +11,6 @@ import org.serialthreads.transformer.strategies.AbstractTransformer;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.serialthreads.transformer.code.MethodCode.isAbstract;
 import static org.serialthreads.transformer.code.MethodCode.isInterface;
@@ -44,13 +42,13 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
     protected @Nullable List<MethodNode> doTransformMethod(ClassNode clazz, MethodNode method) throws AnalyzerException {
         if (isAbstract(method)) {
             // Change signature of abstract methods.
-            return singletonList(
+            return List.of(
                     new CopyMethodTransformer(clazz, method, classInfoCache).transform());
         }
 
         if (isRun(clazz, method, classInfoCache)) {
             // Take special care of run method.
-            return singletonList(
+            return List.of(
                     new RunMethodTransformer(clazz, method, classInfoCache).transform());
         }
 
@@ -60,7 +58,7 @@ public class FrequentInterruptsTransformer2 extends AbstractTransformer {
         }
 
         // "Standard" transformation of interruptible methods.
-        return asList(
+        return List.of(
                 new CopyMethodTransformer(clazz, method, classInfoCache).transform(),
                 new OriginalMethodTransformer(clazz, method, classInfoCache).transform());
     }

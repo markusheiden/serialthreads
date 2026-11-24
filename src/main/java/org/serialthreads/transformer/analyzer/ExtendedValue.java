@@ -11,7 +11,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static com.github.cowwoc.requirements10.java.DefaultJavaValidators.requireThat;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableSortedSet;
 import static java.util.Objects.hash;
 
@@ -48,7 +47,7 @@ public final class ExtendedValue extends BasicValue {
      *         Type of value.
      */
     public static ExtendedValue value(Type type) {
-        return new ExtendedValue(type, NOT_CONSTANT, emptySet());
+        return new ExtendedValue(type, NOT_CONSTANT, Set.of());
     }
 
     /**

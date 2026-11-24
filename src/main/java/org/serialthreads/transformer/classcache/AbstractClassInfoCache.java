@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.Arrays.asList;
 import static org.objectweb.asm.ClassReader.SKIP_CODE;
 import static org.objectweb.asm.ClassReader.SKIP_DEBUG;
 import static org.objectweb.asm.ClassReader.SKIP_FRAMES;
@@ -294,7 +294,7 @@ public abstract class AbstractClassInfoCache implements IClassInfoCache {
         }
         var interfaceNames = classInfoVisitor.getInterfaceNames();
         if (interfaceNames != null) {
-            toProcess.addAll(asList(interfaceNames));
+            toProcess.addAll(List.of(interfaceNames));
         }
 
         return result;

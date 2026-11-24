@@ -12,7 +12,6 @@ import org.objectweb.asm.tree.analysis.Frame;
 import org.serialthreads.transformer.classcache.IClassInfoCache;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -35,14 +34,14 @@ public class ExtendedAnalyzer extends Analyzer<BasicValue> {
      * Opcodes considered as starting points.
      * Jump instructions have to be considered too, because of methods with an endless loop (-> no return).
      */
-    private static final Set<Integer> STARTING_POINT_OPCODES = new TreeSet<>(Arrays.asList(
+    private static final Set<Integer> STARTING_POINT_OPCODES = Set.of(
             IRETURN, LRETURN, FRETURN, DRETURN, ARETURN, RETURN,
             ATHROW,
             GOTO,
             IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
             IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE,
             IF_ACMPEQ, IF_ACMPNE
-    ));
+    );
 
     /**
      * Backward flow of instructions.
